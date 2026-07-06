@@ -1,0 +1,181 @@
+{
+  "nav": {
+    "destinations": "Destinazioni",
+    "tours": "Tour",
+    "aboutUs": "Chi siamo",
+    "bookNow": "Prenota ora"
+  },
+  "hero": {
+    "badge": "✦ Premium Egypt Travel Since 2010",
+    "title": "Scopri <em>l'Egitto</em><br>come mai prima",
+    "description": "Dalle acque cristalline di Hurghada alle meraviglie antiche di Luxor — SeeDora crea viaggi straordinari attraverso i paesaggi più mozzafiato dell'Egitto.",
+    "exploreBtn": "Esplora i tour",
+    "consultationBtn": "Consulenza gratuita",
+    "stats": {
+      "guests": "Ospiti felici",
+      "packages": "Pacchetti turistici",
+      "years": "Anni di eccellenza"
+    },
+    "scroll": "Esplora"
+  },
+  "destinations": {
+    "eyebrow": "Dove ti portiamo",
+    "title": "Le più <span>straordinarie</span> destinazioni dell'Egitto",
+    "description": "Quattro regioni iconiche, ognuna con un'anima unica — dal Mar Rosso alle meraviglie della Valle del Nilo.",
+    "hurghada": {
+      "description": "Il gioiello del Mar Rosso egiziano — spiagge incontaminate, immersioni di livello mondiale e avventure nel deserto.",
+      "tag": "Paradiso del Mar Rosso"
+    },
+    "cairo": {
+      "description": "Le Grandi Piramidi, la Sfinge, il Museo Egizio — la culla della civiltà ti aspetta.",
+      "tag": "Meraviglie antiche"
+    },
+    "luxor": {
+      "description": "Tempio di Karnak, Valle dei Re, crociere sul Nilo — il più grande museo all'aperto del mondo.",
+      "tag": "Gloria faraonica"
+    },
+    "sharm": {
+      "description": "Parco Nazionale Ras Mohamed, reef di fama mondiale, resort di lusso.",
+      "tag": "Paradiso del diving"
+    }
+  },
+  "trips": {
+    "eyebrow": "Esperienze curate",
+    "title": "I nostri <span>tour più popolari</span>",
+    "description": "Da gite di un giorno ad avventure multi-settimana — ogni tour SeeDora è realizzato con passione e lusso.",
+    "categories": {
+      "all": "Tutti i tour",
+      "sea": "Mare & Immersioni",
+      "culture": "Cultura & Storia",
+      "desert": "Avventura nel deserto"
+    },
+    "durations": {
+      "fullDay": "Giornata intera",
+      "twoDays": "2 Giorni",
+      "halfDay": "Mezza giornata",
+      "fiveDays": "5 Giorni",
+      "oneDay": "1 Giorno",
+      "evening": "Serale",
+      "threeHours": "3 ore"
+    },
+    "items": {
+      "snorkeling": {
+        "name": "Safari di snorkeling – Orange Bay",
+        "description": "Vela verso la splendida Orange Bay, snorkeling tra barriere coralline vivaci, pranzo BBQ su una spiaggia incontaminata."
+      },
+      "cairo": {
+        "name": "Piramidi & Esplorazione del Cairo",
+        "description": "Visita le Grandi Piramidi di Giza, la Sfinge, il Museo Egizio con i tesori di Tutankhamen e il bazar Khan El Khalili."
+      },
+      "luxor": {
+        "name": "Luxor – Valle dei Re & Karnak",
+        "description": "Esplora la Valle dei Re, il Tempio di Hatshepsut, Karnak e il Tempio di Luxor."
+      },
+      "quad": {
+        "name": "Quad Bike & Villaggio Beduino",
+        "description": "Giro in quad tra le dune dorate, visita a un villaggio beduino tradizionale, giro in cammello e tramonto spettacolare."
+      },
+      "nile": {
+        "name": "Crociera di lusso sul Nilo – Luxor ad Assuan",
+        "description": "Naviga sul leggendario Nilo su una nave da crociera 5 stelle, visitando Edfu, Kom Ombo, la diga di Assuan e i magnifici templi di Abu Simbel."
+      },
+      "diving": {
+        "name": "Immersioni – Ras Mohamed",
+        "description": "Immersioni in uno dei 10 migliori siti di immersione al mondo con istruttori certificati PADI."
+      },
+      "sinai": {
+        "name": "Alba sul Sinai & Santa Caterina",
+        "description": "Scalate il Monte Sinai di notte, assistete a un'alba mozzafiato, visitate l'antico monastero di Santa Caterina."
+      },
+      "submarine": {
+        "name": "Barca con fondo di vetro & Sottomarino",
+        "description": "Vivi il magico mondo sottomarino senza bagnarti — perfetto per le famiglie."
+      },
+      "atv": {
+        "name": "Safari nel deserto & Cena sotto le stelle",
+        "description": "Safari nel deserto al tramonto in 4x4, cena beduina tradizionale sotto un cielo stellato, musica dal vivo."
+      }
+    },
+    "bookBtn": "Prenota"
+  },
+  "why": {
+    "eyebrow": "Perché viaggiare con noi",
+    "title": "La differenza <span>SeeDora</span>",
+    "description": "15 anni di esperienze egiziane straordinarie per i viaggiatori europei — sicurezza, lusso e autenticità.",
+    "items": {
+      "languages": {
+        "title": "5 Lingue",
+        "text": "Le nostre guide multilingue parlano inglese, tedesco, italiano, francese e russo."
+      },
+      "safety": {
+        "title": "Viaggio 100% sicuro",
+        "text": "Autorizzato e assicurato, con approvazione dell'Egyptian Tourism Authority. La tua sicurezza è la nostra assoluta priorità."
+      },
+      "luxury": {
+        "title": "Standard di lusso",
+        "text": "Trasporto premium, hotel 4 e 5 stelle, esperienze gourmet — perché meriti solo il meglio."
+      },
+      "price": {
+        "title": "Garanzia miglior prezzo",
+        "text": "Pareggiamo o superiamo qualsiasi offerta comparabile. Prezzi trasparenti — nessuna commissione nascosta."
+      }
+    }
+  },
+  "testimonials": {
+    "eyebrow": "Storie di viaggiatori",
+    "title": "Cosa dicono i nostri <span>ospiti</span>",
+    "items": {
+      "klaus": {
+        "text": "SeeDora ci ha regalato la vacanza di una vita. Il viaggio alle Piramidi era perfettamente organizzato. Assolutamente magico!"
+      },
+      "marco": {
+        "text": "La crociera sul Nilo ha superato ogni aspettativa. Svegliarsi ogni mattina vedendo templi antichi dal ponte della nave — semplicemente indimenticabile."
+      },
+      "natalia": {
+        "text": "Il safari nel deserto è stato incredibile — quad, cammelli, cena beduina sotto le stelle. La nostra guida parlava perfettamente italiano. 10/10!"
+      }
+    }
+  },
+  "contact": {
+    "eyebrow": "Contattaci",
+    "title": "Pronto per la tua avventura <span>egiziana</span>?",
+    "description": "Contattaci oggi per un itinerario personalizzato gratuito. Rispondiamo entro 2 ore nella tua lingua.",
+    "form": {
+      "title": "Inviaci un messaggio",
+      "firstName": "Nome",
+      "lastName": "Cognome",
+      "email": "Email",
+      "interest": "Interessato a",
+      "message": "Messaggio",
+      "submit": "Invia messaggio →",
+      "success": "✓ Messaggio inviato!",
+      "placeholders": {
+        "firstName": "Maria",
+        "lastName": "Rossi",
+        "email": "maria@email.com",
+        "message": "Dicci le tue date di viaggio, la dimensione del gruppo e i desideri..."
+      },
+      "interests": {
+        "hurghada": "Hurghada (Mar Rosso)",
+        "cairo": "Il Cairo (Piramidi & Storia)",
+        "luxor": "Luxor (Crociere sul Nilo)",
+        "sharm": "Sharm El-Sheikh",
+        "desert": "Safari nel deserto",
+        "nile": "Crociera sul Nilo",
+        "custom": "Pacchetto personalizzato"
+      }
+    }
+  },
+  "footer": {
+    "description": "Dal 2010 creiamo viaggi egiziani straordinari per viaggiatori europei. Il vostro partner di fiducia per il Mar Rosso, il Nilo e le avventure nel deserto.",
+    "sections": {
+      "destinations": "Destinazioni",
+      "tours": "Tour",
+      "contact": "Contatti"
+    },
+    "rights": "Tutti i diritti riservati.",
+    "privacy": "Informativa sulla privacy",
+    "terms": "Termini e condizioni",
+    "madeWith": "Fatto con ❤️ in Egitto"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "common": {
+    "dashboard": "Tablero",
+    "posts": "Publicaciones",
+    "bookings": "Reservas",
+    "users": "Usuarios",
+    "logout": "Cerrar sesión",
+    "login": "Iniciar sesión",
+    "email": "Correo electrónico",
+    "password": "Contraseña",
+    "submit": "Enviar",
+    "create": "Crear nuevo",
+    "edit": "Editar",
+    "delete": "Eliminar",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "actions": "Acciones"
+  },
+  "dashboard": {
+    "totalPosts": "Total de publicaciones",
+    "totalBookings": "Total de reservas"
+  },
+  "posts": {
+    "title": "Lista de tours",
+    "tourName": "Nombre del tour",
+    "status": "Estado",
+    "date": "Fecha"
+  },
+  "bookings": {
+    "title": "Lista de reservas",
+    "customer": "Cliente",
+    "tour": "Tour",
+    "amount": "Monto",
+    "status": "Estado"
+  }
+}

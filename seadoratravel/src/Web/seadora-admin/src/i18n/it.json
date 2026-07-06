@@ -1,0 +1,36 @@
+{
+  "common": {
+    "dashboard": "لوحة القيادة",
+    "posts": "المنشورات",
+    "bookings": "الحجوزات",
+    "users": "المستخدمين",
+    "logout": "تسجيل الخروج",
+    "login": "تسجيل الدخول",
+    "email": "البريد الإلكتروني",
+    "password": "كلمة المرور",
+    "submit": "إرسال",
+    "create": "إنشاء جديد",
+    "edit": "تعديل",
+    "delete": "حذف",
+    "save": "حفظ",
+    "cancel": "إلغاء",
+    "actions": "إجراءات"
+  },
+  "dashboard": {
+    "totalPosts": "إجمالي المنشورات",
+    "totalBookings": "إجمالي الحجوزات"
+  },
+  "posts": {
+    "title": "قائمة الجولات",
+    "tourName": "اسم الجولة",
+    "status": "الحالة",
+    "date": "التاريخ"
+  },
+  "bookings": {
+    "title": "قائمة الحجوزات",
+    "customer": "العميل",
+    "tour": "الجولة",
+    "amount": "المبلغ",
+    "status": "الحالة"
+  }
+}

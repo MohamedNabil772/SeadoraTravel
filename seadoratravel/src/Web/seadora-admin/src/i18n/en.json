@@ -1,0 +1,36 @@
+{
+  "common": {
+    "dashboard": "Dashboard",
+    "posts": "Posts",
+    "bookings": "Bookings",
+    "users": "Users",
+    "logout": "Logout",
+    "login": "Login",
+    "email": "Email",
+    "password": "Password",
+    "submit": "Submit",
+    "create": "Create New",
+    "edit": "Edit",
+    "delete": "Delete",
+    "save": "Save",
+    "cancel": "Cancel",
+    "actions": "Actions"
+  },
+  "dashboard": {
+    "totalPosts": "Total Posts",
+    "totalBookings": "Total Bookings"
+  },
+  "posts": {
+    "title": "Tours List",
+    "tourName": "Tour Name",
+    "status": "Status",
+    "date": "Date"
+  },
+  "bookings": {
+    "title": "Bookings List",
+    "customer": "Customer",
+    "tour": "Tour",
+    "amount": "Amount",
+    "status": "Status"
+  }
+}

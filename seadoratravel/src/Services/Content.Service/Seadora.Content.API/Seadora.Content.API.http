@@ -1,0 +1,6 @@
+@Seadora.Content.API_HostAddress = http://localhost:5190
+
+GET {{Seadora.Content.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

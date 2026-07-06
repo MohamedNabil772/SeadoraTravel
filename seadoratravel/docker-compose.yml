@@ -1,0 +1,93 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - seadora-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: src/ApiGateway/Dockerfile
+    ports:
+      - "8000:8080"
+    depends_on:
+      - identity-service
+      - content-service
+      - booking-service
+      - file-server
+
+  identity-service:
+    build:
+      context: .
+      dockerfile: src/Services/Identity.Service/Seadora.Identity.API/Dockerfile
+    restart: on-failure
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - JwtSettings__Secret=YourSuperSecretKeyHereYourSuperSecretKeyHere
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Identity;Username=postgres;Password=postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  content-service:
+    build:
+      context: .
+      dockerfile: src/Services/Content.Service/Seadora.Content.API/Dockerfile
+    restart: on-failure
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Content;Username=postgres;Password=postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  booking-service:
+    build:
+      context: .
+      dockerfile: src/Services/Booking.Service/Seadora.Booking.API/Dockerfile
+    restart: on-failure
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Booking;Username=postgres;Password=postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  file-server:
+    build:
+      context: .
+      dockerfile: src/Services/FileServer/Seadora.FileServer.API/Dockerfile
+    volumes:
+      - seadora-uploads:/app/uploads
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+
+  seadora-website:
+    build:
+      context: ./src/Web/seadora-website
+    ports:
+      - "3000:80"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+
+  seadora-admin:
+    build:
+      context: ./src/Web/seadora-admin
+    ports:
+      - "3001:80"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+
+volumes:
+  seadora-uploads:
+  seadora-db-data:

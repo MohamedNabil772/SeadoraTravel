@@ -1,0 +1,177 @@
+{
+  "nav": {
+    "destinations": "Reiseziele",
+    "tours": "Touren",
+    "aboutUs": "Über uns",
+    "bookNow": "Jetzt buchen"
+  },
+  "hero": {
+    "badge": "Premium Ägypten Reisen seit 2010",
+    "title": "Entdecke <em>Ägypten</em><br>wie nie zuvor",
+    "description": "Von den kristallklaren Gewässern Hurgadas bis zu den antiken Wundern von Luxor — SeeDora gestaltet außergewöhnliche Reisen durch Ägyptens atemberaubende Landschaften.",
+    "exploreBtn": "Touren entdecken",
+    "consultationBtn": "Kostenlose Beratung",
+    "stats": {
+      "guests": "Zufriedene Gäste",
+      "packages": "Tour-Pakete",
+      "years": "Jahre Exzellenz"
+    },
+    "scroll": "Entdecken"
+  },
+  "destinations": {
+    "eyebrow": "Wohin wir Sie führen",
+    "title": "Ägyptens außergewöhnlichste <span>Reiseziele</span>",
+    "description": "Vier ikonische Regionen, jede mit einer einzigartigen Seele — vom Roten Meer bis zu den Wundern des Niltals.",
+    "hurghada": {
+      "description": "Ägyptens Rotes Meer Juwel — makellose Strände, erstklassiges Tauchen und Wüstenabenteuer.",
+      "tag": "Rotes Meer Paradies"
+    },
+    "cairo": {
+      "description": "Große Pyramiden, Sphinx, Ägyptisches Museum — die Wiege der Zivilisation wartet auf Sie.",
+      "tag": "Antike Wunder"
+    },
+    "luxor": {
+      "description": "Karnak-Tempel, Tal der Könige, Nilkreuzfahrten — das größte Freilichtmuseum der Welt.",
+      "tag": "Pharaonische Pracht"
+    },
+    "sharm": {
+      "description": "Ras Mohamed Nationalpark, weltberühmte Riffe, Luxusresorts — das ultimative Rote Meer Resort.",
+      "tag": "Tauchparadies"
+    }
+  },
+  "trips": {
+    "eyebrow": "Kuratierte Erlebnisse",
+    "title": "Unsere beliebtesten <span>Touren</span>",
+    "description": "Von Tagesausflügen bis zu mehrwöchigen Abenteuern — jede SeeDora-Tour wird mit Leidenschaft und Luxus gestaltet.",
+    "categories": {
+      "all": "Alle Touren",
+      "sea": "Meer & Tauchen",
+      "culture": "Kultur & Geschichte",
+      "desert": "Wüstenabenteuer"
+    },
+    "durations": {
+      "fullDay": "Ganztägig",
+      "twoDays": "2 Tage",
+      "halfDay": "Halbtägig",
+      "fiveDays": "5 Tage",
+      "oneDay": "1 Tag",
+      "evening": "Abends",
+      "threeHours": "3h"
+    },
+    "items": {
+      "snorkeling": {
+        "name": "Schnorchel-Safari – Orange Bay",
+        "description": "Fahrt zur atemberaubenden Orange Bay Insel, Schnorcheln zwischen lebhaften Korallenriffen, BBQ-Mittagessen am Strand."
+      },
+      "cairo": {
+        "name": "Pyramiden & Kairo Erkundung",
+        "description": "Besuche die Großen Pyramiden von Gizeh, die Sphinx, das Ägyptische Museum mit Tutanchamuns Schätzen und den Khan El Khalili Basar."
+      },
+      "luxor": {
+        "name": "Luxor – Tal der Könige & Karnak",
+        "description": "Erkunde das Tal der Könige, den Hatschepsut-Tempel, Karnak und Luxor-Tempel."
+      },
+      "quad": {
+        "name": "Quad Bike & Beduinendorf",
+        "description": "Quad Bike durch goldene Dünen, Besuch eines traditionellen Beduinendorfes, Kamelreiten und atemberaubender Sonnenuntergang."
+      },
+      "nile": {
+        "name": "Luxus Nilkreuzfahrt – Luxor nach Assuan",
+        "description": "Segeln Sie auf dem legendären Nil auf einem 5-Sterne-Kreuzfahrtschiff, Edfu, Kom Ombo, Assuan-Staudamm und die prächtigen Tempel von Abu Simbel."
+      },
+      "diving": {
+        "name": "Tauchen – Ras Mohamed",
+        "description": "Tauchen Sie an einem der weltweit Top 10 Tauchplätze mit PADI-zertifizierten Instrukteuren. Anfänger und Fortgeschrittene willkommen."
+      },
+      "sinai": {
+        "name": "Sinai-Sonnenaufgang & St. Katharina",
+        "description": "Besteigen Sie den Berg Sinai bei Nacht, erleben Sie einen atemberaubenden Sonnenaufgang, besuchen Sie das antike Kloster der heiligen Katharina."
+      },
+      "submarine": {
+        "name": "Glasbodenboot & U-Boot",
+        "description": "Erleben Sie die magische Unterwasserwelt, ohne nass zu werden — perfekt für Familien. Exotische Fische und Korallen beobachten."
+      },
+      "atv": {
+        "name": "Wüsten-Safari & Sternenhimmel-Dinner",
+        "description": "Sonnenuntergang 4x4 Wüsten-Safari, traditionelles Beduinen-Dinner unter einem Millionen-Sternen-Himmel mit Live-Musik."
+      }
+    },
+    "bookBtn": "Buchen"
+  },
+  "why": {
+    "eyebrow": "Warum mit uns reisen",
+    "title": "Der <span>SeeDora</span>-Unterschied",
+    "description": "15 Jahre außergewöhnliche ägyptische Erlebnisse für europäische Reisende — Sicherheit, Luxus und Authentizität.",
+    "items": {
+      "languages": {
+        "title": "5 Sprachen",
+        "text": "Unsere mehrsprachigen Guides sprechen Englisch, Deutsch, Italienisch, Französisch und Russisch."
+      },
+      "safety": {
+        "title": "100% Sicheres Reisen",
+        "text": "Lizenziert und versichert, mit Genehmigung der Ägyptischen Tourismusbehörde. Ihre Sicherheit hat oberste Priorität."
+      },
+      "luxury": {
+        "title": "Luxusstandards",
+        "text": "Premiumtransport, 4- und 5-Sterne-Hotels, Gourmet-Erlebnisse — weil Sie nur das Beste verdienen."
+      },
+      "price": {
+        "title": "Bestpreisgarantie",
+        "text": "Wir gleichen jedes vergleichbare Angebot an oder unterbieten es. Transparente Preise — keine versteckten Gebühren."
+      }
+    }
+  },
+  "testimonials": {
+    "eyebrow": "Reiseerlebnisse",
+    "title": "Was unsere Gäste <span>sagen</span>",
+    "items": {
+      "klaus": {
+        "text": "SeeDora hat uns den Urlaub unseres Lebens geschenkt. Die Pyramidentour war perfekt organisiert, unser Guide sprach ausgezeichnetes Deutsch. Absolut magisch!"
+      },
+      "marco": {
+        "text": "Die Nilkreuzfahrt hat alle Erwartungen übertroffen. Jeden Morgen antike Tempel vom Bootsdeck sehen — einfach unvergesslich. Danke SeeDora!"
+      },
+      "natalia": {
+        "text": "Die Wüsten-Safari war unglaublich — Quad-Bikes, Kamele, Beduinen-Dinner unter Sternen. Unser deutschsprachiger Guide war fantastisch. 10/10!"
+      }
+    }
+  },
+  "contact": {
+    "eyebrow": "Kontakt aufnehmen",
+    "title": "Bereit für Ihr <span>ägyptisches</span> Abenteuer?",
+    "description": "Kontaktieren Sie uns noch heute für ein kostenloses, persönliches Reiseprogramm. Wir antworten innerhalb von 2 Stunden in Ihrer Sprache.",
+    "form": {
+      "title": "Schreiben Sie uns",
+      "firstName": "Vorname",
+      "lastName": "Nachname",
+      "email": "E-Mail",
+      "interest": "Interesse an",
+      "message": "Nachricht",
+      "submit": "Nachricht senden →",
+      "success": "✓ Nachricht gesendet!",
+      "placeholders": {
+        "firstName": "Maria",
+        "lastName": "Schmidt",
+        "email": "maria@email.com",
+        "message": "Teilen Sie uns Ihre Reisedaten, Gruppengröße und Wünsche mit..."
+      },
+      "interests": {
+        "hurghada": "Hurghada (Rotes Meer)",
+        "cairo": "Kairo (Pyramiden & Geschichte)",
+        "luxor": "Luxor (Nilkreuzfahrten)",
+        "sharm": "Sharm El-Sheikh",
+        "desert": "Wüstensafari",
+        "nile": "Nilkreuzfahrt",
+        "custom": "Individuelles Paket"
+      }
+    }
+  },
+  "footer": {
+    "description": "Seit 2010 außergewöhnliche ägyptische Reisen für europäische Reisende. Ihr zuverlässiger Partner für Rotes Meer, Nil und Wüstenabenteuer.",
+    "sections": {
+      "destinations": "Reiseziele",
+      "tours": "Touren"
+    },
+    "madeWith": "Mit ❤️ in Ägypten gemacht"
+  }
+}

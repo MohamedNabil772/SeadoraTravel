@@ -1,0 +1,181 @@
+{
+  "nav": {
+    "destinations": "Destinations",
+    "tours": "Circuits",
+    "aboutUs": "À propos",
+    "bookNow": "Réserver"
+  },
+  "hero": {
+    "badge": "✦ Premium Egypt Travel Since 2010",
+    "title": "Découvrez <em>l'Égypte</em><br>comme jamais",
+    "description": "Des eaux cristallines d'Hurghada aux merveilles antiques de Louxor — SeeDora crée des voyages extraordinaires à travers les paysages les plus époustouflants d'Égypte.",
+    "exploreBtn": "Explorer les circuits",
+    "consultationBtn": "Consultation gratuite",
+    "stats": {
+      "guests": "Clients satisfaits",
+      "packages": "Forfaits voyage",
+      "years": "Années d'excellence"
+    },
+    "scroll": "Explorer"
+  },
+  "destinations": {
+    "eyebrow": "Où nous vous emmenons",
+    "title": "Les destinations les plus <span>extraordinaires</span> d'Égypte",
+    "description": "Quatre régions emblématiques, chacune avec une âme unique — de la mer Rouge aux merveilles de la vallée du Nil.",
+    "hurghada": {
+      "description": "Le joyau de la mer Rouge — plages immaculées, plongée de classe mondiale et aventures dans le désert.",
+      "tag": "Paradis de la mer Rouge"
+    },
+    "cairo": {
+      "description": "Les Grandes Pyramides, le Sphinx, le Musée Égyptien — le berceau de la civilisation vous attend.",
+      "tag": "Merveilles antiques"
+    },
+    "luxor": {
+      "description": "Temple de Karnak, Vallée des Rois — le plus grand musée à ciel ouvert du monde.",
+      "tag": "Gloire pharaonique"
+    },
+    "sharm": {
+      "description": "Parc national Ras Mohamed, récifs mondialement connus, resorts de luxe.",
+      "tag": "Paradis de la plongée"
+    }
+  },
+  "trips": {
+    "eyebrow": "Expériences sélectionnées",
+    "title": "Nos <span>circuits les plus populaires</span>",
+    "description": "Des excursions d'une journée aux aventures de plusieurs semaines — chaque circuit SeeDora est créé avec passion et luxe.",
+    "categories": {
+      "all": "Tous les circuits",
+      "sea": "Mer & Plongée",
+      "culture": "Culture & Histoire",
+      "desert": "Aventure désert"
+    },
+    "durations": {
+      "fullDay": "Journée entière",
+      "twoDays": "2 Jours",
+      "halfDay": "Demi-journée",
+      "fiveDays": "5 Jours",
+      "oneDay": "1 Jour",
+      "evening": "Soirée",
+      "threeHours": "3 h"
+    },
+    "items": {
+      "snorkeling": {
+        "name": "Safari snorkeling – Orange Bay",
+        "description": "Naviguez vers Orange Bay, snorkeling parmi les récifs coralliens, déjeuner BBQ sur une plage immaculée."
+      },
+      "cairo": {
+        "name": "Pyramides & Exploration du Caire",
+        "description": "Visitez les Grandes Pyramides de Gizeh, le Sphinx, le Musée Égyptien avec les trésors de Toutankhamon."
+      },
+      "luxor": {
+        "name": "Louxor – Vallée des Rois & Karnak",
+        "description": "Explorez la Vallée des Rois, le Temple d'Hatchepsout, Karnak et le Temple de Louxor."
+      },
+      "quad": {
+        "name": "Quad & Village Bédouin",
+        "description": "Quad à travers les dunes dorées, village bédouin traditionnel, balade en chameau et coucher de soleil."
+      },
+      "nile": {
+        "name": "Croisière Nil de luxe – Louxor à Assouan",
+        "description": "Naviguez sur le légendaire Nil sur un bateau de croisière 5 étoiles, Edfou, Kom Ombo, barrage d'Assouan et les temples d'Abou Simbel."
+      },
+      "diving": {
+        "name": "Plongée – Ras Mohamed",
+        "description": "Plongez dans l'un des 10 meilleurs sites de plongée au monde avec des instructeurs certifiés PADI."
+      },
+      "sinai": {
+        "name": "Lever du soleil sur le Sinaï & Ste Catherine",
+        "description": "Gravissez le Mont Sinaï de nuit, admirez un lever de soleil époustouflant, visitez le monastère de Sainte-Catherine."
+      },
+      "submarine": {
+        "name": "Bateau à fond de verre & Sous-marin",
+        "description": "Vivez le monde sous-marin sans vous mouiller — parfait pour les familles."
+      },
+      "atv": {
+        "name": "Safari désert & Dîner sous les étoiles",
+        "description": "Safari 4x4 au coucher du soleil, dîner bédouin sous les étoiles, musique live et danse orientale."
+      }
+    },
+    "bookBtn": "Réserver"
+  },
+  "why": {
+    "eyebrow": "Pourquoi voyager avec nous",
+    "title": "La différence <span>SeeDora</span>",
+    "description": "15 ans d'expériences égyptiennes extraordinaires pour les voyageurs européens — sécurité, luxe et authenticité.",
+    "items": {
+      "languages": {
+        "title": "5 Langues",
+        "text": "Nos guides multilingue parlent anglais, allemand, italien, français et russe."
+      },
+      "safety": {
+        "title": "Voyage 100% sûr",
+        "text": "Agréé et assuré, avec l'approbation de l'Autorité du tourisme égyptien. Votre sécurité est notre priorité absolue."
+      },
+      "luxury": {
+        "title": "Standards de luxe",
+        "text": "Transport premium, hôtels 4 et 5 étoiles, expériences gastronomiques — parce que vous méritez le meilleur."
+      },
+      "price": {
+        "title": "Garantie meilleur prix",
+        "text": "Nous égalons ou battons toute offre comparable. Prix transparents — aucun frais caché."
+      }
+    }
+  },
+  "testimonials": {
+    "eyebrow": "Témoignages",
+    "title": "Ce que disent nos <span>clients</span>",
+    "items": {
+      "klaus": {
+        "text": "SeeDora nous a offert des vacances inoubliables. L'excursion aux Pyramides était parfaitement organisée. Absolument magique!"
+      },
+      "marco": {
+        "text": "La croisière sur le Nil a dépassé toutes nos attentes. Se réveiller chaque matin face aux temples antiques — tout simplement inoubliable."
+      },
+      "natalia": {
+        "text": "Le safari désert était incroyable — quads, chameaux, dîner bédouin sous les étoiles. Notre guide francophone était fantastique. 10/10!"
+      }
+    }
+  },
+  "contact": {
+    "eyebrow": "Contactez-nous",
+    "title": "Prêt pour votre aventure <span>égyptienne</span>?",
+    "description": "Contactez-nous pour un itinéraire gratuit et personnalisé. Nous répondons dans les 2 heures dans votre langue.",
+    "form": {
+      "title": "Envoyez-nous un message",
+      "firstName": "Prénom",
+      "lastName": "Nom",
+      "email": "Email",
+      "interest": "Intéressé par",
+      "message": "Message",
+      "submit": "Envoyer le message →",
+      "success": "✓ Message envoyé!",
+      "placeholders": {
+        "firstName": "Marie",
+        "lastName": "Dubois",
+        "email": "marie@email.com",
+        "message": "Indiquez-nous vos dates de voyage, la taille du groupe et vos souhaits..."
+      },
+      "interests": {
+        "hurghada": "Hurghada (Mer Rouge)",
+        "cairo": "Le Caire (Pyramides & Histoire)",
+        "luxor": "Louxor (Croisières sur le Nil)",
+        "sharm": "Charm el-Cheikh",
+        "desert": "Safari dans le désert",
+        "nile": "Croisière sur le Nil",
+        "custom": "Forfait personnalisé"
+      }
+    }
+  },
+  "footer": {
+    "description": "Depuis 2010, nous créons des voyages égyptiens extraordinaires pour les voyageurs européens. Votre partenaire de confiance pour la mer Rouge, le Nil et le désert.",
+    "sections": {
+      "destinations": "Destinations",
+      "tours": "Circuits",
+      "contact": "Contact"
+    },
+    "rights": "Tous droits réservés.",
+    "privacy": "Politique de confidentialité",
+    "terms": "Conditions générales",
+    "madeWith": "Fait avec ❤️ en Égypte"
+  }
+}

@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SeeDora Travel – Luxury Egypt Experiences</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Jost:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sea: #0a5c8a;
+  --sea-light: #1a8bc4;
+  --sea-deep: #063a5c;
+  --sun: #e8820a;
+  --sun-light: #f5a435;
+  --sun-pale: #fdf3e0;
+  --grass: #2e7d4f;
+  --grass-light: #4caf78;
+  --gold: #c9a84c;
+  --cream: #faf7f2;
+  --dark: #0d1f2d;
+  --text: #2a3f4f;
+  --muted: #6b8a9a;
+  --white: #ffffff;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Jost', sans-serif;
+  background: var(--cream);
+  color: var(--text);
+  overflow-x: hidden;
+}
+
+/* ─── LANGUAGE BAR ─── */
+.lang-bar {
+  background: var(--dark);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 48px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+.lang-bar .contact-info { color: #8eafc2; display: flex; gap: 24px; }
+.lang-bar .contact-info span { display: flex; align-items: center; gap: 6px; }
+.lang-bar .contact-info a { color: var(--sun-light); text-decoration: none; }
+.lang-selector { display: flex; gap: 4px; }
+.lang-btn {
+  background: transparent; border: 1px solid #2a4a5e; color: #8eafc2;
+  padding: 4px 10px; cursor: pointer; border-radius: 3px; font-size: 11px;
+  font-family: 'Jost', sans-serif; letter-spacing: 0.06em; transition: all 0.2s;
+}
+.lang-btn:hover, .lang-btn.active {
+  background: var(--sun); border-color: var(--sun); color: var(--white);
+}
+
+/* ─── NAVBAR ─── */
+nav {
+  position: sticky; top: 0; z-index: 1000;
+  background: rgba(6, 58, 92, 0.97);
+  backdrop-filter: blur(12px);
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 0 48px;
+  border-bottom: 1px solid rgba(201,168,76,0.3);
+}
+.logo {
+  display: flex; align-items: center; gap: 14px; padding: 16px 0;
+  text-decoration: none;
+}
+.logo-icon {
+  width: 46px; height: 46px;
+  background: linear-gradient(135deg, var(--sun), var(--sun-light));
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+}
+.logo-text { line-height: 1; }
+.logo-text .brand { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--white); letter-spacing: 0.05em; }
+.logo-text .tagline { font-size: 10px; color: var(--gold); letter-spacing: 0.2em; text-transform: uppercase; }
+.nav-links { display: flex; gap: 8px; align-items: center; }
+.nav-links a {
+  color: #a8c8dc; text-decoration: none; font-size: 13px;
+  letter-spacing: 0.1em; text-transform: uppercase; padding: 10px 14px;
+  border-radius: 4px; transition: all 0.2s;
+}
+.nav-links a:hover { color: var(--white); background: rgba(255,255,255,0.08); }
+.nav-cta {
+  background: linear-gradient(135deg, var(--sun), var(--sun-light));
+  color: var(--white) !important; padding: 10px 22px !important;
+  border-radius: 4px; font-weight: 500;
+}
+.nav-cta:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(232,130,10,0.4) !important; }
+
+/* ─── HERO ─── */
+.hero {
+  min-height: 92vh;
+  background: linear-gradient(160deg, var(--sea-deep) 0%, var(--sea) 40%, #1a6e8a 70%, #0d4d3a 100%);
+  position: relative; overflow: hidden;
+  display: flex; align-items: center;
+}
+.hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 70% 40%, rgba(232,130,10,0.12) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 70% at 20% 80%, rgba(46,125,79,0.15) 0%, transparent 50%);
+}
+.hero-pattern {
+  position: absolute; inset: 0; opacity: 0.04;
+  background-image: repeating-linear-gradient(45deg, var(--gold) 0px, var(--gold) 1px, transparent 1px, transparent 40px),
+                    repeating-linear-gradient(-45deg, var(--gold) 0px, var(--gold) 1px, transparent 1px, transparent 40px);
+}
+.hero-content {
+  position: relative; z-index: 2;
+  padding: 0 48px; max-width: 760px;
+  animation: fadeUp 1s ease forwards;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(201,168,76,0.15); border: 1px solid rgba(201,168,76,0.4);
+  padding: 6px 16px; border-radius: 20px;
+  font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--gold); margin-bottom: 28px;
+}
+.hero h1 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(44px, 6vw, 80px);
+  font-weight: 900; color: var(--white); line-height: 1.05;
+  margin-bottom: 24px;
+}
+.hero h1 em { font-style: italic; color: var(--sun-light); }
+.hero p {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px; color: rgba(255,255,255,0.75);
+  line-height: 1.7; margin-bottom: 40px; max-width: 580px;
+}
+.hero-btns { display: flex; gap: 16px; flex-wrap: wrap; }
+.btn-primary {
+  background: linear-gradient(135deg, var(--sun), #f59c20);
+  color: var(--white); text-decoration: none; padding: 16px 36px;
+  border-radius: 4px; font-size: 14px; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  transition: all 0.3s; box-shadow: 0 8px 30px rgba(232,130,10,0.35);
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 40px rgba(232,130,10,0.45); }
+.btn-outline {
+  border: 1px solid rgba(255,255,255,0.4); color: var(--white);
+  text-decoration: none; padding: 16px 36px;
+  border-radius: 4px; font-size: 14px; font-weight: 400;
+  letter-spacing: 0.1em; text-transform: uppercase; transition: all 0.3s;
+}
+.btn-outline:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.7); }
+.hero-stats {
+  position: absolute; right: 48px; top: 50%; transform: translateY(-50%);
+  display: flex; flex-direction: column; gap: 20px; z-index: 2;
+}
+.stat-card {
+  background: rgba(255,255,255,0.08); backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.12);
+  padding: 20px 28px; border-radius: 8px; text-align: center;
+  border-left: 3px solid var(--sun);
+}
+.stat-card .num {
+  font-family: 'Playfair Display', serif;
+  font-size: 36px; font-weight: 700; color: var(--sun-light);
+}
+.stat-card .label { font-size: 11px; letter-spacing: 0.15em; color: rgba(255,255,255,0.6); text-transform: uppercase; }
+.scroll-hint {
+  position: absolute; bottom: 36px; left: 50%; transform: translateX(-50%);
+  color: rgba(255,255,255,0.4); font-size: 11px; letter-spacing: 0.15em;
+  text-transform: uppercase; display: flex; flex-direction: column; align-items: center; gap: 8px;
+  animation: bounce 2s infinite;
+}
+.scroll-arrow { width: 20px; height: 20px; border-right: 2px solid; border-bottom: 2px solid; transform: rotate(45deg); border-color: rgba(255,255,255,0.3); }
+
+/* ─── DESTINATIONS SECTION ─── */
+.section { padding: 100px 48px; }
+.section-header { text-align: center; margin-bottom: 70px; }
+.section-eyebrow {
+  font-size: 11px; letter-spacing: 0.25em; text-transform: uppercase;
+  color: var(--grass); font-weight: 600; margin-bottom: 14px;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+}
+.section-eyebrow::before, .section-eyebrow::after {
+  content: ''; width: 40px; height: 1px; background: var(--grass);
+}
+.section h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: clamp(32px, 4vw, 52px); font-weight: 700;
+  color: var(--dark); line-height: 1.15; margin-bottom: 18px;
+}
+.section h2 span { color: var(--sea); }
+.section-sub {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 19px; color: var(--muted); max-width: 600px; margin: 0 auto; line-height: 1.7;
+}
+
+/* ─── DESTINATIONS GRID ─── */
+.dest-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+.dest-card {
+  border-radius: 12px; overflow: hidden; position: relative;
+  height: 420px; cursor: pointer;
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
+.dest-card:hover { transform: translateY(-6px); box-shadow: 0 30px 60px rgba(0,0,0,0.25); }
+.dest-card:first-child { grid-column: span 2; height: 480px; }
+.dest-bg {
+  position: absolute; inset: 0;
+  background-size: cover; background-position: center;
+  transition: transform 0.6s ease;
+}
+.dest-card:hover .dest-bg { transform: scale(1.05); }
+.dest-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(6,28,40,0.9) 0%, rgba(6,28,40,0.3) 50%, transparent 100%);
+}
+.dest-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 28px; }
+.dest-flag { font-size: 20px; margin-bottom: 8px; }
+.dest-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px; font-weight: 700; color: var(--white); margin-bottom: 6px;
+}
+.dest-card:first-child .dest-name { font-size: 34px; }
+.dest-desc { font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.5; margin-bottom: 14px; }
+.dest-tag {
+  display: inline-block;
+  background: rgba(232,130,10,0.85); color: var(--white);
+  font-size: 11px; letter-spacing: 0.1em; padding: 4px 12px; border-radius: 20px;
+}
+
+/* emoji-based destination backgrounds */
+.bg-hurghada {
+  background: linear-gradient(160deg, #0a5c8a 0%, #0d8c6e 40%, #1e9b5e 80%, #c9a84c 100%);
+}
+.bg-cairo {
+  background: linear-gradient(160deg, #c9a84c 0%, #e8820a 40%, #2e4a1a 80%, #0a5c8a 100%);
+}
+.bg-luxor {
+  background: linear-gradient(160deg, #8b6914 0%, #c9a84c 50%, #e8820a 100%);
+}
+.bg-sharm {
+  background: linear-gradient(160deg, #063a5c 0%, #0a7c9e 40%, #1ab8a0 100%);
+}
+
+.dest-emoji {
+  font-size: 80px; position: absolute;
+  top: 50%; left: 50%; transform: translate(-50%, -70%);
+  opacity: 0.25; filter: blur(1px);
+}
+.dest-card:first-child .dest-emoji { font-size: 120px; }
+
+/* ─── TRIPS SECTION ─── */
+.trips-bg { background: var(--dark); position: relative; overflow: hidden; }
+.trips-bg::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 60% 80% at 100% 50%, rgba(10,92,138,0.3) 0%, transparent 60%),
+              radial-gradient(ellipse 40% 60% at 0% 80%, rgba(46,125,79,0.2) 0%, transparent 50%);
+}
+.trips-bg .section-header h2 { color: var(--white); }
+.trips-bg .section-eyebrow { color: var(--sun-light); }
+.trips-bg .section-eyebrow::before, .trips-bg .section-eyebrow::after { background: var(--sun-light); }
+.trips-bg .section-sub { color: rgba(255,255,255,0.55); }
+
+.trips-tabs {
+  display: flex; gap: 8px; justify-content: center; margin-bottom: 50px; flex-wrap: wrap;
+}
+.trip-tab {
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+  color: rgba(255,255,255,0.6); padding: 10px 24px; border-radius: 30px;
+  cursor: pointer; font-family: 'Jost', sans-serif; font-size: 13px;
+  letter-spacing: 0.08em; transition: all 0.25s;
+}
+.trip-tab:hover, .trip-tab.active {
+  background: var(--sea); border-color: var(--sea-light); color: var(--white);
+}
+
+.trips-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+.trip-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 12px; overflow: hidden;
+  transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+}
+.trip-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(232,130,10,0.4);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+}
+.trip-img {
+  height: 200px; position: relative; overflow: hidden;
+  display: flex; align-items: center; justify-content: center;
+}
+.trip-img-emoji { font-size: 72px; opacity: 0.7; }
+.trip-duration {
+  position: absolute; top: 16px; right: 16px;
+  background: rgba(0,0,0,0.6); color: var(--white);
+  padding: 4px 10px; border-radius: 20px; font-size: 12px;
+}
+.trip-badge {
+  position: absolute; top: 16px; left: 16px;
+  background: var(--sun); color: var(--white);
+  padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600;
+}
+.trip-body { padding: 24px; }
+.trip-cat {
+  font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--grass-light); margin-bottom: 8px;
+}
+.trip-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 20px; color: var(--white); margin-bottom: 10px; line-height: 1.3;
+}
+.trip-desc { font-size: 13px; color: rgba(255,255,255,0.55); line-height: 1.6; margin-bottom: 18px; }
+.trip-includes { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
+.trip-tag {
+  background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.5);
+  font-size: 11px; padding: 3px 10px; border-radius: 3px;
+}
+.trip-footer {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-top: 18px; border-top: 1px solid rgba(255,255,255,0.07);
+}
+.trip-price .from { font-size: 10px; color: rgba(255,255,255,0.4); letter-spacing: 0.1em; }
+.trip-price .amount {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px; color: var(--sun-light); font-weight: 700;
+}
+.trip-price .per { font-size: 11px; color: rgba(255,255,255,0.4); }
+.btn-book {
+  background: linear-gradient(135deg, var(--sea), var(--sea-light));
+  color: var(--white); border: none; padding: 10px 22px;
+  border-radius: 4px; cursor: pointer; font-size: 12px;
+  font-family: 'Jost', sans-serif; font-weight: 600;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  transition: all 0.25s;
+}
+.btn-book:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(26,139,196,0.4); }
+
+/* ─── WHY CHOOSE ─── */
+.why-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 32px; margin-top: 10px; }
+.why-card {
+  text-align: center; padding: 40px 28px;
+  border-radius: 12px; background: var(--white);
+  box-shadow: 0 4px 30px rgba(0,0,0,0.06);
+  transition: transform 0.3s, box-shadow 0.3s;
+  border-bottom: 3px solid transparent;
+}
+.why-card:hover {
+  transform: translateY(-4px); box-shadow: 0 16px 50px rgba(0,0,0,0.12);
+}
+.why-card:nth-child(1) { border-color: var(--sea); }
+.why-card:nth-child(2) { border-color: var(--sun); }
+.why-card:nth-child(3) { border-color: var(--grass); }
+.why-card:nth-child(4) { border-color: var(--gold); }
+.why-icon { font-size: 40px; margin-bottom: 18px; }
+.why-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 19px; font-weight: 700; color: var(--dark); margin-bottom: 12px;
+}
+.why-text { font-size: 14px; color: var(--muted); line-height: 1.65; }
+
+/* ─── TESTIMONIALS ─── */
+.testimonials-bg { background: linear-gradient(135deg, var(--sea-deep) 0%, var(--sea) 100%); }
+.testimonials-bg .section-header h2 { color: var(--white); }
+.testimonials-bg .section-eyebrow { color: var(--gold); }
+.testimonials-bg .section-eyebrow::before, .testimonials-bg .section-eyebrow::after { background: var(--gold); }
+.testimonials-bg .section-sub { color: rgba(255,255,255,0.6); }
+.testimonials-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px; }
+.test-card {
+  background: rgba(255,255,255,0.07);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 12px; padding: 32px;
+}
+.stars { color: var(--sun-light); font-size: 16px; margin-bottom: 16px; letter-spacing: 2px; }
+.test-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 17px; font-style: italic;
+  color: rgba(255,255,255,0.85); line-height: 1.7; margin-bottom: 24px;
+}
+.test-author { display: flex; align-items: center; gap: 14px; }
+.test-avatar {
+  width: 46px; height: 46px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--sun), var(--grass));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px;
+}
+.test-name { font-size: 14px; color: var(--white); font-weight: 500; }
+.test-country { font-size: 12px; color: rgba(255,255,255,0.5); }
+
+/* ─── CONTACT ─── */
+.contact-wrapper {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center;
+}
+.contact-left h2 {
+  font-family: 'Playfair Display', serif;
+  font-size: 44px; font-weight: 700; color: var(--dark); margin-bottom: 20px; line-height: 1.15;
+}
+.contact-left h2 span { color: var(--sea); }
+.contact-left p { font-family: 'Cormorant Garamond', serif; font-size: 18px; color: var(--muted); line-height: 1.7; margin-bottom: 36px; }
+.contact-items { display: flex; flex-direction: column; gap: 20px; }
+.contact-item { display: flex; align-items: center; gap: 16px; }
+.contact-item .icon {
+  width: 48px; height: 48px; border-radius: 10px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 22px;
+}
+.icon-phone { background: linear-gradient(135deg, var(--sea), var(--sea-light)); }
+.icon-email { background: linear-gradient(135deg, var(--sun), var(--sun-light)); }
+.icon-map { background: linear-gradient(135deg, var(--grass), var(--grass-light)); }
+.contact-item .detail { font-size: 13px; color: var(--muted); }
+.contact-item .value { font-size: 16px; color: var(--dark); font-weight: 500; }
+.contact-item .value a { color: var(--sea); text-decoration: none; }
+.contact-right {
+  background: var(--white); border-radius: 16px;
+  padding: 44px; box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+}
+.contact-right h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px; color: var(--dark); margin-bottom: 28px;
+}
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+.form-group { margin-bottom: 16px; }
+.form-group label { display: block; font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.form-group input, .form-group select, .form-group textarea {
+  width: 100%; padding: 12px 16px; border: 1px solid #dce6ec; border-radius: 6px;
+  font-family: 'Jost', sans-serif; font-size: 14px; color: var(--dark);
+  background: #f7fbfd; transition: border-color 0.2s;
+  outline: none;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  border-color: var(--sea); background: var(--white);
+}
+.form-group textarea { height: 100px; resize: none; }
+.btn-submit {
+  width: 100%; background: linear-gradient(135deg, var(--sea), var(--sea-light));
+  color: var(--white); border: none; padding: 16px; border-radius: 6px;
+  font-family: 'Jost', sans-serif; font-size: 14px; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer;
+  transition: all 0.3s;
+}
+.btn-submit:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(10,92,138,0.35); }
+
+/* ─── FOOTER ─── */
+footer {
+  background: var(--dark); color: rgba(255,255,255,0.6);
+  padding: 64px 48px 32px;
+}
+.footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 48px; }
+.footer-brand .logo-text .brand { font-size: 26px; display: block; color: var(--white); margin-bottom: 4px; }
+.footer-brand .logo-text .tagline { font-size: 11px; }
+.footer-desc { font-size: 14px; line-height: 1.7; margin-top: 18px; margin-bottom: 24px; }
+.social-links { display: flex; gap: 12px; }
+.social-link {
+  width: 38px; height: 38px; border-radius: 8px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+  text-decoration: none; transition: all 0.2s;
+}
+.social-link:hover { background: var(--sea); border-color: var(--sea); }
+.footer-col h4 {
+  font-family: 'Playfair Display', serif;
+  font-size: 16px; color: var(--white); margin-bottom: 20px;
+}
+.footer-col ul { list-style: none; }
+.footer-col ul li { margin-bottom: 10px; }
+.footer-col ul li a {
+  color: rgba(255,255,255,0.5); text-decoration: none;
+  font-size: 14px; transition: color 0.2s;
+}
+.footer-col ul li a:hover { color: var(--sun-light); }
+.footer-bottom {
+  border-top: 1px solid rgba(255,255,255,0.08);
+  padding-top: 28px; display: flex; justify-content: space-between; align-items: center;
+  font-size: 12px;
+}
+.footer-bottom a { color: rgba(255,255,255,0.4); text-decoration: none; }
+
+/* ─── TRANSLATIONS ─── */
+[data-lang] { display: none; }
+.lang-en [data-lang="en"],
+.lang-de [data-lang="de"],
+.lang-it [data-lang="it"],
+.lang-fr [data-lang="fr"],
+.lang-ru [data-lang="ru"] { display: inline; }
+.lang-en [data-block="en"],
+.lang-de [data-block="de"],
+.lang-it [data-block="it"],
+.lang-fr [data-block="fr"],
+.lang-ru [data-block="ru"] { display: block; }
+[data-block] { display: none; }
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes bounce {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50%       { transform: translateX(-50%) translateY(8px); }
+}
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 1100px) {
+  .dest-grid { grid-template-columns: 1fr 1fr; }
+  .dest-card:first-child { grid-column: span 2; }
+  .trips-grid { grid-template-columns: 1fr 1fr; }
+  .why-grid { grid-template-columns: 1fr 1fr; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .hero-stats { display: none; }
+}
+@media (max-width: 768px) {
+  nav { padding: 0 20px; }
+  .nav-links { display: none; }
+  .section { padding: 70px 20px; }
+  .lang-bar { padding: 8px 20px; flex-direction: column; gap: 8px; }
+  .dest-grid { grid-template-columns: 1fr; }
+  .dest-card:first-child { grid-column: span 1; }
+  .trips-grid { grid-template-columns: 1fr; }
+  .testimonials-grid { grid-template-columns: 1fr; }
+  .contact-wrapper { grid-template-columns: 1fr; gap: 40px; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .hero-content { padding: 0 20px; }
+  .hero h1 { font-size: 38px; }
+  .why-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
+</head>
+<body class="lang-en" id="bodyEl">
+
+<!-- LANGUAGE BAR -->
+<div class="lang-bar">
+  <div class="contact-info">
+    <span>📞 <a href="tel:+201001296641">+20 100 129 6641</a></span>
+    <span>✉️ <a href="mailto:info@sedoratravel.com">info@sedoratravel.com</a></span>
+  </div>
+  <div class="lang-selector">
+    <button class="lang-btn active" onclick="setLang('en',this)">🇬🇧 EN</button>
+    <button class="lang-btn" onclick="setLang('de',this)">🇩🇪 DE</button>
+    <button class="lang-btn" onclick="setLang('it',this)">🇮🇹 IT</button>
+    <button class="lang-btn" onclick="setLang('fr',this)">🇫🇷 FR</button>
+    <button class="lang-btn" onclick="setLang('ru',this)">🇷🇺 RU</button>
+  </div>
+</div>
+
+<!-- NAVBAR -->
+<nav>
+  <a class="logo" href="#">
+    <div class="logo-icon">🌊</div>
+    <div class="logo-text">
+      <span class="brand">SeeDora Travel</span>
+      <span class="tagline">Egypt · Luxury Experiences</span>
+    </div>
+  </a>
+  <div class="nav-links">
+    <a href="#destinations">
+      <span data-lang="en">Destinations</span>
+      <span data-lang="de">Reiseziele</span>
+      <span data-lang="it">Destinazioni</span>
+      <span data-lang="fr">Destinations</span>
+      <span data-lang="ru">Направления</span>
+    </a>
+    <a href="#trips">
+      <span data-lang="en">Tours</span>
+      <span data-lang="de">Touren</span>
+      <span data-lang="it">Tour</span>
+      <span data-lang="fr">Circuits</span>
+      <span data-lang="ru">Туры</span>
+    </a>
+    <a href="#why">
+      <span data-lang="en">About Us</span>
+      <span data-lang="de">Über uns</span>
+      <span data-lang="it">Chi siamo</span>
+      <span data-lang="fr">À propos</span>
+      <span data-lang="ru">О нас</span>
+    </a>
+    <a href="#contact" class="nav-cta">
+      <span data-lang="en">Book Now</span>
+      <span data-lang="de">Jetzt buchen</span>
+      <span data-lang="it">Prenota ora</span>
+      <span data-lang="fr">Réserver</span>
+      <span data-lang="ru">Забронировать</span>
+    </a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-pattern"></div>
+  <div class="hero-content">
+    <div class="hero-badge">✦ Premium Egypt Travel Since 2010</div>
+    <h1>
+      <span data-lang="en">Discover <em>Egypt</em><br>Like Never Before</span>
+      <span data-lang="de">Entdecke <em>Ägypten</em><br>wie nie zuvor</span>
+      <span data-lang="it">Scopri <em>l'Egitto</em><br>come mai prima</span>
+      <span data-lang="fr">Découvrez <em>l'Égypte</em><br>comme jamais</span>
+      <span data-lang="ru">Откройте <em>Египет</em><br>с новой стороны</span>
+    </h1>
+    <p>
+      <span data-lang="en">From the crystalline waters of Hurghada to the ancient wonders of Luxor — SeeDora crafts extraordinary journeys across Egypt's most breathtaking landscapes.</span>
+      <span data-lang="de">Von den kristallklaren Gewässern Hurgadas bis zu den antiken Wundern von Luxor — SeeDora gestaltet außergewöhnliche Reisen durch Ägyptens atemberaubende Landschaften.</span>
+      <span data-lang="it">Dalle acque cristalline di Hurghada alle meraviglie antiche di Luxor — SeeDora crea viaggi straordinari attraverso i paesaggi più mozzafiato dell'Egitto.</span>
+      <span data-lang="fr">Des eaux cristallines d'Hurghada aux merveilles antiques de Louxor — SeeDora crée des voyages extraordinaires à travers les paysages les plus époustouflants d'Égypte.</span>
+      <span data-lang="ru">От кристальных вод Хургады до древних чудес Луксора — SeeDora создаёт незабываемые путешествия по самым захватывающим уголкам Египта.</span>
+    </p>
+    <div class="hero-btns">
+      <a href="#trips" class="btn-primary">
+        <span data-lang="en">Explore Tours</span>
+        <span data-lang="de">Touren entdecken</span>
+        <span data-lang="it">Esplora i tour</span>
+        <span data-lang="fr">Explorer les circuits</span>
+        <span data-lang="ru">Смотреть туры</span>
+      </a>
+      <a href="#contact" class="btn-outline">
+        <span data-lang="en">Free Consultation</span>
+        <span data-lang="de">Kostenlose Beratung</span>
+        <span data-lang="it">Consulenza gratuita</span>
+        <span data-lang="fr">Consultation gratuite</span>
+        <span data-lang="ru">Бесплатная консультация</span>
+      </a>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div class="stat-card"><div class="num">5000+</div><div class="label">Happy Guests</div></div>
+    <div class="stat-card"><div class="num">40+</div><div class="label">Tour Packages</div></div>
+    <div class="stat-card"><div class="num">15</div><div class="label">Years of Excellence</div></div>
+  </div>
+  <div class="scroll-hint">
+    <span data-lang="en">Explore</span><span data-lang="de">Entdecken</span><span data-lang="it">Esplora</span><span data-lang="fr">Explorer</span><span data-lang="ru">Далее</span>
+    <div class="scroll-arrow"></div>
+  </div>
+</section>
+
+<!-- DESTINATIONS -->
+<section class="section" id="destinations">
+  <div class="section-header">
+    <div class="section-eyebrow">
+      <span data-lang="en">Where We Take You</span>
+      <span data-lang="de">Wohin wir Sie führen</span>
+      <span data-lang="it">Dove ti portiamo</span>
+      <span data-lang="fr">Où nous vous emmenons</span>
+      <span data-lang="ru">Наши направления</span>
+    </div>
+    <h2>
+      <span data-lang="en">Egypt's Most <span>Extraordinary</span> Destinations</span>
+      <span data-lang="de">Ägyptens außergewöhnlichste <span>Reiseziele</span></span>
+      <span data-lang="it">Le più <span>straordinarie</span> destinazioni dell'Egitto</span>
+      <span data-lang="fr">Les destinations les plus <span>extraordinaires</span> d'Égypte</span>
+      <span data-lang="ru">Самые <span>удивительные</span> места Египта</span>
+    </h2>
+    <p class="section-sub">
+      <span data-lang="en">Four iconic regions, each with a unique soul — from Red Sea paradise to Nile Valley wonders.</span>
+      <span data-lang="de">Vier ikonische Regionen, jede mit einer einzigartigen Seele — vom Roten Meer bis zu den Wundern des Niltals.</span>
+      <span data-lang="it">Quattro regioni iconiche, ognuna con un'anima unica — dal Mar Rosso alle meraviglie della Valle del Nilo.</span>
+      <span data-lang="fr">Quatre régions emblématiques, chacune avec une âme unique — de la mer Rouge aux merveilles de la vallée du Nil.</span>
+      <span data-lang="ru">Четыре знаковых региона — от Красного моря до чудес долины Нила.</span>
+    </p>
+  </div>
+  <div class="dest-grid">
+    <div class="dest-card">
+      <div class="dest-bg bg-hurghada"></div>
+      <div class="dest-emoji">🐠🌊🤿</div>
+      <div class="dest-overlay"></div>
+      <div class="dest-info">
+        <div class="dest-flag">🌊</div>
+        <div class="dest-name">Hurghada</div>
+        <div class="dest-desc">
+          <span data-lang="en">Egypt's Red Sea jewel — pristine beaches, world-class diving, vibrant nightlife and desert adventures await.</span>
+          <span data-lang="de">Ägyptens Rotes Meer Juwel — makellose Strände, erstklassiges Tauchen und Wüstenabenteuer.</span>
+          <span data-lang="it">Il gioiello del Mar Rosso egiziano — spiagge incontaminate, immersioni di livello mondiale e avventure nel deserto.</span>
+          <span data-lang="fr">Le joyau de la mer Rouge — plages immaculées, plongée de classe mondiale et aventures dans le désert.</span>
+          <span data-lang="ru">Жемчужина Красного моря — нетронутые пляжи, дайвинг мирового класса и пустынные приключения.</span>
+        </div>
+        <span class="dest-tag">
+          <span data-lang="en">Red Sea Paradise</span>
+          <span data-lang="de">Rotes Meer Paradies</span>
+          <span data-lang="it">Paradiso del Mar Rosso</span>
+          <span data-lang="fr">Paradis de la mer Rouge</span>
+          <span data-lang="ru">Рай Красного моря</span>
+        </span>
+      </div>
+    </div>
+    <div class="dest-card">
+      <div class="dest-bg bg-cairo"></div>
+      <div class="dest-emoji">🏛️🐪</div>
+      <div class="dest-overlay"></div>
+      <div class="dest-info">
+        <div class="dest-flag">🏛️</div>
+        <div class="dest-name">Cairo</div>
+        <div class="dest-desc">
+          <span data-lang="en">The Great Pyramids, Sphinx, Egyptian Museum — the cradle of civilization awaits your discovery.</span>
+          <span data-lang="de">Große Pyramiden, Sphinx, Ägyptisches Museum — die Wiege der Zivilisation wartet auf Sie.</span>
+          <span data-lang="it">Le Grandi Piramidi, la Sfinge, il Museo Egizio — la culla della civiltà ti aspetta.</span>
+          <span data-lang="fr">Les Grandes Pyramides, le Sphinx, le Musée Égyptien — le berceau de la civilisation vous attend.</span>
+          <span data-lang="ru">Великие пирамиды, Сфинкс, Египетский музей — колыбель цивилизации ждёт вас.</span>
+        </div>
+        <span class="dest-tag">
+          <span data-lang="en">Ancient Wonders</span>
+          <span data-lang="de">Antike Wunder</span>
+          <span data-lang="it">Meraviglie antiche</span>
+          <span data-lang="fr">Merveilles antiques</span>
+          <span data-lang="ru">Древние чудеса</span>
+        </span>
+      </div>
+    </div>
+    <div class="dest-card">
+      <div class="dest-bg bg-luxor"></div>
+      <div class="dest-emoji">🏺⚱️</div>
+      <div class="dest-overlay"></div>
+      <div class="dest-info">
+        <div class="dest-flag">🏺</div>
+        <div class="dest-name">Luxor</div>
+        <div class="dest-desc">
+          <span data-lang="en">Karnak Temple, Valley of the Kings, Nile cruises — the world's greatest open-air museum.</span>
+          <span data-lang="de">Karnak-Tempel, Tal der Könige, Nilkreuzfahrten — das größte Freilichtmuseum der Welt.</span>
+          <span data-lang="it">Tempio di Karnak, Valle dei Re, crociere sul Nilo — il più grande museo all'aperto del mondo.</span>
+          <span data-lang="fr">Temple de Karnak, Vallée des Rois — le plus grand musée à ciel ouvert du monde.</span>
+          <span data-lang="ru">Храм Карнак, Долина царей — величайший открытый музей мира.</span>
+        </div>
+        <span class="dest-tag">
+          <span data-lang="en">Pharaonic Glory</span>
+          <span data-lang="de">Pharaonische Pracht</span>
+          <span data-lang="it">Gloria faraonica</span>
+          <span data-lang="fr">Gloire pharaonique</span>
+          <span data-lang="ru">Величие фараонов</span>
+        </span>
+      </div>
+    </div>
+    <div class="dest-card">
+      <div class="dest-bg bg-sharm"></div>
+      <div class="dest-emoji">🐢🌴</div>
+      <div class="dest-overlay"></div>
+      <div class="dest-info">
+        <div class="dest-flag">🌴</div>
+        <div class="dest-name">Sharm El-Sheikh</div>
+        <div class="dest-desc">
+          <span data-lang="en">Ras Mohamed National Park, world-famous reefs, luxury resorts — the ultimate Red Sea retreat.</span>
+          <span data-lang="de">Ras Mohamed Nationalpark, weltberühmte Riffe, Luxusresorts — das ultimative Rote Meer Resort.</span>
+          <span data-lang="it">Parco Nazionale Ras Mohamed, reef di fama mondiale, resort di lusso.</span>
+          <span data-lang="fr">Parc national Ras Mohamed, récifs mondialement connus, resorts de luxe.</span>
+          <span data-lang="ru">Национальный парк Рас Мухаммад, всемирно известные рифы, люкс-курорты.</span>
+        </div>
+        <span class="dest-tag">
+          <span data-lang="en">Dive Paradise</span>
+          <span data-lang="de">Tauchparadies</span>
+          <span data-lang="it">Paradiso del diving</span>
+          <span data-lang="fr">Paradis de la plongée</span>
+          <span data-lang="ru">Рай дайвинга</span>
+        </span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TRIPS -->
+<section class="section trips-bg" id="trips">
+  <div class="section-header">
+    <div class="section-eyebrow">
+      <span data-lang="en">Curated Experiences</span>
+      <span data-lang="de">Kuratierte Erlebnisse</span>
+      <span data-lang="it">Esperienze curate</span>
+      <span data-lang="fr">Expériences sélectionnées</span>
+      <span data-lang="ru">Избранные маршруты</span>
+    </div>
+    <h2>
+      <span data-lang="en">Our Most <span>Popular Tours</span></span>
+      <span data-lang="de">Unsere beliebtesten <span>Touren</span></span>
+      <span data-lang="it">I nostri <span>tour più popolari</span></span>
+      <span data-lang="fr">Nos <span>circuits les plus populaires</span></span>
+      <span data-lang="ru">Наши самые <span>популярные туры</span></span>
+    </h2>
+    <p class="section-sub">
+      <span data-lang="en">From day trips to multi-week adventures — every SeeDora tour is crafted with passion, safety and luxury in mind.</span>
+      <span data-lang="de">Von Tagesausflügen bis zu mehrwöchigen Abenteuern — jede SeeDora-Tour wird mit Leidenschaft und Luxus gestaltet.</span>
+      <span data-lang="it">Da gite di un giorno ad avventure multi-settimana — ogni tour SeeDora è realizzato con passione e lusso.</span>
+      <span data-lang="fr">Des excursions d'une journée aux aventures de plusieurs semaines — chaque circuit SeeDora est créé avec passion et luxe.</span>
+      <span data-lang="ru">От однодневных экскурсий до многонедельных приключений — каждый тур SeeDora создан с любовью и заботой о вашем комфорте.</span>
+    </p>
+  </div>
+
+  <div class="trips-tabs">
+    <button class="trip-tab active" onclick="filterTrips('all',this)">
+      <span data-lang="en">All Tours</span><span data-lang="de">Alle Touren</span><span data-lang="it">Tutti i tour</span><span data-lang="fr">Tous</span><span data-lang="ru">Все</span>
+    </button>
+    <button class="trip-tab" onclick="filterTrips('sea',this)">
+      <span data-lang="en">Sea & Diving</span><span data-lang="de">Meer & Tauchen</span><span data-lang="it">Mare & Immersioni</span><span data-lang="fr">Mer & Plongée</span><span data-lang="ru">Море & Дайвинг</span>
+    </button>
+    <button class="trip-tab" onclick="filterTrips('culture',this)">
+      <span data-lang="en">Culture & History</span><span data-lang="de">Kultur & Geschichte</span><span data-lang="it">Cultura & Storia</span><span data-lang="fr">Culture & Histoire</span><span data-lang="ru">Культура</span>
+    </button>
+    <button class="trip-tab" onclick="filterTrips('desert',this)">
+      <span data-lang="en">Desert Adventure</span><span data-lang="de">Wüstenabenteuer</span><span data-lang="it">Avventura nel deserto</span><span data-lang="fr">Aventure désert</span><span data-lang="ru">Пустыня</span>
+    </button>
+  </div>
+
+  <div class="trips-grid" id="tripsGrid">
+
+    <!-- SNORKELING TRIP -->
+    <div class="trip-card" data-category="sea">
+      <div class="trip-img" style="background:linear-gradient(135deg,#063a5c,#1a9b8a)">
+        <div class="trip-img-emoji">🤿</div>
+        <span class="trip-duration">
+          <span data-lang="en">Full Day</span><span data-lang="de">Ganztägig</span><span data-lang="it">Giornata intera</span><span data-lang="fr">Journée entière</span><span data-lang="ru">Полный день</span>
+        </span>
+        <span class="trip-badge">⭐ BESTSELLER</span>
+      </div>
+      <div class="trip-body">
+        <div class="trip-cat">Hurghada · Sea & Diving</div>
+        <div class="trip-name">
+          <span data-lang="en">Snorkeling Safari – Orange Bay</span>
+          <span data-lang="de">Schnorchel-Safari – Orange Bay</span>
+          <span data-lang="it">Safari di snorkeling – Orange Bay</span>
+          <span data-lang="fr">Safari snorkeling – Orange Bay</span>
+          <span data-lang="ru">Снорклинг-сафари – Orange Bay</span>
+        </div>
+        <div class="trip-desc">
+          <span data-lang="en">Sail to the stunning Orange Bay Island, snorkel among vibrant coral reefs, enjoy a BBQ lunch on a pristine beach.</span>
+          <span data-lang="de">Fahrt zur atemberaubenden Orange Bay Insel, Schnorcheln zwischen lebhaften Korallenriffen, BBQ-Mittagessen am Strand.</span>
+          <span data-lang="it">Vela verso la splendida Orange Bay, snorkeling tra barriere coralline vivaci, pranzo BBQ su una spiaggia incontaminata.</span>
+          <span data-lang="fr">Naviguez vers Orange Bay, snorkeling parmi les récifs coralliens, déjeuner BBQ sur une plage immaculée.</span>
+          <span data-lang="ru">Плавание к острову Orange Bay, снорклинг среди кораллов, барбекю-обед на пляже.</span>
+        </div>
+        <div class="trip-includes">
+          <span class="trip-tag">🚌 Transfer</span>
+          <span class="trip-tag">🥗 Lunch</span>
+          <span class="trip-tag">🤿 Equipment</span>
+        </div>
+        <div class="trip-footer">
+          <div class="trip-price">
+            <div class="from">FROM</div>
+            <div class="amount">€25</div>
+            <div class="per">/person</div>
+          </div>
+          <button class="btn-book" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
+            <span data-lang="en">Book</span><span data-lang="de">Buchen</span><span data-lang="it">Prenota</span><span data-lang="fr">Réserver</span><span data-lang="ru">Забронировать</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PYRAMIDS CAIRO -->
+    <div class="trip-card" data-category="culture">
+      <div class="trip-img" style="background:linear-gradient(135deg,#8b6914,#c9a84c)">
+        <div class="trip-img-emoji">🏛️</div>
+        <span class="trip-duration">
+          <span data-lang="en">2 Days</span><span data-lang="de">2 Tage</span><span data-lang="it">2 Giorni</span><span data-lang="fr">2 Jours</span><span data-lang="ru">2 дня</span>
+        </span>
+      </div>
+      <div class="trip-body">
+        <div class="trip-cat">Cairo · Culture & History</div>
+        <div class="trip-name">
+          <span data-lang="en">Pyramids & Cairo Explorer</span>
+          <span data-lang="de">Pyramiden & Kairo Erkundung</span>
+          <span data-lang="it">Piramidi & Esplorazione del Cairo</span>
+          <span data-lang="fr">Pyramides & Exploration du Caire</span>
+          <span data-lang="ru">Пирамиды и Каир</span>
+        </div>
+        <div class="trip-desc">
+          <span data-lang="en">Visit the Great Pyramids of Giza, the Sphinx, Egyptian Museum with Tutankhamun's treasures and Khan El Khalili bazaar.</span>
+          <span data-lang="de">Besuche die Großen Pyramiden von Gizeh, die Sphinx, das Ägyptische Museum mit Tutanchamuns Schätzen und den Khan El Khalili Basar.</span>
+          <span data-lang="it">Visita le Grandi Piramidi di Giza, la Sfinge, il Museo Egizio con i tesori di Tutankhamen e il bazar Khan El Khalili.</span>
+          <span data-lang="fr">Visitez les Grandes Pyramides de Gizeh, le Sphinx, le Musée Égyptien avec les trésors de Toutankhamon.</span>
+          <span data-lang="ru">Посетите Великие пирамиды Гизы, Сфинкс, Египетский музей с сокровищами Тутанхамона.</span>
+        </div>
+        <div class="trip-includes">
+          <span class="trip-tag">✈️ Flights</span>
+          <span class="trip-tag">🏨 Hotel</span>
+          <span class="trip-tag">🎟️ Tickets</span>
+          <span class="trip-tag">🧭 Guide</span>
+        </div>
+        <div class="trip-footer">
+          <div class="trip-price">
+            <div class="from">FROM</div>
+            <div class="amount">€180</div>
+            <div class="per">/person</div>
+          </div>
+          <button class="btn-book" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
+            <span data-lang="en">Book</span><span data-lang="de">Buchen</span><span data-lang="it">Prenota</span><span data-lang="fr">Réserver</span><span data-lang="ru">Забронировать</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- LUXOR TOUR -->
+    <div class="trip-card" data-category="culture">
+      <div class="trip-img" style="background:linear-gradient(135deg,#2e4a1a,#5a7c2a)">
+        <div class="trip-img-emoji">🏺</div>
+        <span class="trip-duration">
+          <span data-lang="en">2 Days</span><span data-lang="de">2 Tage</span><span data-lang="it">2 Giorni</span><span data-lang="fr">2 Jours</span><span data-lang="ru">2 дня</span>
+        </span>
+      </div>
+      <div class="trip-body">
+        <div class="trip-cat">Luxor · Pharaonic Heritage</div>
+        <div class="trip-name">
+          <span data-lang="en">Luxor – Valley of Kings & Karnak</span>
+          <span data-lang="de">Luxor – Tal der Könige & Karnak</span>
+          <span data-lang="it">Luxor – Valle dei Re & Karnak</span>
+          <span data-lang="fr">Louxor – Vallée des Rois & Karnak</span>
+          <span data-lang="ru">Луксор – Долина царей и Карнак</span>
+        </div>
+        <div class="trip-desc">
+          <span data-lang="en">Explore the Valley of the Kings, Hatshepsut Temple, Karnak and Luxor Temples — Egypt's most magnificent ancient sites.</span>
+          <span data-lang="de">Erkunde das Tal der Könige, den Hatschepsut-Tempel, Karnak und Luxor-Tempel.</span>
+          <span data-lang="it">Esplora la Valle dei Re, il Tempio di Hatshepsut, Karnak e il Tempio di Luxor.</span>
+          <span data-lang="fr">Explorez la Vallée des Rois, le Temple d'Hatchepsout, Karnak et le Temple de Louxor.</span>
+          <span data-lang="ru">Долина царей, храм Хатшепсут, храмы Карнак и Луксор.</span>
+        </div>
+        <div class="trip-includes">
+          <span class="trip-tag">✈️ Flights</span>
+          <span class="trip-tag">🏨 Hotel</span>
+          <span class="trip-tag">🧭 Guide</span>
+        </div>
+        <div class="trip-footer">
+          <div class="trip-price">
+            <div class="from">FROM</div>
+            <div class="amount">€160</div>
+            <div class="per">/person</div>
+          </div>
+          <button class="btn-book" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
+            <span data-lang="en">Book</span><span data-lang="de">Buchen</span><span data-lang="it">Prenota</span><span data-lang="fr">Réserver</span><span data-lang="ru">Забронировать</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- QUAD BIKE DESERT -->
+    <div class="trip-card" data-category="desert">
+      <div class="trip-img" style="background:linear-gradient(135deg,#7c4a14,#e8820a)">
+        <div class="trip-img-emoji">🏜️</div>
+        <span class="trip-duration">
+          <span data-lang="en">Half Day</span><span data-lang="de">Halbtägig</span><span data-lang="it">Mezza giornata</span><span data-lang="fr">Demi-journée</span><span data-lang="ru">Полдня</span>
+        </span>
+        <span class="trip-badge">🔥 HOT</span>
+      </div>
+      <div class="trip-body">
+        <div class="trip-cat">Hurghada · Desert Adventure</div>
+        <div class="trip-name">
+          <span data-lang="en">Quad Bike & Bedouin Village</span>
+          <span data-lang="de">Quad Bike & Beduinendorf</span>
+          <span data-lang="it">Quad Bike & Villaggio Beduino</span>
+          <span data-lang="fr">Quad & Village Bédouin</span>
+          <span data-lang="ru">Квадроциклы и деревня бедуинов</span>
+        </div>
+        <div class="trip-desc">
+          <span data-lang="en">Ride quad bikes through golden dunes, visit a traditional Bedouin village, enjoy camel riding and a stunning sunset.</span>
+          <span data-lang="de">Quad Bike durch goldene Dünen, Besuch eines traditionellen Beduinendorfes, Kamelreiten und atemberaubender Sonnenuntergang.</span>
+          <span data-lang="it">Giro in quad tra le dune dorate, visita a un villaggio beduino tradizionale, giro in cammello e tramonto spettacolare.</span>
+          <span data-lang="fr">Quad à travers les dunes dorées, village bédouin traditionnel, balade en chameau et coucher de soleil.</span>
+          <span data-lang="ru">Квадроциклы по золотым дюнам, деревня бедуинов, верблюды и закат.</span>
+        </div>
+        <div class="trip-includes">
+          <span class="trip-tag">🚌 Transfer</span>
+          <span class="trip-tag">🍵 Bedouin Tea</span>
+          <span class="trip-tag">🐪 Camel Ride</span>
+        </div>
+        <div class="trip-footer">
+          <div class="trip-price">
+            <div class="from">FROM</div>
+            <div class="amount">€30</div>
+            <div class="per">/person</div>
+          </div>
+          <button class="btn-book" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
+            <span data-lang="en">Book</span><span data-lang="de">Buchen</span><span data-lang="it">Prenota</span><span data-lang="fr">Réserver</span><span data-lang="ru">Забронировать</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- NILE CRUISE -->
+    <div class="trip-card" data-category="culture">
+      <div class="trip-img" style="background:linear-gradient(135deg,#063a5c,#c9a84c)">
+        <div class="trip-img-emoji">🛳️</div>
+        <span class="trip-duration">
+          <span data-lang="en">5 Days</span><span data-lang="de">5 Tage</span><span data-lang="it">5 Giorni</span><span data-lang="fr">5 Jours</span><span data-lang="ru">5 дней</span>
+        </span>
+        <span class="trip-badge">⭐ LUXURY</span>
+      </div>
+      <div class="trip-body">
+        <div class="trip-cat">Nile Valley · Premium Experience</div>
+        <div class="trip-name">
+          <span data-lang="en">Luxury Nile Cruise – Luxor to Aswan</span>
+          <span data-lang="de">Luxus Nilkreuzfahrt – Luxor nach Assuan</span>
+          <span data-lang="it">Crociera di lusso sul Nilo – Luxor ad Assuan</span>
+          <span data-lang="fr">Croisière Nil de luxe – Louxor à Assouan</span>
+          <span data-lang="ru">Круиз по Нилу – Луксор–Асуан</span>
+        </div>
+        <div class="trip-desc">
+          <span data-lang="en">Sail the legendary Nile on a 5-star cruise ship, visiting Edfu, Kom Ombo, Aswan Dam and the magnificent Abu Simbel temples.</span>
+          <span data-lang="de">Segeln Sie auf dem legendären Nil auf einem 5-Sterne-Kreuzfahrtschiff, Edfu, Kom Ombo, Assuan-Staudamm und die prächtigen Tempel von Abu Simbel.</span>
+          <span data-lang="it">Naviga sul leggendario Nilo su una nave da crociera 5 stelle, visitando Edfu, Kom Ombo, la diga di Assuan e i magnifici templi di Abu Simbel.</span>
+          <span data-lang="fr">Naviguez sur le légendaire Nil sur un bateau de croisière 5 étoiles, Edfou, Kom Ombo, barrage d'Assouan et les temples d'Abou Simbel.</span>
+          <span data-lang="ru">5-звёздочный круиз по Нилу: Эдфу, Ком Омбо, Асуанская плотина и храмы Абу-Симбел.</span>
+        </div>
+        <div class="trip-includes">
+          <span class="trip-tag">🛳️ Cruise</span>
+          <span class="trip-tag">🍽️ Full Board</span>
+          <span class="trip-tag">🎟️ All Tickets</span>
+          <span class="trip-tag">🧭 Guide</span>
+        </div>
+        <div class="trip-footer">
+          <div class="trip-price">
+            <div class="from">FROM</div>
+            <div class="amount">€490</div>
+            <div class="per">/person</div>
+          </div>
+          <button class="btn-book" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
+            <span data-lang="en">Book</span><span data-lang="de">Buchen</span><span data-lang="it">Prenota</span><span data-lang="fr">Réserver</span><span data-lang="ru">Забронировать</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIVING TRIP -->
+    <div class="trip-card" data-category="sea">
+      <div class="trip-img" style="background:linear-gradient(135deg,#0a3a5c,#1a9b70)">
+        <div class="trip-img-emoji">🐠</div>
+        <span class="trip-duration">
+          <span data-lang="en">Full Day</span><span data-lang="de">Ganztägig</span><span data-lang="it">Giornata</span><span data-lang="fr">Journée</span><span data-lang="ru">Полный день</span>
+        </span>
+      </div>
+      <div class="trip-body">
+        <div class="trip-cat">Hurghada / Sharm · Diving</div>
+        <div class="trip-name">
+          <span data-lang="en">Scuba Diving – Ras Mohamed</span>
+          <span data-lang="de">Tauchen – Ras Mohamed</span>
+          <span data-lang="it">Immersioni – Ras Mohamed</span>
+          <span data-lang="fr">Plongée – Ras Mohamed</span>
+          <span data-lang="ru">Дайвинг – Рас Мухаммад</span>
+        </div>
+        <div class="trip-desc">
+          <span data-lang="en">Dive in one of the world's top 10 dive sites with PADI certified instructors. Beginners and advanced divers welcome.</span>
+          <span data-lang="de">Tauchen Sie an einem der weltweit Top 10 Tauchplätze mit PADI-zertifizierten Instrukteuren. Anfänger und Fortgeschrittene willkommen.</span>
+          <span data-lang="it">Immersioni in uno dei 10 migliori siti di immersione al mondo con istruttori certificati PADI.</span>
+          <span data-lang="fr">Plongez dans l'un des 10 meilleurs sites de plongée au monde avec des instructeurs certifiés PADI.</span>
+          <span data-lang="ru">Дайвинг на одном из топ-10 мест для погружений в мире с инструкторами PADI.</span>
+        </div>
+        <div class="trip-includes">
+          <span class="trip-tag">🚌 Transfer</span>
+          <span class="trip-tag">🤿 Equipment</span>
+          <span class="trip-tag">👨‍🏫 Instructor</span>
+          <span class="trip-tag">🥗 Lunch</span>
+        </div>
+        <div class="trip-footer">
+          <div class="trip-price">
+            <div class="from">FROM</div>
+            <div class="amount">€55</div>
+            <div class="per">/person</div>
+          </div>
+          <button class="btn-book" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
+            <span data-lang="en">Book</span><span data-lang="de">Buchen</span><span data-lang="it">Prenota</span><span data-lang="fr">Réserver</span><span data-lang="ru">Забронировать</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SHARM EXCURSION -->
+    <div class="trip-card" data-category="culture">
+      <div class="trip-img" style="background:linear-gradient(135deg,#1a4060,#2e7d4f)">
+        <div class="trip-img-emoji">⛪</div>
+        <span class="trip-duration">
+          <span data-lang="en">1 Day</span><span data-lang="de">1 Tag</span><span data-lang="it">1 Giorno</span><span data-lang="fr">1 Jour</span><span data-lang="ru">1 день</span>
+        </span>
+      </div>
+      <div class="trip-body">
+        <div class="trip-cat">Sharm El-Sheikh · Sightseeing</div>
+        <div class="trip-name">
+          <span data-lang="en">Mount Sinai Sunrise & St Catherine</span>
+          <span data-lang="de">Sinai-Sonnenaufgang & St. Katharina</span>
+          <span data-lang="it">Alba sul Sinai & Santa Caterina</span>
+          <span data-lang="fr">Lever du soleil sur le Sinaï & Ste Catherine</span>
+          <span data-lang="ru">Рассвет на Синае и монастырь Св. Екатерины</span>
+        </div>
+        <div class="trip-desc">
+          <span data-lang="en">Climb Mount Sinai by night, witness a breathtaking sunrise, visit the ancient monastery of St. Catherine — a spiritual journey.</span>
+          <span data-lang="de">Besteigen Sie den Berg Sinai bei Nacht, erleben Sie einen atemberaubenden Sonnenaufgang, besuchen Sie das antike Kloster der heiligen Katharina.</span>
+          <span data-lang="it">Scalate il Monte Sinai di notte, assistete a un'alba mozzafiato, visitate l'antico monastero di Santa Caterina.</span>
+          <span data-lang="fr">Gravissez le Mont Sinaï de nuit, admirez un lever de soleil époustouflant, visitez le monastère de Sainte-Catherine.</span>
+          <span data-lang="ru">Ночной подъём на гору Синай, рассвет, монастырь Св. Екатерины.</span>
+        </div>
+        <div class="trip-includes">
+          <span class="trip-tag">🚌 Transfer</span>
+          <span class="trip-tag">🔦 Torch</span>
+          <span class="trip-tag">🧭 Guide</span>
+        </div>
+        <div class="trip-footer">
+          <div class="trip-price">
+            <div class="from">FROM</div>
+            <div class="amount">€45</div>
+            <div class="per">/person</div>
+          </div>
+          <button class="btn-book" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
+            <span data-lang="en">Book</span><span data-lang="de">Buchen</span><span data-lang="it">Prenota</span><span data-lang="fr">Réserver</span><span data-lang="ru">Забронировать</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUBMARINE -->
+    <div class="trip-card" data-category="sea">
+      <div class="trip-img" style="background:linear-gradient(135deg,#0d3050,#0a6e8a)">
+        <div class="trip-img-emoji">🌊</div>
+        <span class="trip-duration">3h</span>
+      </div>
+      <div class="trip-body">
+        <div class="trip-cat">Hurghada · Sea Experience</div>
+        <div class="trip-name">
+          <span data-lang="en">Glass-Bottom Boat & Submarine</span>
+          <span data-lang="de">Glasbodenboot & U-Boot</span>
+          <span data-lang="it">Barca con fondo di vetro & Sottomarino</span>
+          <span data-lang="fr">Bateau à fond de verre & Sous-marin</span>
+          <span data-lang="ru">Лодка со стеклянным дном и подводная лодка</span>
+        </div>
+        <div class="trip-desc">
+          <span data-lang="en">Experience the magical underwater world without getting wet — perfect for families. Observe exotic fish and corals in crystal clear water.</span>
+          <span data-lang="de">Erleben Sie die magische Unterwasserwelt, ohne nass zu werden — perfekt für Familien. Exotische Fische und Korallen beobachten.</span>
+          <span data-lang="it">Vivi il magico mondo sottomarino senza bagnarti — perfetto per le famiglie.</span>
+          <span data-lang="fr">Vivez le monde sous-marin sans vous mouiller — parfait pour les familles.</span>
+          <span data-lang="ru">Подводный мир без намокания — идеально для семей. Экзотические рыбы и кораллы.</span>
+        </div>
+        <div class="trip-includes">
+          <span class="trip-tag">🚌 Transfer</span>
+          <span class="trip-tag">👨‍👩‍👧 Family OK</span>
+        </div>
+        <div class="trip-footer">
+          <div class="trip-price">
+            <div class="from">FROM</div>
+            <div class="amount">€20</div>
+            <div class="per">/person</div>
+          </div>
+          <button class="btn-book" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
+            <span data-lang="en">Book</span><span data-lang="de">Buchen</span><span data-lang="it">Prenota</span><span data-lang="fr">Réserver</span><span data-lang="ru">Забронировать</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ATV SAFARI -->
+    <div class="trip-card" data-category="desert">
+      <div class="trip-img" style="background:linear-gradient(135deg,#5c3a0a,#a05c14)">
+        <div class="trip-img-emoji">🌅</div>
+        <span class="trip-duration">
+          <span data-lang="en">Evening</span><span data-lang="de">Abends</span><span data-lang="it">Serale</span><span data-lang="fr">Soirée</span><span data-lang="ru">Вечер</span>
+        </span>
+      </div>
+      <div class="trip-body">
+        <div class="trip-cat">Hurghada · Desert Night</div>
+        <div class="trip-name">
+          <span data-lang="en">Desert Safari & Stargazing Dinner</span>
+          <span data-lang="de">Wüsten-Safari & Sternenhimmel-Dinner</span>
+          <span data-lang="it">Safari nel deserto & Cena sotto le stelle</span>
+          <span data-lang="fr">Safari désert & Dîner sous les étoiles</span>
+          <span data-lang="ru">Пустынное сафари и ужин под звёздами</span>
+        </div>
+        <div class="trip-desc">
+          <span data-lang="en">Sunset 4x4 desert safari, traditional Bedouin dinner under a billion stars, with live music and belly dance show.</span>
+          <span data-lang="de">Sonnenuntergang 4x4 Wüsten-Safari, traditionelles Beduinen-Dinner unter einem Millionen-Sternen-Himmel mit Live-Musik.</span>
+          <span data-lang="it">Safari nel deserto al tramonto in 4x4, cena beduina tradizionale sotto un cielo stellato, musica dal vivo.</span>
+          <span data-lang="fr">Safari 4x4 au coucher du soleil, dîner bédouin sous les étoiles, musique live et danse orientale.</span>
+          <span data-lang="ru">Сафари на 4x4 на закате, традиционный бедуинский ужин под звёздами, живая музыка и танец живота.</span>
+        </div>
+        <div class="trip-includes">
+          <span class="trip-tag">🚌 Transfer</span>
+          <span class="trip-tag">🍽️ Dinner</span>
+          <span class="trip-tag">🎵 Show</span>
+        </div>
+        <div class="trip-footer">
+          <div class="trip-price">
+            <div class="from">FROM</div>
+            <div class="amount">€35</div>
+            <div class="per">/person</div>
+          </div>
+          <button class="btn-book" onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">
+            <span data-lang="en">Book</span><span data-lang="de">Buchen</span><span data-lang="it">Prenota</span><span data-lang="fr">Réserver</span><span data-lang="ru">Забронировать</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- WHY SEEDORA -->
+<section class="section" id="why">
+  <div class="section-header">
+    <div class="section-eyebrow">
+      <span data-lang="en">Why Travel With Us</span>
+      <span data-lang="de">Warum mit uns reisen</span>
+      <span data-lang="it">Perché viaggiare con noi</span>
+      <span data-lang="fr">Pourquoi voyager avec nous</span>
+      <span data-lang="ru">Почему SeeDora</span>
+    </div>
+    <h2>
+      <span data-lang="en">The <span>SeeDora</span> Difference</span>
+      <span data-lang="de">Der <span>SeeDora</span>-Unterschied</span>
+      <span data-lang="it">La differenza <span>SeeDora</span></span>
+      <span data-lang="fr">La différence <span>SeeDora</span></span>
+      <span data-lang="ru">Отличие <span>SeeDora</span></span>
+    </h2>
+    <p class="section-sub">
+      <span data-lang="en">15 years of crafting extraordinary Egyptian experiences for European travellers with safety, luxury and authenticity.</span>
+      <span data-lang="de">15 Jahre außergewöhnliche ägyptische Erlebnisse für europäische Reisende — Sicherheit, Luxus und Authentizität.</span>
+      <span data-lang="it">15 anni di esperienze egiziane straordinarie per i viaggiatori europei — sicurezza, lusso e autenticità.</span>
+      <span data-lang="fr">15 ans d'expériences égyptiennes extraordinaires pour les voyageurs européens — sécurité, luxe et authenticité.</span>
+      <span data-lang="ru">15 лет незабываемых путешествий по Египту для европейских туристов — безопасность, роскошь и подлинность.</span>
+    </p>
+  </div>
+  <div class="why-grid">
+    <div class="why-card">
+      <div class="why-icon">🌍</div>
+      <div class="why-title">
+        <span data-lang="en">5 Languages</span><span data-lang="de">5 Sprachen</span><span data-lang="it">5 Lingue</span><span data-lang="fr">5 Langues</span><span data-lang="ru">5 языков</span>
+      </div>
+      <div class="why-text">
+        <span data-lang="en">Our multilingual guides speak English, German, Italian, French and Russian — you'll always feel at home.</span>
+        <span data-lang="de">Unsere mehrsprachigen Guides sprechen Englisch, Deutsch, Italienisch, Französisch und Russisch.</span>
+        <span data-lang="it">Le nostre guide multilingue parlano inglese, tedesco, italiano, francese e russo.</span>
+        <span data-lang="fr">Nos guides multilingues parlent anglais, allemand, italien, français et russe.</span>
+        <span data-lang="ru">Наши гиды говорят на английском, немецком, итальянском, французском и русском.</span>
+      </div>
+    </div>
+    <div class="why-card">
+      <div class="why-icon">🛡️</div>
+      <div class="why-title">
+        <span data-lang="en">100% Safe Travel</span><span data-lang="de">100% Sicheres Reisen</span><span data-lang="it">Viaggio 100% sicuro</span><span data-lang="fr">Voyage 100% sûr</span><span data-lang="ru">100% безопасность</span>
+      </div>
+      <div class="why-text">
+        <span data-lang="en">Licensed and insured, with Egypt Tourism Authority approval. Your safety is our absolute priority on every trip.</span>
+        <span data-lang="de">Lizenziert und versichert, mit Genehmigung der Ägyptischen Tourismusbehörde. Ihre Sicherheit hat oberste Priorität.</span>
+        <span data-lang="it">Autorizzato e assicurato, con approvazione dell'Egyptian Tourism Authority. La tua sicurezza è la nostra assoluta priorità.</span>
+        <span data-lang="fr">Agréé et assuré, avec l'approbation de l'Autorité du tourisme égyptien. Votre sécurité est notre priorité absolue.</span>
+        <span data-lang="ru">Лицензированы и застрахованы. Ваша безопасность — наш абсолютный приоритет.</span>
+      </div>
+    </div>
+    <div class="why-card">
+      <div class="why-icon">💎</div>
+      <div class="why-title">
+        <span data-lang="en">Luxury Standards</span><span data-lang="de">Luxusstandards</span><span data-lang="it">Standard di lusso</span><span data-lang="fr">Standards de luxe</span><span data-lang="ru">Высокие стандарты</span>
+      </div>
+      <div class="why-text">
+        <span data-lang="en">Premium transport, 4 & 5-star hotels, gourmet experiences — because you deserve nothing but the best.</span>
+        <span data-lang="de">Premiumtransport, 4- und 5-Sterne-Hotels, Gourmet-Erlebnisse — weil Sie nur das Beste verdienen.</span>
+        <span data-lang="it">Trasporto premium, hotel 4 e 5 stelle, esperienze gourmet — perché meriti solo il meglio.</span>
+        <span data-lang="fr">Transport premium, hôtels 4 et 5 étoiles, expériences gastronomiques — parce que vous méritez le meilleur.</span>
+        <span data-lang="ru">Премиум-транспорт, отели 4–5 звёзд, гастрономия — только лучшее.</span>
+      </div>
+    </div>
+    <div class="why-card">
+      <div class="why-icon">🤝</div>
+      <div class="why-title">
+        <span data-lang="en">Best Price Guarantee</span><span data-lang="de">Bestpreisgarantie</span><span data-lang="it">Garanzia miglior prezzo</span><span data-lang="fr">Garantie meilleur prix</span><span data-lang="ru">Гарантия лучшей цены</span>
+      </div>
+      <div class="why-text">
+        <span data-lang="en">We match or beat any comparable offer. Transparent pricing — no hidden fees, no surprises. Just exceptional value.</span>
+        <span data-lang="de">Wir gleichen jedes vergleichbare Angebot an oder unterbieten es. Transparente Preise — keine versteckten Gebühren.</span>
+        <span data-lang="it">Pareggiamo o superiamo qualsiasi offerta comparabile. Prezzi trasparenti — nessuna commissione nascosta.</span>
+        <span data-lang="fr">Nous égalons ou battons toute offre comparable. Prix transparents — aucun frais caché.</span>
+        <span data-lang="ru">Сравняем или побьём любое аналогичное предложение. Прозрачные цены — никаких скрытых сборов.</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="section testimonials-bg">
+  <div class="section-header">
+    <div class="section-eyebrow">
+      <span data-lang="en">Traveller Stories</span>
+      <span data-lang="de">Reiseerlebnisse</span>
+      <span data-lang="it">Storie di viaggiatori</span>
+      <span data-lang="fr">Témoignages</span>
+      <span data-lang="ru">Отзывы</span>
+    </div>
+    <h2 style="color:var(--white)">
+      <span data-lang="en">What Our Guests <span>Say</span></span>
+      <span data-lang="de">Was unsere Gäste <span>sagen</span></span>
+      <span data-lang="it">Cosa dicono i nostri <span>ospiti</span></span>
+      <span data-lang="fr">Ce que disent nos <span>clients</span></span>
+      <span data-lang="ru">Что говорят наши <span>гости</span></span>
+    </h2>
+  </div>
+  <div class="testimonials-grid">
+    <div class="test-card">
+      <div class="stars">★★★★★</div>
+      <div class="test-text">
+        <span data-lang="en">"SeeDora gave us the holiday of a lifetime. The Pyramids trip was perfectly organized, our guide spoke excellent German and took care of everything. Absolutely magical!"</span>
+        <span data-lang="de">"SeeDora hat uns den Urlaub unseres Lebens geschenkt. Die Pyramidentour war perfekt organisiert, unser Guide sprach ausgezeichnetes Deutsch. Absolut magisch!"</span>
+        <span data-lang="it">"SeeDora ci ha regalato la vacanza di una vita. Il viaggio alle Piramidi era perfettamente organizzato. Assolutamente magico!"</span>
+        <span data-lang="fr">"SeeDora nous a offert des vacances inoubliables. L'excursion aux Pyramides était parfaitement organisée. Absolument magique!"</span>
+        <span data-lang="ru">"SeeDora подарила нам отпуск всей жизни. Поездка к пирамидам была безупречно организована. Абсолютно волшебно!"</span>
+      </div>
+      <div class="test-author">
+        <div class="test-avatar">🇩🇪</div>
+        <div><div class="test-name">Klaus & Monika W.</div><div class="test-country">Munich, Germany</div></div>
+      </div>
+    </div>
+    <div class="test-card">
+      <div class="stars">★★★★★</div>
+      <div class="test-text">
+        <span data-lang="en">"The Nile Cruise was beyond expectations. Waking up every morning to see ancient temples from the boat deck — simply unforgettable. Thank you SeeDora!"</span>
+        <span data-lang="de">"Die Nilkreuzfahrt hat alle Erwartungen übertroffen. Jeden Morgen antike Tempel vom Bootsdeck sehen — einfach unvergesslich. Danke SeeDora!"</span>
+        <span data-lang="it">"La crociera sul Nilo ha superato ogni aspettativa. Svegliarsi ogni mattina vedendo templi antichi dal ponte della nave — semplicemente indimenticabile."</span>
+        <span data-lang="fr">"La croisière sur le Nil a dépassé toutes nos attentes. Se réveiller chaque matin face aux temples antiques — tout simplement inoubliable."</span>
+        <span data-lang="ru">"Круиз по Нилу превзошёл все ожидания. Просыпаться каждое утро и видеть древние храмы с палубы — незабываемо!"</span>
+      </div>
+      <div class="test-author">
+        <div class="test-avatar">🇮🇹</div>
+        <div><div class="test-name">Marco & Giulia F.</div><div class="test-country">Milan, Italy</div></div>
+      </div>
+    </div>
+    <div class="test-card">
+      <div class="stars">★★★★★</div>
+      <div class="test-text">
+        <span data-lang="en">"The desert safari was incredible — quad bikes, camels, Bedouin dinner under the stars. Our Russian-speaking guide made us feel totally at ease. 10/10!"</span>
+        <span data-lang="de">"Die Wüsten-Safari war unglaublich — Quad-Bikes, Kamele, Beduinen-Dinner unter Sternen. Unser deutschsprachiger Guide war fantastisch. 10/10!"</span>
+        <span data-lang="it">"Il safari nel deserto è stato incredibile — quad, cammelli, cena beduina sotto le stelle. La nostra guida parlava perfettamente italiano. 10/10!"</span>
+        <span data-lang="fr">"Le safari désert était incroyable — quads, chameaux, dîner bédouin sous les étoiles. Notre guide francophone était fantastique. 10/10!"</span>
+        <span data-lang="ru">"Пустынное сафари было невероятным — квадроциклы, верблюды, бедуинский ужин под звёздами. Наш гид говорил по-русски. 10/10!"</span>
+      </div>
+      <div class="test-author">
+        <div class="test-avatar">🇷🇺</div>
+        <div><div class="test-name">Natalia & Dmitri K.</div><div class="test-country">Moscow, Russia</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="section" id="contact">
+  <div class="contact-wrapper">
+    <div class="contact-left">
+      <div class="section-eyebrow" style="justify-content:flex-start">
+        <span data-lang="en">Get In Touch</span>
+        <span data-lang="de">Kontakt aufnehmen</span>
+        <span data-lang="it">Contattaci</span>
+        <span data-lang="fr">Contactez-nous</span>
+        <span data-lang="ru">Связаться с нами</span>
+      </div>
+      <h2>
+        <span data-lang="en">Ready to Start Your <span>Egyptian</span> Adventure?</span>
+        <span data-lang="de">Bereit für Ihr <span>ägyptisches</span> Abenteuer?</span>
+        <span data-lang="it">Pronto per la tua avventura <span>egiziana</span>?</span>
+        <span data-lang="fr">Prêt pour votre aventure <span>égyptienne</span>?</span>
+        <span data-lang="ru">Готовы начать <span>египетское</span> приключение?</span>
+      </h2>
+      <p>
+        <span data-lang="en">Contact us today for a free, personalised itinerary. We respond within 2 hours in your language.</span>
+        <span data-lang="de">Kontaktieren Sie uns noch heute für ein kostenloses, persönliches Reiseprogramm. Wir antworten innerhalb von 2 Stunden in Ihrer Sprache.</span>
+        <span data-lang="it">Contattaci oggi per un itinerario personalizzato gratuito. Rispondiamo entro 2 ore nella tua lingua.</span>
+        <span data-lang="fr">Contactez-nous pour un itinéraire gratuit et personnalisé. Nous répondons dans les 2 heures dans votre langue.</span>
+        <span data-lang="ru">Свяжитесь с нами сегодня для бесплатного персонального маршрута. Ответим в течение 2 часов на вашем языке.</span>
+      </p>
+      <div class="contact-items">
+        <div class="contact-item">
+          <div class="icon icon-phone">📞</div>
+          <div>
+            <div class="detail">WhatsApp / Call</div>
+            <div class="value"><a href="tel:+201001296641">+20 100 129 6641</a></div>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="icon icon-email">✉️</div>
+          <div>
+            <div class="detail">Email</div>
+            <div class="value"><a href="mailto:info@sedoratravel.com">info@sedoratravel.com</a></div>
+          </div>
+        </div>
+        <div class="contact-item">
+          <div class="icon icon-map">📍</div>
+          <div>
+            <div class="detail">Base</div>
+            <div class="value">Hurghada, Red Sea, Egypt 🇪🇬</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="contact-right">
+      <h3>
+        <span data-lang="en">Send Us a Message</span>
+        <span data-lang="de">Schreiben Sie uns</span>
+        <span data-lang="it">Inviaci un messaggio</span>
+        <span data-lang="fr">Envoyez-nous un message</span>
+        <span data-lang="ru">Написать нам</span>
+      </h3>
+      <div class="form-row">
+        <div class="form-group">
+          <label>
+            <span data-lang="en">First Name</span><span data-lang="de">Vorname</span><span data-lang="it">Nome</span><span data-lang="fr">Prénom</span><span data-lang="ru">Имя</span>
+          </label>
+          <input type="text" placeholder="Maria">
+        </div>
+        <div class="form-group">
+          <label>
+            <span data-lang="en">Last Name</span><span data-lang="de">Nachname</span><span data-lang="it">Cognome</span><span data-lang="fr">Nom</span><span data-lang="ru">Фамилия</span>
+          </label>
+          <input type="text" placeholder="Schmidt">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" placeholder="maria@email.com">
+      </div>
+      <div class="form-group">
+        <label>
+          <span data-lang="en">Interested In</span><span data-lang="de">Interesse an</span><span data-lang="it">Interessato a</span><span data-lang="fr">Intéressé par</span><span data-lang="ru">Интересует</span>
+        </label>
+        <select>
+          <option>
+            <span data-lang="en">Hurghada – Sea & Diving</span>
+          </option>
+          <option>Cairo – Pyramids & Culture</option>
+          <option>Luxor – Nile Valley</option>
+          <option>Sharm El-Sheikh</option>
+          <option>Desert Safari</option>
+          <option>Nile Cruise</option>
+          <option>Custom Package</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>
+          <span data-lang="en">Message</span><span data-lang="de">Nachricht</span><span data-lang="it">Messaggio</span><span data-lang="fr">Message</span><span data-lang="ru">Сообщение</span>
+        </label>
+        <textarea placeholder="Tell us your travel dates, group size and wishes..."></textarea>
+      </div>
+      <button class="btn-submit" onclick="handleSubmit(this)">
+        <span data-lang="en">Send Message →</span>
+        <span data-lang="de">Nachricht senden →</span>
+        <span data-lang="it">Invia messaggio →</span>
+        <span data-lang="fr">Envoyer le message →</span>
+        <span data-lang="ru">Отправить →</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <div class="logo-text">
+        <span class="brand">SeeDora Travel</span>
+        <span class="tagline">✦ EGYPT · LUXURY EXPERIENCES ✦</span>
+      </div>
+      <p class="footer-desc">
+        <span data-lang="en">Crafting extraordinary Egyptian journeys for European travellers since 2010. Your trusted partner for Red Sea paradise, Nile wonders and desert adventures.</span>
+        <span data-lang="de">Seit 2010 außergewöhnliche ägyptische Reisen für europäische Reisende. Ihr zuverlässiger Partner für Rotes Meer, Nil und Wüstenabenteuer.</span>
+        <span data-lang="it">Dal 2010 creiamo viaggi egiziani straordinari per viaggiatori europei. Il vostro partner di fiducia per il Mar Rosso, il Nilo e le avventure nel deserto.</span>
+        <span data-lang="fr">Depuis 2010, nous créons des voyages égyptiens extraordinaires pour les voyageurs européens.</span>
+        <span data-lang="ru">С 2010 года создаём незабываемые путешествия по Египту для европейских туристов.</span>
+      </p>
+      <div class="social-links">
+        <a class="social-link" href="#">📘</a>
+        <a class="social-link" href="#">📸</a>
+        <a class="social-link" href="#">🐦</a>
+        <a class="social-link" href="#">💼</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>
+        <span data-lang="en">Destinations</span><span data-lang="de">Reiseziele</span><span data-lang="it">Destinazioni</span><span data-lang="fr">Destinations</span><span data-lang="ru">Направления</span>
+      </h4>
+      <ul>
+        <li><a href="#destinations">🌊 Hurghada</a></li>
+        <li><a href="#destinations">🏛️ Cairo & Pyramids</a></li>
+        <li><a href="#destinations">🏺 Luxor & Aswan</a></li>
+        <li><a href="#destinations">🌴 Sharm El-Sheikh</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>
+        <span data-lang="en">Tours</span><span data-lang="de">Touren</span><span data-lang="it">Tour</span><span data-lang="fr">Circuits</span><span data-lang="ru">Туры</span>
+      </h4>
+      <ul>
+        <li><a href="#trips">🤿 Diving & Snorkeling</a></li>
+        <li><a href="#trips">🏜️ Desert Safari</a></li>
+        <li><a href="#trips">🛳️ Nile Cruise</a></li>
+        <li><a href="#trips">🏛️ Cultural Tours</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>
+        <span data-lang="en">Contact</span><span data-lang="de">Kontakt</span><span data-lang="it">Contatti</span><span data-lang="fr">Contact</span><span data-lang="ru">Контакты</span>
+      </h4>
+      <ul>
+        <li><a href="tel:+201001296641">📞 +20 100 129 6641</a></li>
+        <li><a href="mailto:info@sedoratravel.com">✉️ info@sedoratravel.com</a></li>
+        <li><a href="#">📍 Hurghada, Egypt</a></li>
+        <li><a href="#">💬 WhatsApp Us</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 SeeDora Travel. All rights reserved.</span>
+    <span>
+      <a href="#">Privacy Policy</a> · <a href="#">Terms</a> · 
+      <span data-lang="en">Made with ❤️ in Egypt</span>
+      <span data-lang="de">Mit ❤️ in Ägypten gemacht</span>
+      <span data-lang="it">Fatto con ❤️ in Egitto</span>
+      <span data-lang="fr">Fait avec ❤️ en Égypte</span>
+      <span data-lang="ru">Создано с ❤️ в Египте</span>
+    </span>
+  </div>
+</footer>
+
+<script>
+// Language switcher
+function setLang(lang, btn) {
+  document.getElementById('bodyEl').className = 'lang-' + lang;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// Trip filter
+function filterTrips(cat, btn) {
+  document.querySelectorAll('.trip-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.trip-card').forEach(card => {
+    if (cat === 'all' || card.dataset.category === cat) {
+      card.style.display = 'block';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+
+// Form submit mock
+function handleSubmit(btn) {
+  const orig = btn.innerHTML;
+  btn.innerHTML = '✓ Message Sent!';
+  btn.style.background = 'linear-gradient(135deg, var(--grass), var(--grass-light))';
+  setTimeout(() => {
+    btn.innerHTML = orig;
+    btn.style.background = '';
+  }, 3000);
+}
+
+// Scroll animations
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.style.opacity = '1';
+      entry.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.dest-card, .trip-card, .why-card, .test-card').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(30px)';
+  el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+  observer.observe(el);
+});
+</script>
+</body>
+</html>

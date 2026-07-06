@@ -1,0 +1,36 @@
+{
+  "common": {
+    "dashboard": "Dashboard",
+    "posts": "Beiträge",
+    "bookings": "Buchungen",
+    "users": "Benutzer",
+    "logout": "Abmelden",
+    "login": "Anmelden",
+    "email": "E-Mail",
+    "password": "Passwort",
+    "submit": "Absenden",
+    "create": "Neu erstellen",
+    "edit": "Bearbeiten",
+    "delete": "Löschen",
+    "save": "Speichern",
+    "cancel": "Abbrechen",
+    "actions": "Aktionen"
+  },
+  "dashboard": {
+    "totalPosts": "Gesamtbeiträge",
+    "totalBookings": "Gesamtbuchungen"
+  },
+  "posts": {
+    "title": "Tourliste",
+    "tourName": "Tourname",
+    "status": "Status",
+    "date": "Datum"
+  },
+  "bookings": {
+    "title": "Buchungsliste",
+    "customer": "Kunde",
+    "tour": "Tour",
+    "amount": "Betrag",
+    "status": "Status"
+  }
+}
