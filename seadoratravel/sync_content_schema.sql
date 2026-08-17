@@ -1,0 +1,12 @@
+ALTER TABLE "Tours" ADD COLUMN IF NOT EXISTS "Packages" jsonb DEFAULT '[]'::jsonb;
+ALTER TABLE "Tours" ADD COLUMN IF NOT EXISTS "PickupTimeType" text DEFAULT 'FixedSlots';
+ALTER TABLE "Tours" ADD COLUMN IF NOT EXISTS "AvailablePickupTimes" jsonb DEFAULT '["15:00 - 15:30 (Sunset)", "10:00 - 10:30 (Morning)"]'::jsonb;
+ALTER TABLE "Tours" ADD COLUMN IF NOT EXISTS "Highlights" jsonb DEFAULT '{}'::jsonb;
+ALTER TABLE "Tours" ADD COLUMN IF NOT EXISTS "Itinerary" jsonb DEFAULT '[]'::jsonb;
+ALTER TABLE "Tours" ADD COLUMN IF NOT EXISTS "Inclusions" jsonb DEFAULT '{}'::jsonb;
+ALTER TABLE "Tours" ADD COLUMN IF NOT EXISTS "Exclusions" jsonb DEFAULT '{}'::jsonb;
+ALTER TABLE "Tours" ADD COLUMN IF NOT EXISTS "ImportantInformation" jsonb DEFAULT '{}'::jsonb;
+ALTER TABLE "Tours" ADD COLUMN IF NOT EXISTS "Faqs" jsonb DEFAULT '[]'::jsonb;
+ALTER TABLE "Tours" ADD COLUMN IF NOT EXISTS "Addons" jsonb DEFAULT '[]'::jsonb;
+ALTER TABLE "Tours" ADD COLUMN IF NOT EXISTS "OriginalPrice" numeric NULL;
+ALTER TABLE "Tours" ADD COLUMN IF NOT EXISTS "DiscountPercentage" numeric NULL;

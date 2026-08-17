@@ -1,31 +1,266 @@
 @import "tailwindcss";
 
-* { margin: 0; padding: 0; box-sizing: border-box; }
-html { scroll-behavior: smooth; }
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,900;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Jost:wght@300;400;500;600;700&display=swap');
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   THEME FOUNDATIONS: Midnight Opulence
+   ───────────────────────────────────────────────────────────────────────────── */
 :root {
-  --sea: #0a5c8a;
-  --sea-light: #1a8bc4;
+  /* Core Colors */
   --sea-deep: #063a5c;
-  --sun: #e8820a;
-  --sun-light: #f5a435;
-  --sun-pale: #fdf3e0;
-  --grass: #2e7d4f;
-  --grass-light: #4caf78;
+  --dark: #0d1f2d;
   --gold: #c9a84c;
   --cream: #faf7f2;
-  --dark: #0d1f2d;
-  --text: #2a3f4f;
-  --muted: #6b8a9a;
   --white: #ffffff;
+  
+  /* Supporting Tones */
+  --sea: #0a5c8a;
+  --sea-light: #1a8bc4;
+  --grass: #2e7d4f;
+  --muted: #6b8a9a;
+  --sun-pale: #fdf3e0;
+
+  /* Typography */
+  --font-serif-display: 'Playfair Display', Georgia, serif;
+  --font-serif-accent: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Jost', system-ui, -apple-system, sans-serif;
+
+  /* Animation Tokens (Emil Kowalski / Apple Physics) */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --transition-fast: 150ms;
+  --transition-normal: 250ms;
+  --transition-slow: 400ms;
+  --transition-image: 600ms;
 }
 
+* { margin: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
 body {
-  font-family: 'Jost', sans-serif;
+  font-family: var(--font-sans);
   background: var(--cream);
-  color: var(--text);
+  color: var(--dark);
   overflow-x: hidden;
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   TYPOGRAPHY
+   ───────────────────────────────────────────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6, .font-serif-display {
+  font-family: var(--font-serif-display);
+}
+
+.font-serif-accent {
+  font-family: var(--font-serif-accent);
+}
+
+.hero-title {
+  font-family: var(--font-serif-display);
+  font-size: clamp(3rem, 7vw, 5.5rem);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  color: var(--white);
+  text-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.section-title {
+  font-family: var(--font-serif-display);
+  font-size: clamp(2.5rem, 4.5vw, 3.5rem);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--sea-deep);
+}
+
+.subheading-italic {
+  font-family: var(--font-serif-accent);
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  font-weight: 500;
+  font-style: italic;
+  line-height: 1.4;
+  letter-spacing: 0.01em;
+  color: var(--gold);
+}
+
+.label-eyebrow {
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.25em;
+  color: var(--gold);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   PREMIUM COMPONENTS
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Primary Luxury Button */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 32px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--white);
+  background: var(--sea-deep);
+  border: 1px solid var(--sea-deep);
+  border-radius: 9999px; /* Pill shape for elegance */
+  cursor: pointer;
+  transition: transform var(--transition-fast) var(--ease-out), 
+              background-color var(--transition-normal) ease,
+              box-shadow var(--transition-normal) ease;
+}
+
+.btn-primary:hover {
+  background: var(--gold);
+  border-color: var(--gold);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -6px rgba(201, 168, 76, 0.5);
+  color: var(--dark);
+}
+
+.btn-primary:active {
+  transform: scale(0.97);
+  box-shadow: 0 4px 12px -4px rgba(201, 168, 76, 0.4);
+}
+
+/* Secondary Outline Button */
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 13px 30px;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--sea-deep);
+  background: transparent;
+  border: 1px solid rgba(6, 58, 92, 0.3);
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: transform var(--transition-fast) var(--ease-out), 
+              border-color var(--transition-normal) ease,
+              background-color var(--transition-normal) ease;
+}
+
+.btn-secondary:hover {
+  border-color: var(--sea-deep);
+  background: var(--sea-deep);
+  color: var(--white);
+  transform: translateY(-2px);
+}
+
+.btn-secondary:active {
+  transform: scale(0.97);
+}
+
+/* Premium Pressable Elements (Any generic button/card) */
+.premium-press {
+  transition: transform var(--transition-fast) var(--ease-out);
+}
+.premium-press:active {
+  transform: scale(0.97);
+}
+
+/* Hover Underline */
+.hover-underline {
+  position: relative;
+  text-decoration: none;
+  color: inherit;
+  transition: color var(--transition-normal) ease;
+}
+.hover-underline::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--gold);
+  transition: width var(--transition-normal) var(--ease-out);
+}
+.hover-underline:hover {
+  color: var(--gold);
+}
+.hover-underline:hover::after {
+  width: 100%;
+}
+
+/* Glassmorphism Classes */
+.glass-panel {
+  background: rgba(250, 247, 242, 0.7);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 16px 40px -12px rgba(6, 58, 92, 0.1);
+}
+.glass-panel-dark {
+  background: rgba(13, 31, 45, 0.85);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(201, 168, 76, 0.15);
+  box-shadow: 0 16px 40px -12px rgba(0, 0, 0, 0.3);
+  color: var(--white);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────────
+   MOTION & ANIMATION SYSTEM
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Scroll Reveal Fade Up */
+.reveal-fade-up {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity var(--transition-slow) var(--ease-out),
+              transform var(--transition-slow) var(--ease-out);
+  will-change: transform, opacity;
+}
+.reveal-fade-up.in-view {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger Children */
+.stagger-container.in-view > *:nth-child(1) { transition-delay: 40ms; }
+.stagger-container.in-view > *:nth-child(2) { transition-delay: 80ms; }
+.stagger-container.in-view > *:nth-child(3) { transition-delay: 120ms; }
+.stagger-container.in-view > *:nth-child(4) { transition-delay: 160ms; }
+.stagger-container.in-view > *:nth-child(5) { transition-delay: 200ms; }
+.stagger-container.in-view > *:nth-child(n+6) { transition-delay: 240ms; }
+
+/* Modal/Drawer Spring */
+.modal-enter-active, .modal-leave-active {
+  transition: opacity var(--transition-normal) var(--ease-out);
+}
+.modal-enter-from, .modal-leave-to {
+  opacity: 0;
+}
+.modal-content-enter-active, .modal-content-leave-active {
+  transition: transform var(--transition-normal) var(--ease-out), opacity var(--transition-normal) var(--ease-out);
+}
+.modal-content-enter-from, .modal-content-leave-to {
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+    transform: none !important;
+  }
+  .reveal-fade-up { opacity: 1 !important; }
 }

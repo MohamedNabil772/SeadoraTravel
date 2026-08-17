@@ -1,18 +1,19 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
-using Seadora.Booking.Domain.Entities;
 using Seadora.Booking.Application.Common.Interfaces;
+using Seadora.Booking.Application.DTOs;
+using Mapster;
 
 namespace Seadora.Booking.Application.Feedbacks.Queries.GetFeedbacks;
 
-public record GetFeedbacksQuery(Guid? TourId, bool IncludeHidden = false) : IRequest<List<Feedback>>;
+public record GetFeedbacksQuery(Guid? TourId, bool IncludeHidden = false) : IRequest<List<FeedbackDto>>;
 
-public class GetFeedbacksQueryHandler : IRequestHandler<GetFeedbacksQuery, List<Feedback>>
+public class GetFeedbacksQueryHandler : IRequestHandler<GetFeedbacksQuery, List<FeedbackDto>>
 {
     private readonly IBookingDbContext _context;
 
@@ -21,7 +22,7 @@ public class GetFeedbacksQueryHandler : IRequestHandler<GetFeedbacksQuery, List<
         _context = context;
     }
 
-    public async Task<List<Feedback>> Handle(GetFeedbacksQuery request, CancellationToken cancellationToken)
+    public async Task<List<FeedbackDto>> Handle(GetFeedbacksQuery request, CancellationToken cancellationToken)
     {
         var query = _context.Feedbacks.AsQueryable();
 
@@ -35,6 +36,7 @@ public class GetFeedbacksQueryHandler : IRequestHandler<GetFeedbacksQuery, List<
             query = query.Where(f => f.TourId == request.TourId.Value);
         }
 
-        return await query.OrderByDescending(f => f.CreatedAt).ToListAsync(cancellationToken);
+        var feedbacks = await query.OrderByDescending(f => f.CreatedAt).ToListAsync(cancellationToken);
+        return feedbacks.Adapt<List<FeedbackDto>>();
     }
 }

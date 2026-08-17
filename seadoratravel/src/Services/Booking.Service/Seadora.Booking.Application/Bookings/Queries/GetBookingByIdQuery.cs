@@ -4,12 +4,15 @@ using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Seadora.Booking.Application.Common.Interfaces;
+using Seadora.Booking.Application.DTOs;
+using Mapster;
+using System.Collections.Generic;
 
 namespace Seadora.Booking.Application.Bookings.Queries;
 
-public record GetBookingByIdQuery(Guid Id) : IRequest<Seadora.Booking.Domain.Entities.Booking>;
+public record GetBookingByIdQuery(Guid Id) : IRequest<BookingDto>;
 
-public class GetBookingByIdQueryHandler : IRequestHandler<GetBookingByIdQuery, Seadora.Booking.Domain.Entities.Booking>
+public class GetBookingByIdQueryHandler : IRequestHandler<GetBookingByIdQuery, BookingDto>
 {
     private readonly IBookingDbContext _context;
 
@@ -18,7 +21,7 @@ public class GetBookingByIdQueryHandler : IRequestHandler<GetBookingByIdQuery, S
         _context = context;
     }
 
-    public async Task<Seadora.Booking.Domain.Entities.Booking> Handle(GetBookingByIdQuery request, CancellationToken cancellationToken)
+    public async Task<BookingDto> Handle(GetBookingByIdQuery request, CancellationToken cancellationToken)
     {
         var booking = await _context.Bookings
             .FirstOrDefaultAsync(b => b.Id == request.Id, cancellationToken);
@@ -28,6 +31,6 @@ public class GetBookingByIdQueryHandler : IRequestHandler<GetBookingByIdQuery, S
             throw new KeyNotFoundException("Booking not found.");
         }
 
-        return booking;
+        return booking.Adapt<BookingDto>();
     }
 }

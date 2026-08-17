@@ -22,9 +22,12 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
         services.AddDbContext<SeadoraIdentityDbContext>(options =>
+        {
             options.UseNpgsql(
                 configuration.GetConnectionString("DefaultConnection"),
-                b => b.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null))); // Using In-Memory for now as per FixMaster patterns often used in dev
+                b => b.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null));
+            options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+        });
 
         services.AddIdentity<User, Role>()
             .AddEntityFrameworkStores<SeadoraIdentityDbContext>()

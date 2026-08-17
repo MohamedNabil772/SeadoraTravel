@@ -5,9 +5,11 @@ import it from './locales/it.json'
 import de from './locales/de.json'
 import ru from './locales/ru.json'
 
+const savedLang = localStorage.getItem('seadora_lang') || 'en'
+
 const i18n = createI18n({
   legacy: false,
-  locale: 'en',
+  locale: savedLang,
   fallbackLocale: 'en',
   messages: {
     en,

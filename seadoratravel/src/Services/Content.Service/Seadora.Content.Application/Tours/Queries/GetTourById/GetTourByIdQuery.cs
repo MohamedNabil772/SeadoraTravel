@@ -1,16 +1,17 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Seadora.Content.Application.Common.Interfaces;
-using Seadora.Content.Domain.Entities;
+using Seadora.Content.Application.DTOs;
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Mapster;
 
 namespace Seadora.Content.Application.Tours.Queries.GetTourById;
 
-public record GetTourByIdQuery(Guid Id) : IRequest<Tour>;
+public record GetTourByIdQuery(Guid Id) : IRequest<TourDto?>;
 
-public class GetTourByIdQueryHandler : IRequestHandler<GetTourByIdQuery, Tour>
+public class GetTourByIdQueryHandler : IRequestHandler<GetTourByIdQuery, TourDto?>
 {
     private readonly IContentDbContext _context;
 
@@ -19,18 +20,9 @@ public class GetTourByIdQueryHandler : IRequestHandler<GetTourByIdQuery, Tour>
         _context = context;
     }
 
-    public async Task<Tour> Handle(GetTourByIdQuery request, CancellationToken cancellationToken)
+    public async Task<TourDto?> Handle(GetTourByIdQuery request, CancellationToken cancellationToken)
     {
-        var tour = await _context.Tours
-            .Include(t => t.Destination)
-            .Include(t => t.Category)
-            .FirstOrDefaultAsync(t => t.Id == request.Id, cancellationToken);
-
-        if (tour == null)
-        {
-            throw new KeyNotFoundException("Tour not found.");
-        }
-
-        return tour;
+        var tour = await _context.Tours.AsNoTracking().FirstOrDefaultAsync(t => t.Id == request.Id, cancellationToken);
+        return tour?.Adapt<TourDto>();
     }
 }

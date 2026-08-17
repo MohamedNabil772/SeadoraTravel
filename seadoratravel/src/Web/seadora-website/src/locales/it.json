@@ -3,20 +3,41 @@
     "destinations": "Destinazioni",
     "tours": "Tour",
     "aboutUs": "Chi siamo",
-    "bookNow": "Prenota ora"
+    "bookNow": "Prenota ora",
+    "explore": "Esplora",
+    "login": "Accedi"
   },
   "hero": {
-    "badge": "✦ Premium Egypt Travel Since 2010",
-    "title": "Scopri <em>l'Egitto</em><br>come mai prima",
-    "description": "Dalle acque cristalline di Hurghada alle meraviglie antiche di Luxor — SeeDora crea viaggi straordinari attraverso i paesaggi più mozzafiato dell'Egitto.",
-    "exploreBtn": "Esplora i tour",
-    "consultationBtn": "Consulenza gratuita",
+    "badge": "Spedizioni di Lusso nel Mar Rosso e Faraoniche",
+    "title": "Scopri <em>l'Egitto</em><br>Dove ogni onda racconta una storia",
+    "description": "Dalle lagune turchesi di Hurghada ai templi dorati di Luxor e alla Valle del Nilo — SeeDora crea viaggi VIP privati su misura curati alla perfezione.",
+    "exploreBtn": "Esplora i viaggi",
+    "browseAll": "Tutti i tour",
+    "vipConcierge": "Concierge VIP 24/7",
+    "searchPlaceholder": "Cerca tour VIP, immersioni, crociere sul Nilo, piramidi...",
+    "searchBtn": "Esplora",
+    "trending": "Spedizioni in evidenza:",
+    "eliteStandard": "Standard Élite Mar Rosso",
+    "handcrafted": "Esperienze di Lusso su Misura",
+    "bestPriceGuarantee": "Miglior Prezzo & Qualità Garantiti",
+    "officialPermits": "Permessi Ufficiali del Ministero del Turismo",
+    "freeCancellation": "Cancellazione gratuita disponibile",
+    "satisfactionRate": "di soddisfazione dei viaggiatori in tutto il mondo",
+    "scroll": "Esplora",
+    "quickTags": {
+      "diving": "Immersioni Mar Rosso",
+      "luxor": "Luxor Antica",
+      "cairo": "Piramidi & Il Cairo",
+      "cruise": "Crociere di Lusso sul Nilo",
+      "safari": "Safari nel Deserto"
+    },
     "stats": {
       "guests": "Ospiti felici",
-      "packages": "Pacchetti turistici",
-      "years": "Anni di eccellenza"
-    },
-    "scroll": "Esplora"
+      "packages": "Tour curati",
+      "years": "Anni di eccellenza",
+      "experience": "Anni di viaggi di lusso",
+      "yearsLabel": "Anni"
+    }
   },
   "destinations": {
     "eyebrow": "Dove ti portiamo",
@@ -152,7 +173,7 @@
       "placeholders": {
         "firstName": "Maria",
         "lastName": "Rossi",
-        "email": "maria@email.com",
+        "email": "maria{'@'}email.com",
         "message": "Dicci le tue date di viaggio, la dimensione del gruppo e i desideri..."
       },
       "interests": {
@@ -177,5 +198,308 @@
     "privacy": "Informativa sulla privacy",
     "terms": "Termini e condizioni",
     "madeWith": "Fatto con ❤️ in Egitto"
+  },
+  "bookingPopup": {
+    "header": "Prenota la tua Esperienza",
+    "subHeader": "Prenotazione diretta con l'operatore con conferma immediata",
+    "leadTraveler": "Viaggiatore Principale & WhatsApp",
+    "whatsappVoucher": "Voucher WhatsApp",
+    "fullName": "Nome Completo",
+    "email": "Indirizzo Email",
+    "whatsapp": "Numero WhatsApp",
+    "hotelPickup": "Dettagli Prelievo & Orari",
+    "hotelName": "Nome Hotel / Resort",
+    "roomNumber": "Numero Camera",
+    "pickupTime": "Orario di Prelievo / Partenza",
+    "passportPhoto": "Foto Passaporto / Carta d'Identità",
+    "securityPermits": "Permessi di Sicurezza",
+    "uploadPassport": "Carica Foto Passaporto / Carta d'Identità",
+    "supportsFormats": "Supporta JPG, PNG, WEBP o PDF fino a 10MB",
+    "encryptedWarning": "Crittografato e strettamente richiesto dalla Guardia Costiera",
+    "specialRequests": "Richieste Speciali / Note Dietetiche",
+    "specialRequestsPlaceholder": "Opzionale: Pasti vegetariani, anniversario...",
+    "bookingSummary": "Riepilogo Prenotazione",
+    "travelDate": "Data di Viaggio",
+    "guests": "Ospiti",
+    "adults": "Adulti",
+    "children": "Bambini",
+    "taxesIncluded": "Tasse & Commissioni Incluse",
+    "totalToPay": "Totale da Pagare",
+    "confirmReservation": "Conferma Prenotazione",
+    "confirming": "Conferma della prenotazione...",
+    "sslEncrypted": "Crittografia SSL a 256 bit · Cancellazione gratuita fino a 24 ore prima",
+    "whatsappNotice": "Il tuo voucher digitale e gli aggiornamenti del transfer saranno inviati direttamente a questo numero WhatsApp.",
+    "preferredTime": "Orario di Prelievo Preferito (Flessibile / Personalizzato)",
+    "freeChoice": "Scelta Libera",
+    "flexibleNotice": "Seleziona qualsiasi orario tra le 07:00 e le 20:00 per la tua partenza personalizzata.",
+    "conciergeCoordination": "Coordinamento Prelievo Concierge",
+    "conciergeNotice": "L'orario esatto verrà calcolato in base alla posizione del tuo hotel e inviato su WhatsApp.",
+    "readyForPermit": "Pronto per il permesso",
+    "uploadingDoc": "Caricamento documento...",
+    "addons": "Servizi Aggiuntivi",
+    "selected": "selezionato/i"
+  },
+  "validation": {
+    "fullNameRequired": "Il nome completo è obbligatorio",
+    "emailInvalid": "Inserisci un indirizzo email valido",
+    "whatsappInvalid": "Inserisci un numero WhatsApp valido",
+    "hotelNameRequired": "Il nome dell'hotel / resort è obbligatorio",
+    "passportRequired": "La foto del passaporto / carta d'identità è richiesta per i permessi della guardia costiera"
+  },
+  "toast": {
+    "bookingConfirmed": "Prenotazione confermata! È stato inviato un voucher di conferma su WhatsApp.",
+    "formErrors": "Si prega di correggere gli errori nel modulo.",
+    "tourSaved": "Tour salvato nei preferiti",
+    "linkCopied": "Link copiato negli appunti"
+  },
+  "placeholders": {
+    "fullName": "es. Mario Rossi",
+    "email": "nome{'@'}esempio.it",
+    "whatsapp": "+39 312 3456789",
+    "hotelName": "es. Resort Sunrise",
+    "roomNumber": "es. 2104",
+    "specialRequests": "Opzionale: Pasti vegetariani, celebrazioni...",
+    "search": "Cerca tour...",
+    "date": "Seleziona data",
+    "message": "Raccontaci le tue esigenze..."
+  },
+  "tours": {
+    "travelDate": "Data di Viaggio"
+  },
+  "concierge": {
+    "welcome": "Benvenuti a Seadora Travel! Come posso aiutarvi oggi con la vostra esperienza di lusso sul Mar Rosso?",
+    "prompts": {
+      "recommend": "🏝️ Consiglia i migliori tour",
+      "weekend": "📅 Disponibilità per il fine settimana",
+      "payment": "💳 Pagamento e cancellazione",
+      "passport": "🛂 Perché caricare il passaporto?"
+    },
+    "recommendationFallback": "Ecco alcune delle nostre esperienze più votate che ti consiglio:",
+    "connectionError": "Mi dispiace, ho problemi di connessione al server.",
+    "processingError": "Mi dispiace, si è verificato un errore durante l'elaborazione della tua richiesta.",
+    "title": "Concierge Seadora",
+    "online": "In linea",
+    "copied": "Copiato!",
+    "bookNow": "Prenota Ora",
+    "placeholder": "Messaggio al Concierge..."
+  },
+  "calendar": {
+    "weekdays": {
+      "mo": "Lu",
+      "tu": "Ma",
+      "we": "Me",
+      "th": "Gi",
+      "fr": "Ve",
+      "sa": "Sa",
+      "su": "Do"
+    },
+    "subtitle": "Seleziona la data di partenza",
+    "prevMonth": "Mese precedente",
+    "nextMonth": "Mese successivo",
+    "available": "Disponibile",
+    "limitedSpots": "Posti limitati",
+    "spotsLeft": "Solo {count} posti rimasti",
+    "soldOut": "Esaurito",
+    "pastDate": "Data passata",
+    "legendAvailable": "Disponibile",
+    "legendLimited": "Posti limitati",
+    "legendSoldOut": "Esaurito",
+    "selectDates": "Seleziona date",
+    "clear": "Cancella",
+    "resetDate": "Reimposta data",
+    "done": "Fatto",
+    "today": "Oggi",
+    "tomorrow": "Domani",
+    "weekend": "Fine settimana",
+    "nextWeek": "Prossima settimana",
+    "thisWeekend": "Questo fine settimana",
+    "next7Days": "Prossimi 7 giorni",
+    "next14Days": "Prossimi 14 giorni",
+    "thisMonth": "Questo mese",
+    "allDates": "Tutte le date",
+    "departureDate": "Data di partenza"
+  },
+  "booking": {
+    "tabs": {
+      "step1": "Fase 1 (Date e Ospiti)",
+      "step2": "Fase 2 (Informazioni e Hotel)",
+      "step3": "Fase 3 (Conferma e Voucher)"
+    },
+    "labels": {
+      "fullName": "Nome Completo",
+      "email": "E-mail",
+      "whatsapp": "WhatsApp/Telefono",
+      "hotelNameRoom": "Nome dell'Hotel e Camera",
+      "specialRequests": "Richieste Speciali / Dietetiche",
+      "guideLanguage": "Lingua della Guida",
+      "hotelPickup": "Prelievo in Hotel",
+      "tripType": "Tipo di Viaggio",
+      "passportPhoto": "Foto del Passaporto (Richiesta per motivi di sicurezza)",
+      "roomNo": "Numero di Camera",
+      "hotelName": "Nome dell'Hotel (Prelievo)"
+    },
+    "placeholders": {
+      "fullName": "es: Alexander Wright",
+      "email": "es: alex@example.com",
+      "whatsapp": "es: +44 7123 456789",
+      "hotelNameRoom": "es: Steigenberger ALDAU Beach Hotel, Camera 304",
+      "hotelName": "es: Steigenberger ALDAU Beach Hotel",
+      "roomNo": "es: Camera 304",
+      "specialRequests": "es: Vegetariano, celebrazione anniversario, seggiolino bambino richiesto..."
+    },
+    "options": {
+      "languages": {
+        "en": "Inglese",
+        "de": "Tedesco",
+        "fr": "Francese",
+        "it": "Italiano",
+        "ru": "Russo",
+        "ar": "Arabo"
+      },
+      "pickup": {
+        "yes": "Sì - prelievo gratuito in hotel",
+        "no": "No - incontro al porto turistico"
+      },
+      "tripType": {
+        "group": "Escursione di Gruppo (Condivisa)",
+        "private": "Escursione Privata (Esclusiva)"
+      }
+    },
+    "pricing": {
+      "basePrice": "Prezzo Base",
+      "guests": "Ospiti",
+      "totalAmount": "Importo Totale",
+      "taxesIncluded": "Tasse e Spese Portuali Incluse",
+      "instantVoucher": "Voucher WhatsApp Istantaneo"
+    },
+    "actions": {
+      "confirm": "Conferma e Ricevi il Voucher WhatsApp",
+      "back": "Indietro",
+      "close": "Chiudi",
+      "processing": "Elaborazione in corso..."
+    },
+    "modal": {
+      "title": "Prenota l'Esperienza",
+      "subtitle": "Portale di Prenotazione di Lusso",
+      "noPayment": "Nessun pagamento richiesto in questa fase. Il tuo maggiordomo di viaggio personale confermerà la disponibilità e assicurerà la prenotazione.",
+      "uploadPassport": "Carica Foto Passaporto (JPEG, PNG)",
+      "maxSize": "Dimensione massima 5MB",
+      "totalValue": "Valore Totale",
+      "perPerson": "/ persona",
+      "selectedPackage": "Pacchetto Selezionato",
+      "value": "Valore",
+      "eliteGuides": "Guide Locali d'Elite",
+      "eliteGuidesDesc": "Accompagnato da egittologi privati dedicati",
+      "flexibleCancel": "Cancellazione Flessibile",
+      "flexibleCancelDesc": "Modifiche gratuite fino a 72 ore prima della partenza",
+      "stripeSecured": "Sicuro con Stripe",
+      "encryptedConnection": "Connessione Crittografata",
+      "seedoraGold": "SeeDora Gold",
+      "signatureService": "Servizio Firma",
+      "heroTitle": "Inizia il Tuo <br>Viaggio di Lusso <br>in Egitto",
+      "heroDesc": "Creati da egittologi certificati e specialisti dell'ospitalità di lusso, i nostri tour offrono un accesso ineguagliabile e sistemazioni d'élite."
+    }
+  },
+  "tourDetails": {
+    "home": "Home",
+    "allTours": "Tutti i Tour",
+    "bestseller": "Più Venduto",
+    "reviewsCount": "4.288 recensioni",
+    "durationLabel": "5 Ore",
+    "freeCancel": "Cancellazione Gratuita (fino a 24h prima)",
+    "hotelTransfer": "Trasferimento Hotel",
+    "included": "Incluso",
+    "liveGuide": "Guida Turistica",
+    "guideLangs": "IT, EN, DE, FR, RU",
+    "mobileTicket": "Biglietto Mobile",
+    "instantVoucher": "Conferma Immediata",
+    "viewAllPhotos": "Mostra tutte le 30 foto",
+    "hookQuote": "Lascia il resort per il deserto aperto e vivi cinque avventure indimenticabili in una serata d'oro.",
+    "navigation": {
+      "overview": "Panoramica",
+      "highlights": "Punti Forti",
+      "itinerary": "Itinerario / Programma",
+      "includes": "Inclusioni ed Esclusioni",
+      "info": "Punto d'incontro e Prelievo",
+      "reviews": "Recensioni degli Ospiti",
+      "faq": "FAQ"
+    },
+    "descHeading": "Descrizione dell'Esperienza",
+    "readMore": "Leggi descrizione completa",
+    "showLess": "Mostra meno",
+    "highlightsHeading": "Punti Forti del Tour",
+    "itineraryHeading": "Itinerario e Programma",
+    "includesHeading": "Cosa è incluso e non incluso",
+    "includedTitle": "Incluso nel Tour",
+    "excludedTitle": "Non Incluso",
+    "infoHeading": "Informazioni Importanti & Consigli",
+    "whatToBringTitle": "Cosa Portare",
+    "notSuitableTitle": "Non Adatto a",
+    "notSuitableText": "Donne in gravidanza, persone con gravi problemi alla schiena o bambini sotto i 6 anni per la guida del quad.",
+    "reviewsHeading": "Recensioni dei Clienti",
+    "reviewsSub": "Recensioni verificate da viaggiatori recenti",
+    "verifiedBooking": "Prenotazione Verificata",
+    "faqHeading": "Domande Frequenti (FAQ)",
+    "sidebar": {
+      "startingFrom": "A partire da",
+      "saveBadge": "RISPARMIA 25%",
+      "perPerson": "a persona",
+      "step1": "Seleziona Data di Partenza",
+      "step2": "Scegli il Pacchetto",
+      "step3": "Numero di Ospiti",
+      "adults": "Adulti",
+      "adultsAge": "Età 12+",
+      "children": "Bambini",
+      "childrenAge": "Età 6-11 (50%)",
+      "step4": "Opzioni Aggiuntive (Opzionale)",
+      "totalAmount": "Subtotale",
+      "taxesIncluded": "Prezzo Totale (tasse incluse)",
+      "bookBtn": "Prenota Ora",
+      "instantConfirmation": "Prenota Ora, Paga Dopo",
+      "trust1": "Pagamento Sicuro con Crittografia SSL a 256 Bit",
+      "trust2": "Assistenza Concierge 24/7",
+      "trust3": "Miglior Prezzo Garantito — Operatore Diretto",
+      "guideLanguage": "Lingua della Guida",
+      "hotelPickupLocation": "Luogo di Prelievo",
+      "notesAndSpecialRequests": "Note e Richieste Speciali",
+      "placeholders": {
+        "hotelName": "Inserisci il nome del tuo hotel",
+        "specialRequests": "Eventuali richieste speciali o note dietetiche..."
+      }
+    },
+    "reviewForm": {
+      "title": "Scrivi una Recensione",
+      "yourRating": "La Tua Valutazione",
+      "yourName": "Il Tuo Nome",
+      "reviewTitle": "Titolo della Recensione",
+      "shareExperience": "Condividi la tua esperienza...",
+      "submitReview": "Invia Recensione"
+    }
+  },
+  "auth": {
+    "welcomeTitle": "Sblocca i viaggi VIP",
+    "welcomeSubtitle": "Privilegi esclusivi per i membri SeeDora",
+    "tabs": {
+      "phone": "Telefono / WhatsApp",
+      "email": "Accesso via e-mail"
+    },
+    "phone": {
+      "label": "Numero di cellulare",
+      "placeholder": "+39 312 345 6789",
+      "submit": "Invia OTP WhatsApp"
+    },
+    "email": {
+      "emailLabel": "Indirizzo e-mail",
+      "emailPlaceholder": "nome@esempio.it",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "********",
+      "submit": "Accedi"
+    },
+    "social": {
+      "divider": "O CONTINUA CON",
+      "google": "Google",
+      "facebook": "Facebook",
+      "apple": "Apple"
+    }
   }
 }

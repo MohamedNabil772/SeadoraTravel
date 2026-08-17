@@ -3,20 +3,41 @@
     "destinations": "Направления",
     "tours": "Туры",
     "aboutUs": "О нас",
-    "bookNow": "Забронировать"
+    "bookNow": "Забронировать",
+    "explore": "Обзор",
+    "login": "Войти"
   },
   "hero": {
-    "badge": "✦ Premium Egypt Travel Since 2010",
-    "title": "Откройте <em>Египет</em><br>с новой стороны",
-    "description": "От кристальных вод Хургады до древних чудес Луксора — SeeDora создаёт незабываемые путешествия по самым захватывающим уголкам Египта.",
-    "exploreBtn": "Смотреть туры",
-    "consultationBtn": "Бесплатная консультация",
+    "badge": "Роскошные Экспедиции по Красному Морю и Египту",
+    "title": "Откройте <em>Египет</em><br>Где каждая волна рассказывает историю",
+    "description": "От лазурных лагун Хургады до золотых храмов Луксора и долины Нила — SeeDora организует безупречные индивидуальные VIP-путешествия высшего класса.",
+    "exploreBtn": "Найти путешествие",
+    "browseAll": "Все туры",
+    "vipConcierge": "VIP Консьерж 24/7",
+    "searchPlaceholder": "Поиск VIP-туров, дайвинга, круизов по Нилу, пирамид...",
+    "searchBtn": "Найти",
+    "trending": "Популярные направления:",
+    "eliteStandard": "Элитный Стандарт Красного Моря",
+    "handcrafted": "Индивидуальные Премиальные Туры",
+    "bestPriceGuarantee": "Гарантия лучшей цены и качества",
+    "officialPermits": "Официальные разрешения Министерства туризма",
+    "freeCancellation": "Доступна бесплатная отмена",
+    "satisfactionRate": "довольных путешественников со всего мира",
+    "scroll": "Смотреть далее",
+    "quickTags": {
+      "diving": "Дайвинг в Красном море",
+      "luxor": "Древний Луксор",
+      "cairo": "Пирамиды и Каир",
+      "cruise": "Круизы по Нилу Люкс",
+      "safari": "Сафари в пустыне"
+    },
     "stats": {
       "guests": "Счастливых гостей",
-      "packages": "Тур-пакетов",
-      "years": "Лет опыта"
-    },
-    "scroll": "Далее"
+      "packages": "Авторских туров",
+      "years": "Лет опыта",
+      "experience": "лет роскошных путешествий",
+      "yearsLabel": "лет"
+    }
   },
   "destinations": {
     "eyebrow": "Наши направления",
@@ -152,7 +173,7 @@
       "placeholders": {
         "firstName": "Мария",
         "lastName": "Иванова",
-        "email": "maria@email.com",
+        "email": "maria{'@'}email.com",
         "message": "Напишите ваши даты поездки, количество человек и пожелания..."
       },
       "interests": {
@@ -177,5 +198,308 @@
     "privacy": "Политика конфиденциальности",
     "terms": "Условия использования",
     "madeWith": "Создано с ❤️ в Египте"
+  },
+  "bookingPopup": {
+    "header": "Забронируйте Экскурсию",
+    "subHeader": "Прямое бронирование у оператора с мгновенным подтверждением",
+    "leadTraveler": "Главный путешественник & WhatsApp",
+    "whatsappVoucher": "Ваучер WhatsApp",
+    "fullName": "Полное имя",
+    "email": "Электронная почта",
+    "whatsapp": "Номер WhatsApp",
+    "hotelPickup": "Трансфер из отеля и время",
+    "hotelName": "Название отеля / курорта",
+    "roomNumber": "Номер комнаты",
+    "pickupTime": "Время трансфера / отправления",
+    "passportPhoto": "Фото паспорта / удостоверения",
+    "securityPermits": "Разрешения службы безопасности",
+    "uploadPassport": "Загрузить фото паспорта / удостоверения",
+    "supportsFormats": "Поддерживает JPG, PNG, WEBP или PDF до 10 МБ",
+    "encryptedWarning": "Зашифровано и строго требуется береговой охраной",
+    "specialRequests": "Особые пожелания / диетические предпочтения",
+    "specialRequestsPlaceholder": "Необязательно: вегетарианские блюда, годовщина...",
+    "bookingSummary": "Детали бронирования",
+    "travelDate": "Дата поездки",
+    "guests": "Гости",
+    "adults": "Взрослые",
+    "children": "Дети",
+    "taxesIncluded": "Налоги и сборы включены",
+    "totalToPay": "Итого к оплате",
+    "confirmReservation": "Подтвердить бронирование",
+    "confirming": "Подтверждение бронирования...",
+    "sslEncrypted": "256-битное SSL шифрование · Бесплатная отмена за 24 часа",
+    "whatsappNotice": "Ваш электронный ваучер и обновления по трансферу будут отправлены напрямую на этот номер WhatsApp.",
+    "preferredTime": "Желаемое время трансфера (Гибкое / Индивидуальное)",
+    "freeChoice": "Свободный выбор",
+    "flexibleNotice": "Выберите любое удобное время с 07:00 до 20:00 для вашего индивидуального отправления.",
+    "conciergeCoordination": "Координация трансфера консьержем",
+    "conciergeNotice": "Точное время будет рассчитано в зависимости от расположения вашего отеля и отправлено в WhatsApp.",
+    "readyForPermit": "Готово для разрешения",
+    "uploadingDoc": "Загрузка документа...",
+    "addons": "Дополнительные услуги",
+    "selected": "выбрано"
+  },
+  "validation": {
+    "fullNameRequired": "Пожалуйста, укажите полное имя",
+    "emailInvalid": "Пожалуйста, укажите действительный адрес электронной почты",
+    "whatsappInvalid": "Пожалуйста, укажите действительный номер WhatsApp",
+    "hotelNameRequired": "Пожалуйста, укажите название отеля / курорта",
+    "passportRequired": "Фото паспорта / удостоверения обязательно для разрешений береговой охраны"
+  },
+  "toast": {
+    "bookingConfirmed": "Бронирование подтверждено! Ваучер отправлен на WhatsApp.",
+    "formErrors": "Пожалуйста, исправьте ошибки в форме.",
+    "tourSaved": "Тур сохранен в избранное",
+    "linkCopied": "Ссылка скопирована в буфер обмена"
+  },
+  "placeholders": {
+    "fullName": "напр. Иван Иванов",
+    "email": "имя{'@'}пример.ру",
+    "whatsapp": "+7 900 123 45 67",
+    "hotelName": "напр. Sunrise Resort",
+    "roomNumber": "напр. 2104",
+    "specialRequests": "Необязательно: Вегетарианское питание, праздник...",
+    "search": "Поиск...",
+    "date": "Выберите дату",
+    "message": "Расскажите нам о ваших требованиях..."
+  },
+  "tours": {
+    "travelDate": "Дата Поездки"
+  },
+  "concierge": {
+    "welcome": "Добро пожаловать в Seadora Travel! Чем я могу помочь вам сегодня с вашим роскошным отдыхом на Красном море?",
+    "prompts": {
+      "recommend": "🏝️ Посоветовать лучшие туры",
+      "weekend": "📅 Доступность на выходных",
+      "payment": "💳 Оплата и отмена",
+      "passport": "🛂 Зачем загружать паспорт?"
+    },
+    "recommendationFallback": "Вот несколько наших самых рейтинговых впечатлений, которые я вам рекомендую:",
+    "connectionError": "К сожалению, у меня проблемы с подключением к серверу.",
+    "processingError": "К сожалению, при обработке вашего запроса произошла ошибка.",
+    "title": "Консьерж Seadora",
+    "online": "В сети",
+    "copied": "Скопировано!",
+    "bookNow": "Забронировать",
+    "placeholder": "Сообщение консьержу..."
+  },
+  "calendar": {
+    "weekdays": {
+      "mo": "Пн",
+      "tu": "Вт",
+      "we": "Ср",
+      "th": "Чт",
+      "fr": "Пт",
+      "sa": "Сб",
+      "su": "Вс"
+    },
+    "subtitle": "Выберите дату отправления",
+    "prevMonth": "Предыдущий месяц",
+    "nextMonth": "Следующий месяц",
+    "available": "Доступно",
+    "limitedSpots": "Мало мест",
+    "spotsLeft": "Осталось {count} мест",
+    "soldOut": "Распродано",
+    "pastDate": "Прошедшая дата",
+    "legendAvailable": "Доступно",
+    "legendLimited": "Мало мест",
+    "legendSoldOut": "Распродано",
+    "selectDates": "Выбрать даты",
+    "clear": "Очистить",
+    "resetDate": "Сбросить дату",
+    "done": "Готово",
+    "today": "Сегодня",
+    "tomorrow": "Завтра",
+    "weekend": "Выходные",
+    "nextWeek": "След. неделя",
+    "thisWeekend": "В эти выходные",
+    "next7Days": "Следующие 7 дней",
+    "next14Days": "Следующие 14 дней",
+    "thisMonth": "В этом месяце",
+    "allDates": "Все даты",
+    "departureDate": "Дата выезда"
+  },
+  "booking": {
+    "tabs": {
+      "step1": "Шаг 1 (Даты и Гости)",
+      "step2": "Шаг 2 (Информация и Отель)",
+      "step3": "Шаг 3 (Подтверждение и Ваучер)"
+    },
+    "labels": {
+      "fullName": "Полное Имя",
+      "email": "Электронная Почта",
+      "whatsapp": "WhatsApp/Телефон",
+      "hotelNameRoom": "Название Отеля и Номер",
+      "specialRequests": "Особые Пожелания / Диета",
+      "guideLanguage": "Язык Гида",
+      "hotelPickup": "Трансфер из отеля",
+      "tripType": "Тип Поездки",
+      "passportPhoto": "Фото паспорта (Необходимо для службы безопасности)",
+      "roomNo": "Номер комнаты",
+      "hotelName": "Название отеля (Трансфер)"
+    },
+    "placeholders": {
+      "fullName": "напр. Alexander Wright",
+      "email": "напр. alex@example.com",
+      "whatsapp": "напр. +44 7123 456789",
+      "hotelNameRoom": "напр. Steigenberger ALDAU Beach Hotel, Номер 304",
+      "hotelName": "напр. Steigenberger ALDAU Beach Hotel",
+      "roomNo": "напр. Номер 304",
+      "specialRequests": "напр. Вегетарианец, годовщина, нужно детское кресло..."
+    },
+    "options": {
+      "languages": {
+        "en": "Английский",
+        "de": "Немецкий",
+        "fr": "Французский",
+        "it": "Итальянский",
+        "ru": "Русский",
+        "ar": "Арабский"
+      },
+      "pickup": {
+        "yes": "Да - бесплатный трансфер",
+        "no": "Нет - встречаемся в марине"
+      },
+      "tripType": {
+        "group": "Групповая Экскурсия (Совместная)",
+        "private": "Индивидуальная Экскурсия (Эксклюзив)"
+      }
+    },
+    "pricing": {
+      "basePrice": "Базовая Цена",
+      "guests": "Гости",
+      "totalAmount": "Итоговая Сумма",
+      "taxesIncluded": "Налоги и Портовые Сборы Включены",
+      "instantVoucher": "Мгновенный Ваучер WhatsApp"
+    },
+    "actions": {
+      "confirm": "Подтвердить и Получить Ваучер WhatsApp",
+      "back": "Назад",
+      "close": "Закрыть",
+      "processing": "Обработка..."
+    },
+    "modal": {
+      "title": "Забронировать Впечатление",
+      "subtitle": "Роскошный Портал Бронирования",
+      "noPayment": "На этом этапе оплата не взимается. Ваш персональный менеджер по туризму подтвердит наличие мест и обеспечит бронирование.",
+      "uploadPassport": "Загрузить Фото Паспорта (JPEG, PNG)",
+      "maxSize": "Макс. размер 5MB",
+      "totalValue": "Общая Стоимость",
+      "perPerson": "/ человек",
+      "selectedPackage": "Выбранный Пакет",
+      "value": "Стоимость",
+      "eliteGuides": "Элитные Местные Гиды",
+      "eliteGuidesDesc": "В сопровождении преданных частных египтологов",
+      "flexibleCancel": "Гибкая Отмена",
+      "flexibleCancelDesc": "Бесплатные изменения за 72 часа до отправления",
+      "stripeSecured": "Защищено Stripe",
+      "encryptedConnection": "Зашифрованное Соединение",
+      "seedoraGold": "SeeDora Gold",
+      "signatureService": "Фирменное Обслуживание",
+      "heroTitle": "Начните Свое <br>Роскошное <br>Путешествие",
+      "heroDesc": "Созданные сертифицированными египтологами и специалистами по роскошному гостеприимству, наши туры предлагают непревзойденный доступ и элитное размещение."
+    }
+  },
+  "tourDetails": {
+    "home": "Главная",
+    "allTours": "Все туры",
+    "bestseller": "Хит продаж",
+    "reviewsCount": "4 288 отзывов",
+    "durationLabel": "5 часов",
+    "freeCancel": "Бесплатная отмена (за 24 ч.)",
+    "hotelTransfer": "Трансфер из отеля",
+    "included": "Включено",
+    "liveGuide": "Гид",
+    "guideLangs": "RU, EN, DE, IT, FR",
+    "mobileTicket": "Мобильный билет",
+    "instantVoucher": "Мгновенное подтверждение",
+    "viewAllPhotos": "Все 30 фото",
+    "hookQuote": "Смените отель на бескрайнюю пустыню и проживите 5 ярких приключений за один золотой вечер.",
+    "navigation": {
+      "overview": "Обзор",
+      "highlights": "Главное",
+      "itinerary": "Программа",
+      "includes": "Включено",
+      "info": "Место встречи и трансфер",
+      "reviews": "Отзывы",
+      "faq": "FAQ"
+    },
+    "descHeading": "Описание экскурсии",
+    "readMore": "Читать полное описание",
+    "showLess": "Свернуть",
+    "highlightsHeading": "Главные впечатления",
+    "itineraryHeading": "Программа тура и тайминг",
+    "includesHeading": "Что включено и не включено",
+    "includedTitle": "В стоимость входит",
+    "excludedTitle": "Дополнительно оплачивается",
+    "infoHeading": "Полезная информация и советы",
+    "whatToBringTitle": "Что взять с собой",
+    "notSuitableTitle": "Не рекомендуется",
+    "notSuitableText": "Беременным женщинам, людям с травмами спины и детям до 6 лет для управления квадроциклом.",
+    "reviewsHeading": "Отзывы путешественников",
+    "reviewsSub": "Проверенные отзывы туристов о сафари",
+    "verifiedBooking": "Подтвержденная поездка",
+    "faqHeading": "Часто задаваемые вопросы",
+    "sidebar": {
+      "startingFrom": "От",
+      "saveBadge": "СКИДКА 25%",
+      "perPerson": "за человека",
+      "step1": "Выберите дату",
+      "step2": "Выберите вариант сафари",
+      "step3": "Количество гостей",
+      "adults": "Взрослые",
+      "adultsAge": "От 12 лет",
+      "children": "Дети",
+      "childrenAge": "6-11 лет (50%)",
+      "step4": "Дополнительные опции",
+      "totalAmount": "Промежуточный итог",
+      "taxesIncluded": "Все налоги и сборы включены",
+      "bookBtn": "Забронировать",
+      "instantConfirmation": "Бронируйте сейчас, платите позже",
+      "trust1": "Безопасная оплата с 256-битным SSL-шифрованием",
+      "trust2": "Поддержка в WhatsApp 24/7",
+      "trust3": "Гарантия лучшей цены от прямого организатора",
+      "guideLanguage": "Язык гида",
+      "hotelPickupLocation": "Место отправления",
+      "notesAndSpecialRequests": "Особые пожелания",
+      "placeholders": {
+        "hotelName": "Введите название вашего отеля",
+        "specialRequests": "Особые требования или диетические примечания..."
+      }
+    },
+    "reviewForm": {
+      "title": "Написать отзыв",
+      "yourRating": "Ваша оценка",
+      "yourName": "Ваше имя",
+      "reviewTitle": "Заголовок отзыва",
+      "shareExperience": "Поделитесь своим опытом...",
+      "submitReview": "Отправить отзыв"
+    }
+  },
+  "auth": {
+    "welcomeTitle": "Откройте VIP путешествия",
+    "welcomeSubtitle": "Эксклюзивные привилегии для Участников SeeDora",
+    "tabs": {
+      "phone": "Телефон / WhatsApp",
+      "email": "Вход по Email"
+    },
+    "phone": {
+      "label": "Мобильный номер",
+      "placeholder": "+7 912 345 67 89",
+      "submit": "Отправить WhatsApp OTP"
+    },
+    "email": {
+      "emailLabel": "Email адрес",
+      "emailPlaceholder": "name@example.ru",
+      "passwordLabel": "Пароль",
+      "passwordPlaceholder": "********",
+      "submit": "Войти"
+    },
+    "social": {
+      "divider": "ИЛИ ПРОДОЛЖИТЬ С",
+      "google": "Google",
+      "facebook": "Facebook",
+      "apple": "Apple"
+    }
   }
 }

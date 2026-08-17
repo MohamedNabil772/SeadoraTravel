@@ -17,11 +17,17 @@ public static class DependencyInjection
         var dataSource = dataSourceBuilder.Build();
 
         services.AddDbContext<ContentDbContext>(options =>
+        {
             options.UseNpgsql(
                 dataSource,
-                b => b.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null)));
+                b => b.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null));
+            options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+        });
             
         services.AddScoped<IContentDbContext>(provider => provider.GetRequiredService<ContentDbContext>());
+        
+        services.AddScoped<IExcelLocalizationService, Seadora.Content.Infrastructure.Services.ExcelLocalizationService>();
+        services.AddScoped<IQuestPdfGeneratorService, Seadora.Content.Infrastructure.Services.QuestPdfGeneratorService>();
         
         return services;
     }

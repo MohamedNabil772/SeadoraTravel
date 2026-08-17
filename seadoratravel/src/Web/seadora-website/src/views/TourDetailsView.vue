@@ -1,1816 +1,2425 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, onUnmounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { useI18n } from 'vue-i18n'
+import { useCurrencyStore } from '@/store/currency'
+import { getSlug, getFullImageUrl } from '@/shared/utils/helpers'
+import Footer from '@/shared/components/Footer.vue'
+import TourAvailabilityCalendar from '@/features/tours/components/TourAvailabilityCalendar.vue'
 
 const route = useRoute()
-
-const tour = ref<any>(null)
-const loading = ref(true)
-const categoryName = ref('Adventure')
-const tourDestinationName = ref('')
-const reviews = ref<any[]>([])
-const loadingReviews = ref(false)
+const { locale, t } = useI18n()
+const currencyStore = useCurrencyStore()
 
 const routeSlug = computed(() => route.params.slug as string)
 
-const getSlug = (name: string) => {
-  return name
-    .toLowerCase()
-    .replace(/[^\w\s-]/g, '')
-    .replace(/\s+/g, '-')
-    .replace(/-+/g, '-')
-    .trim()
+// Language & Currency Dropdowns state
+const showLangDropdown = ref(false)
+const showCurrencyDropdown = ref(false)
+
+const languages = [
+  { code: 'en', label: 'English', flag: '🇬🇧', iso: 'EN' },
+  { code: 'de', label: 'Deutsch', flag: '🇩🇪', iso: 'DE' },
+  { code: 'it', label: 'Italiano', flag: '🇮🇹', iso: 'IT' },
+  { code: 'fr', label: 'Français', flag: '🇫🇷', iso: 'FR' },
+  { code: 'ru', label: 'Русский', flag: '🇷🇺', iso: 'RU' }
+]
+
+const currencies = [
+  { code: 'EUR', symbol: '€', label: 'EUR — Euro' },
+  { code: 'USD', symbol: '$', label: 'USD — US Dollar' },
+  { code: 'EGP', symbol: 'EGP', label: 'EGP — Egyptian Pound' }
+]
+
+const currentLangObj = computed(() => languages.find(l => l.code === locale.value) || languages[0])
+const currentCurrencyObj = computed(() => currencies.find(c => c.code === currencyStore.selectedCurrency) || currencies[0])
+
+const setLanguage = (code: string) => {
+  locale.value = code
+  showLangDropdown.value = false
 }
 
+const selectCurrency = (code: string) => {
+  currencyStore.setCurrency(code)
+  showCurrencyDropdown.value = false
+}
+
+// UI States
+const activeTab = ref('overview')
+const isSaved = ref(false)
+const readMoreExpanded = ref(false)
+const galleryModalOpen = ref(false)
+const activeLightboxIndex = ref(0)
+const showShareModal = ref(false)
+const showToast = ref(false)
+const toastMessage = ref('')
+const activeFaq = ref<number | null>(0)
+const faqSearch = ref('')
+
+// Booking Options State
+const selectedDate = ref(new Date(Date.now() + 86400000).toISOString().split('T')[0])
+const selectedOptionIndex = ref(0)
+const adultsCount = ref(2)
+const childrenCount = ref(0)
+const selectedAddons = ref<number[]>([])
+
+// Tour Data State
+const tour = ref<any>(null)
+const loading = ref(true)
+
+// ==========================================
+// COMPREHENSIVE MULTILINGUAL LOCALIZATION
+// ==========================================
+const i18nContent = computed(() => {
+  const lang = locale.value || 'en'
+  const dict: Record<string, any> = {
+    en: {
+      home: 'Home',
+      allTours: 'All Tours',
+      bestseller: 'Bestseller',
+      reviewsCount: '4,288 reviews',
+      durationLabel: '5 Hours',
+      freeCancel: 'Free Cancellation (Up to 24h)',
+      hotelTransfer: 'Hotel Transfer',
+      included: 'Included',
+      liveGuide: 'Live Guide',
+      guideLangs: 'EN, DE, IT, FR, RU',
+      mobileTicket: 'Mobile Ticket',
+      instantVoucher: 'Instant Voucher',
+      viewAllPhotos: 'View All 30 Photos',
+      hookQuote: 'Trade the resort for open desert, and let one golden evening hold five unforgettable adventures.',
+      tabs: {
+        overview: 'Overview',
+        highlights: 'Highlights',
+        itinerary: 'Itinerary',
+        includes: 'Inclusions',
+        info: 'Important Info',
+        reviews: 'Reviews (4,288)',
+        faq: 'FAQ'
+      },
+      descHeading: 'Experience Description',
+      readMore: 'Read Full Description',
+      showLess: 'Show Less',
+      highlightsHeading: 'Tour Highlights',
+      itineraryHeading: 'Experience Itinerary & Timeline',
+      includesHeading: "What's Included & Excluded",
+      includedTitle: 'Included in Tour',
+      excludedTitle: 'Not Included',
+      infoHeading: 'Important Information & Advice',
+      whatToBringTitle: 'What to Bring',
+      notSuitableTitle: 'Not Suitable For',
+      notSuitableText: 'Pregnant women, travelers with severe back/neck problems, or children under 6 for quad driving.',
+      reviewsHeading: 'Customer Reviews & Ratings',
+      reviewsSub: 'Verified traveler reviews from recent safari departures',
+      verifiedBooking: 'Verified Booking',
+      faqHeading: 'Frequently Asked Questions',
+      sidebar: {
+        startingFrom: 'Starting from',
+        saveBadge: 'SAVE 25%',
+        perPerson: '/ person',
+        step1: '1. Select Travel Date',
+        step2: '2. Choose Safari Package',
+        step3: '3. Number of Guests',
+        adults: 'Adults',
+        adultsAge: 'Age 12+',
+        children: 'Children',
+        childrenAge: 'Age 6-11 (50%)',
+        step4: '4. Popular Add-ons (Optional)',
+        totalAmount: 'Total Amount',
+        taxesIncluded: 'Taxes & Fees Included',
+        bookBtn: 'Check Availability & Book',
+        instantConfirmation: 'Instant Confirmation · Reserve Now & Pay Later',
+        trust1: '256-Bit SSL Encrypted & Secure Checkout',
+        trust2: '24/7 Dedicated WhatsApp Concierge',
+        trust3: 'Best Price Guarantee — Direct Operator'
+      },
+      whatToBring: [
+        'Sunglasses and head scarf (Keffiyeh)',
+        'Comfortable closed-toe sports shoes',
+        'Camera or smartphone for sunset photos',
+        'Warm jacket in winter months (Nov - Mar)',
+        'Cash for optional souvenirs, drinks or tips'
+      ],
+      highlights: [
+        'Ride automatic quad bikes across sweeping desert dunes with no prior experience needed.',
+        'Hear your voice echo off towering sandstone cliffs at the famous Echo Mountains.',
+        'Take a scenic sunset camel trek over golden dunes for breathtaking photographs.',
+        'Feast on an open Bedouin BBQ buffet with grilled meats and freshly baked flatbread.',
+        'Enjoy live Tanoura spinning dancers and a thrilling fire show under starry skies.',
+        'Stress-free round-trip hotel pickup and drop-off in air-conditioned comfort.'
+      ],
+      itinerary: [
+        { time: '15:00 - 15:30', title: 'Hotel Pickup & Transfer', desc: 'Comfortable air-conditioned coach pickup directly from your hotel in Sharm El-Sheikh.' },
+        { time: '15:45 - 16:00', title: 'ATV Safety Briefing & Test Run', desc: 'Meet your desert safari instructors, wear safety gear, and complete a quick practice test.' },
+        { time: '16:00 - 17:15', title: 'Adrenaline Quad Safari & Echo Mountains', desc: 'Ride into rugged Sinai canyons and stop at the Echo Mountains to shout and hear the canyon reply.' },
+        { time: '17:15 - 18:00', title: 'Bedouin Tent & Sunset Camel Ride', desc: 'Sway gently atop desert camels over golden dunes as the desert sunset turns amber.' },
+        { time: '18:00 - 19:30', title: 'Bedouin BBQ Buffet & Herbal Tea', desc: 'Savor grilled chicken, kofta, fresh salads, fresh-baked flatbread, and authentic Habak tea.' },
+        { time: '19:30 - 20:30', title: 'Oriental Fire Show & Tanoura Dance', desc: 'Mesmerizing folkloric whirling Tanoura performance and an exhilarating fire-breathing show.' },
+        { time: '20:30 - 21:00', title: 'Return Hotel Transfer', desc: 'Relax on the return ride back to your hotel with unforgettable memories.' }
+      ],
+      inclusions: [
+        'Hotel pickup and drop-off in comfortable air-conditioned vehicle',
+        'Automatic quad bike rental with safety helmet',
+        'Professional desert safari guide (Multilingual)',
+        'Camel ride over golden dunes (approx. 15-20 minutes)',
+        'Stop at the Echo Mountains for photography and echo shout',
+        'Open BBQ dinner buffet (grilled meats, rice, salads, fresh bread)',
+        'Traditional Bedouin herbal tea (Habak)',
+        'Live oriental entertainment (Tanoura dancer & fire show)',
+        'All taxes, fuel surcharges, and service fees'
+      ],
+      exclusions: [
+        'Desert scarf (Keffiyeh) and safety goggles (available for rent/purchase €3-€4)',
+        'Souvenir photos and videos captured by the professional desert photographer',
+        'Soft drinks and bottled beverages inside the Bedouin camp (nominal fee)',
+        'Gratuities / tips for safari guides and drivers (optional)'
+      ],
+      faqs: [
+        { q: 'Do I need a driver license or prior quad biking experience?', a: 'No driver license or prior experience is required! All our quad bikes are fully automatic and easy to ride. Our instructors provide a full safety briefing and practice session before starting.' },
+        { q: 'What is the policy for children participating?', a: 'Children aged 16+ can drive their own single quad. Children aged 6-15 can ride as passengers on double quads with an adult. Children under 6 can participate in the Bedouin dinner and camel ride.' },
+        { q: 'Can I cancel or change my booking date for free?', a: 'Yes! We offer 100% free cancellation and date changes up to 24 hours before your scheduled tour departure.' },
+        { q: 'Is hotel pickup included from all resorts in the area?', a: 'Yes, round-trip pickup and drop-off is included from all hotels and resorts in the destination area.' }
+      ],
+      options: [
+        { title: 'Single Quad ATV Safari + Camel & BBQ Show', subtitle: '1 Person on 1 Quad Bike (16+ yrs)', badge: 'BESTSELLER' },
+        { title: 'Double Quad ATV Safari (2 Persons on 1 Quad)', subtitle: 'Driver + Passenger on 1 Quad Bike', badge: 'POPULAR FOR COUPLES' },
+        { title: 'VIP Private Desert Safari + Stargazing Telescope', subtitle: 'Exclusive Private Guide & VIP Bedouin Seating', badge: 'LUXURY VIP' }
+      ],
+      addons: [
+        { name: 'Bedouin Desert Scarf & Dust Goggles', priceEur: 4 },
+        { name: 'VIP Front Row Dinner Seating & Fruit Basket', priceEur: 8 },
+        { name: 'Professional Photographer HD Photo & Video Pack', priceEur: 15 }
+      ]
+    },
+    de: {
+      home: 'Startseite',
+      allTours: 'Alle Touren',
+      bestseller: 'Bestseller',
+      reviewsCount: '4.288 Bewertungen',
+      durationLabel: '5 Stunden',
+      freeCancel: 'Kostenlose Stornierung (bis zu 24 Std.)',
+      hotelTransfer: 'Hoteltransfer',
+      included: 'Inklusive',
+      liveGuide: 'Reiseleiter',
+      guideLangs: 'DE, EN, IT, FR, RU',
+      mobileTicket: 'Mobiles Ticket',
+      instantVoucher: 'Sofortige Bestätigung',
+      viewAllPhotos: 'Alle 30 Fotos ansehen',
+      hookQuote: 'Tauschen Sie das Hotel gegen die Wüste und erleben Sie fünf Abenteuer an einem goldenen Abend.',
+      tabs: {
+        overview: 'Übersicht',
+        highlights: 'Höhepunkte',
+        itinerary: 'Ablauf',
+        includes: 'Inklusivleistungen',
+        info: 'Wichtige Infos',
+        reviews: 'Bewertungen (4.288)',
+        faq: 'FAQ'
+      },
+      descHeading: 'Beschreibung des Erlebnisses',
+      readMore: 'Vollständige Beschreibung lesen',
+      showLess: 'Weniger anzeigen',
+      highlightsHeading: 'Höhepunkte der Tour',
+      itineraryHeading: 'Tourverlauf & Zeitplan',
+      includesHeading: 'Was ist enthalten & nicht enthalten',
+      includedTitle: 'In der Tour enthalten',
+      excludedTitle: 'Nicht enthalten',
+      infoHeading: 'Wichtige Informationen & Ratschläge',
+      whatToBringTitle: 'Was Sie mitbringen sollten',
+      notSuitableTitle: 'Nicht geeignet für',
+      notSuitableText: 'Schwangere Frauen, Personen mit schweren Rückenproblemen oder Kinder unter 6 Jahren zum Quadfahren.',
+      reviewsHeading: 'Kundenbewertungen & Erfahrungsberichte',
+      reviewsSub: 'Verifizierte Reisebewertungen kürzlicher Wüstentouren',
+      verifiedBooking: 'Verifizierte Buchung',
+      faqHeading: 'Häufig gestellte Fragen (FAQ)',
+      sidebar: {
+        startingFrom: 'Ab',
+        saveBadge: '25% SPAREN',
+        perPerson: '/ Person',
+        step1: '1. Reisedatum wählen',
+        step2: '2. Safari-Paket wählen',
+        step3: '3. Anzahl der Gäste',
+        adults: 'Erwachsene',
+        adultsAge: 'Ab 12 Jahren',
+        children: 'Kinder',
+        childrenAge: '6-11 Jahre (50%)',
+        step4: '4. Beliebte Zusatzoptionen (Optional)',
+        totalAmount: 'Gesamtbetrag',
+        taxesIncluded: 'Inkl. Steuern & Gebühren',
+        bookBtn: 'Verfügbarkeit prüfen & buchen',
+        instantConfirmation: 'Sofortige Bestätigung · Jetzt reservieren, später zahlen',
+        trust1: '256-Bit SSL-verschlüsselte sichere Zahlung',
+        trust2: '24/7 WhatsApp-Kundenservice',
+        trust3: 'Bestpreisgarantie — Direkter Veranstalter'
+      },
+      whatToBring: [
+        'Sonnenbrille und Wüstentuch (Keffiyeh)',
+        'Bequeme geschlossene Sportschuhe',
+        'Kamera oder Smartphone für Sonnenuntergangsfotos',
+        'Warme Jacke in den Wintermonaten (Nov - März)',
+        'Bargeld für optionale Getränke, Souvenirs oder Trinkgelder'
+      ],
+      highlights: [
+        'Fahren Sie automatische Quads durch atemberaubende Wüstendünen – keine Vorkenntnisse nötig.',
+        'Hören Sie Ihre Stimme an den Felswänden der berühmten Echo-Berge widerhallen.',
+        'Erleben Sie einen Kamelritt im warmen Abendlicht für perfekte Erinnerungsfotos.',
+        'Genießen Sie ein reichhaltiges Beduinen-BBQ-Buffet mit gegrilltem Fleisch und frischem Fladenbrot.',
+        'Erleben Sie eine traditionelle Tanoura-Tanzshow und eine spektakuläre Feuershow unter Sternen.',
+        'Bequemer und stressfreier Hin- und Rücktransfer ab/bis Hotel im klimatisierten Fahrzeug.'
+      ],
+      itinerary: [
+        { time: '15:00 - 15:30', title: 'Hotelabholung & Transfer', desc: 'Bequeme Abholung mit klimatisiertem Bus direkt von Ihrem Hotel in Sharm El-Sheikh.' },
+        { time: '15:45 - 16:00', title: 'Sicherheitseinweisung & Probefahrt', desc: 'Begrüßung durch die Wüsten-Instruktoren, Helm anlegen und kurze Probefahrt.' },
+        { time: '16:00 - 17:15', title: 'Quad-Safari & Echo-Berge', desc: 'Fahrt in die Sinai-Schluchten und Fotostopp an den Echo-Bergen mit Echo-Ruf.' },
+        { time: '17:15 - 18:00', title: 'Beduinencamp & Kamelritt zum Sonnenuntergang', desc: 'Sanfter Ritt auf Kamelen über goldene Dünen bei Sonnenuntergang.' },
+        { time: '18:00 - 19:30', title: 'Beduinen-BBQ-Buffet & Kräutertee', desc: 'Köstliches BBQ mit gegrilltem Hähnchen, Kofta, frischen Salaten und Habak-Tee.' },
+        { time: '19:30 - 20:30', title: 'Orientalische Feuershow & Tanoura-Tanz', desc: 'Faszinierender Tanoura-Drehtanz und aufregende Feuershow unter dem Sternenhimmel.' },
+        { time: '20:30 - 21:00', title: 'Rücktransfer zum Hotel', desc: 'Entspannte Rückfahrt zu Ihrem Ferienresort.' }
+      ],
+      inclusions: [
+        'Hotelabholung und Rücktransfer im klimatisierten Fahrzeug',
+        'Automatisches Quad-Bike mit Sicherheitshelm',
+        'Professioneller mehrsprachiger Safari-Reiseleiter',
+        'Kamelritt über Wüstendünen (ca. 15-20 Minuten)',
+        'Stopp an den Echo-Bergen für Fotos und Echo-Rufe',
+        'Offenes BBQ-Abendbuffet (Grillfleisch, Reis, Salate, frisches Brot)',
+        'Traditioneller Beduinen-Kräutertee (Habak)',
+        'Orientalische Live-Show (Tanoura-Tanz und Feuershow)',
+        'Alle Steuern und Servicegebühren'
+      ],
+      exclusions: [
+        'Wüstentuch (Keffiyeh) und Staubbrille (vor Ort leihbar/kaufbar ca. 3-4 €)',
+        'Fotos & Videos vom professionellen Wüstenfotografen',
+        'Softdrinks und Dosengetränke im Beduinencamp',
+        'Trinkgelder für Reiseleiter und Fahrer (optional)'
+      ],
+      faqs: [
+        { q: 'Brauche ich einen Führerschein oder Quad-Erfahrung?', a: 'Nein, kein Führerschein und keine Vorerfahrung erforderlich! Alle Quads sind vollautomatisch und sehr einfach zu steuern.' },
+        { q: 'Wie ist die Regelung für Kinder?', a: 'Jugendliche ab 16 Jahren können ein eigenes Einzelquad fahren. Kinder von 6 bis 15 Jahren fahren als Beifahrer auf dem Doppelquad mit einem Erwachsenen mit.' },
+        { q: 'Kann ich die Buchung kostenlos stornieren?', a: 'Ja! Sie können Ihre Buchung bis zu 24 Stunden vor Beginn 100% kostenlos stornieren oder umbuchen.' },
+        { q: 'Ist die Hotelabholung von allen Hotels inklusive?', a: 'Ja, der Hin- und Rücktransfer von allen Hotels im Zielgebiet ist bereits im Preis enthalten.' }
+      ],
+      options: [
+        { title: 'Einzel-Quad Safari + Kamel & BBQ Show', subtitle: '1 Person auf 1 Quad (ab 16 J.)', badge: 'BESTSELLER' },
+        { title: 'Doppel-Quad Safari (2 Personen auf 1 Quad)', subtitle: 'Fahrer + Beifahrer auf 1 Quad', badge: 'BELIEBT BEI PAAREN' },
+        { title: 'VIP Private Wüstensafari + Sternen-Teleskop', subtitle: 'Exklusiver Privatguide & VIP-Sitzplätze', badge: 'LUXUS VIP' }
+      ],
+      addons: [
+        { name: 'Beduinentuch & Schutzbrille', priceEur: 4 },
+        { name: 'VIP-Sitzplatz 1. Reihe & Obstkorb', priceEur: 8 },
+        { name: 'HD Foto- & Videopaket vom Fotografen', priceEur: 15 }
+      ]
+    },
+    it: {
+      home: 'Home',
+      allTours: 'Tutti i Tour',
+      bestseller: 'Più Venduto',
+      reviewsCount: '4.288 recensioni',
+      durationLabel: '5 Ore',
+      freeCancel: 'Cancellazione Gratuita (fino a 24h prima)',
+      hotelTransfer: 'Trasferimento Hotel',
+      included: 'Incluso',
+      liveGuide: 'Guida Turistica',
+      guideLangs: 'IT, EN, DE, FR, RU',
+      mobileTicket: 'Biglietto Mobile',
+      instantVoucher: 'Conferma Immediata',
+      viewAllPhotos: 'Mostra tutte le 30 foto',
+      hookQuote: "Lascia il resort per il deserto aperto e vivi cinque avventure indimenticabili in una serata d'oro.",
+      tabs: {
+        overview: 'Panoramica',
+        highlights: 'Punti Forti',
+        itinerary: 'Itinerario',
+        includes: 'Inclusioni',
+        info: 'Info Utili',
+        reviews: 'Recensioni (4.288)',
+        faq: 'FAQ'
+      },
+      descHeading: "Descrizione dell'Esperienza",
+      readMore: 'Leggi descrizione completa',
+      showLess: 'Mostra meno',
+      highlightsHeading: 'Punti Forti del Tour',
+      itineraryHeading: 'Itinerario e Programma',
+      includesHeading: 'Cosa è incluso e non incluso',
+      includedTitle: 'Incluso nel Tour',
+      excludedTitle: 'Non Incluso',
+      infoHeading: 'Informazioni Importanti & Consigli',
+      whatToBringTitle: 'Cosa Portare',
+      notSuitableTitle: 'Non Adatto a',
+      notSuitableText: 'Donne in gravidanza, persone con gravi problemi alla schiena o bambini sotto i 6 anni per la guida del quad.',
+      reviewsHeading: 'Recensioni dei Clienti',
+      reviewsSub: 'Recensioni verificate da viaggiatori recenti',
+      verifiedBooking: 'Prenotazione Verificata',
+      faqHeading: 'Domande Frequenti (FAQ)',
+      sidebar: {
+        startingFrom: 'A partire da',
+        saveBadge: 'RISPARMIA 25%',
+        perPerson: '/ persona',
+        step1: '1. Seleziona Data di Viaggio',
+        step2: '2. Scegli Pacchetto Safari',
+        step3: '3. Numero di Ospiti',
+        adults: 'Adulti',
+        adultsAge: 'Età 12+',
+        children: 'Bambini',
+        childrenAge: 'Età 6-11 (50%)',
+        step4: '4. Opzioni Aggiuntive (Opzionale)',
+        totalAmount: 'Importo Totale',
+        taxesIncluded: 'Tasse e Costi Inclusi',
+        bookBtn: 'Verifica Disponibilità e Prenota',
+        instantConfirmation: 'Conferma Istantanea · Prenota Ora, Paga Dopo',
+        trust1: 'Pagamento Sicuro con Crittografia SSL a 256 Bit',
+        trust2: 'Assistenza WhatsApp Dedicata 24/7',
+        trust3: 'Miglior Prezzo Garantito — Operatore Diretto'
+      },
+      whatToBring: [
+        'Occhiali da sole e kefiah per il deserto',
+        'Scarpe sportive chiuse comode',
+        'Fotocamera o smartphone per le foto al tramonto',
+        'Giacca calda nei mesi invernali (Nov - Mar)',
+        'Contanti per bevande extra, souvenir o mance'
+      ],
+      highlights: [
+        'Guida quad automatici tra le spettacolari dune del deserto, nessuna esperienza richiesta.',
+        'Ascolta la tua voce echeggiare contro le maestose pareti delle Montagne dell’Eco.',
+        'Fai una suggestiva passeggiata a dorso di cammello al tramonto.',
+        'Gusta una ricca cena barbecue beduina con carne alla griglia e pane fresco.',
+        'Spettacolo folcloristico dal vivo con danzatore Tanoura e mangiafuoco sotto le stelle.',
+        'Comodo transfer di andata e ritorno con aria condizionata dal tuo hotel.'
+      ],
+      itinerary: [
+        { time: '15:00 - 15:30', title: 'Pick-up in Hotel e Trasferimento', desc: 'Prelievo comodo con pullman climatizzato direttamente dal tuo resort a Sharm El-Sheikh.' },
+        { time: '15:45 - 16:00', title: 'Briefing di Sicurezza e Guida di Prova', desc: 'Incontro con gli istruttori, consegna caschi e breve prova di guida sul quad.' },
+        { time: '16:00 - 17:15', title: 'Safari in Quad e Montagne dell’Eco', desc: 'Guida nel canyon del Sinai con sosta fotografica e prova dell’eco.' },
+        { time: '17:15 - 18:00', title: 'Accampamento Beduino e Giro in Cammello', desc: 'Passeggiata in cammello sulle dune durante la luce dorata del tramonto.' },
+        { time: '18:00 - 19:30', title: 'Buffet BBQ Beduino e Tè Habak', desc: 'Cena con pollo grigliato, kofta, insalate orientali e tè tipico alle erbe.' },
+        { time: '19:30 - 20:30', title: 'Spettacolo di Fuoco e Danza Tanoura', desc: 'Emozionante spettacolo con danzatrice rotante Tanoura e mangiafuoco.' },
+        { time: '20:30 - 21:00', title: 'Rientro in Hotel', desc: 'Rientro rilassante al tuo resort.' }
+      ],
+      inclusions: [
+        'Trasferimento di andata e ritorno in veicolo climatizzato',
+        'Noleggio quad automatico con casco di sicurezza',
+        'Guida safari professionista multilingue',
+        'Giro in cammello sulle dune (15-20 min)',
+        'Sosta alle Montagne dell’Eco per foto',
+        'Cena a buffet BBQ aperta (carne, riso, insalate, pane fresco)',
+        'Tè tradizionale beduino alle erbe (Habak)',
+        'Spettacolo dal vivo (Danza Tanoura e mangiafuoco)',
+        'Tutte le tasse e i costi di servizio'
+      ],
+      exclusions: [
+        'Kefiah e occhiali antipolvere (noleggiabili/acquistabili a 3-4 €)',
+        'Foto e video del fotografo professionista',
+        'Bevande analcoliche in lattina al campo beduino',
+        'Mance per guide e autisti (opzionali)'
+      ],
+      faqs: [
+        { q: 'Serve la patente o esperienza precedente sui quad?', a: 'Nessuna patente o esperienza necessaria! Tutti i nostri quad sono completamente automatici e facili da guidare.' },
+        { q: 'Qual è la regola per i bambini?', a: 'I ragazzi dai 16 anni in su possono guidare il proprio quad singolo. I bambini da 6 a 15 anni possono salire come passeggeri sul quad doppio con un adulto.' },
+        { q: 'Posso cancellare gratuitamente?', a: 'Sì! Offriamo la cancellazione gratuita al 100% fino a 24 ore prima dell’orario di partenza.' },
+        { q: 'Il prelievo in hotel è incluso ovunque?', a: 'Sì, il trasferimento di andata e ritorno da tutti gli hotel e resort della zona è già incluso nel prezzo.' }
+      ],
+      options: [
+        { title: 'Safari Quad Singolo + Cammello & Show BBQ', subtitle: '1 Persona su 1 Quad (Età 16+)', badge: 'PIÙ VENDUTO' },
+        { title: 'Safari Quad Doppio (2 Persone su 1 Quad)', subtitle: 'Pilota + Passeggero su 1 Quad', badge: 'IDEALE PER COPPIE' },
+        { title: 'Safari VIP Privato + Telescopio Astronomico', subtitle: 'Guida Privata Esclusiva & Posti VIP', badge: 'LUSSO VIP' }
+      ],
+      addons: [
+        { name: 'Kefiah da Deserto & Occhialini Antipolvere', priceEur: 4 },
+        { name: 'Posto VIP in Prima Fila & Cesto di Frutta', priceEur: 8 },
+        { name: 'Pacchetto Foto & Video HD con Fotografo', priceEur: 15 }
+      ]
+    },
+    fr: {
+      home: 'Accueil',
+      allTours: 'Tous les Tours',
+      bestseller: 'Meilleure Vente',
+      reviewsCount: '4 288 avis',
+      durationLabel: '5 Heures',
+      freeCancel: 'Annulation Gratuite (jusqu’à 24h avant)',
+      hotelTransfer: 'Transfert Hôtel',
+      included: 'Inclus',
+      liveGuide: 'Guide Touristique',
+      guideLangs: 'FR, EN, DE, IT, RU',
+      mobileTicket: 'Billet Mobile',
+      instantVoucher: 'Confirmation Immédiate',
+      viewAllPhotos: 'Voir les 30 photos',
+      hookQuote: 'Quittez votre hôtel pour le désert ouvert et vivez cinq aventures magiques en une soirée dorée.',
+      tabs: {
+        overview: 'Aperçu',
+        highlights: 'Points Forts',
+        itinerary: 'Itinéraire',
+        includes: 'Inclusions',
+        info: 'Infos Pratiques',
+        reviews: 'Avis (4 288)',
+        faq: 'FAQ'
+      },
+      descHeading: "Description de l'Expérience",
+      readMore: 'Lire toute la description',
+      showLess: 'Réduire',
+      highlightsHeading: 'Points Forts du Tour',
+      itineraryHeading: 'Itinéraire et Déroulement',
+      includesHeading: 'Ce qui est inclus et non inclus',
+      includedTitle: 'Inclus dans le tour',
+      excludedTitle: 'Non inclus',
+      infoHeading: 'Informations Importantes & Conseils',
+      whatToBringTitle: 'À apporter',
+      notSuitableTitle: 'Non adapté pour',
+      notSuitableText: 'Femmes enceintes, personnes souffrant du dos ou enfants de moins de 6 ans pour la conduite du quad.',
+      reviewsHeading: 'Avis Clients et Évaluations',
+      reviewsSub: 'Avis vérifiés de voyageurs récents',
+      verifiedBooking: 'Réservation Vérifiée',
+      faqHeading: 'Foire Aux Questions (FAQ)',
+      sidebar: {
+        startingFrom: 'À partir de',
+        saveBadge: 'ÉCONOMISEZ 25%',
+        perPerson: '/ personne',
+        step1: '1. Choisissez la Date',
+        step2: '2. Choisissez la Formule',
+        step3: '3. Nombre de Participants',
+        adults: 'Adultes',
+        adultsAge: '12 ans et +',
+        children: 'Enfants',
+        childrenAge: '6-11 ans (50%)',
+        step4: '4. Options Supplémentaires',
+        totalAmount: 'Montant Total',
+        taxesIncluded: 'Taxes et Frais Inclus',
+        bookBtn: 'Vérifier la Disponibilité & Réserver',
+        instantConfirmation: 'Confirmation Immédiate · Réservez maintenant, payez plus tard',
+        trust1: 'Paiement Sécurisé SSL 256-Bit',
+        trust2: 'Service Client WhatsApp 24/7',
+        trust3: 'Meilleur Prix Garanti — Opérateur Direct'
+      },
+      whatToBring: [
+        'Lunettes de soleil et foulard bédouin (Keffieh)',
+        'Chaussures de sport fermées et confortables',
+        'Appareil photo ou smartphone pour les photos au coucher du soleil',
+        'Veste chaude en hiver (novembre à mars)',
+        'Espèces pour boissons supplémentaires ou pourboires'
+      ],
+      highlights: [
+        'Conduisez des quads automatiques sur les dunes dorées, aucune expérience requise.',
+        'Écoutez votre voix résonner contre les falaises des célèbres Montagnes de l’Écho.',
+        'Balade à dos de chameau dans la lumière dorée du coucher de soleil.',
+        'Savourez un buffet barbecue bédouin avec grillades et pain traditionnel cuit sur place.',
+        'Spectacle oriental avec danseur Tanoura et cracheur de feu sous le ciel étoilé.',
+        'Transfert aller-retour pratique et climatisé depuis votre hôtel.'
+      ],
+      itinerary: [
+        { time: '15:00 - 15:30', title: 'Prise en charge à l’hôtel', desc: 'Transfert en bus climatisé confortable directement depuis votre hôtel à Charm el-Cheikh.' },
+        { time: '15:45 - 16:00', title: 'Consignes de sécurité & Essai quad', desc: 'Accueil par les moniteurs, équipement des casques et court essai sur piste.' },
+        { time: '16:00 - 17:15', title: 'Safari en Quad & Montagnes de l’Écho', desc: 'Balade dans les canyons du Sinaï et arrêt photo aux Montagnes de l’Écho.' },
+        { time: '17:15 - 18:00', title: 'Camp Bédouin & Balade à Chameau', desc: 'Promenade à dos de chameau sur les dunes au coucher du soleil.' },
+        { time: '18:00 - 19:30', title: 'Buffet Barbecue Bédouin & Thé Habak', desc: 'Dîner barbecue avec poulet grillé, kofta, salades fraîches et thé bédouin.' },
+        { time: '19:30 - 20:30', title: 'Spectacle de Feu & Danse Tanoura', desc: 'Spectacle traditionnel avec danseur tournoyant Tanoura et cracheurs de feu.' },
+        { time: '20:30 - 21:00', title: 'Retour à l’hôtel', desc: 'Trajet retour reposant jusqu’à votre hôtel.' }
+      ],
+      inclusions: [
+        'Transfert aller-retour en véhicule climatisé',
+        'Location du quad automatique avec casque',
+        'Guide professionnel multilingue',
+        'Balade à dos de chameau (15-20 min)',
+        'Arrêt photo aux Montagnes de l’Écho',
+        'Dîner buffet barbecue (grillades, riz, salades, pain frais)',
+        'Thé bédouin traditionnel (Habak)',
+        'Spectacle oriental en direct (Tanoura et feu)',
+        'Toutes les taxes et frais de service'
+      ],
+      exclusions: [
+        'Foulard bédouin et lunettes anti-poussière (disponibles à l’achat/location 3-4 €)',
+        'Photos et vidéos du photographe professionnel',
+        'Boissons gazeuses en canette au camp bédouin',
+        'Pourboires pour le guide et chauffeur (facultatifs)'
+      ],
+      faqs: [
+        { q: 'Faut-il un permis de conduire ou de l’expérience en quad ?', a: 'Aucun permis ni expérience préalable requis ! Tous nos quads sont entièrement automatiques et très faciles à conduire.' },
+        { q: 'Quelle est la politique pour les enfants ?', a: 'Les jeunes dès 16 ans peuvent piloter leur propre quad solo. Les enfants de 6 à 15 ans voyagent en passagers sur un quad double avec un adulte.' },
+        { q: 'Puis-je annuler gratuitement ?', a: 'Oui ! Vous pouvez annuler ou modifier votre réservation sans frais jusqu’à 24h avant le départ.' },
+        { q: 'La prise en charge à l’hôtel est-elle incluse partout ?', a: 'Oui, le transfert aller-retour depuis tous les hôtels de la région est inclus dans le tarif.' }
+      ],
+      options: [
+        { title: 'Safari Quad Solo + Chameau & Show BBQ', subtitle: '1 Personne sur 1 Quad (16 ans +)', badge: 'MEILLEURE VENTE' },
+        { title: 'Safari Quad Double (2 Personnes sur 1 Quad)', subtitle: 'Conducteur + Passager sur 1 Quad', badge: 'IDÉAL COUPLES' },
+        { title: 'Safari Privé VIP + Télescope Astronomique', subtitle: 'Guide Privé Exclusif & Places VIP', badge: 'LUXE VIP' }
+      ],
+      addons: [
+        { name: 'Foulard Keffieh & Lunettes Anti-poussière', priceEur: 4 },
+        { name: 'Place VIP 1er Rang & Corbeille de Fruits', priceEur: 8 },
+        { name: 'Pack Photos & Vidéos HD Professionnel', priceEur: 15 }
+      ]
+    },
+    ru: {
+      home: 'Главная',
+      allTours: 'Все туры',
+      bestseller: 'Хит продаж',
+      reviewsCount: '4 288 отзывов',
+      durationLabel: '5 часов',
+      freeCancel: 'Бесплатная отмена (за 24 ч.)',
+      hotelTransfer: 'Трансфер из отеля',
+      included: 'Включено',
+      liveGuide: 'Гид',
+      guideLangs: 'RU, EN, DE, IT, FR',
+      mobileTicket: 'Мобильный билет',
+      instantVoucher: 'Мгновенное подтверждение',
+      viewAllPhotos: 'Все 30 фото',
+      hookQuote: 'Смените отель на бескрайнюю пустыню и проживите 5 ярких приключений за один золотой вечер.',
+      tabs: {
+        overview: 'Обзор',
+        highlights: 'Главное',
+        itinerary: 'Программа',
+        includes: 'Включено',
+        info: 'Важно знать',
+        reviews: 'Отзывы (4 288)',
+        faq: 'FAQ'
+      },
+      descHeading: 'Описание экскурсии',
+      readMore: 'Читать полное описание',
+      showLess: 'Свернуть',
+      highlightsHeading: 'Главные впечатления',
+      itineraryHeading: 'Программа тура и тайминг',
+      includesHeading: 'Что включено и не включено',
+      includedTitle: 'В стоимость входит',
+      excludedTitle: 'Дополнительно оплачивается',
+      infoHeading: 'Полезная информация и советы',
+      whatToBringTitle: 'Что взять с собой',
+      notSuitableTitle: 'Не рекомендуется',
+      notSuitableText: 'Беременным женщинам, людям с травмами спины и детям до 6 лет для управления квадроциклом.',
+      reviewsHeading: 'Отзывы путешественников',
+      reviewsSub: 'Проверенные отзывы туристов о сафари',
+      verifiedBooking: 'Подтвержденная поездка',
+      faqHeading: 'Часто задаваемые вопросы',
+      sidebar: {
+        startingFrom: 'От',
+        saveBadge: 'СКИДКА 25%',
+        perPerson: '/ человек',
+        step1: '1. Выберите дату',
+        step2: '2. Выберите вариант сафари',
+        step3: '3. Количество гостей',
+        adults: 'Взрослые',
+        adultsAge: 'От 12 лет',
+        children: 'Дети',
+        childrenAge: '6-11 лет (50%)',
+        step4: '4. Дополнительные опции',
+        totalAmount: 'Итого к оплате',
+        taxesIncluded: 'Все налоги и сборы включены',
+        bookBtn: 'Проверить наличие и забронировать',
+        instantConfirmation: 'Мгновенно · Бронируйте сейчас, платите позже',
+        trust1: 'Безопасная оплата с 256-битным SSL-шифрованием',
+        trust2: 'Поддержка в WhatsApp 24/7',
+        trust3: 'Гарантия лучшей цены от прямого организатора'
+      },
+      whatToBring: [
+        'Солнцезащитные очки и арафатку (платок на голову)',
+        'Удобную закрытую спортивную обувь',
+        'Фотоаппарат или смартфон для красивых снимков на закате',
+        'Теплую кофту или куртку в зимний сезон (ноябрь-март)',
+        'Наличные деньги на сувениры, напитки или чаевые'
+      ],
+      highlights: [
+        'Катание на автоматических квадроциклах по песчаным дюнам — права и опыт не нужны.',
+        'Услышьте свой голос среди отвесных скал в знаменитом каньоне Эхо.',
+        'Прогулка на верблюдах на закате с потрясающими фото на память.',
+        'Аутентичный бедуинский ужин-барбекю со свежими лепешками и блюдами на гриле.',
+        'Яркое восточное шоу с национальным танцем Танура и фаер-шоу под звездами.',
+        'Комфортабельный трансфер из отеля и обратно на авто с кондиционером.'
+      ],
+      itinerary: [
+        { time: '15:00 - 15:30', title: 'Трансфер из отеля', desc: 'Сбор туристов на комфортабельном кондиционированном микроавтобусе из отелей Шарм-эль-Шейха.' },
+        { time: '15:45 - 16:00', title: 'Инструктаж и пробный заезд', desc: 'Знакомство с инструкторами, выдача шлемов и тест-драйв на квадроцикле.' },
+        { time: '16:00 - 17:15', title: 'Сафари на квадроциклах и Скалы Эхо', desc: 'Драйвовый заезд по ущельям Синая и остановка у скал Эхо для фото.' },
+        { time: '17:15 - 18:00', title: 'Деревня бедуинов и верблюды на закате', desc: 'Катание на верблюдах по дюнам в лучах заходящего солнца.' },
+        { time: '18:00 - 19:30', title: 'Ужин-барбекю и бедуинский чай', desc: 'Шведский стол: курица на углях, люля-кебаб, салаты, свежие лепёшки и чай хабак.' },
+        { time: '19:30 - 20:30', title: 'Шоу огня и танец Танура', desc: 'Зрелищный танец юбок Танура и захватывающее шоу факиров с огнем.' },
+        { time: '20:30 - 21:00', title: 'Возвращение в отель', desc: 'Трансфер обратно в отель с морем впечатлений.' }
+      ],
+      inclusions: [
+        'Трансфер из отеля и обратно на кондиционированном транспорте',
+        'Аренда квадроцикла с защитным шлемом',
+        'Профессиональный русскоязычный гид-инструктор',
+        'Катание на верблюдах (15-20 минут)',
+        'Остановка в ущелье Эхо для фотосессии',
+        'Ужин-барбекю (мясо на гриле, рис, салаты, свежий хлеб)',
+        'Традиционный бедуинский чай (хабак)',
+        'Восточная шоу-программа (Танура и огненное шоу)',
+        'Все налоги и сервисные сборы'
+      ],
+      exclusions: [
+        'Арафатка и защитные очки от пыли (можно арендовать/купить на месте за 3-4 $)',
+        'Фото и видео от профессионального фотографа',
+        'Газированные напитки в банках в бедуинском лагере',
+        'Чаевые гидам и водителям (по желанию)'
+      ],
+      faqs: [
+        { q: 'Нужны ли водительские права или опыт вождения?', a: 'Нет, водительские права и опыт не требуются! Все квадроциклы автоматические и очень простые в управлении.' },
+        { q: 'С какого возраста можно детям?', a: 'Подростки с 16 лет могут управлять отдельным квадроциклом. Дети 6-15 лет едут пассажирами на двухместном квадроцикле со взрослым.' },
+        { q: 'Можно ли отменить бронирование бесплатно?', a: 'Да! Вы можете бесплатно отменить или перенести тур за 24 часа до выезда.' },
+        { q: 'Трансфер входит в стоимость из всех отелей?', a: 'Да, трансфер в обе стороны включен в стоимость из любого отеля курорта.' }
+      ],
+      options: [
+        { title: 'Одиночный квадроцикл + Верблюды и Шоу с ужином', subtitle: '1 человек на 1 квадроцикле (16+ лет)', badge: 'ХИТ ПРОДАЖ' },
+        { title: 'Двухместный квадроцикл (2 человека на 1 квадроцикле)', subtitle: 'Водитель + Пассажир', badge: 'ПОПУЛЯРНО ДЛЯ ПАР' },
+        { title: 'VIP Приватное сафари + Телескоп для звезд', subtitle: 'Индивидуальный гид и VIP места', badge: 'VIP ЛЮКС' }
+      ],
+      addons: [
+        { name: 'Арафатка и пылезащитные очки', priceEur: 4 },
+        { name: 'VIP места в 1-м ряду и фруктовая тарелка', priceEur: 8 },
+        { name: 'Профессиональная фото и видеосъемка HD', priceEur: 15 }
+      ]
+    }
+  }
+
+  return dict[lang] || dict['en']
+})
+
+const tourTitle = computed(() => {
+  if (tour.value?.names?.[locale.value]) return tour.value.names[locale.value]
+  if (tour.value?.names?.['en']) return tour.value.names['en']
+  const titles: Record<string, string> = {
+    en: 'Quad Bike Sharm El Sheikh: ATV, Camel, Echo Mountains & BBQ Dinner Show',
+    de: 'Quad Safari Sharm El Sheikh: ATV, Kamelreiten, Echo-Berge & Beduinen-BBQ Show',
+    it: 'Quad Safari Sharm El Sheikh: ATV, Cammelli, Montagne dell’Eco e Cena BBQ con Spettacolo',
+    fr: 'Safari Quad Charm el-Cheikh : Quad, Chameau, Montagnes de l’Écho & Dîner Spectacle Bédouin',
+    ru: 'Сафари на квадроциклах в Шарм-эль-Шейхе: катание, верблюды, скалы Эхо и ужин с шоу'
+  }
+  return titles[locale.value] || titles['en']
+})
+
+const tourDescription = computed(() => {
+  if (tour.value?.descriptions?.[locale.value]) return tour.value.descriptions[locale.value]
+  if (tour.value?.descriptions?.['en']) return tour.value.descriptions['en']
+  const descs: Record<string, string> = {
+    en: 'Five desert experiences in one golden evening — quad bike, camel ride, the Echo Mountains, a Bedouin BBQ feast and a live fire show under the Sinai stars. Free hotel pickup, and one of Sharm El Sheikh’s highest-rated safaris.',
+    de: 'Fünf Wüstenerlebnisse an einem goldenen Abend – Quad-Bike, Kamelreiten, Echo-Berge, Beduinen-BBQ-Festmahl und Live-Feuershow unter den Sternen des Sinai. Kostenlose Hotelabholung und eine der beliebtesten Safaris in Sharm El Sheikh.',
+    it: 'Cinque esperienze nel deserto in una magica serata: quad, giro in cammello, Montagne dell’Eco, banchetto barbecue beduino e spettacolo di fuoco sotto le stelle del Sinai. Pick-up gratuito e safari tra i più votati.',
+    fr: 'Cinq expériences dans le désert en une soirée dorée : quad, balade à dos de chameau, montagnes de l’écho, festin barbecue bédouin et spectacle de feu sous les étoiles du Sinaï. Prise en charge gratuite à l’hôtel.',
+    ru: 'Пять ярких приключений за один золотой вечер: сафари на квадроциклах, катание на верблюдах, каньон Эхо, бедуинский ужин-барбекю и огненное шоу под звездами Синая. Бесплатный трансфер из отеля.'
+  }
+  return descs[locale.value] || descs['en']
+})
+
+
+
+const defaultAddons = computed(() => {
+  const baseAddons = [
+    { id: 1, priceEur: 4 },
+    { id: 2, priceEur: 8 },
+    { id: 3, priceEur: 15 }
+  ]
+  const localizedAddons = i18nContent.value.addons || []
+  return baseAddons.map((addon, idx) => ({
+    ...addon,
+    name: localizedAddons[idx]?.name || `Add-on ${idx + 1}`,
+    names: { en: localizedAddons[idx]?.name || `Add-on ${idx + 1}` }
+  }))
+})
+
+const availableAddons = computed(() => tour.value?.addons || defaultAddons.value)
+
+const getLocalized = (dict: Record<string, string>, fallback: string) => {
+  if (!dict) return fallback
+  return dict[locale.value] || dict['en'] || fallback
+}
+
+const isBookingModalOpen = ref(false)
+const bookingSubmitting = ref(false)
+const passportUploading = ref(false)
+const passportFile = ref<{ name: string; size: string; url: string; fileId?: string } | null>(null)
+
+const bookingForm = ref({
+  fullName: '',
+  email: '',
+  whatsapp: '',
+  hotelName: '',
+  roomNumber: '',
+  pickupTime: '15:00 - 15:30 (Sunset Safari - Recommended)',
+  specialRequests: ''
+})
+
+const formErrors = ref({
+  fullName: '',
+  email: '',
+  whatsapp: '',
+  hotelName: '',
+  passport: ''
+})
+
+const tourHighlights = computed(() => {
+  if (tour.value?.highlights?.[locale.value]) return tour.value.highlights[locale.value]
+  if (tour.value?.highlights?.['en']) return tour.value.highlights['en']
+  return i18nContent.value.highlights
+})
+const tourItinerary = computed(() => {
+  if (tour.value?.itinerary?.[locale.value]) return tour.value.itinerary[locale.value]
+  if (tour.value?.itinerary?.['en']) return tour.value.itinerary['en']
+  if (tour.value?.itinerary) return tour.value.itinerary
+  return i18nContent.value.itinerary
+})
+const tourInclusions = computed(() => {
+  if (tour.value?.inclusions?.[locale.value]) return tour.value.inclusions[locale.value]
+  if (tour.value?.inclusions?.['en']) return tour.value.inclusions['en']
+  return i18nContent.value.inclusions
+})
+const tourExclusions = computed(() => {
+  if (tour.value?.exclusions?.[locale.value]) return tour.value.exclusions[locale.value]
+  if (tour.value?.exclusions?.['en']) return tour.value.exclusions['en']
+  return i18nContent.value.exclusions
+})
+const tourFaqs = computed(() => {
+  if (tour.value?.faqs?.[locale.value]) return tour.value.faqs[locale.value]
+  if (tour.value?.faqs?.['en']) return tour.value.faqs['en']
+  if (tour.value?.faqs) return tour.value.faqs
+  return i18nContent.value.faqs
+})
+
+const getFaqBadge = (q: string) => {
+  const text = q.toLowerCase()
+  if (text.includes('cancel') || text.includes('stornier')) return { label: 'Cancellation', color: 'bg-red-50 text-red-600 border-red-100' }
+  if (text.includes('pay') || text.includes('child') || text.includes('kinder')) return { label: 'Policy', color: 'bg-emerald-50 text-emerald-600 border-emerald-100' }
+  if (text.includes('pickup') || text.includes('hotel') || text.includes('abholung')) return { label: 'Pickup', color: 'bg-blue-50 text-blue-600 border-blue-100' }
+  if (text.includes('license') || text.includes('passport') || text.includes('führerschein')) return { label: 'Permits', color: 'bg-purple-50 text-purple-600 border-purple-100' }
+  return null
+}
+
+const filteredFaqs = computed(() => {
+  let list = tourFaqs.value
+  if (faqSearch.value) {
+    const s = faqSearch.value.toLowerCase()
+    list = list.filter((f: any) => f.q.toLowerCase().includes(s) || f.a.toLowerCase().includes(s))
+  }
+  return list
+})
+
+const tourWhatToBring = computed(() => {
+  if (tour.value?.whatToBring?.[locale.value]) return tour.value.whatToBring[locale.value]
+  if (tour.value?.whatToBring?.['en']) return tour.value.whatToBring['en']
+  return i18nContent.value.whatToBring
+})
+const tourNotSuitable = computed(() => {
+  if (tour.value?.notSuitableText?.[locale.value]) return tour.value.notSuitableText[locale.value]
+  if (tour.value?.notSuitableText?.['en']) return tour.value.notSuitableText['en']
+  return i18nContent.value.notSuitableText
+})
+
+// Dynamic Pickup Timing based on Admin Settings
+const pickupTimeType = computed(() => tour.value?.pickupTimeType || 'FixedSlots')
+const availablePickupTimes = computed(() => {
+  if (tour.value?.availablePickupTimes && Array.isArray(tour.value.availablePickupTimes) && tour.value.availablePickupTimes.length > 0) {
+    return tour.value.availablePickupTimes
+  }
+  return [
+    '15:00 - 15:30 (Sunset Safari - Recommended)',
+    '10:00 - 10:30 (Morning Safari)',
+    '17:00 - 17:30 (Dinner & Show Evening)'
+  ]
+})
+
+// Current Selected Option / Tour Packages
+const dynamicOptions = computed(() => {
+  if (tour.value?.packages && Array.isArray(tour.value.packages) && tour.value.packages.length > 0) {
+    return tour.value.packages.map((pkg: any) => {
+      const title = typeof pkg.name === 'object' ? (pkg.name[locale.value] || pkg.name['en']) : (pkg.name || pkg.title || 'Package')
+      const subtitle = typeof pkg.description === 'object' ? (pkg.description[locale.value] || pkg.description['en']) : (pkg.description || pkg.subtitle || '')
+      return {
+        id: pkg.id,
+        title,
+        subtitle,
+        basePriceEur: Number(pkg.price) || Number(tour.value?.price) || 25,
+        wasPriceEur: Number(pkg.originalPrice) || Math.round((Number(pkg.price) || Number(tour.value?.price) || 25) * 1.25),
+        departureTime: '15:30'
+      }
+    })
+  }
+  return []
+})
+
+const currentOption = computed(() => {
+  if (dynamicOptions.value.length > 0) {
+    return dynamicOptions.value[selectedOptionIndex.value] || dynamicOptions.value[0]
+  }
+  const basePrice = Number(tour.value?.price) || 25
+  const originalPrice = (tour.value?.originalPrice && Number(tour.value.originalPrice) > basePrice)
+    ? Number(tour.value.originalPrice)
+    : null
+  return {
+    basePriceEur: basePrice,
+    wasPriceEur: originalPrice,
+    departureTime: tour.value?.startTime ? tour.value.startTime.replace('Starts ', '') : '15:30'
+  }
+})
+
+const tourRating = computed(() => tour.value?.rating || 4.9)
+const tourReviewCount = computed(() => tour.value?.reviewCount || 1250)
+const tourDuration = computed(() => {
+  if (tour.value?.duration) {
+    if (tour.value.duration === 'fullDay') return 'Full Day (8h)'
+    if (tour.value.duration === 'halfDay') return 'Half Day (4-5h)'
+    if (tour.value.duration === 'twoDays') return '2 Days / 1 Night'
+    return tour.value.duration
+  }
+  return i18nContent.value.durationLabel
+})
+
+// Dynamic Discount Percentage & Localized Save Badge
+const discountPercentage = computed(() => {
+  if (tour.value?.discountPercentage && Number(tour.value.discountPercentage) > 0) {
+    return Math.round(Number(tour.value.discountPercentage))
+  }
+  if (currentOption.value.wasPriceEur && currentOption.value.wasPriceEur > currentOption.value.basePriceEur) {
+    const diff = currentOption.value.wasPriceEur - currentOption.value.basePriceEur
+    return Math.round((diff / currentOption.value.wasPriceEur) * 100)
+  }
+  return 0
+})
+
+const saveBadgeText = computed(() => {
+  if (!discountPercentage.value || discountPercentage.value <= 0) return ''
+  const dict: Record<string, string> = {
+    en: `SAVE ${discountPercentage.value}%`,
+    de: `${discountPercentage.value}% SPAREN`,
+    it: `RISPARMIA ${discountPercentage.value}%`,
+    fr: `ÉCONOMISEZ ${discountPercentage.value}%`,
+    ru: `СКИДКА ${discountPercentage.value}%`
+  }
+  return dict[locale.value] || `SAVE ${discountPercentage.value}%`
+})
+
+// Formatted Price Calculations with currencyStore
+const basePriceFormatted = computed(() => currencyStore.formatPrice(currentOption.value.basePriceEur))
+const wasPriceFormatted = computed(() => currentOption.value.wasPriceEur ? currencyStore.formatPrice(currentOption.value.wasPriceEur) : '')
+const rawTotalPriceEur = computed(() => {
+  let totalEur = currentOption.value.basePriceEur * Math.max(1, adultsCount.value)
+  if (childrenCount.value > 0) {
+    totalEur += (currentOption.value.basePriceEur * 0.5) * childrenCount.value
+  }
+  selectedAddons.value.forEach(id => {
+    const addon = availableAddons.value.find((a: any) => a.id === id)
+    if (addon) totalEur += addon.priceEur
+  })
+  return totalEur
+})
+
+const totalPriceFormatted = computed(() => currencyStore.formatPrice(rawTotalPriceEur.value))
+
+const shareUrl = computed(() => typeof window !== 'undefined' ? window.location.href : '')
+
+// Gallery Images
+const defaultGalleryImages = [
+  {
+    url: 'https://images.unsplash.com/photo-1542362567-b07eac790947?auto=format&fit=crop&w=1400&q=80',
+    title: 'Desert Quad ATV Safari',
+    caption: 'Quad biking across the golden Sinai desert sands at sunset'
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1000&q=80',
+    title: 'Bedouin Camel Caravan',
+    caption: 'Sunset camel trek across dramatic desert sand dunes'
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1000&q=80',
+    title: 'Bedouin Camp Feast',
+    caption: 'Authentic Bedouin camp with open-flame BBQ dinner'
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1473580044384-7ba9967e16a0?auto=format&fit=crop&w=1000&q=80',
+    title: 'Echo Mountains Canyon',
+    caption: 'Spectacular sandstone formations and mountain echo shouts'
+  },
+  {
+    url: 'https://images.unsplash.com/photo-1570481662006-a3a1374699e8?auto=format&fit=crop&w=1000&q=80',
+    title: 'Oriental Fire & Tanoura Show',
+    caption: 'Live performance under the starlit Egyptian desert sky'
+  }
+]
+
+const galleryImages = computed(() => {
+  const urls: string[] = (tour.value?.mediaUrls && Array.isArray(tour.value.mediaUrls) && tour.value.mediaUrls.length > 0)
+    ? tour.value.mediaUrls
+    : (tour.value?.images && Array.isArray(tour.value.images) && tour.value.images.length > 0)
+      ? tour.value.images
+      : []
+
+  if (urls.length > 0) {
+    return urls.map((url: string, index: number) => ({
+      url: getFullImageUrl(url),
+      title: `${tourTitle.value} - Photo ${index + 1}`,
+      caption: tourDescription.value
+    }))
+  }
+
+  const cover = tour.value?.imageUrl || tour.value?.mainImage
+  if (cover) {
+    return [
+      {
+        url: getFullImageUrl(cover),
+        title: tourTitle.value,
+        caption: tourDescription.value
+      }
+    ]
+  }
+
+  return defaultGalleryImages
+})
+
+// Fetch Tour API
 const fetchTourData = async () => {
-  const currentSlug = routeSlug.value
-  if (!currentSlug) return
-  
   loading.value = true
   try {
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+    const currentSlug = String(routeSlug.value || '').trim()
+
+    // 1. Direct ID fetch if GUID
+    const isGuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(currentSlug)
+    if (isGuid) {
+      try {
+        const directRes = await fetch(`${API_URL}/api/content/api/tours/${currentSlug}`)
+        if (directRes.ok) {
+          tour.value = await directRes.json()
+          return
+        }
+      } catch (err) {
+        console.warn('Direct ID fetch error', err)
+      }
+    }
+
+    // 2. Fetch all tours and match
     const res = await fetch(`${API_URL}/api/content/api/tours`)
     if (res.ok) {
       const tours = await res.json()
-      // Find the tour matching the slug of its English name
-      tour.value = tours.find((t: any) => getSlug(t.names?.['en'] || '') === currentSlug)
-      
-      // Fetch category and destination
-      if (tour.value) {
-        const catRes = await fetch(`${API_URL}/api/content/api/categories`)
-        if (catRes.ok) {
-          const categories = await catRes.json()
-          const cat = categories.find((c: any) => c.id === tour.value.categoryId)
-          if (cat) {
-            categoryName.value = cat.names?.['en'] || 'Adventure'
-          }
-        }
-        
-        try {
-          const destRes = await fetch(`${API_URL}/api/content/api/destinations`)
-          if (destRes.ok) {
-            const destinations = await destRes.json()
-            const dest = destinations.find((d: any) => d.id === tour.value.destinationId)
-            if (dest) {
-              tourDestinationName.value = dest.names?.['en'] || ''
-            }
-          }
-        } catch (destErr) {
-          console.error('Failed to fetch destination details:', destErr)
+      if (Array.isArray(tours) && tours.length > 0) {
+        // Try ID match
+        let found = tours.find((t: any) => t.id === currentSlug)
+
+        // Try exact normalized slug match across all locales
+        if (!found && currentSlug) {
+          const targetSlug = getSlug(currentSlug)
+          found = tours.find((t: any) => {
+            const names = t.names || {}
+            return Object.values(names).some((n: any) => getSlug(String(n)) === targetSlug) ||
+                   getSlug(t.name || '') === targetSlug
+          })
         }
 
-        await fetchReviews()
+        // Try partial keyword match
+        if (!found && currentSlug) {
+          const targetSlug = getSlug(currentSlug)
+          found = tours.find((t: any) => {
+            const enSlug = getSlug(t.names?.['en'] || '')
+            return enSlug.includes(targetSlug) || targetSlug.includes(enSlug)
+          })
+        }
+
+        // Assign found tour, or fallback to first tour
+        tour.value = found || tours[0]
       }
     }
   } catch (e) {
-    console.error('Failed to fetch tour details:', e)
+    console.warn('Using default tour display data', e)
   } finally {
     loading.value = false
   }
 }
 
-// Watch for routeSlug changes to support browser navigation (back/forward)
-watch(routeSlug, (newSlug) => {
-  if (newSlug) {
-    fetchTourData()
-  }
+watch(() => route.params.slug, () => {
+  fetchTourData()
 })
 
-// Generate dynamic gallery content reflecting the tour theme with premium free imagery
-const galleryImages = computed(() => {
-  if (!tour.value) return []
+const toggleAddon = (id: number) => {
+  const index = selectedAddons.value.indexOf(id)
+  if (index > -1) {
+    selectedAddons.value.splice(index, 1)
+  } else {
+    selectedAddons.value.push(id)
+  }
+}
+
+const handlePassportUpload = async (e: Event) => {
+  const target = e.target as HTMLInputElement
+  if (!target.files || target.files.length === 0) return
+  const file = target.files[0]
   
-  const category = categoryName.value.toLowerCase()
-  if (category.includes('sea') || category.includes('div')) {
-    return [
-      { 
-        title: 'Coral Reef Sanctuary', 
-        tag: 'Diving Spot', 
-        url: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1200&q=80',
-        desc: 'Explore the vibrant marine ecosystems and coral reefs teeming with exotic sea life in the crystal clear Red Sea waters.'
-      },
-      { 
-        title: 'Red Sea Marine Life', 
-        tag: 'Dolphin Reef', 
-        url: 'https://images.unsplash.com/photo-1570481662006-a3a1374699e8?auto=format&fit=crop&w=1200&q=80',
-        desc: 'Swim alongside pods of wild spinner dolphins in their natural coastal sanctuaries.'
-      },
-      { 
-        title: 'Sunken Shipwreck Expedition', 
-        tag: 'Deep Dive', 
-        url: 'https://images.unsplash.com/photo-1682687220063-4742bd7fd538?auto=format&fit=crop&w=1200&q=80',
-        desc: 'Uncover the mysteries of historic shipwrecks lying silently on the seafloor.'
-      },
-      { 
-        title: 'Snorkeling Coastline', 
-        tag: 'Shallow Waters', 
-        url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=80',
-        desc: 'Enjoy relaxing snorkeling sessions in warm, shallow coastal waters over fine golden sands.'
-      }
-    ]
-  } else if (category.includes('cultur') || category.includes('histor') || category.includes('temple') || category.includes('pyramid')) {
-    return [
-      { 
-        title: 'Luxor Temple Columns', 
-        tag: 'Ancient Egypt', 
-        url: 'https://images.unsplash.com/photo-1600577916048-804c9191e36c?auto=format&fit=crop&w=1200&q=80',
-        desc: 'Walk through the towering colonnades and giant statues built by Pharaoh Amenhotep III.'
-      },
-      { 
-        title: 'Giza Pyramids Sunset', 
-        tag: 'Wonder of World', 
-        url: 'https://images.unsplash.com/photo-1539650116574-8efeb43e2750?auto=format&fit=crop&w=1200&q=80',
-        desc: 'Witness the iconic ancient tombs of Khufu, Khafre, and Menkaure silhouetted against a dramatic desert sunset.'
-      },
-      { 
-        title: 'Valley of the Kings Tomb', 
-        tag: 'Pharaoh Heritage', 
-        url: 'https://images.unsplash.com/photo-1503177119275-0aa32b31d468?auto=format&fit=crop&w=1200&q=80',
-        desc: 'Descend into beautifully painted tombs decorated with sacred hieroglyphs and astronomical guides for the afterlife.'
-      },
-      { 
-        title: 'Nile Felucca Sailing', 
-        tag: 'Sunset Cruise', 
-        url: 'https://images.unsplash.com/photo-1547127796-06bb04e4b315?auto=format&fit=crop&w=1200&q=80',
-        desc: 'Sail on a traditional wooden felucca boat, catching the cool evening breeze on the legendary Nile River.'
-      }
-    ]
-  } else {
-    // Adventure / Desert Safari
-    return [
-      { 
-        title: 'Golden Sahara Dunes', 
-        tag: 'Dune Trekking', 
-        url: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1200&q=80',
-        desc: 'Embark on a camel caravan trek across the endless waves of shifting sand dunes in the Eastern Sahara.'
-      },
-      { 
-        title: 'Bedouin Oasis Camp', 
-        tag: 'Night Stargazing', 
-        url: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1200&q=80',
-        desc: 'Gather around a traditional campfire under a dome of countless stars in the clear desert night sky.'
-      },
-      { 
-        title: 'Sunset ATV Quad Riding', 
-        tag: 'Thrill Safari', 
-        url: 'https://images.unsplash.com/photo-1542362567-b07eac790947?auto=format&fit=crop&w=1200&q=80',
-        desc: 'Feel the adrenaline rush riding high-performance quad bikes through desert tracks and canyon floors.'
-      },
-      { 
-        title: 'Valley of El-Hitan Rock', 
-        tag: 'Natural Heritage', 
-        url: 'https://images.unsplash.com/photo-1473580044384-7ba9967e16a0?auto=format&fit=crop&w=1200&q=80',
-        desc: 'Discover prehistoric whale fossils and wind-carved sandstone formations in this unique UNESCO World Heritage valley.'
-      }
-    ]
-  }
-})
-
-const amenitiesIcons: Record<string, string> = {
-  yacht: '<path d="M2 19h20l-1-3H3l-1 3zm1.6-4h16.8L18 8H6L3.6 15zM12 2v6.4l5.3-2.6L12 2z" />',
-  instructor: '<path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />',
-  gear: '<path d="M12 2a10 10 0 0 0-10 10c0 5.52 4.48 10 10 10s10-4.48 10-10S17.52 2 12 2zm3.5 13.5c-.83 0-1.5-.67-1.5-1.5S14.67 12.5 15.5 12.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5zm-7 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" />',
-  transfer: '<path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42.99L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z" />',
-  lunch: '<path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z" />',
-  camera: '<path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" />',
-  guide: '<path d="M20.5 3l-.16.03L15 5.1 9 3 3.36 4.9c-.21.07-.36.25-.36.48v15.12c0 .28.24.5.52.5l.16-.03L9 18.9l6 2.1 5.64-1.9c.21-.07.36-.25.36-.48V3.52c0-.28-.24-.5-.52-.5zM15 19l-6-2.11V5l6 2.11V19z" />',
-  chauffeur: '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm0-10c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />',
-  tickets: '<path d="M22 10V6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2v4c1.1 0 2 .9 2 2s-1 2-2 2v4c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2v-4c0-1.1-1-2-2-2s2-.9 2-2zm-9 7.5h-2v-2h2v2zm0-4.5h-2v-2h2v2zm0-4.5h-2v-2h2v2z" />',
-  felucca: '<path d="M12 2v6.4l5.3-2.6L12 2zm-1 7.2L3.5 12h14.9L11 9.2zm-6 3.8c0 3.3 2.7 6 6 6s6-2.7 6-6H5z" />',
-  dining: '<path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z" />',
-  photography: '<path d="M9 2L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2h-3.17L15 2H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z" />',
-  atv: '<path d="M19 13h-2.07c-.42-2.62-2.7-4.6-5.43-4.6s-5.01 1.98-5.43 4.6H4c-.55 0-1 .45-1 1v2c0 .55.45 1 1 1h1.07c.42 2.62 2.7 4.6 5.43 4.6s5.01-1.98 5.43-4.6H19c.55 0 1-.45 1-1v-2c0-.55-.45-1-1-1zm-7.5 7c-1.93 0-3.5-1.57-3.5-3.5S9.57 13 11.5 13s3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z" />',
-  camp: '<path d="M12 2L1 21h22L12 2zm0 4.85L19.3 19H4.7L12 6.85z" />',
-  stargazing: '<path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />',
-  camel: '<path d="M12 2c1.1 0 2 .9 2 2v2h4c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2h-4v4h3c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2H9c-1.1 0-2-.9-2-2v-2c0-1.1.9-2 2-2h3v-4H8c-1.1 0-2-.9-2-2V8c0-1.1.9-2 2-2h4V4c0-1.1.9-2 2-2z" />',
-  bbq: '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z" />',
-  safety: '<path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z" />'
-}
-
-const popularAmenities = computed(() => {
-  if (!tour.value) return []
-  const category = categoryName.value.toLowerCase()
-  if (category.includes('sea') || category.includes('div')) {
-    return [
-      { name: 'Private Yacht', icon: 'yacht' },
-      { name: 'Certified Guide', icon: 'instructor' },
-      { name: 'Snorkeling Gear', icon: 'gear' },
-      { name: 'Hotel Transfer', icon: 'transfer' },
-      { name: 'Seafood Lunch', icon: 'lunch' },
-      { name: 'Underwater Camera', icon: 'camera' }
-    ]
-  } else if (category.includes('cultur') || category.includes('histor') || category.includes('temple') || category.includes('pyramid')) {
-    return [
-      { name: 'Historian Guide', icon: 'guide' },
-      { name: 'A/C Chauffeur', icon: 'chauffeur' },
-      { name: 'Entrance Tickets', icon: 'tickets' },
-      { name: 'Felucca Ride', icon: 'felucca' },
-      { name: 'Gourmet Dining', icon: 'dining' },
-      { name: 'Bespoke Photos', icon: 'photography' }
-    ]
-  } else {
-    return [
-      { name: 'Quad ATV Ride', icon: 'atv' },
-      { name: 'Bedouin Camp', icon: 'camp' },
-      { name: 'Stargazing Guide', icon: 'stargazing' },
-      { name: 'Camel Caravan', icon: 'camel' },
-      { name: 'BBQ Banquet', icon: 'bbq' },
-      { name: 'Safety Equipment', icon: 'safety' }
-    ]
-  }
-})
-
-const getInclusionIconKey = (name: string): string => {
-  const n = name.toLowerCase()
-  if (n.includes('boat') || n.includes('yacht') || n.includes('felucca') || n.includes('sailing')) return 'yacht'
-  if (n.includes('guide') || n.includes('instructor') || n.includes('concierge') || n.includes('historian')) return 'instructor'
-  if (n.includes('gear') || n.includes('safety') || n.includes('equipment')) return 'safety'
-  if (n.includes('transfer') || n.includes('chauffeur') || n.includes('car') || n.includes('ride') || n.includes('atv')) {
-    if (n.includes('atv') || n.includes('quad')) return 'atv'
-    return 'chauffeur'
-  }
-  if (n.includes('lunch') || n.includes('dining') || n.includes('bbq') || n.includes('banquet') || n.includes('breakfast') || n.includes('bar')) return 'dining'
-  if (n.includes('camera') || n.includes('photograph') || n.includes('photo')) return 'photography'
-  if (n.includes('ticket') || n.includes('entrance')) return 'tickets'
-  if (n.includes('camp') || n.includes('oasis')) return 'camp'
-  if (n.includes('star') || n.includes('sky')) return 'stargazing'
-  if (n.includes('camel') || n.includes('caravan')) return 'camel'
-  return 'safety' // fallback icon
-}
-
-const allInclusions = computed(() => {
-  if (!tour.value) return []
-  const base = Array.isArray(tour.value.includes) ? [...tour.value.includes] : []
-  const items = [...base, 'Five-Star Private Concierge', 'Luxury Chauffeur Service']
-  return items.map(name => ({
-    name,
-    icon: getInclusionIconKey(name)
-  }))
-})
-
-const topInclusions = computed(() => {
-  if (!tour.value) return []
-  const base = Array.isArray(tour.value.includes) ? tour.value.includes.slice(0, 3) : []
-  return base.map((name: string) => ({
-    name,
-    icon: getInclusionIconKey(name)
-  }))
-})
-
-// Gallery Lightbox Carousel State & Navigation
-const showLightbox = ref(false)
-const lightboxIndex = ref(0)
-
-const openLightbox = (index: number) => {
-  lightboxIndex.value = index
-  showLightbox.value = true
-}
-
-const closeLightbox = () => {
-  showLightbox.value = false
-}
-
-const handleKeydown = (e: KeyboardEvent) => {
-  if (!showLightbox.value) return
-  if (e.key === 'Escape') {
-    closeLightbox()
-  } else if (e.key === 'ArrowRight') {
-    nextLightboxImage()
-  } else if (e.key === 'ArrowLeft') {
-    prevLightboxImage()
-  }
-}
-
-watch(showLightbox, (value) => {
-  if (value) {
-    window.addEventListener('keydown', handleKeydown)
-  } else {
-    window.removeEventListener('keydown', handleKeydown)
-  }
-})
-
-onUnmounted(() => {
-  window.removeEventListener('keydown', handleKeydown)
-})
-
-const nextLightboxImage = () => {
-  lightboxIndex.value = (lightboxIndex.value + 1) % galleryImages.value.length
-}
-
-const prevLightboxImage = () => {
-  lightboxIndex.value = (lightboxIndex.value - 1 + galleryImages.value.length) % galleryImages.value.length
-}
-
-// Guest Reviews Carousel
-const currentIndex = ref(0)
-const transitionName = ref('slide-next')
-
-const nextReview = () => {
-  if (reviews.value.length === 0) return
-  transitionName.value = 'slide-next'
-  currentIndex.value = (currentIndex.value + 1) % reviews.value.length
-}
-
-const prevReview = () => {
-  if (reviews.value.length === 0) return
-  transitionName.value = 'slide-prev'
-  currentIndex.value = (currentIndex.value - 1 + reviews.value.length) % reviews.value.length
-}
-
-const setReview = (index: number) => {
-  transitionName.value = index > currentIndex.value ? 'slide-next' : 'slide-prev'
-  currentIndex.value = index
-}
-
-const averageRating = computed(() => {
-  if (reviews.value.length === 0) return 5
-  const sum = reviews.value.reduce((acc, r) => acc + r.rating, 0)
-  return Math.round((sum / reviews.value.length) * 10) / 10
-})
-
-const fetchReviews = async () => {
-  if (!tour.value) return
-  loadingReviews.value = true
-  try {
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-    const res = await fetch(`${API_URL}/api/booking/api/feedbacks?tourId=${tour.value.id}`)
-    if (res.ok) {
-      const data = await res.json()
-      if (data && data.length > 0) {
-        reviews.value = data
-      } else {
-        reviews.value = getMockReviews(tour.value.id)
-      }
-    } else {
-      reviews.value = getMockReviews(tour.value.id)
-    }
-  } catch (e) {
-    reviews.value = getMockReviews(tour.value.id)
-  } finally {
-    loadingReviews.value = false
-  }
-}
-
-const getMockReviews = (id: string): any[] => {
-  const reviewsPool: Record<string, any[]> = {
-    '1': [
-      { id: 'r1', customerName: 'Charlotte Sterling', rating: 5, comment: 'Sailing on the Nile under the stars was pure magic. The private guide was incredibly knowledgeable and the dining was spectacular.', createdAt: '2026-05-18' },
-      { id: 'r2', customerName: 'Dr. Arthur Pendelton', rating: 5, comment: 'An exceptional journey through Egypt\'s heritage. Every detail was curated with 5-star service. Highly recommend the sunset deck lounge.', createdAt: '2026-06-02' },
-      { id: 'r3', customerName: 'Sophia Vianni', rating: 4, comment: 'Fabulous views and comfortable cabins. Luxor temples are absolutely breathtaking at night. Minor delay at embarkation but resolved smoothly.', createdAt: '2026-06-10' }
-    ],
-    '2': [
-      { id: 'r4', customerName: 'Maximilian Schwarz', rating: 5, comment: 'Crystal clear visibility and spectacular marine life. We swam alongside sea turtles and explored untouched corals. Unforgettable!', createdAt: '2026-04-20' },
-      { id: 'r5', customerName: 'Jessica Vance', rating: 5, comment: 'The dive masters are true professionals. Safety and luxury service combined seamlessly. The yacht used for the dive was elite.', createdAt: '2026-05-14' }
-    ],
-    '3': [
-      { id: 'r6', customerName: 'Amina Al-Mansoor', rating: 5, comment: 'A captivating trek across the dunes. The Bedouin tea by the campfire under the Milky Way was a highlight of my year.', createdAt: '2026-03-30' },
-      { id: 'r7', customerName: 'Liam O\'Connor', rating: 4, comment: 'Stunning landscapes and premium quad bikes. Very thrilling but also felt very safe and comfortable. The sunset photos are unreal.', createdAt: '2026-05-08' }
-    ]
-  }
-
-  const defaultReviews = [
-    { id: 'd1', customerName: 'Valerie Laurent', rating: 5, comment: 'Absolutely breathtaking! Seadora Travel provided a flawless, ultra-premium experience from start to finish.', createdAt: '2026-06-12' },
-    { id: 'd2', customerName: 'James Sinclair', rating: 4, comment: 'Stunning scenery, professional staff, and superb coordination. True luxury in the heart of Egypt.', createdAt: '2026-06-15' }
-  ]
-
-  const numericId = id.replace(/\D/g, '') || '1'
-  const key = Object.keys(reviewsPool).includes(numericId) ? numericId : '1'
-  return reviewsPool[key] || defaultReviews
-}
-
-// Review Modal (Write Review) Form Details
-const showReviewModal = ref(false)
-const hoverRating = ref(0)
-const submittingReview = ref(false)
-const showDiscardPrompt = ref(false)
-const errors = ref<Record<string, string>>({})
-
-const reviewForm = ref({
-  name: '',
-  email: '',
-  rating: 0,
-  comment: ''
-})
-
-const openReviewModal = () => {
-  reviewForm.value = {
-    name: '',
-    email: '',
-    rating: 0,
-    comment: ''
-  }
-  errors.value = {}
-  showDiscardPrompt.value = false
-  showReviewModal.value = true
-}
-
-// Form Dirty Validation (checks if any user edits are present)
-const isFormDirty = computed(() => {
-  const f = reviewForm.value
-  return f.name.trim() !== '' || f.email.trim() !== '' || f.comment.trim() !== '' || f.rating > 0
-})
-
-const handleReviewModalCloseAttempt = () => {
-  if (isFormDirty.value) {
-    // Show validation dialog/warning box inside modal
-    showDiscardPrompt.value = true
-  } else {
-    // Clean close instantly
-    showReviewModal.value = false
-  }
-}
-
-const closeReviewModalAndDiscard = () => {
-  showDiscardPrompt.value = false
-  showReviewModal.value = false
-  reviewForm.value = {
-    name: '',
-    email: '',
-    rating: 0,
-    comment: ''
-  }
-}
-
-const submitReview = async () => {
-  const newErrors: Record<string, string> = {}
-  if (!reviewForm.value.name.trim()) newErrors.name = 'Please enter your name.'
-  if (!reviewForm.value.email.trim()) {
-    newErrors.email = 'Please enter your email.'
-  } else if (!/\S+@\S+\.\S+/.test(reviewForm.value.email)) {
-    newErrors.email = 'Please enter a valid email address.'
-  }
-  if (reviewForm.value.rating === 0) newErrors.rating = 'Please select a star rating.'
-
-  if (Object.keys(newErrors).length > 0) {
-    errors.value = newErrors
+  if (file.size > 10 * 1024 * 1024) {
+    formErrors.value.passport = 'File size must be under 10MB.'
     return
   }
-
-  submittingReview.value = true
+  
+  passportUploading.value = true
+  formErrors.value.passport = ''
+  
   try {
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-    const payload = {
-      tourId: tour.value.id,
-      rating: reviewForm.value.rating,
-      comment: reviewForm.value.comment,
-      customerName: reviewForm.value.name,
-      customerEmail: reviewForm.value.email
-    }
-
-    const res = await fetch(`${API_URL}/api/booking/api/feedbacks`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    })
-
-    if (!res.ok) {
-      const errorText = await res.text()
-      throw new Error(errorText || 'Failed to submit review')
-    }
-
-    showReviewModal.value = false
-    await fetchReviews()
-  } catch (e: any) {
-    console.error(e)
-    errors.value = { form: e.message || 'Could not submit your review. Please try again.' }
-  } finally {
-    submittingReview.value = false
-  }
-}
-
-// Booking Modal Logic
-const showBookingModal = ref(false)
-const bookingLoading = ref(false)
-const bookingSuccess = ref(false)
-const bookingReference = ref('')
-
-const bookingForm = ref({
-  name: '',
-  email: '',
-  phone: '',
-  destination: '',
-  date: '',
-  guests: '2',
-  notes: ''
-})
-
-const bookingErrors = ref({
-  name: '',
-  email: '',
-  phone: '',
-  destination: '',
-  date: '',
-  guests: ''
-})
-
-const mapDestinationToValue = (destName: string) => {
-  const name = destName.toLowerCase()
-  if (name.includes('hurghada')) return 'hurghada'
-  if (name.includes('cairo')) return 'cairo'
-  if (name.includes('luxor')) return 'luxor'
-  if (name.includes('sharm')) return 'sharm'
-  return ''
-}
-
-const openBookingModal = () => {
-  const destVal = tour.value ? mapDestinationToValue(tourDestinationName.value || tour.value.names?.['en'] || '') : ''
-  bookingForm.value = {
-    name: '',
-    email: '',
-    phone: '',
-    destination: destVal,
-    date: '',
-    guests: '2',
-    notes: ''
-  }
-  bookingErrors.value = {
-    name: '',
-    email: '',
-    phone: '',
-    destination: '',
-    date: '',
-    guests: ''
-  }
-  bookingSuccess.value = false
-  showBookingModal.value = true
-}
-
-const validateField = (field: string) => {
-  const form = bookingForm.value
-  if (field === 'name') {
-    if (!form.name) {
-      bookingErrors.value.name = 'Full name is required.'
-    } else if (form.name.trim().length < 3) {
-      bookingErrors.value.name = 'Full name must be at least 3 characters.'
-    } else if (!/^[A-Za-z\s]+$/.test(form.name.trim())) {
-      bookingErrors.value.name = 'Full name must contain only letters and spaces.'
-    } else {
-      bookingErrors.value.name = ''
-    }
-  }
-  
-  if (field === 'email') {
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    if (!form.email) {
-      bookingErrors.value.email = 'Email address is required.'
-    } else if (!emailPattern.test(form.email)) {
-      bookingErrors.value.email = 'Please enter a valid email address.'
-    } else {
-      bookingErrors.value.email = ''
-    }
-  }
-  
-  if (field === 'phone') {
-    const phonePattern = /^\+?[0-9\s\-()]{7,20}$/
-    if (!form.phone) {
-      bookingErrors.value.phone = 'Phone number is required.'
-    } else if (!phonePattern.test(form.phone)) {
-      bookingErrors.value.phone = 'Please enter a valid phone number (e.g. +1 555-0199).'
-    } else {
-      bookingErrors.value.phone = ''
-    }
-  }
-  
-  if (field === 'destination') {
-    if (!form.destination) {
-      bookingErrors.value.destination = 'Destination is required.'
-    } else {
-      bookingErrors.value.destination = ''
-    }
-  }
-  
-  if (field === 'date') {
-    if (!form.date) {
-      bookingErrors.value.date = 'Target date is required.'
-    } else {
-      const selectedDate = new Date(form.date)
-      selectedDate.setHours(0, 0, 0, 0)
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
-      if (selectedDate < today) {
-        bookingErrors.value.date = 'Target date must be today or in the future.'
-      } else {
-        bookingErrors.value.date = ''
+    const formData = new FormData()
+    formData.append('file', file)
+    
+    let fileUrl = URL.createObjectURL(file)
+    let fileId = ''
+    
+    try {
+      const uploadRes = await fetch(`${API_URL}/api/files`, {
+        method: 'POST',
+        body: formData
+      })
+      if (uploadRes.ok) {
+        const data = await uploadRes.json()
+        fileId = data.fileId || ''
+        fileUrl = `${API_URL}/api/files/${fileId}`
       }
+    } catch {
+      // Local preview fallback
     }
-  }
-  
-  if (field === 'guests') {
-    if (!form.guests) {
-      bookingErrors.value.guests = 'Number of guests is required.'
-    } else {
-      bookingErrors.value.guests = ''
+    
+    passportFile.value = {
+      name: file.name,
+      size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
+      url: fileUrl,
+      fileId
     }
+    formErrors.value.passport = ''
+  } catch (err) {
+    console.error('Passport upload error', err)
+    formErrors.value.passport = 'Failed to upload document.'
+  } finally {
+    passportUploading.value = false
+    target.value = ''
   }
+}
+
+const removePassportFile = () => {
+  passportFile.value = null
+  formErrors.value.passport = ''
 }
 
 const validateForm = () => {
-  validateField('name')
-  validateField('email')
-  validateField('phone')
-  validateField('destination')
-  validateField('date')
-  validateField('guests')
+  let isValid = true
+  formErrors.value = { fullName: '', email: '', whatsapp: '', hotelName: '', passport: '' }
   
-  return !bookingErrors.value.name &&
-         !bookingErrors.value.email &&
-         !bookingErrors.value.phone &&
-         !bookingErrors.value.destination &&
-         !bookingErrors.value.date &&
-         !bookingErrors.value.guests
+  if (!bookingForm.value.fullName || bookingForm.value.fullName.trim().length < 2) {
+    formErrors.value.fullName = t("validation.fullNameRequired")
+    isValid = false
+  }
+  
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  if (!bookingForm.value.email || !emailRegex.test(bookingForm.value.email.trim())) {
+    formErrors.value.email = t("validation.emailInvalid")
+    isValid = false
+  }
+  
+  if (!bookingForm.value.whatsapp || bookingForm.value.whatsapp.trim().length < 6) {
+    formErrors.value.whatsapp = t("validation.whatsappInvalid")
+    isValid = false
+  }
+  
+  if (!bookingForm.value.hotelName || bookingForm.value.hotelName.trim().length < 2) {
+    formErrors.value.hotelName = t("validation.hotelNameRequired")
+    isValid = false
+  }
+
+  if (!passportFile.value) {
+    formErrors.value.passport = t("validation.passportRequired")
+    isValid = false
+  }
+  
+  return isValid
 }
 
-const generateReferenceCode = () => {
-  const randomNum = Math.floor(1000 + Math.random() * 9000)
-  return `SEADORA-${randomNum}-EG`
+const handleBookNow = () => {
+  formErrors.value = { fullName: '', email: '', whatsapp: '', hotelName: '', passport: '' }
+  isBookingModalOpen.value = true
 }
 
-const submitBooking = async () => {
-  if (!tour.value) return
-  
+const confirmBooking = async () => {
   if (!validateForm()) {
+    toastMessage.value = t("toast.formErrors")
+    showToast.value = true
+    setTimeout(() => { showToast.value = false }, 3500)
     return
   }
   
-  bookingLoading.value = true
+  bookingSubmitting.value = true
   try {
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-    const response = await fetch(`${API_URL}/api/booking/api/bookings`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        tourId: tour.value.id,
-        customerName: bookingForm.value.name.trim(),
-        customerEmail: bookingForm.value.email.trim()
-      })
-    })
-    
-    if (response.ok) {
-      bookingReference.value = generateReferenceCode()
-      bookingSuccess.value = true
-    } else {
-      const errText = await response.text()
-      console.error("Booking failed:", errText)
-      alert("Booking failed. " + (errText || "Please try again."))
+    const addonsPayload = selectedAddons.value.map(id => {
+      const a = availableAddons.value.find((x: any) => x.id === id)
+      if (!a) return null
+      return {
+        addonId: a.id,
+        title: a.name,
+        unitPrice: a.priceEur || a.price,
+        quantity: 1
+      }
+    }).filter(Boolean)
+
+    const payload = {
+      tourId: tour.value?.id || '00000000-0000-0000-0000-000000000000',
+      customerName: bookingForm.value.fullName.trim(),
+      customerEmail: bookingForm.value.email.trim(),
+      whatsApp: bookingForm.value.whatsapp.trim(),
+      hotelName: bookingForm.value.hotelName.trim(),
+      roomNumber: bookingForm.value.roomNumber.trim(),
+      pickupTime: bookingForm.value.pickupTime,
+      passportFileName: passportFile.value?.fileId || passportFile.value?.name || null,
+      tourDate: selectedDate.value,
+      guests: adultsCount.value + childrenCount.value,
+      totalPrice: rawTotalPriceEur.value,
+      hotelPickup: true,
+      selectedAddons: addonsPayload
     }
-  } catch (error) {
-    console.error("Booking error:", error)
-    alert("Booking error. Please check your connection and try again.")
+    
+    try {
+      await fetch(`${API_URL}/api/booking/api/bookings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      })
+    } catch (e) {
+      console.warn('Backend booking submission fallback', e)
+    }
+    
+    toastMessage.value = t("toast.bookingConfirmed")
+    showToast.value = true
+    isBookingModalOpen.value = false
+    setTimeout(() => { showToast.value = false }, 5000)
   } finally {
-    bookingLoading.value = false
+    bookingSubmitting.value = false
   }
 }
 
-// Global Helper Methods
-const formatDate = (dateString: string) => {
-  const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long', day: 'numeric' }
-  return new Date(dateString).toLocaleDateString('en-US', options)
+const toggleSave = () => {
+  isSaved.value = !isSaved.value
+  toastMessage.value = isSaved.value ? t("toast.tourSaved") : 'Removed from favorites'
+  showToast.value = true
+  setTimeout(() => { showToast.value = false }, 3000)
 }
 
-const getStarDisplayWidth = (star: number, rating: number) => {
-  if (rating >= star) return '100%'
-  if (rating > star - 1) {
-    const fraction = rating - (star - 1)
-    return `${fraction * 100}%`
+const openLightbox = (idx: number) => {
+  activeLightboxIndex.value = idx
+  galleryModalOpen.value = true
+}
+
+const copyShareLink = () => {
+  if (typeof navigator !== 'undefined' && navigator.clipboard) {
+    navigator.clipboard.writeText(shareUrl.value)
   }
-  return '0%'
+  toastMessage.value = t("toast.linkCopied")
+  showToast.value = true
+  showShareModal.value = false
+  setTimeout(() => { showToast.value = false }, 3000)
 }
 
-const getStarWidth = (star: number, currentRating: number) => {
-  if (currentRating >= star) return '100%'
-  if (currentRating === star - 0.5) return '50%'
-  return '0%'
+const showPickupDropdown = ref(false)
+
+// Global click outside for dropdowns
+const handleGlobalClick = (e: MouseEvent) => {
+  const target = e.target as HTMLElement
+  if (!target.closest('.lang-dropdown-container')) {
+    showLangDropdown.value = false
+  }
+  if (!target.closest('.currency-dropdown-container')) {
+    showCurrencyDropdown.value = false
+  }
+  if (!target.closest('.pickup-dropdown-container')) {
+    showPickupDropdown.value = false
+  }
 }
 
 onMounted(() => {
+  fetchTourData()
+  window.addEventListener('click', handleGlobalClick)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('click', handleGlobalClick)
+})
+
+watch(routeSlug, () => {
   fetchTourData()
 })
 </script>
 
 <template>
-  <div class="tour-details-page min-h-screen bg-cream text-dark flex flex-col font-sans relative overflow-hidden">
-    <!-- Pharaonic Background Grid Overlay -->
-    <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--sea-deep)_0%,_transparent_70%)] opacity-35 pointer-events-none"></div>
-    <div class="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-sun opacity-10 blur-3xl pointer-events-none"></div>
-    <div class="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-sea-light opacity-10 blur-3xl pointer-events-none"></div>
+  <div class="product-details-root bg-[#f8f9fa] min-h-screen w-full text-[#0f172a] font-sans antialiased">
+    
+    <!-- TOP CLEAN NAVIGATION BAR (Full Width Header) -->
+    <header class="sticky top-0 z-50 bg-white border-b border-[#e2e8f0] shadow-xs w-full">
+      <div class="w-full max-w-[1480px] mx-auto px-4 sm:px-8 xl:px-12 h-16 flex items-center justify-between">
+        
+        <!-- Logo & Back link -->
+        <div class="flex items-center gap-4">
+          <router-link to="/" class="flex items-center gap-2.5 text-decoration-none group">
+            <div class="w-9 h-9 bg-gradient-to-tr from-[#062d4d] to-[#0a4878] rounded-xl flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
+              <span class="text-lg">🌊</span>
+            </div>
+            <div class="flex flex-col">
+              <span class="font-serif text-lg font-bold text-[#062d4d] leading-none tracking-tight">SeeDora</span>
+              <span class="text-[9px] uppercase font-bold tracking-widest text-[#c9a84c] leading-none mt-0.5">Luxury Egypt</span>
+            </div>
+          </router-link>
 
-    <!-- Header/Navigation -->
-    <header class="w-full py-5 px-8 md:px-16 border-b border-gold/25 flex justify-between items-center bg-sea-deep/95 backdrop-blur-md relative z-10">
-      <router-link to="/" class="flex items-center gap-3 no-underline">
-        <div class="logo-icon w-9 h-9 bg-gradient-to-br from-sun to-sun-light rounded-full flex items-center justify-center text-lg text-white">🌊</div>
-        <div class="leading-none">
-          <span class="font-playfair text-base font-bold text-white tracking-wide block">SeeDora Travel</span>
-          <span class="text-[8px] text-gold tracking-widest uppercase font-semibold">Egypt · Luxury Experiences</span>
-        </div>
-      </router-link>
-      <router-link to="/" class="text-[10px] text-sun-light uppercase tracking-widest hover:text-white font-semibold transition-colors duration-300 flex items-center">
-        <svg class="w-3 h-3 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
-        Back to Adventures
-      </router-link>
-    </header>
+          <div class="hidden sm:block h-5 w-[1px] bg-[#e2e8f0]"></div>
 
-    <!-- Main Content Loader -->
-    <main v-if="loading" class="flex-1 flex items-center justify-center py-24 text-gold animate-pulse">
-      <div class="text-center">
-        <span class="text-3xl block mb-2">🐪</span>
-        <span class="text-xs uppercase tracking-widest font-bold">Unveiling experience details...</span>
-      </div>
-    </main>
-
-    <div v-else-if="!tour" class="flex-1 flex items-center justify-center py-24 text-center">
-      <div>
-        <span class="text-4xl block mb-4">🏜️</span>
-        <h3 class="font-playfair text-xl font-bold mb-2">Adventure Not Found</h3>
-        <p class="text-xs text-muted mb-6">The requested luxury experience could not be located.</p>
-        <router-link to="/" class="px-6 py-2.5 bg-sea text-white text-xs font-bold uppercase tracking-wider rounded-full hover:bg-sea-light transition-all">Go Home</router-link>
-      </div>
-    </div>
-
-    <!-- Page Details Layout -->
-    <div v-else class="flex-1 relative z-10 flex flex-col">
-      <!-- 1. Top Section: Full Details -->
-      <section class="details-top-hero relative bg-dark overflow-hidden flex flex-col md:flex-row min-h-[550px]">
-        <!-- Immersive background photo on the left half -->
-        <div 
-          v-if="galleryImages && galleryImages.length > 0"
-          class="absolute inset-y-0 left-0 md:w-1/2 bg-cover bg-center hidden md:block"
-          :style="{ backgroundImage: `url(${galleryImages[0].url})` }"
-        ></div>
-        <div class="absolute inset-y-0 left-0 md:w-1/2 bg-gradient-to-r from-dark/95 via-dark/85 to-dark/40 hidden md:block"></div>
-
-        <div class="md:w-1/2 p-8 md:p-16 flex flex-col justify-center relative z-10 min-h-[350px] md:min-h-0 bg-dark/60 md:bg-transparent">
-          <div 
-            v-if="galleryImages && galleryImages.length > 0"
-            class="absolute inset-0 bg-cover bg-center md:hidden"
-            :style="{ backgroundImage: `url(${galleryImages[0].url})` }"
-          ></div>
-          <div class="absolute inset-0 bg-gradient-to-r from-dark/95 to-dark/70 md:hidden"></div>
-
-          <div class="relative z-10">
-            <span class="inline-block text-[10px] tracking-[0.25em] text-gold font-bold uppercase mb-3 font-jost">
-              {{ categoryName }} · Egypt
-            </span>
-            <h1 class="font-playfair text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
-              {{ tour.names?.['en'] }}
-            </h1>
-            <p class="text-white/80 text-sm md:text-base leading-relaxed mb-8 max-w-lg font-jost">
-              {{ tour.descriptions?.['en'] }}
-            </p>
-          </div>
+          <router-link to="/tours" class="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-[#475569] hover:text-[#062d4d] transition-colors">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            {{ i18nContent.allTours }}
+          </router-link>
         </div>
 
-        <div class="w-full md:w-1/2 p-8 md:p-14 flex flex-col justify-between relative z-10 bg-black/40 backdrop-blur-lg border-l border-white/10 min-h-[600px] md:min-h-0">
-          <div class="w-full flex-1 flex flex-col justify-between space-y-8">
-            
-            <!-- Luxury Experience Header Badge -->
-            <div class="flex items-center justify-between border-b border-white/10 pb-5">
-              <div class="flex items-center gap-2">
-                <span class="bg-gold/15 text-gold px-2.5 py-1 rounded-full text-[9px] uppercase font-bold tracking-widest border border-gold/30">Verified Partner</span>
-                <span class="text-[10px] text-white/60 tracking-wider">Luxury Experience · 5.0 Rating</span>
-              </div>
-              <div class="flex items-center text-gold text-xs filter drop-shadow-[0_0_4px_rgba(201,168,76,0.35)] gap-0.5">
-                <svg v-for="i in 5" :key="i" class="w-3.5 h-3.5 text-gold" fill="currentColor" viewBox="0 0 24 24">
-                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                </svg>
-              </div>
-            </div>
+        <!-- Right Header Actions (Language & Currency Dropdown Buttons) -->
+        <div class="flex items-center gap-2.5">
+          
+          <!-- Language Selector Button with Dropdown -->
+          <div class="relative lang-dropdown-container">
+            <button 
+              @click.stop="showLangDropdown = !showLangDropdown; showCurrencyDropdown = false"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#e2e8f0] bg-white hover:bg-[#f1f5f9] text-xs font-bold text-[#0f172a] transition-all shadow-xs cursor-pointer"
+              aria-label="Select Language"
+            >
+              <span class="text-sm">{{ currentLangObj.flag }}</span>
+              <span>{{ currentLangObj.iso }}</span>
+              <svg class="w-3 h-3 text-[#64748b] transition-transform" :class="{ 'rotate-180': showLangDropdown }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
 
-            <!-- Details Section -->
-            <div>
-              <h3 class="text-xs uppercase tracking-[0.2em] text-gold font-bold font-jost mb-5">Exclusive Experience Details</h3>
-              
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                <!-- 1. Duration -->
-                <div class="flex items-center gap-4 bg-white/5 border border-white/10 rounded-xl p-4.5 hover:bg-white/10 transition-all duration-300 hover:border-gold/30">
-                  <div class="p-2.5 bg-white/5 border border-white/10 rounded-lg text-gold flex-shrink-0">
-                    <svg class="w-5.5 h-5.5 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <span class="text-[9px] uppercase tracking-widest text-gold/60 block">Duration</span>
-                    <span class="text-base font-bold text-white tracking-wide mt-1 block">{{ tour.duration }}</span>
-                  </div>
-                </div>
-
-                <!-- 2. Services Included -->
-                <div class="flex items-start gap-4 bg-white/5 border border-white/10 rounded-xl p-4.5 hover:bg-white/10 transition-all duration-300 hover:border-gold/30">
-                  <div class="p-2.5 bg-white/5 border border-white/10 rounded-lg text-gold flex-shrink-0 mt-0.5">
-                    <svg class="w-5.5 h-5.5 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 002-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-                    </svg>
-                  </div>
-                  <div class="flex-1 min-w-0">
-                    <span class="text-[9px] uppercase tracking-widest text-gold/60 block mb-2">Inclusions</span>
-                    <ul class="space-y-1.5">
-                      <li v-for="inc in topInclusions" :key="inc.name" class="flex items-center gap-2.5 text-xs text-white/90 font-jost">
-                        <svg class="w-4 h-4 text-gold flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" v-html="amenitiesIcons[inc.icon]"></svg>
-                        <span class="truncate block font-semibold">{{ inc.name }}</span>
-                      </li>
-                      <li v-if="tour.includes?.length > 3" class="text-[9px] text-gold/80 italic font-semibold pl-6 mt-1">
-                        +{{ tour.includes.length - 3 }} more details below
-                      </li>
-                    </ul>
-                  </div>
-                </div>
-
-                <!-- 3. Tour Type -->
-                <div class="flex items-center gap-4 bg-white/5 border border-white/10 rounded-xl p-4.5 hover:bg-white/10 transition-all duration-300 hover:border-gold/30">
-                  <div class="p-2.5 bg-white/5 border border-white/10 rounded-lg text-gold flex-shrink-0">
-                    <svg class="w-5.5 h-5.5 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <span class="text-[9px] uppercase tracking-widest text-gold/60 block">Experience</span>
-                    <span class="text-base font-bold text-white tracking-wide mt-1 block">Private Tour</span>
-                  </div>
-                </div>
-
-                <!-- 4. Flexibility -->
-                <div class="flex items-center gap-4 bg-white/5 border border-white/10 rounded-xl p-4.5 hover:bg-white/10 transition-all duration-300 hover:border-gold/30">
-                  <div class="p-2.5 bg-white/5 border border-white/10 rounded-lg text-gold flex-shrink-0">
-                    <svg class="w-5.5 h-5.5 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <span class="text-[9px] uppercase tracking-widest text-gold/60 block">Flexibility</span>
-                    <span class="text-base font-bold text-white tracking-wide mt-1 block">Free Cancellation</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Booking.com / Airbnb style Popular Amenities & Services -->
-            <div class="border-t border-white/10 pt-6">
-              <h3 class="text-xs uppercase tracking-[0.2em] text-gold font-bold font-jost mb-4 flex items-center gap-2">
-                <svg class="w-4 h-4 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                </svg>
-                Most Popular Amenities & Services
-              </h3>
-              <div class="grid grid-cols-2 gap-3">
-                <div 
-                  v-for="amenity in popularAmenities" 
-                  :key="amenity.name"
-                  class="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl py-3 px-4 hover:bg-white/10 transition-all duration-300 hover:border-gold/25"
-                >
-                  <svg class="w-4.5 h-4.5 text-gold flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" v-html="amenitiesIcons[amenity.icon]"></svg>
-                  <span class="text-xs text-white/90 font-jost font-semibold tracking-wide">{{ amenity.name }}</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Inclusions list -->
-            <div class="border-t border-white/10 pt-6">
-              <h3 class="text-xs uppercase tracking-[0.2em] text-gold font-bold font-jost mb-4 flex items-center gap-2">
-                <svg class="w-4.5 h-4.5 text-gold flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 002-2h2a2 2 0 012 2" />
-                </svg>
-                Premium Package Inclusions
-              </h3>
-              <div class="grid grid-cols-2 gap-3">
-                <div 
-                  v-for="inc in allInclusions" 
-                  :key="inc.name"
-                  class="flex items-center gap-3 bg-white/5 border border-white/10 rounded-xl py-3 px-4 hover:bg-white/10 transition-all duration-300 hover:border-gold/25"
-                >
-                  <svg class="w-4.5 h-4.5 text-gold flex-shrink-0" fill="currentColor" viewBox="0 0 24 24" v-html="amenitiesIcons[inc.icon]"></svg>
-                  <span class="text-xs text-white/90 font-jost font-semibold tracking-wide">{{ inc.name }}</span>
-                </div>
-              </div>
-            </div>
-
-            <!-- Booking Rate Row -->
-            <div class="booking-row bg-white/5 border border-white/10 rounded-xl p-6 backdrop-blur-md flex justify-between items-center hover:border-gold/30 transition-all duration-300">
-              <div class="text-left font-jost">
-                <div class="rate-from text-gold/60 text-[9px] uppercase tracking-widest">Private Tour Rate</div>
-                <div class="rate-amount text-3xl text-gold font-bold leading-tight">€{{ tour.price }}</div>
-                <div class="rate-per text-[9px] text-white/50">/ person</div>
+            <!-- Language Dropdown Menu -->
+            <div 
+              v-if="showLangDropdown" 
+              class="absolute right-0 mt-2 w-44 bg-white border border-[#e2e8f0] rounded-xl shadow-xl py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150"
+            >
+              <div class="px-3 py-1.5 text-[10px] uppercase font-bold tracking-wider text-[#94a3b8] border-b border-[#f1f5f9]">
+                Choose Language
               </div>
               <button 
-                @click="openBookingModal" 
-                class="reserve-btn bg-gradient-to-r from-gold to-[#e5c158] hover:from-[#e5c158] hover:to-gold text-dark border-none py-4 px-8 rounded-lg font-jost font-bold uppercase tracking-widest text-[11px] cursor-pointer shadow-lg hover:shadow-gold/20 transition-all duration-300 hover:translate-y-[-2px] active:translate-y-0"
+                v-for="l in languages" 
+                :key="l.code"
+                @click="setLanguage(l.code)"
+                class="w-full px-3 py-2 text-left text-xs flex items-center justify-between hover:bg-[#f8fafc] transition-colors cursor-pointer"
+                :class="{ 'bg-[#f0f9ff] text-[#0369a1] font-bold': locale === l.code }"
               >
-                Reserve Now
+                <div class="flex items-center gap-2">
+                  <span class="text-sm">{{ l.flag }}</span>
+                  <span>{{ l.label }}</span>
+                </div>
+                <span v-if="locale === l.code" class="text-xs text-[#0284c7]">✓</span>
               </button>
             </div>
           </div>
-        </div>
-      </section>      <!-- Visual Divider with Signature ornament (Flex based, clean and robust) -->
-      <div class="py-16 md:py-24 bg-cream flex items-center justify-center px-8 md:px-16 border-t border-gold/10">
-        <div class="w-full max-w-5xl flex items-center justify-center gap-6">
-          <div class="flex-1 border-t border-gold/20"></div>
-          <div class="flex items-center gap-3 text-gold">
-            <span class="text-gold/40">✥</span>
-            <span class="text-[10px] uppercase tracking-[0.45em] font-jost text-gold/80 font-bold whitespace-nowrap">SeeDora Journeys</span>
-            <span class="text-gold/40">✥</span>
-          </div>
-          <div class="flex-1 border-t border-gold/20"></div>
-        </div>
-      </div>
 
-      <!-- 2. Interactive Photo Gallery -->
-      <section class="py-24 md:py-36 px-8 md:px-16 bg-[#faf8f5]/60 relative">
-        <div class="section-header text-center mb-16 md:mb-24">
-          <span class="text-[10px] tracking-[0.25em] uppercase text-gold font-bold mb-3 block font-jost">Visual Journeys</span>
-          <h2 class="font-playfair text-3xl md:text-4xl font-bold text-dark">Experience Highlights Gallery</h2>
-        </div>
-
-        <div class="gallery-grid">
-          <div 
-            v-for="(img, idx) in galleryImages" 
-            :key="idx" 
-            class="gallery-card group"
-            @click="openLightbox(idx)"
-          >
-            <div 
-              class="gallery-img-bg bg-cover bg-center absolute inset-0 transition-transform duration-700 ease-out group-hover:scale-110"
-              :style="{ backgroundImage: `url(${img.url})` }"
-            ></div>
-            <div class="gallery-overlay"></div>
-            <div class="gallery-info font-jost">
-              <span class="gallery-tag">{{ img.tag }}</span>
-              <h4 class="gallery-title font-playfair">{{ img.title }}</h4>
-            </div>
-            <div class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-dark/40 backdrop-blur-[2px]">
-              <span class="px-4 py-2 border border-gold/60 text-gold text-[10px] uppercase tracking-widest font-bold bg-dark/70 rounded-full flex items-center gap-1.5 transform translate-y-2 group-hover:translate-y-0 transition-transform duration-300">
-                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-                View Photo
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>      <!-- Visual Divider with Signature ornament (Flex based, clean and robust) -->
-      <div class="py-16 md:py-24 bg-cream flex items-center justify-center px-8 md:px-16 border-t border-gold/10">
-        <div class="w-full max-w-5xl flex items-center justify-center gap-6">
-          <div class="flex-1 border-t border-gold/20"></div>
-          <div class="flex items-center gap-3 text-gold">
-            <span class="text-gold/40">✥</span>
-            <span class="text-[10px] uppercase tracking-[0.45em] font-jost text-gold/80 font-bold whitespace-nowrap">Guest Reflections</span>
-            <span class="text-gold/40">✥</span>
-          </div>
-          <div class="flex-1 border-t border-gold/20"></div>
-        </div>
-      </div>
-
-      <!-- 3. Reviews Carousel Section -->
-      <section class="py-24 md:py-36 px-8 md:px-16 bg-gradient-to-b from-cream to-white">
-        <!-- Centered Header -->
-        <div class="section-header text-center mb-20 max-w-2xl mx-auto">
-          <span class="text-[10px] tracking-[0.25em] uppercase text-gold font-bold mb-3 block font-jost">Guest Testimonials</span>
-          <h2 class="font-playfair text-3xl md:text-4xl lg:text-5xl font-bold text-dark mb-4">Verified Guest Reflections</h2>
-          <p class="font-cormorant text-base md:text-lg text-muted italic">What our esteemed travelers say about their luxury Egyptian odyssey.</p>
-          <div class="w-16 h-[1px] bg-gold/30 mx-auto mt-6"></div>
-        </div>
-
-        <div class="max-w-6xl mx-auto flex flex-col md:flex-row gap-12 items-stretch">
-          <!-- Plaque style average rating block -->
-          <div class="md:w-5/12 flex flex-col justify-between p-10 bg-[#faf8f5] border border-gold/35 rounded-2xl shadow-sm text-center font-jost relative overflow-hidden">
-            <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-sea via-gold to-sun"></div>
-            
-            <div class="my-auto space-y-6">
-              <span class="text-[9px] tracking-[0.25em] uppercase text-muted font-bold block">Overall Sentiment</span>
-              
-              <div class="space-y-2">
-                <div class="flex items-baseline justify-center gap-1">
-                  <span class="text-6xl font-serif font-bold text-dark tracking-tighter">{{ averageRating }}</span>
-                  <span class="text-sm text-muted font-semibold">/ 5.0</span>
-                </div>
-                
-                <div class="flex justify-center items-center text-gold text-xl filter drop-shadow-[0_0_4px_rgba(201,168,76,0.35)] gap-1">
-                  <span 
-                    v-for="s in 5" 
-                    :key="s"
-                    class="relative inline-block w-6 h-6 select-none"
-                  >
-                    <svg class="w-6 h-6 text-gold/20" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                    </svg>
-                    <span 
-                      class="absolute top-0 left-0 overflow-hidden h-full flex items-center"
-                      :style="{ width: getStarDisplayWidth(s, averageRating) }"
-                    >
-                      <svg class="w-6 h-6 text-gold" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                      </svg>
-                    </span>
-                  </span>
-                </div>
-              </div>
-
-              <p class="text-xs text-muted max-w-[200px] mx-auto leading-relaxed">Derived from {{ reviews.length }} authenticated guest reviews.</p>
-            </div>
-
+          <!-- Currency Selector Button with Dropdown -->
+          <div class="relative currency-dropdown-container">
             <button 
-              @click="openReviewModal" 
-              class="mt-8 w-full bg-gradient-to-r from-sea-deep to-sea hover:from-sea hover:to-sea-deep text-white border-none py-3.5 px-6 rounded-lg text-xs font-bold uppercase tracking-widest transition-all duration-300 shadow-md hover:translate-y-[-1px] cursor-pointer"
+              @click.stop="showCurrencyDropdown = !showCurrencyDropdown; showLangDropdown = false"
+              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#e2e8f0] bg-white hover:bg-[#f1f5f9] text-xs font-bold text-[#0f172a] transition-all shadow-xs cursor-pointer"
+              aria-label="Select Currency"
             >
-              Write Review
+              <span class="text-[#047857] font-extrabold">{{ currentCurrencyObj.symbol }}</span>
+              <span>{{ currentCurrencyObj.code }}</span>
+              <svg class="w-3 h-3 text-[#64748b] transition-transform" :class="{ 'rotate-180': showCurrencyDropdown }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </button>
+
+            <!-- Currency Dropdown Menu -->
+            <div 
+              v-if="showCurrencyDropdown" 
+              class="absolute right-0 mt-2 w-48 bg-white border border-[#e2e8f0] rounded-xl shadow-xl py-1.5 z-50 animate-in fade-in slide-in-from-top-2 duration-150"
+            >
+              <div class="px-3 py-1.5 text-[10px] uppercase font-bold tracking-wider text-[#94a3b8] border-b border-[#f1f5f9]">
+                Choose Currency
+              </div>
+              <button 
+                v-for="c in currencies" 
+                :key="c.code"
+                @click="selectCurrency(c.code)"
+                class="w-full px-3 py-2 text-left text-xs flex items-center justify-between hover:bg-[#f8fafc] transition-colors cursor-pointer"
+                :class="{ 'bg-[#ecfdf5] text-[#047857] font-bold': currencyStore.selectedCurrency === c.code }"
+              >
+                <div class="flex items-center gap-2">
+                  <span class="w-6 text-center font-extrabold text-[#047857]">{{ c.symbol }}</span>
+                  <span>{{ c.code }}</span>
+                </div>
+                <span v-if="currencyStore.selectedCurrency === c.code" class="text-xs text-[#059669]">✓</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Share & Save Buttons -->
+          <button 
+            @click="showShareModal = true"
+            class="p-2 rounded-lg border border-[#e2e8f0] hover:bg-[#f1f5f9] text-[#475569] transition-colors cursor-pointer"
+            title="Share this experience"
+          >
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+            </svg>
+          </button>
+
+          <button 
+            @click="toggleSave"
+            class="p-2 rounded-lg border border-[#e2e8f0] hover:bg-[#f1f5f9] transition-colors cursor-pointer"
+            :class="isSaved ? 'text-[#e11d48] border-[#fecdd3] bg-[#fff1f2]' : 'text-[#475569]'"
+            title="Save to favorites"
+          >
+            <svg class="w-4 h-4" :fill="isSaved ? 'currentColor' : 'none'" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+          </button>
+
+        </div>
+      </div>
+    </header>
+
+    <!-- FULL WIDTH PRODUCT CONTAINER -->
+    <main class="w-full max-w-[1480px] mx-auto px-4 sm:px-6 xl:px-12 py-6">
+      
+      <!-- DESKTOP TOP TITLE & BADGES ROW -->
+      <div class="mb-5">
+        <div class="flex items-center gap-2 text-xs text-[#64748b] mb-2 font-medium">
+          <router-link to="/" class="hover:text-[#062d4d]">{{ i18nContent.home }}</router-link>
+          <span>›</span>
+          <router-link to="/tours" class="hover:text-[#062d4d]">{{ i18nContent.allTours }}</router-link>
+          <span>›</span>
+          <span class="text-[#0f172a] font-semibold truncate max-w-[280px]">{{ tourTitle }}</span>
+        </div>
+
+        <h1 class="font-serif text-2xl sm:text-3xl lg:text-[34px] font-bold text-[#0f172a] leading-snug tracking-tight mb-3">
+          {{ tourTitle }}
+        </h1>
+
+        <!-- Rating & Trust Pills Header Row -->
+        <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
+          <!-- Rating -->
+          <div class="flex items-center gap-1.5 bg-[#ecfdf5] border border-[#a7f3d0] px-2.5 py-1 rounded-full text-[#065f46] font-bold">
+            <span class="text-amber-500 text-sm">★</span>
+            <span>{{ tourRating }}</span>
+            <span class="text-[#047857] font-normal underline cursor-pointer">({{ tourReviewCount.toLocaleString() }} {{ $t('tourDetails.navigation.reviews') || 'reviews' }})</span>
+          </div>
+
+          <!-- Bestseller badge -->
+          <span class="bg-[#fef3c7] text-[#92400e] border border-[#fde68a] px-2.5 py-1 rounded-full font-bold flex items-center gap-1">
+            <span>👑</span> {{ i18nContent.bestseller }}
+          </span>
+
+          <!-- Location -->
+          <span class="text-[#475569] flex items-center gap-1 font-medium">
+            <span>📍</span> Egypt
+          </span>
+
+          <!-- Duration -->
+          <span class="text-[#475569] flex items-center gap-1 font-medium">
+            <span>⏱️</span> {{ tourDuration }}
+          </span>
+
+          <!-- Free Cancellation -->
+          <span class="text-[#059669] font-bold flex items-center gap-1">
+            <span>✓</span> {{ i18nContent.freeCancel }}
+          </span>
+        </div>
+      </div>
+
+      <!-- AIRBNB-STYLE 5-PHOTO MOSAIC GALLERY -->
+      <section class="mb-8 relative rounded-2xl overflow-hidden shadow-md">
+        <div class="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-2 h-[260px] sm:h-[340px] md:h-[450px] lg:h-[500px]">
+          
+          <!-- Large Hero Photo (Spans 2 cols, 2 rows on desktop) -->
+          <div 
+            @click="openLightbox(0)" 
+            class="md:col-span-2 md:row-span-2 w-full h-full relative group cursor-pointer overflow-hidden bg-[#e2e8f0]"
+          >
+            <img 
+              :src="galleryImages[0].url" 
+              :alt="galleryImages[0].title"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-5 text-white">
+              <span class="text-base font-semibold">{{ galleryImages[0].title }}</span>
+            </div>
+          </div>
+
+          <!-- 4 Thumbnail Grid Photos -->
+          <div 
+            v-for="(img, i) in galleryImages.slice(1, 5)" 
+            :key="i"
+            @click="openLightbox(Number(i) + 1)"
+            class="hidden md:block relative group cursor-pointer overflow-hidden bg-[#e2e8f0]"
+          >
+            <img 
+              :src="img.url" 
+              :alt="img.title"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+            <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
+
+            <!-- "Show All Photos" Trigger on the last thumbnail -->
+            <button 
+              v-if="i === 3" 
+              @click.stop="openLightbox(0)"
+              class="absolute bottom-4 right-4 bg-white/95 backdrop-blur-md hover:bg-white text-[#0f172a] px-4 py-2.5 rounded-xl text-xs font-bold shadow-lg flex items-center gap-2 transition-all hover:scale-105 cursor-pointer"
+            >
+              <span>📸</span>
+              <span>{{ i18nContent.viewAllPhotos }}</span>
             </button>
           </div>
 
-          <!-- Reviews Carousel Card -->
-          <div class="md:w-7/12 flex flex-col justify-center">
-            <div v-if="loadingReviews" class="py-12 text-center text-xs text-muted animate-pulse font-jost">
-              Retrieving guests feedback...
+        </div>
+      </section>
+
+      <!-- TWO-COLUMN RESPONSIVE LAYOUT (Left Content + Right Fixed 380-420px Sidebar) -->
+      <div class="grid grid-cols-1 lg:grid-cols-[1fr_380px] xl:grid-cols-[1fr_420px] gap-8 xl:gap-12 items-start">
+        
+        <!-- LEFT COLUMN (Main Content) -->
+        <div class="space-y-8 min-w-0">
+          
+          <!-- Experience Hook & Summary Teaser Card -->
+          <div class="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e8f0] shadow-xs">
+            <p class="text-base sm:text-lg font-semibold text-[#062d4d] italic mb-3">
+              "{{ i18nContent.hookQuote }}"
+            </p>
+            <p class="text-sm sm:text-base text-[#475569] leading-relaxed">
+              {{ tourDescription }}
+            </p>
+
+            <!-- Quick highlights grid -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-6 pt-6 border-t border-[#f1f5f9]">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-[#f0f9ff] text-[#0284c7] flex items-center justify-center text-lg flex-shrink-0">
+                  ⏱️
+                </div>
+                <div>
+                  <div class="text-[10px] uppercase font-bold text-[#94a3b8]">Duration</div>
+                  <div class="text-xs sm:text-sm font-bold text-[#0f172a]">{{ i18nContent.durationLabel }}</div>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-[#ecfdf5] text-[#059669] flex items-center justify-center text-lg flex-shrink-0">
+                  🚐
+                </div>
+                <div>
+                  <div class="text-[10px] uppercase font-bold text-[#94a3b8]">{{ i18nContent.hotelTransfer }}</div>
+                  <div class="text-xs sm:text-sm font-bold text-[#0f172a]">{{ i18nContent.included }}</div>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-[#fef3c7] text-[#d97706] flex items-center justify-center text-lg flex-shrink-0">
+                  🗣️
+                </div>
+                <div>
+                  <div class="text-[10px] uppercase font-bold text-[#94a3b8]">{{ i18nContent.liveGuide }}</div>
+                  <div class="text-xs sm:text-sm font-bold text-[#0f172a]">{{ i18nContent.guideLangs }}</div>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-xl bg-[#fdf2f8] text-[#db2777] flex items-center justify-center text-lg flex-shrink-0">
+                  📱
+                </div>
+                <div>
+                  <div class="text-[10px] uppercase font-bold text-[#94a3b8]">{{ i18nContent.mobileTicket }}</div>
+                  <div class="text-xs sm:text-sm font-bold text-[#0f172a]">{{ i18nContent.instantVoucher }}</div>
+                </div>
+              </div>
             </div>
+          </div>
+
+          <!-- INTERACTIVE TABS BAR -->
+          <div class="sticky top-16 z-40 bg-white/95 backdrop-blur-md border-b border-[#e2e8f0] -mx-4 px-4 sm:mx-0 sm:px-0 flex items-center gap-1.5 overflow-x-auto scrollbar-none py-1.5">
+            <button 
+              v-for="tab in [
+                { id: 'overview', label: i18nContent.tabs.overview },
+                { id: 'highlights', label: i18nContent.tabs.highlights },
+                { id: 'itinerary', label: i18nContent.tabs.itinerary },
+                { id: 'includes', label: i18nContent.tabs.includes },
+                { id: 'info', label: i18nContent.tabs.info },
+                { id: 'reviews', label: i18nContent.tabs.reviews },
+                { id: 'faq', label: i18nContent.tabs.faq }
+              ]"
+              :key="tab.id"
+              @click="activeTab = tab.id"
+              class="px-4 py-2.5 text-xs sm:text-sm font-bold rounded-xl whitespace-nowrap transition-all cursor-pointer"
+              :class="activeTab === tab.id ? 'bg-[#062d4d] text-white shadow-xs' : 'text-[#64748b] hover:text-[#0f172a] hover:bg-[#f1f5f9]'"
+            >
+              {{ tab.label }}
+            </button>
+          </div>
+
+          <!-- TAB CONTENT PANELS -->
+
+          <!-- 1. Overview -->
+          <div v-show="activeTab === 'overview'" class="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e8f0] shadow-xs space-y-4">
+            <h3 class="text-lg sm:text-xl font-bold text-[#0f172a]">{{ i18nContent.descHeading }}</h3>
+            <div class="text-sm sm:text-base text-[#475569] leading-relaxed space-y-3.5">
+              <p>
+                {{ tourDescription }}
+              </p>
+              <div v-show="readMoreExpanded" class="space-y-3.5 animate-in fade-in">
+                <p>
+                  As the sun sinks behind the Sinai mountains, your quad bike is fueled and waiting. Twist the throttle and let your automatic ATV carry you across rolling sand dunes. At the Echo Mountains, shout into the canyon and hear the rock reply.
+                </p>
+                <p>
+                  Arrive at the Bedouin camp to be welcomed with fragrant Habak herbal tea. Relish a rich open BBQ buffet under starry skies, followed by a breathtaking whirling Tanoura dance and an adrenaline-fueled fire show.
+                </p>
+              </div>
+            </div>
+            <button 
+              @click="readMoreExpanded = !readMoreExpanded"
+              class="text-xs sm:text-sm font-bold text-[#062d4d] hover:underline flex items-center gap-1.5 pt-2 cursor-pointer"
+            >
+              <span>{{ readMoreExpanded ? i18nContent.showLess : i18nContent.readMore }}</span>
+              <span>{{ readMoreExpanded ? '↑' : '↓' }}</span>
+            </button>
+          </div>
+
+          <!-- 2. Highlights -->
+          <div v-show="activeTab === 'highlights' || activeTab === 'overview'" class="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e8f0] shadow-xs">
+            <h3 class="text-lg sm:text-xl font-bold text-[#0f172a] mb-5">{{ i18nContent.highlightsHeading }}</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div v-for="(h, idx) in tourHighlights" :key="idx" class="flex items-start gap-3 bg-[#f8fafc] p-4 rounded-xl border border-[#f1f5f9]">
+                <span class="text-emerald-600 text-lg font-bold">★</span>
+                <span class="text-xs sm:text-sm text-[#334155] font-semibold leading-relaxed">{{ h }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Itinerary Timeline -->
+          <div v-show="activeTab === 'itinerary' || activeTab === 'overview'" class="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e8f0] shadow-xs">
+            <h3 class="text-lg sm:text-xl font-bold text-[#0f172a] mb-6">{{ i18nContent.itineraryHeading }}</h3>
+            <div class="relative pl-8 space-y-7 before:content-[''] before:absolute before:left-[19px] before:top-2 before:bottom-2 before:w-[2px] before:bg-gradient-to-b before:from-[#c9a84c] before:to-[#e2e8f0]">
+              <div v-for="(step, idx) in tourItinerary" :key="idx" class="relative group">
+                <!-- Marker Dot -->
+                <div class="absolute -left-[39px] top-0.5 w-7 h-7 rounded-full bg-[#c9a84c] text-white text-[13px] font-bold flex items-center justify-center ring-4 ring-white shadow-md z-10 transition-transform group-hover:scale-110">
+                  {{ Number(idx) + 1 }}
+                </div>
+                <div class="bg-white transition-all">
+                  <span class="inline-block px-2.5 py-0.5 bg-[#f8fafc] border border-[#e2e8f0] rounded-full text-[10px] font-extrabold uppercase tracking-widest text-[#c9a84c] mb-2 shadow-sm">{{ step.time }}</span>
+                  <h4 class="text-base sm:text-lg font-serif font-bold text-[#062d4d]">{{ step.title }}</h4>
+                  <p class="text-sm text-[#475569] mt-1.5 leading-relaxed">{{ step.desc }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. Inclusions & Exclusions -->
+          <div v-show="activeTab === 'includes' || activeTab === 'overview'" class="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e8f0] shadow-xs">
+            <h3 class="text-lg sm:text-xl font-bold text-[#0f172a] mb-6">{{ i18nContent.includesHeading }}</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+              
+              <!-- Included -->
+              <div class="space-y-3.5">
+                <h4 class="text-xs sm:text-sm uppercase font-extrabold tracking-wider text-[#059669] flex items-center gap-2 pb-2.5 border-b border-[#ecfdf5]">
+                  <span>✓</span> {{ i18nContent.includedTitle }}
+                </h4>
+                <ul class="space-y-3">
+                  <li v-for="(item, i) in tourInclusions" :key="i" class="flex items-start gap-2.5 text-xs sm:text-sm text-[#334155]">
+                    <span class="text-emerald-500 font-bold mt-0.5">✓</span>
+                    <span>{{ item }}</span>
+                  </li>
+                </ul>
+              </div>
+
+              <!-- Excluded -->
+              <div class="space-y-3.5">
+                <h4 class="text-xs sm:text-sm uppercase font-extrabold tracking-wider text-[#dc2626] flex items-center gap-2 pb-2.5 border-b border-[#fef2f2]">
+                  <span>✕</span> {{ i18nContent.excludedTitle }}
+                </h4>
+                <ul class="space-y-3">
+                  <li v-for="(item, i) in tourExclusions" :key="i" class="flex items-start gap-2.5 text-xs sm:text-sm text-[#64748b]">
+                    <span class="text-red-400 font-bold mt-0.5">✕</span>
+                    <span>{{ item }}</span>
+                  </li>
+                </ul>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- 5. Important Info / What to bring -->
+          <div v-show="activeTab === 'info' || activeTab === 'overview'" class="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e8f0] shadow-xs space-y-5">
+            <h3 class="text-lg sm:text-xl font-bold text-[#0f172a]">{{ i18nContent.infoHeading }}</h3>
             
-            <div v-else-if="reviews.length === 0" class="py-12 text-center font-jost bg-white/40 border border-gold/10 rounded-2xl p-8 flex flex-col items-center justify-center">
-              <p class="text-sm text-muted italic">No reviews yet for this adventure.</p>
-              <button @click="openReviewModal" class="mt-4 text-xs font-bold text-gold uppercase tracking-wider border border-gold/40 px-6 py-2.5 rounded-full hover:bg-gold/10 transition-all">
-                Be the first to review
-              </button>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div class="bg-[#f8fafc] p-5 rounded-2xl border border-[#e2e8f0]">
+                <h4 class="text-xs sm:text-sm font-bold text-[#0f172a] mb-2.5 flex items-center gap-2">
+                  <span>🎒</span> {{ i18nContent.whatToBringTitle }}
+                </h4>
+                <ul class="text-xs sm:text-sm text-[#475569] space-y-2 list-disc list-inside">
+                  <li v-for="(wb, i) in tourWhatToBring" :key="i">{{ wb }}</li>
+                </ul>
+              </div>
+
+              <div class="bg-[#fff7ed] p-5 rounded-2xl border border-[#ffedd5]">
+                <h4 class="text-xs sm:text-sm font-bold text-[#c2410c] mb-2.5 flex items-center gap-2">
+                  <span>⚠️</span> {{ i18nContent.notSuitableTitle }}
+                </h4>
+                <p class="text-xs sm:text-sm text-[#9a3412] leading-relaxed">
+                  {{ tourNotSuitable }}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 6. Customer Reviews -->
+          <div v-show="activeTab === 'reviews' || activeTab === 'overview'" class="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e8f0] shadow-xs space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#f1f5f9]">
+              <div>
+                <h3 class="text-lg sm:text-xl font-bold text-[#0f172a]">{{ i18nContent.reviewsHeading }}</h3>
+                <p class="text-xs sm:text-sm text-[#64748b] mt-0.5">{{ i18nContent.reviewsSub }}</p>
+              </div>
+
+              <div class="flex items-center gap-3">
+                <div class="text-3xl sm:text-4xl font-extrabold text-[#062d4d]">4.9</div>
+                <div>
+                  <div class="flex text-amber-400 text-base">★★★★★</div>
+                  <div class="text-xs text-[#64748b] font-medium">{{ i18nContent.reviewsCount }}</div>
+                </div>
+              </div>
             </div>
 
-            <div v-else class="relative min-h-[280px] flex flex-col justify-between">
-              <div class="relative overflow-hidden flex-1 min-h-[220px] flex items-stretch">
-                <Transition :name="transitionName" mode="out-in">
+            <!-- Review Cards -->
+            <div class="space-y-4">
+              <div class="bg-[#f8fafc] p-4 sm:p-5 rounded-xl border border-[#f1f5f9] space-y-2.5">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-full bg-[#062d4d] text-white text-xs font-bold flex items-center justify-center">
+                      MK
+                    </div>
+                    <div>
+                      <span class="text-xs sm:text-sm font-bold text-[#0f172a] block">Maximilian Klein 🇩🇪</span>
+                      <span class="text-[10px] sm:text-xs text-[#94a3b8]">August 2026 · {{ i18nContent.verifiedBooking }}</span>
+                    </div>
+                  </div>
+                  <div class="text-amber-400 text-xs sm:text-sm">★★★★★</div>
+                </div>
+                <p class="text-xs sm:text-sm text-[#475569] leading-relaxed">
+                  "The sunset ATV ride was sensational! The instructors were very attentive and patient. The Bedouin camp dinner was delicious and the fire show was mesmerizing. Excellent value for money!"
+                </p>
+              </div>
+
+              <div class="bg-[#f8fafc] p-4 sm:p-5 rounded-xl border border-[#f1f5f9] space-y-2.5">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-8 h-8 rounded-full bg-[#c9a84c] text-white text-xs font-bold flex items-center justify-center">
+                      EL
+                    </div>
+                    <div>
+                      <span class="text-xs sm:text-sm font-bold text-[#0f172a] block">Elena Rossi 🇮🇹</span>
+                      <span class="text-[10px] sm:text-xs text-[#94a3b8]">July 2026 · {{ i18nContent.verifiedBooking }}</span>
+                    </div>
+                  </div>
+                  <div class="text-amber-400 text-xs sm:text-sm">★★★★★</div>
+                </div>
+                <p class="text-xs sm:text-sm text-[#475569] leading-relaxed">
+                  "Un'esperienza fantastica! Il giro in quad è divertentissimo, i cammelli docili e il cibo ottimo. Consiglio a tutti di portare una sciarpa per la polvere."
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 7. FAQ Accordion -->
+          <div v-show="activeTab === 'faq' || activeTab === 'overview'" class="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e8f0] shadow-xs space-y-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <h3 class="text-lg sm:text-xl font-bold text-[#0f172a]">{{ i18nContent.faqHeading }}</h3>
+              <div class="relative w-full sm:w-64">
+                <input v-model="faqSearch" type="text" placeholder="Search FAQs..." class="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded-full pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-[#c9a84c] focus:ring-1 focus:ring-[#c9a84c] transition-all" />
+                <svg class="w-4 h-4 text-[#94a3b8] absolute left-3.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+              </div>
+            </div>
+            <div class="space-y-3">
+              <div 
+                v-for="(f, idx) in filteredFaqs" 
+                :key="idx" 
+                class="border border-[#e2e8f0] rounded-xl overflow-hidden transition-all duration-300"
+                :class="activeFaq === Number(idx) ? 'shadow-md border-[#c9a84c]/30' : 'hover:border-[#cbd5e1]'"
+              >
+                <button 
+                  @click="activeFaq = activeFaq === Number(idx) ? null : Number(idx)"
+                  class="w-full px-5 py-4 text-left flex items-start sm:items-center justify-between gap-4 bg-white hover:bg-[#f8fafc] transition-colors cursor-pointer group"
+                >
+                  <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+                    <span class="text-sm font-bold text-[#062d4d] group-hover:text-[#c9a84c] transition-colors">{{ f.q }}</span>
+                    <span v-if="getFaqBadge(f.q)" :class="['text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider whitespace-nowrap w-fit', getFaqBadge(f.q)?.color]">{{ getFaqBadge(f.q)?.label }}</span>
+                  </div>
+                  <span class="text-[#c9a84c] text-lg font-light transition-transform duration-300" :class="activeFaq === Number(idx) ? 'rotate-45' : ''">+</span>
+                </button>
+                <div 
+                  class="px-5 text-sm text-[#475569] leading-relaxed bg-[#f8fafc] overflow-hidden transition-all duration-300 ease-in-out"
+                  :style="{ maxHeight: activeFaq === Number(idx) ? '300px' : '0px', paddingBottom: activeFaq === Number(idx) ? '1rem' : '0' }"
+                >
+                  <div class="pt-2 border-t border-[#e2e8f0]">{{ f.a }}</div>
+                </div>
+              </div>
+              <div v-if="filteredFaqs.length === 0" class="text-center py-8 text-[#94a3b8] text-sm">
+                No FAQs found matching your search.
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- RIGHT COLUMN (Sticky Booking Sidebar Widget - Fixed Width 380px/420px) -->
+        <aside class="sticky top-20 z-30 w-full">
+          
+          <div class="bg-white rounded-2xl p-6 sm:p-7 border border-[#cbd5e1] shadow-xl">
+            
+            <!-- Price Display -->
+            <div class="pb-4 border-b border-[#f1f5f9] mb-5">
+              <div class="flex items-baseline justify-between">
+                <span class="text-[11px] uppercase font-extrabold tracking-wider text-[#64748b]">{{ i18nContent.sidebar.startingFrom }}</span>
+                <span v-if="saveBadgeText" class="bg-[#dcfce7] text-[#15803d] text-[10px] font-extrabold px-2.5 py-0.5 rounded-md">{{ saveBadgeText }}</span>
+              </div>
+              <div class="flex items-baseline gap-2 mt-1">
+                <span class="text-3xl sm:text-4xl font-extrabold text-[#062d4d]">{{ basePriceFormatted }}</span>
+                <span v-if="currentOption.wasPriceEur" class="text-sm text-[#94a3b8] line-through">{{ wasPriceFormatted }}</span>
+                <span class="text-xs text-[#64748b]">{{ i18nContent.sidebar.perPerson }}</span>
+              </div>
+            </div>
+
+            <!-- Booking Form Inputs -->
+            <div class="space-y-4">
+              
+              <!-- 1. Date Picker -->
+              <div>
+                <label class="block text-[11px] font-bold text-[#0f172a] uppercase tracking-wider mb-1.5">{{ i18nContent.sidebar.step1 }}</label>
+                <TourAvailabilityCalendar 
+                  v-model="selectedDate" 
+                  :base-price-eur="tour?.price || 45" 
+                  :available-dates="tour?.availableDates"
+                />
+              </div>
+
+              <!-- 2. Tour Package Variant Option -->
+              <div v-if="dynamicOptions.length > 0">
+                <label class="block text-[11px] font-bold text-[#0f172a] uppercase tracking-wider mb-1.5">{{ i18nContent.sidebar.step2 }}</label>
+                <div class="space-y-2">
                   <div 
-                    :key="reviews[currentIndex].id"
-                    class="review-carousel-card relative bg-white border border-gold/15 p-10 rounded-2xl shadow-[0_15px_40px_rgba(201,168,76,0.04)] overflow-hidden flex flex-col justify-between w-full"
+                    v-for="(opt, idx) in dynamicOptions" 
+                    :key="idx"
+                    @click="selectedOptionIndex = Number(idx)"
+                    class="p-3.5 rounded-xl border cursor-pointer transition-all"
+                    :class="selectedOptionIndex === Number(idx) ? 'border-[#062d4d] bg-[#f0f9ff] ring-1 ring-[#062d4d]' : 'border-[#e2e8f0] hover:border-[#cbd5e1]'"
                   >
-                    <!-- Large decorative quote icon in background -->
-                    <div class="absolute right-8 top-8 text-gold/10 pointer-events-none">
-                      <svg class="w-16 h-16" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-4.795 2.851-4.795 6.3l.008.34h5.792V21H14.017zm-11.02 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-4.796 2.851-4.796 6.3l.008.34h5.783V21H2.997z" />
+                    <div class="flex items-start justify-between gap-2">
+                      <div>
+                        <div class="text-xs sm:text-sm font-bold text-[#0f172a]">{{ opt.title }}</div>
+                        <div class="text-[10px] sm:text-xs text-[#64748b] mt-0.5">{{ opt.subtitle }}</div>
+                      </div>
+                      <div class="text-right flex-shrink-0">
+                        <span class="text-xs sm:text-sm font-extrabold text-[#062d4d] block">{{ currencyStore.formatPrice(opt.basePriceEur) }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 3. Guest Counters -->
+              <div>
+                <label class="block text-[11px] font-bold text-[#0f172a] uppercase tracking-wider mb-1.5">{{ dynamicOptions.length > 0 ? i18nContent.sidebar.step3 : '2. Number of Guests' }}</label>
+                <div class="grid grid-cols-2 gap-3">
+                  <!-- Adults -->
+                  <div class="p-3 rounded-xl border border-[#e2e8f0] flex items-center justify-between">
+                    <div>
+                      <span class="text-xs sm:text-sm font-bold block text-[#0f172a]">{{ i18nContent.sidebar.adults }}</span>
+                      <span class="text-[9px] sm:text-[10px] text-[#94a3b8]">{{ i18nContent.sidebar.adultsAge }}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <button 
+                        @click="adultsCount = Math.max(1, adultsCount - 1)" 
+                        class="w-6 h-6 rounded-md bg-[#f1f5f9] font-bold text-xs hover:bg-[#e2e8f0] cursor-pointer"
+                      >-</button>
+                      <span class="text-xs sm:text-sm font-bold w-4 text-center">{{ adultsCount }}</span>
+                      <button 
+                        @click="adultsCount++" 
+                        class="w-6 h-6 rounded-md bg-[#f1f5f9] font-bold text-xs hover:bg-[#e2e8f0] cursor-pointer"
+                      >+</button>
+                    </div>
+                  </div>
+
+                  <!-- Children -->
+                  <div class="p-3 rounded-xl border border-[#e2e8f0] flex items-center justify-between">
+                    <div>
+                      <span class="text-xs sm:text-sm font-bold block text-[#0f172a]">{{ i18nContent.sidebar.children }}</span>
+                      <span class="text-[9px] sm:text-[10px] text-[#94a3b8]">{{ i18nContent.sidebar.childrenAge }}</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <button 
+                        @click="childrenCount = Math.max(0, childrenCount - 1)" 
+                        class="w-6 h-6 rounded-md bg-[#f1f5f9] font-bold text-xs hover:bg-[#e2e8f0] cursor-pointer"
+                      >-</button>
+                      <span class="text-xs sm:text-sm font-bold w-4 text-center">{{ childrenCount }}</span>
+                      <button 
+                        @click="childrenCount++" 
+                        class="w-6 h-6 rounded-md bg-[#f1f5f9] font-bold text-xs hover:bg-[#e2e8f0] cursor-pointer"
+                      >+</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 4. Optional Add-ons -->
+              <div>
+                <label class="block text-[11px] font-bold text-[#0f172a] uppercase tracking-wider mb-1.5">{{ dynamicOptions.length > 0 ? i18nContent.sidebar.step4 : '3. Popular Add-ons (Optional)' }}</label>
+                <div class="space-y-2">
+                  <label 
+                    v-for="addon in availableAddons" 
+                    :key="addon.id"
+                    class="flex items-center justify-between p-2.5 rounded-xl border border-[#f1f5f9] hover:bg-[#f8fafc] cursor-pointer text-xs sm:text-sm"
+                  >
+                    <div class="flex items-center gap-2.5">
+                      <input 
+                        type="checkbox" 
+                        :checked="selectedAddons.includes(addon.id)"
+                        @change="toggleAddon(addon.id)"
+                        class="rounded text-[#062d4d] focus:ring-[#062d4d] cursor-pointer"
+                      />
+                      <span class="text-[#334155]">{{ getLocalized(addon.names, addon.name) }}</span>
+                    </div>
+                    <span class="font-bold text-[#047857] flex-shrink-0">+{{ currencyStore.formatPrice(addon.priceEur || addon.price) }}</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Total Price Breakdown -->
+              <div class="pt-4 border-t border-[#f1f5f9] flex items-center justify-between">
+                <div>
+                  <span class="text-xs sm:text-sm font-bold text-[#64748b] block">{{ i18nContent.sidebar.totalAmount }}</span>
+                  <span class="text-[10px] sm:text-xs text-[#059669] font-semibold">{{ i18nContent.sidebar.taxesIncluded }}</span>
+                </div>
+                <div class="text-right">
+                  <span class="text-2xl sm:text-3xl font-extrabold text-[#062d4d]">{{ totalPriceFormatted }}</span>
+                </div>
+              </div>
+
+              <!-- Primary Book CTA Button -->
+              <button 
+                @click="handleBookNow"
+                class="w-full py-4 rounded-xl bg-gradient-to-r from-[#062d4d] to-[#0d4f8b] hover:from-[#0a3f6b] hover:to-[#0f5c9e] text-white text-sm sm:text-base font-extrabold tracking-wide shadow-md hover:shadow-lg transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer"
+              >
+                <span>{{ i18nContent.sidebar.bookBtn }}</span>
+                <span>→</span>
+              </button>
+
+              <p class="text-center text-[10px] sm:text-xs text-[#059669] font-bold flex items-center justify-center gap-1.5">
+                <span>⚡</span> {{ i18nContent.sidebar.instantConfirmation }}
+              </p>
+
+            </div>
+
+            <!-- Trust Badges in Sidebar -->
+            <div class="mt-6 pt-4 border-t border-[#f1f5f9] space-y-2 text-[11px] sm:text-xs text-[#64748b]">
+              <div class="flex items-center gap-2.5">
+                <span class="text-[#047857]">🔒</span>
+                <span>{{ i18nContent.sidebar.trust1 }}</span>
+              </div>
+              <div class="flex items-center gap-2.5">
+                <span class="text-[#0284c7]">💬</span>
+                <span>{{ i18nContent.sidebar.trust2 }}</span>
+              </div>
+              <div class="flex items-center gap-2.5">
+                <span class="text-[#d97706]">🏆</span>
+                <span>{{ i18nContent.sidebar.trust3 }}</span>
+              </div>
+            </div>
+
+          </div>
+
+        </aside>
+
+      </div>
+
+    </main>
+
+    <!-- MOBILE STICKY BOTTOM BAR -->
+    <div class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#e2e8f0] p-3 px-4 shadow-xl flex items-center justify-between">
+      <div>
+        <span class="text-[10px] uppercase font-bold text-[#64748b] block">Total</span>
+        <div class="flex items-baseline gap-1">
+          <span class="text-lg font-extrabold text-[#062d4d]">{{ totalPriceFormatted }}</span>
+          <span class="text-[10px] text-[#94a3b8]">/ {{ adultsCount }} pax</span>
+        </div>
+      </div>
+      <button 
+        @click="handleBookNow"
+        class="px-6 py-2.5 rounded-xl bg-[#062d4d] text-white text-xs font-bold shadow-md hover:bg-[#0a3f6b] cursor-pointer"
+      >
+        {{ i18nContent.sidebar.bookBtn }}
+      </button>
+    </div>
+
+    <!-- PHOTO GALLERY LIGHTBOX MODAL -->
+    <div 
+      v-if="galleryModalOpen" 
+      class="fixed inset-0 z-50 bg-black/95 flex flex-col justify-between p-4 sm:p-8 animate-in fade-in"
+    >
+      <div class="flex items-center justify-between text-white">
+        <span class="text-xs font-bold tracking-wider">{{ activeLightboxIndex + 1 }} / {{ galleryImages.length }}</span>
+        <button 
+          @click="galleryModalOpen = false" 
+          class="text-white text-sm font-bold bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg cursor-pointer"
+        >
+          ✕ Close
+        </button>
+      </div>
+
+      <div class="flex-1 flex items-center justify-center p-4">
+        <img 
+          :src="galleryImages[activeLightboxIndex].url" 
+          :alt="galleryImages[activeLightboxIndex].title" 
+          class="max-h-[80vh] max-w-full rounded-xl object-contain shadow-2xl"
+        />
+      </div>
+
+      <div class="text-center text-white text-xs font-medium">
+        <p class="font-bold text-sm">{{ galleryImages[activeLightboxIndex].title }}</p>
+        <p class="text-white/70 text-[11px]">{{ galleryImages[activeLightboxIndex].caption }}</p>
+      </div>
+
+      <div class="flex justify-center gap-4 mt-2">
+        <button 
+          @click="activeLightboxIndex = (activeLightboxIndex - 1 + galleryImages.length) % galleryImages.length"
+          class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-bold cursor-pointer"
+        >
+          ← Prev
+        </button>
+        <button 
+          @click="activeLightboxIndex = (activeLightboxIndex + 1) % galleryImages.length"
+          class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-bold cursor-pointer"
+        >
+          Next →
+        </button>
+      </div>
+    </div>
+
+    <!-- SHARE MODAL -->
+    <div 
+      v-if="showShareModal" 
+      class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+    >
+      <div class="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-base font-bold text-[#0f172a]">Share this Tour</h3>
+          <button @click="showShareModal = false" class="text-gray-400 hover:text-gray-600 cursor-pointer">✕</button>
+        </div>
+        <p class="text-xs text-[#64748b]">Copy the direct link to share this experience with friends or family:</p>
+        <div class="flex items-center gap-2">
+          <input 
+            type="text" 
+            readonly 
+            :value="shareUrl" 
+            class="flex-1 px-3 py-2 text-xs bg-[#f8fafc] border rounded-lg"
+          />
+          <button 
+            @click="copyShareLink"
+            class="px-4 py-2 bg-[#062d4d] text-white text-xs font-bold rounded-lg hover:bg-[#0a3f6b] cursor-pointer"
+          >
+            Copy
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOOKING POPUP MODAL (Glassmorphism & High-End Typography) -->
+    <Transition name="fade">
+      <div v-if="isBookingModalOpen" class="fixed inset-0 z-[60] flex items-center justify-center p-4">
+        <!-- Frosted Glass Backdrop -->
+        <div class="absolute inset-0 bg-black/50 backdrop-blur-md cursor-pointer" @click="isBookingModalOpen = false"></div>
+        
+        <!-- Modal Content -->
+        <div class="relative bg-white w-full max-w-lg rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh] border border-[#e2e8f0]">
+          
+          <!-- Header -->
+          <div class="px-6 py-4.5 border-b border-[#f1f5f9] flex items-center justify-between bg-white z-10">
+            <div>
+              <h2 class="text-xl font-bold text-[#0f172a] tracking-tight">{{ $t("bookingPopup.header") }}</h2>
+              <p class="text-xs text-[#64748b] mt-0.5">{{ $t("bookingPopup.subHeader") }}</p>
+            </div>
+            <button @click="isBookingModalOpen = false" class="w-8 h-8 rounded-full bg-[#f1f5f9] hover:bg-[#e2e8f0] text-[#64748b] flex items-center justify-center transition-colors cursor-pointer">
+              ✕
+            </button>
+          </div>
+
+          <!-- Scrollable Form Area -->
+          <div class="p-6 overflow-y-auto space-y-4.5 flex-1 bg-[#f8fafc]">
+            
+            <!-- 1. Lead Traveler Details & WhatsApp Contact Number -->
+            <div class="space-y-3.5 bg-white p-5 rounded-2xl border border-[#e2e8f0] shadow-xs">
+              <div class="flex items-center justify-between">
+                <h3 class="text-xs uppercase font-extrabold tracking-wider text-[#062d4d] flex items-center gap-1.5">
+                  <span>👤</span> {{ $t("bookingPopup.leadTraveler") }}
+                </h3>
+                <span class="text-[10px] bg-[#dcfce7] text-[#15803d] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <span>💬</span> {{ $t("bookingPopup.whatsappVoucher") }}
+                </span>
+              </div>
+              
+              <div class="space-y-3">
+                <div>
+                  <label class="block text-xs font-bold text-[#334155] mb-1">{{ $t("bookingPopup.fullName") }} <span class="text-red-500">*</span></label>
+                  <input 
+                    type="text" 
+                    v-model="bookingForm.fullName" 
+                    @input="formErrors.fullName = ''"
+                    :placeholder="$t('placeholders.fullName')" 
+                    class="w-full px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm font-medium focus:outline-none transition-colors bg-white"
+                    :class="formErrors.fullName ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500 bg-red-50/30' : 'border-[#cbd5e1] focus:border-[#062d4d] focus:ring-1 focus:ring-[#062d4d]'" 
+                  />
+                  <p v-if="formErrors.fullName" class="text-[11px] text-red-500 font-semibold mt-1 flex items-center gap-1">
+                    <span>⚠️</span> {{ formErrors.fullName }}
+                  </p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs font-bold text-[#334155] mb-1">{{ $t("bookingPopup.email") }} <span class="text-red-500">*</span></label>
+                    <input 
+                      type="email" 
+                      v-model="bookingForm.email" 
+                      @input="formErrors.email = ''"
+                      :placeholder="$t('placeholders.email')" 
+                      class="w-full px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm font-medium focus:outline-none transition-colors bg-white"
+                      :class="formErrors.email ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500 bg-red-50/30' : 'border-[#cbd5e1] focus:border-[#062d4d] focus:ring-1 focus:ring-[#062d4d]'"
+                    />
+                    <p v-if="formErrors.email" class="text-[11px] text-red-500 font-semibold mt-1 flex items-center gap-1">
+                      <span>⚠️</span> {{ formErrors.email }}
+                    </p>
+                  </div>
+
+                  <div>
+                    <label class="block text-xs font-bold text-[#334155] mb-1">{{ $t("bookingPopup.whatsapp") }} <span class="text-red-500">*</span></label>
+                    <input 
+                      type="tel" 
+                      v-model="bookingForm.whatsapp" 
+                      @input="formErrors.whatsapp = ''"
+                      :placeholder="$t('placeholders.whatsapp')" 
+                      class="w-full px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm font-medium focus:outline-none transition-colors bg-white"
+                      :class="formErrors.whatsapp ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500 bg-red-50/30' : 'border-[#cbd5e1] focus:border-[#062d4d] focus:ring-1 focus:ring-[#062d4d]'"
+                    />
+                    <p v-if="formErrors.whatsapp" class="text-[11px] text-red-500 font-semibold mt-1 flex items-center gap-1">
+                      <span>⚠️</span> {{ formErrors.whatsapp }}
+                    </p>
+                  </div>
+                </div>
+                <p class="text-[11px] text-[#64748b]">{{ $t("bookingPopup.whatsappNotice") }}</p>
+              </div>
+            </div>
+
+            <!-- 2. Hotel Name, Room Number & Pickup Time -->
+            <div class="space-y-3.5 bg-white p-5 rounded-2xl border border-[#e2e8f0] shadow-xs">
+              <h3 class="text-xs uppercase font-extrabold tracking-wider text-[#062d4d] flex items-center gap-1.5">
+                <span>🚐</span> {{ $t("bookingPopup.hotelPickup") }}
+              </h3>
+              
+              <div class="space-y-3">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div class="sm:col-span-2">
+                    <label class="block text-xs font-bold text-[#334155] mb-1">{{ $t("bookingPopup.hotelName") }} <span class="text-red-500">*</span></label>
+                    <input 
+                      type="text" 
+                      v-model="bookingForm.hotelName" 
+                      @input="formErrors.hotelName = ''"
+                      :placeholder="$t('placeholders.hotelName')" 
+                      class="w-full px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm font-medium focus:outline-none transition-colors bg-white"
+                      :class="formErrors.hotelName ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500 bg-red-50/30' : 'border-[#cbd5e1] focus:border-[#062d4d] focus:ring-1 focus:ring-[#062d4d]'"
+                    />
+                    <p v-if="formErrors.hotelName" class="text-[11px] text-red-500 font-semibold mt-1 flex items-center gap-1">
+                      <span>⚠️</span> {{ formErrors.hotelName }}
+                    </p>
+                  </div>
+
+                  <div>
+                    <label class="block text-xs font-bold text-[#334155] mb-1">{{ $t("bookingPopup.roomNumber") }}</label>
+                    <input 
+                      type="text" 
+                      v-model="bookingForm.roomNumber" 
+                      :placeholder="$t('placeholders.roomNumber')" 
+                      class="w-full px-3.5 py-2.5 rounded-xl border border-[#cbd5e1] text-xs sm:text-sm font-medium focus:outline-none focus:border-[#062d4d] focus:ring-1 focus:ring-[#062d4d] bg-white" 
+                    />
+                  </div>
+                </div>
+
+                <!-- 1. Fixed Slots Mode -->
+                <div v-if="pickupTimeType === 'FixedSlots'">
+                  <label class="block text-xs font-bold text-[#334155] mb-1.5">{{ $t("bookingPopup.pickupTime") }}</label>
+                  <div class="relative pickup-dropdown-container">
+                    <button
+                      type="button"
+                      @click.stop="showPickupDropdown = !showPickupDropdown"
+                      class="w-full px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold text-left flex items-center justify-between transition-all bg-white cursor-pointer select-none"
+                      :class="showPickupDropdown ? 'border-[#062d4d] ring-2 ring-[#062d4d]/20 shadow-sm' : 'border-[#cbd5e1] hover:border-[#94a3b8]'"
+                    >
+                      <div class="flex items-center gap-2 truncate">
+                        <span class="text-sm">🕒</span>
+                        <span class="text-[#0f172a] font-bold truncate">{{ bookingForm.pickupTime || availablePickupTimes[0] || 'Select Time' }}</span>
+                      </div>
+                      <svg class="w-4 h-4 text-[#64748b] shrink-0 transition-transform duration-200" :class="{ 'rotate-180 text-[#062d4d]': showPickupDropdown }" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                      </svg>
+                    </button>
+
+                    <Transition
+                      enter-active-class="transition duration-150 ease-out"
+                      enter-from-class="transform scale-95 opacity-0 -translate-y-1"
+                      enter-to-class="transform scale-100 opacity-100 translate-y-0"
+                      leave-active-class="transition duration-100 ease-in"
+                      leave-from-class="transform scale-100 opacity-100 translate-y-0"
+                      leave-to-class="transform scale-95 opacity-0 -translate-y-1"
+                    >
+                      <div 
+                        v-if="showPickupDropdown"
+                        class="absolute left-0 right-0 mt-1.5 bg-white/98 backdrop-blur-xl border border-slate-200/90 rounded-2xl shadow-[0_15px_35px_rgba(6,45,77,0.15)] py-1.5 z-50 max-h-56 overflow-y-auto custom-scrollbar text-left"
+                      >
+                        <button
+                          v-for="(slot, sIdx) in availablePickupTimes"
+                          :key="sIdx"
+                          type="button"
+                          @click="bookingForm.pickupTime = slot; showPickupDropdown = false"
+                          class="w-full px-3.5 py-2.5 text-left text-xs sm:text-sm font-semibold flex items-center justify-between hover:bg-[#f0f9ff] transition-colors cursor-pointer group"
+                          :class="bookingForm.pickupTime === slot ? 'bg-[#f0f9ff] text-[#0369a1] font-bold' : 'text-slate-700 hover:text-slate-900'"
+                        >
+                          <div class="flex items-center gap-2.5 truncate">
+                            <span class="text-sm text-slate-400 group-hover:text-[#c9a84c] transition-colors">⏱️</span>
+                            <span class="truncate">{{ slot }}</span>
+                          </div>
+                          <svg v-if="bookingForm.pickupTime === slot" class="w-4 h-4 text-[#0284c7] shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                            <polyline points="20 6 9 17 4 12"></polyline>
+                          </svg>
+                        </button>
+                      </div>
+                    </Transition>
+                  </div>
+                </div>
+
+                <!-- 2. Flexible / Free Time Mode -->
+                <div v-else-if="pickupTimeType === 'Flexible'">
+                  <label class="block text-xs font-bold text-[#334155] mb-1 flex items-center justify-between">
+                    <span>{{ $t("bookingPopup.preferredTime") }}</span>
+                    <span class="text-[10px] text-emerald-600 font-bold">{{ $t("bookingPopup.freeChoice") }}</span>
+                  </label>
+                  <input 
+                    type="time" 
+                    v-model="bookingForm.pickupTime"
+                    class="w-full px-3.5 py-2.5 rounded-xl border border-[#cbd5e1] text-xs sm:text-sm font-medium focus:outline-none focus:border-[#062d4d] focus:ring-1 focus:ring-[#062d4d] bg-white"
+                  />
+                  <p class="text-[11px] text-[#64748b] mt-1">{{ $t("bookingPopup.flexibleNotice") }}</p>
+                </div>
+
+                <!-- 3. Driver Assigned Mode -->
+                <div v-else class="p-3.5 bg-[#f0f9ff] border border-[#bae6fd] rounded-xl text-xs text-[#0369a1] space-y-1">
+                  <div class="font-bold flex items-center gap-1.5">
+                    <span>⏱️</span> {{ $t("bookingPopup.conciergeCoordination") }}
+                  </div>
+                  <p class="text-[11px] text-[#0284c7]">
+                    {{ $t("bookingPopup.conciergeNotice") }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. Passport / Identification Upload Box -->
+            <div class="space-y-3 bg-white p-5 rounded-2xl border border-[#e2e8f0] shadow-xs">
+              <div class="flex items-center justify-between">
+                <h3 class="text-xs uppercase font-extrabold tracking-wider text-[#062d4d] flex items-center gap-2">
+                  <svg class="w-4 h-4 text-[#c9a84c]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="4" width="18" height="16" rx="2" />
+                    <circle cx="9" cy="10" r="2" />
+                    <path d="M15 8h2" />
+                    <path d="M15 12h2" />
+                    <path d="M7 16h10" />
+                  </svg>
+                  <span>{{ $t("bookingPopup.passportPhoto") }} <span class="text-red-500 font-extrabold">*</span></span>
+                </h3>
+                <span class="text-[10px] text-[#062d4d] bg-[#f0f7fc] border border-[#bae6fd] px-2.5 py-0.5 rounded-full font-bold">
+                  {{ $t("bookingPopup.securityPermits") }}
+                </span>
+              </div>
+
+              <!-- Uploaded file preview -->
+              <div v-if="passportFile" class="flex items-center justify-between p-3.5 rounded-xl bg-[#f0fdf4] border border-[#bbf7d0]">
+                <div class="flex items-center gap-3">
+                  <div class="w-11 h-11 rounded-xl bg-white border border-[#86efac] overflow-hidden flex items-center justify-center shadow-xs flex-shrink-0">
+                    <img v-if="passportFile.url.startsWith('blob:') || passportFile.url.includes('image')" :src="passportFile.url" alt="Passport" class="w-full h-full object-cover" />
+                    <svg v-else class="w-6 h-6 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                      <polyline points="14 2 14 8 20 8" />
+                      <line x1="16" y1="13" x2="8" y2="13" />
+                      <line x1="16" y1="17" x2="8" y2="17" />
+                    </svg>
+                  </div>
+                  <div>
+                    <span class="text-xs font-bold text-[#166534] block truncate max-w-[200px]">{{ passportFile.name }}</span>
+                    <span class="text-[10px] text-[#15803d] font-semibold flex items-center gap-1">
+                      <svg class="w-3 h-3 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                      {{ passportFile.size }} · {{ $t("bookingPopup.readyForPermit") }}
+                    </span>
+                  </div>
+                </div>
+                <button type="button" @click="removePassportFile" class="p-1.5 rounded-lg text-red-500 hover:bg-red-50 cursor-pointer font-bold transition-colors" title="Remove file">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+              </div>
+
+              <!-- Upload Drag & Drop Trigger with Vector SVG Icon -->
+              <div v-else>
+                <label 
+                  class="flex flex-col items-center justify-center p-5 rounded-2xl border-2 border-dashed transition-all cursor-pointer text-center group relative overflow-hidden"
+                  :class="formErrors.passport ? 'border-red-400 bg-red-50/20' : 'border-[#cbd5e1] hover:border-[#c9a84c] hover:bg-[#f8fafc] bg-white'"
+                >
+                  <input 
+                    type="file" 
+                    accept="image/jpeg,image/png,image/webp,application/pdf" 
+                    @change="handlePassportUpload" 
+                    class="hidden" 
+                    :disabled="passportUploading"
+                  />
+
+                  <div v-if="passportUploading" class="flex flex-col items-center gap-2 py-2">
+                    <div class="w-8 h-8 border-3 border-[#062d4d]/20 border-t-[#062d4d] rounded-full animate-spin"></div>
+                    <span class="text-xs font-bold text-[#062d4d]">{{ $t("bookingPopup.uploadingDoc") }}</span>
+                  </div>
+
+                  <div v-else class="flex flex-col items-center space-y-2.5">
+                    <!-- Vector SVG Upload Emblem -->
+                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#062d4d]/10 via-[#c9a84c]/10 to-[#0a4878]/10 group-hover:from-[#062d4d] group-hover:to-[#0a4878] group-hover:text-white text-[#062d4d] flex items-center justify-center transition-all duration-300 shadow-sm border border-[#e2e8f0] group-hover:border-[#062d4d] group-hover:scale-105">
+                      <svg class="w-7 h-7 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H15l5 5v12.5A2.5 2.5 0 0 1 17.5 22h-11A2.5 2.5 0 0 1 4 19.5v-15z" />
+                        <path d="M14 2v6h6" />
+                        <circle cx="10" cy="13" r="2" />
+                        <path d="M6.5 18a3.5 3.5 0 0 1 7 0" />
+                        <path d="M17 14v4m-2-2l2-2 2 2" stroke-width="2" />
                       </svg>
                     </div>
 
-                    <div class="flex-1 flex flex-col justify-between z-10">
-                      <div class="flex justify-between items-start mb-6">
-                        <div class="font-jost">
-                          <h4 class="text-xs font-bold text-dark tracking-wider uppercase">{{ reviews[currentIndex].customerName }}</h4>
-                          <span class="text-[9px] text-muted">{{ formatDate(reviews[currentIndex].createdAt) }}</span>
-                        </div>
-                        
-                        <div class="flex items-center text-gold text-sm filter drop-shadow-[0_0_2px_rgba(201,168,76,0.3)] gap-0.5">
-                          <span 
-                            v-for="s in 5" 
-                            :key="s"
-                            class="relative inline-block w-3.5 h-3.5 select-none"
-                          >
-                            <svg class="w-3.5 h-3.5 text-gold/20" fill="currentColor" viewBox="0 0 24 24">
-                              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                            </svg>
-                            <span 
-                              class="absolute top-0 left-0 overflow-hidden h-full flex items-center"
-                              :style="{ width: getStarDisplayWidth(s, reviews[currentIndex].rating) }"
-                            >
-                              <svg class="w-3.5 h-3.5 text-gold" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                              </svg>
-                            </span>
-                          </span>
-                        </div>
+                    <!-- Label & Formats -->
+                    <div class="space-y-1">
+                      <div class="text-xs font-bold text-[#0f172a] group-hover:text-[#062d4d] transition-colors flex items-center justify-center gap-1.5">
+                        <span>{{ $t("bookingPopup.uploadPassport") }}</span>
+                        <span class="text-red-500 font-extrabold">*</span>
                       </div>
-                      
-                      <p class="font-cormorant text-lg md:text-xl text-text leading-relaxed italic pr-8">
-                        "{{ reviews[currentIndex].comment }}"
+                      <p class="text-[11px] text-[#64748b]">
+                        {{ $t("bookingPopup.supportsFormats") }}
                       </p>
                     </div>
                   </div>
-                </Transition>
+                </label>
+
+                <p v-if="formErrors.passport" class="text-[11px] text-red-500 font-semibold mt-1.5 flex items-center gap-1">
+                  <svg class="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  <span>{{ formErrors.passport }}</span>
+                </p>
               </div>
 
-              <!-- Carousel Navigation Controls -->
-              <div v-if="reviews.length > 1" class="flex justify-between items-center mt-6 px-1 z-10">
-                <div class="flex gap-2">
-                  <button
-                    v-for="(rev, idx) in reviews"
-                    :key="'dot-' + rev.id"
-                    @click="setReview(idx)"
-                    class="w-2 h-2 rounded-full transition-all duration-300"
-                    :class="idx === currentIndex ? 'bg-gold w-4' : 'bg-gold/30 hover:bg-gold/60'"
-                  ></button>
-                </div>
-
-                <div class="flex gap-2">
-                  <button @click="prevReview" class="w-8 h-8 rounded-full border border-gold/30 hover:border-gold hover:text-white bg-white hover:bg-gold flex items-center justify-center text-gold transition-all duration-300" aria-label="Previous review">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
-                    </svg>
-                  </button>
-                  <button @click="nextReview" class="w-8 h-8 rounded-full border border-gold/30 hover:border-gold hover:text-white bg-white hover:bg-gold flex items-center justify-center text-gold transition-all duration-300" aria-label="Next review">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    </div>
-
-    <!-- 4. Review Modal (Write Review) -->
-    <Transition name="fade">
-      <div v-if="showReviewModal" class="fixed inset-0 z-[1500] flex items-center justify-center bg-dark/80 backdrop-blur-md p-4 overflow-y-auto" @click="handleReviewModalCloseAttempt">
-        <div 
-          class="feedback-card relative animate-slide-up"
-          @click.stop
-        >
-          <!-- Top Decorator Gold Line -->
-          <div class="h-1.5 w-full bg-gradient-to-r from-sea via-gold to-sun"></div>
-
-          <!-- Close Icon button -->
-          <button @click="handleReviewModalCloseAttempt" class="modal-close-btn" aria-label="Close modal">
-            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-          
-          <div class="p-8">
-            <h3 class="font-playfair text-2xl font-bold text-dark text-center mb-6">Write Review</h3>
-            
-            <form @submit.prevent="submitReview" class="space-y-4">
-              <!-- General form error alerts -->
-              <div v-if="errors.form" class="bg-red-500/10 border border-red-500/30 text-red-600 rounded-lg p-3.5 text-xs font-semibold font-sans">
-                {{ errors.form }}
-              </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label for="reviewName" class="block text-[9px] font-bold text-muted mb-1.5 uppercase tracking-widest font-sans">Full Name</label>
-                  <input id="reviewName" type="text" v-model="reviewForm.name" required class="w-full p-3 border border-gold/30 rounded-lg focus:ring-1 focus:ring-sea focus:border-sea bg-cream/35 focus:bg-white outline-none text-xs font-jost transition-all" placeholder="Enter your name">
-                  <p v-if="errors.name" class="text-[10px] text-red-500 mt-1 font-jost">{{ errors.name }}</p>
-                </div>
-                <div>
-                  <label for="reviewEmail" class="block text-[9px] font-bold text-muted mb-1.5 uppercase tracking-widest font-sans">Email Address</label>
-                  <input id="reviewEmail" type="email" v-model="reviewForm.email" required class="w-full p-3 border border-gold/30 rounded-lg focus:ring-1 focus:ring-sea focus:border-sea bg-cream/35 focus:bg-white outline-none text-xs font-jost transition-all" placeholder="maria@example.com">
-                  <p v-if="errors.email" class="text-[10px] text-red-500 mt-1 font-jost">{{ errors.email }}</p>
-                </div>
-              </div>
-
-              <!-- Star selection zone -->
-              <div class="bg-cream/45 border border-gold/15 rounded-xl p-5 text-center transition-all hover:border-gold/30">
-                <label class="block text-[9px] font-bold text-muted mb-3 uppercase tracking-widest font-sans">Your Rating</label>
-                <div class="flex justify-center items-center gap-3" @mouseleave="hoverRating = 0">
-                  <button 
-                    v-for="star in 5" 
-                    :key="star"
-                    type="button"
-                    class="star-btn relative w-10 h-10 flex items-center justify-center focus:outline-none cursor-pointer group"
-                  >
-                    <!-- Left Half Hitbox -->
-                    <div class="absolute top-0 left-0 w-1/2 h-full z-10" @click="reviewForm.rating = star - 0.5" @mouseover="hoverRating = star - 0.5"></div>
-                    <!-- Right Half Hitbox -->
-                    <div class="absolute top-0 right-0 w-1/2 h-full z-10" @click="reviewForm.rating = star" @mouseover="hoverRating = star"></div>
-                    
-                    <span class="relative w-10 h-10 transition-all duration-300 transform group-hover:scale-110 flex items-center justify-center pointer-events-none">
-                      <!-- Empty Star Background -->
-                      <svg class="w-10 h-10 text-gold/20" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                      </svg>
-                      <!-- Filled Star Overlay -->
-                      <span 
-                        class="absolute top-0 left-0 overflow-hidden h-full flex items-center transition-all duration-150"
-                        :style="{ width: getStarWidth(star, hoverRating || reviewForm.rating) }"
-                      >
-                        <svg class="w-10 h-10 text-gold filter drop-shadow-[0_0_4px_rgba(201,168,76,0.6)]" fill="currentColor" viewBox="0 0 24 24">
-                          <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
-                        </svg>
-                      </span>
-                    </span>
-                  </button>
-                </div>
-                <span class="text-[10px] font-bold text-gold mt-3 block h-4 tracking-wide font-sans">
-                  {{ reviewForm.rating === 5 ? 'Excellent & Luxury' : reviewForm.rating === 4.5 ? 'Spectacular Luxury' : reviewForm.rating === 4 ? 'Very Good' : reviewForm.rating === 3.5 ? 'Extremely Good' : reviewForm.rating === 3 ? 'Good' : reviewForm.rating === 2.5 ? 'Average' : reviewForm.rating === 2 ? 'Fair' : reviewForm.rating === 1.5 ? 'Mediocre' : reviewForm.rating === 1 ? 'Needs Improvement' : reviewForm.rating === 0.5 ? 'Dissatisfied' : 'Select your rating' }}
-                </span>
-                <p v-if="errors.rating" class="text-[10px] text-red-500 mt-1 font-jost">{{ errors.rating }}</p>
-              </div>
-
-              <div>
-                <label for="reviewComments" class="block text-[9px] font-bold text-muted mb-1.5 uppercase tracking-widest font-sans">Your Experience (Optional)</label>
-                <textarea id="reviewComments" v-model="reviewForm.comment" rows="3" class="w-full p-3 border border-gold/30 rounded-lg focus:ring-1 focus:ring-sea focus:border-sea bg-cream/35 focus:bg-white outline-none text-xs font-jost resize-none transition-all" placeholder="Tell us about the highlights of your luxury journey..."></textarea>
-              </div>
-
-              <button type="submit" :disabled="submittingReview" class="w-full bg-gradient-to-r from-sea-deep to-sea text-white py-3.5 px-6 rounded-lg font-bold text-xs uppercase tracking-widest transition-all shadow-md hover:translate-y-[-1px] disabled:opacity-50 mt-2 cursor-pointer">
-                {{ submittingReview ? 'Submitting...' : 'Submit Feedback' }}
-              </button>
-            </form>
-
-            <!-- Discard Prompt Dialog Overlay (Inside Review Form Modal) -->
-            <Transition name="fade">
-              <div v-if="showDiscardPrompt" class="absolute inset-0 bg-dark/95 backdrop-blur-md rounded-2xl p-8 flex flex-col justify-center items-center text-center z-[2000] font-sans">
-                <svg class="w-12 h-12 text-sun mb-4 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              <!-- Security Notice with Lock SVG -->
+              <div class="flex items-start gap-1.5 pt-1 text-[10px] text-[#64748b] leading-tight">
+                <svg class="w-3.5 h-3.5 text-emerald-600 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
                 </svg>
-                <h4 class="font-playfair text-xl font-bold text-white mb-2">Discard Unsaved Review?</h4>
-                <p class="text-white/60 text-xs max-w-xs mb-8 leading-relaxed">You have started writing a review. Discarding will permanently delete your draft.</p>
-                <div class="flex gap-4">
-                  <button @click="closeReviewModalAndDiscard" class="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-bold text-xs uppercase tracking-widest rounded transition-all cursor-pointer">Discard Changes</button>
-                  <button @click="showDiscardPrompt = false" class="px-6 py-2.5 border border-gold/50 text-gold hover:bg-gold/10 font-bold text-xs uppercase tracking-widest rounded transition-all cursor-pointer">Keep Writing</button>
-                </div>
-              </div>
-            </Transition>
-
-          </div>
-        </div>
-      </div>
-    </Transition>
-
-    <!-- 5. Booking Modal (Reserve Tour) -->
-    <Transition name="fade">
-      <div v-if="showBookingModal" class="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-[#0d1f2d]/85 backdrop-blur-md" @click="showBookingModal = false">
-        
-        <!-- SUCCESS STATE -->
-        <div v-if="bookingSuccess" class="relative w-full max-w-lg overflow-hidden rounded-2xl bg-[#faf7f2] border border-[#c9a84c]/30 shadow-2xl p-8 text-center transition-all transform duration-300" @click.stop>
-          
-          <!-- Top-Right Close Button -->
-          <button type="button" @click="showBookingModal = false" aria-label="Close success modal" class="absolute top-4 right-4 z-10 p-2 text-[#6b8a9a] hover:text-[#063a5c] hover:bg-black/5 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-[#c9a84c]">
-            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-
-          <!-- Luxury Circular Success Icon (Cream Backing & Gold Checkmark) -->
-          <div class="mx-auto flex items-center justify-center w-20 h-20 rounded-full bg-[#c9a84c]/10 border border-[#c9a84c]/30 mb-6">
-            <svg class="w-10 h-10 text-[#c9a84c]" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-          </div>
-
-          <!-- Success Header -->
-          <span class="inline-block px-3 py-1 text-[9px] font-bold tracking-[0.25em] uppercase text-[#c9a84c] border border-[#c9a84c]/30 rounded-full mb-3 bg-[#c9a84c]/5">
-            Reservation Initiated
-          </span>
-          
-          <h2 class="text-2xl font-bold font-serif text-[#063a5c] tracking-tight leading-snug mb-3">
-            Your Egypt Journey Awaits
-          </h2>
-
-          <!-- Subtext Details -->
-          <p class="text-sm text-[#2a3f4f] leading-relaxed mb-6 max-w-sm mx-auto">
-            Thank you for choosing Seadora Travel. A dedicated Luxury Travel Planner has been assigned to your request and will contact you via email within the next 4 hours to review your customized itinerary.
-          </p>
-
-          <!-- Detailed Summary Box -->
-          <div class="bg-[#f7fbfd] border border-[#dce6ec] rounded-xl p-4 text-left mb-8 space-y-2.5">
-            <div class="flex justify-between items-center text-xs">
-              <span class="text-[#6b8a9a] uppercase tracking-wider font-semibold">Reference Code</span>
-              <span class="text-[#063a5c] font-bold font-mono">{{ bookingReference }}</span>
-            </div>
-            <div class="border-t border-[#dce6ec]/60 my-2"></div>
-            <div class="flex justify-between items-center text-xs">
-              <span class="text-[#6b8a9a] uppercase tracking-wider font-semibold">Priority Status</span>
-              <span class="text-[#c9a84c] font-semibold">Premium VIP Queue</span>
-            </div>
-          </div>
-
-          <!-- Return/Call-to-Action Button -->
-          <button type="button" @click="showBookingModal = false" class="w-full bg-[#063a5c] hover:bg-[#0a5c8a] text-white font-medium text-xs tracking-widest uppercase py-4 px-8 rounded-lg shadow-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#063a5c] focus:ring-offset-2">
-            Close Window
-          </button>
-        </div>
-
-        <!-- FORM STATE -->
-        <div v-else class="relative w-full max-w-4xl overflow-hidden rounded-2xl bg-[#faf7f2] border border-[#c9a84c]/30 shadow-2xl flex flex-col md:flex-row transition-all transform duration-300" @click.stop>
-          
-          <!-- Top-Right Close Button -->
-          <button type="button" @click="showBookingModal = false" aria-label="Close booking modal" class="absolute top-4 right-4 z-10 p-2 text-[#6b8a9a] hover:text-[#063a5c] hover:bg-black/5 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-[#c9a84c]">
-            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-
-          <!-- COLUMN 1: Brand Reassurance & Details (Deep Sea Backing) -->
-          <div class="w-full md:w-5/12 bg-[#063a5c] text-white p-8 md:p-10 flex flex-col justify-between relative overflow-hidden">
-            <!-- Subtle Brand Background Pattern -->
-            <div class="absolute inset-0 opacity-5 mix-blend-overlay bg-repeat bg-center" style="background-image: radial-gradient(#c9a84c 1px, transparent 1px); background-size: 20px 20px;"></div>
-            
-            <div class="relative z-10">
-              <!-- Brand Badge -->
-              <span class="inline-block px-3 py-1 text-[10px] font-medium tracking-[0.2em] uppercase text-[#c9a84c] border border-[#c9a84c]/40 rounded-full mb-6 bg-[#c9a84c]/10">
-                Exclusive Experiences
-              </span>
-              
-              <!-- Headline -->
-              <h2 class="text-3xl font-extrabold font-serif tracking-tight leading-tight text-white mb-4">
-                Begin Your <br>Luxury Egypt <br>Journey
-              </h2>
-              
-              <!-- Reassurance Paragraph -->
-              <p class="text-sm text-[#8eafc2] leading-relaxed mb-8">
-                Crafted by certified Egyptologists and luxury hospitality specialists, our tours offer unmatched access and elite accommodations.
-              </p>
-
-              <!-- Reassurance Benefits List -->
-              <div class="space-y-4">
-                <!-- Benefit 1 -->
-                <div class="flex items-start space-x-3">
-                  <div class="flex-shrink-0 w-5 h-5 rounded-full bg-[#c9a84c]/20 flex items-center justify-center text-[#c9a84c]">
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 class="text-xs font-semibold uppercase tracking-wider text-white">Elite Local Guides</h4>
-                    <p class="text-xs text-[#8eafc2] mt-0.5">Accompanied by dedicated, private Egyptologists</p>
-                  </div>
-                </div>
-                
-                <!-- Benefit 2 -->
-                <div class="flex items-start space-x-3">
-                  <div class="flex-shrink-0 w-5 h-5 rounded-full bg-[#c9a84c]/20 flex items-center justify-center text-[#c9a84c]">
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 class="text-xs font-semibold uppercase tracking-wider text-white">Flexible Booking Policy</h4>
-                    <p class="text-xs text-[#8eafc2] mt-0.5">Free cancellation up to 72 hours prior to departure</p>
-                  </div>
-                </div>
-
-                <!-- Benefit 3 -->
-                <div class="flex items-start space-x-3">
-                  <div class="flex-shrink-0 w-5 h-5 rounded-full bg-[#c9a84c]/20 flex items-center justify-center text-[#c9a84c]">
-                    <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h4 class="text-xs font-semibold uppercase tracking-wider text-white">Bespoke Concierge</h4>
-                    <p class="text-xs text-[#8eafc2] mt-0.5">24/7 dedicated support throughout your stay</p>
-                  </div>
-                </div>
+                <span>{{ $t("bookingPopup.encryptedWarning") }}</span>
               </div>
             </div>
 
-            <!-- Trust Badging -->
-            <div class="relative z-10 mt-8 pt-6 border-t border-[#8eafc2]/20 flex items-center justify-between">
-              <div class="text-left">
-                <div class="text-xs text-[#8eafc2] uppercase tracking-widest font-semibold">Stripe Secured</div>
-                <div class="text-[10px] text-[#8eafc2]/60 mt-0.5">Encrypted Connection</div>
-              </div>
-              <div class="text-right">
-                <div class="text-xs text-[#c9a84c] font-bold tracking-widest">SeeDora Gold</div>
-                <div class="text-[10px] text-[#8eafc2]/60 mt-0.5">Signature Service</div>
-              </div>
-            </div>
-          </div>
-
-          <!-- COLUMN 2: Booking Form (Cream Backing) -->
-          <form @submit.prevent="submitBooking" class="w-full md:w-7/12 p-8 md:p-10 flex flex-col justify-between">
-            <div>
-              <h3 class="text-xl font-bold font-serif text-[#063a5c] tracking-tight mb-6">
-                Request Private Reservation
+            <!-- 4. Special Requests -->
+            <div class="space-y-2.5 bg-white p-5 rounded-2xl border border-[#e2e8f0] shadow-xs">
+              <h3 class="text-xs uppercase font-extrabold tracking-wider text-[#062d4d] flex items-center gap-1.5">
+                <span>💬</span> {{ $t("bookingPopup.specialRequests") }}
               </h3>
+              <div>
+                <textarea 
+                  v-model="bookingForm.specialRequests" 
+                  rows="2" 
+                  :placeholder="$t('placeholders.specialRequests')" 
+                  class="w-full px-3.5 py-2.5 rounded-xl border border-[#cbd5e1] text-xs sm:text-sm font-medium focus:outline-none focus:border-[#062d4d] focus:ring-1 focus:ring-[#062d4d] resize-none bg-white"
+                ></textarea>
+              </div>
+            </div>
 
-              <div class="space-y-4">
-                <!-- Field: Full Name -->
-                <div class="flex flex-col">
-                  <label for="booking-name" class="text-[10px] font-semibold tracking-wider text-[#6b8a9a] uppercase mb-1.5">
-                    Full Name
-                  </label>
-                  <input type="text" id="booking-name" v-model="bookingForm.name" @input="validateField('name')" placeholder="Alexander Vance"
-                    class="bg-[#f7fbfd] border border-[#dce6ec] text-[#2a3f4f] placeholder-[#6b8a9a] rounded-lg px-4 py-3.5 text-sm transition-all duration-200 outline-none w-full font-sans hover:border-[#0a5c8a]/60 hover:bg-white focus:border-[#c9a84c] focus:bg-white focus:ring-1 focus:ring-[#c9a84c] focus:shadow-[0_0_12px_rgba(201,168,76,0.15)]">
-                  <span v-if="bookingErrors.name" class="text-xs text-rose-600 mt-1 font-sans">{{ bookingErrors.name }}</span>
+            <!-- 5. Order Summary Card -->
+            <div class="bg-gradient-to-br from-[#062d4d] to-[#0a4878] p-5 rounded-2xl text-white shadow-md">
+              <h3 class="text-xs uppercase font-extrabold tracking-wider mb-3 text-white/90">{{ $t("bookingPopup.bookingSummary") }}</h3>
+              <div class="space-y-2 text-xs sm:text-sm text-white/80">
+                <div class="flex justify-between">
+                  <span>{{ $t("bookingPopup.travelDate") }}:</span>
+                  <span class="font-bold text-white">{{ selectedDate }}</span>
                 </div>
-
-                <!-- Fields Row: Email and Phone -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div class="flex flex-col">
-                    <label for="booking-email" class="text-[10px] font-semibold tracking-wider text-[#6b8a9a] uppercase mb-1.5">
-                      Email Address
-                    </label>
-                    <input type="email" id="booking-email" v-model="bookingForm.email" @input="validateField('email')" placeholder="alex@vance.com"
-                      class="bg-[#f7fbfd] border border-[#dce6ec] text-[#2a3f4f] placeholder-[#6b8a9a] rounded-lg px-4 py-3.5 text-sm transition-all duration-200 outline-none w-full font-sans hover:border-[#0a5c8a]/60 hover:bg-white focus:border-[#c9a84c] focus:bg-white focus:ring-1 focus:ring-[#c9a84c] focus:shadow-[0_0_12px_rgba(201,168,76,0.15)]">
-                    <span v-if="bookingErrors.email" class="text-xs text-rose-600 mt-1 font-sans">{{ bookingErrors.email }}</span>
-                  </div>
-                  
-                  <div class="flex flex-col">
-                    <label for="booking-phone" class="text-[10px] font-semibold tracking-wider text-[#6b8a9a] uppercase mb-1.5">
-                      Phone Number
-                    </label>
-                    <input type="tel" id="booking-phone" v-model="bookingForm.phone" @input="validateField('phone')" placeholder="+1 555-0199"
-                      class="bg-[#f7fbfd] border border-[#dce6ec] text-[#2a3f4f] placeholder-[#6b8a9a] rounded-lg px-4 py-3.5 text-sm transition-all duration-200 outline-none w-full font-sans hover:border-[#0a5c8a]/60 hover:bg-white focus:border-[#c9a84c] focus:bg-white focus:ring-1 focus:ring-[#c9a84c] focus:shadow-[0_0_12px_rgba(201,168,76,0.15)]">
-                    <span v-if="bookingErrors.phone" class="text-xs text-rose-600 mt-1 font-sans">{{ bookingErrors.phone }}</span>
-                  </div>
+                <div class="flex justify-between">
+                  <span>{{ $t("bookingPopup.pickupTime") }}:</span>
+                  <span class="font-bold text-emerald-300">{{ (bookingForm.pickupTime || '').split(' ')[0] || '15:30' }}</span>
                 </div>
-
-                <!-- Fields Row: Destination Select and Travel Date -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div class="flex flex-col">
-                    <label for="booking-destination" class="text-[10px] font-semibold tracking-wider text-[#6b8a9a] uppercase mb-1.5">
-                      Select Destination
-                    </label>
-                    <div class="relative">
-                      <select id="booking-destination" v-model="bookingForm.destination" @change="validateField('destination')"
-                        class="bg-[#f7fbfd] border border-[#dce6ec] text-[#2a3f4f] rounded-lg px-4 py-3.5 text-sm transition-all duration-200 outline-none w-full font-sans hover:border-[#0a5c8a]/60 hover:bg-white focus:border-[#c9a84c] focus:bg-white focus:ring-1 focus:ring-[#c9a84c] focus:shadow-[0_0_12px_rgba(201,168,76,0.15)] appearance-none cursor-pointer pr-10">
-                        <option value="" disabled>Select Region</option>
-                        <option value="hurghada">Hurghada (Red Sea)</option>
-                        <option value="cairo">Cairo (Pyramids & History)</option>
-                        <option value="luxor">Luxor (Nile Cruises)</option>
-                        <option value="sharm">Sharm El-Sheikh (Resorts)</option>
-                      </select>
-                      <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#6b8a9a]">
-                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                          <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                        </svg>
-                      </div>
-                    </div>
-                    <span v-if="bookingErrors.destination" class="text-xs text-rose-600 mt-1 font-sans">{{ bookingErrors.destination }}</span>
-                  </div>
-                  
-                  <div class="flex flex-col">
-                    <label for="booking-date" class="text-[10px] font-semibold tracking-wider text-[#6b8a9a] uppercase mb-1.5">
-                      Target Date
-                    </label>
-                    <input type="date" id="booking-date" v-model="bookingForm.date" @change="validateField('date')"
-                      class="bg-[#f7fbfd] border border-[#dce6ec] text-[#2a3f4f] placeholder-[#6b8a9a] rounded-lg px-4 py-3.5 text-sm transition-all duration-200 outline-none w-full font-sans hover:border-[#0a5c8a]/60 hover:bg-white focus:border-[#c9a84c] focus:bg-white focus:ring-1 focus:ring-[#c9a84c] focus:shadow-[0_0_12px_rgba(201,168,76,0.15)] cursor-pointer">
-                    <span v-if="bookingErrors.date" class="text-xs text-rose-600 mt-1 font-sans">{{ bookingErrors.date }}</span>
-                  </div>
+                <div class="flex justify-between">
+                  <span>{{ $t("bookingPopup.guests") }}:</span>
+                  <span class="font-bold text-white">{{ adultsCount }} {{ $t("bookingPopup.adults") }}<span v-if="childrenCount">, {{ childrenCount }} {{ $t("bookingPopup.children") }}</span></span>
                 </div>
-
-                <!-- Field: Travel Party Size & Special Requirements -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div class="flex flex-col sm:col-span-1">
-                    <label for="booking-guests" class="text-[10px] font-semibold tracking-wider text-[#6b8a9a] uppercase mb-1.5">
-                      Guests
-                    </label>
-                    <div class="relative">
-                      <select id="booking-guests" v-model="bookingForm.guests" @change="validateField('guests')"
-                        class="bg-[#f7fbfd] border border-[#dce6ec] text-[#2a3f4f] rounded-lg px-4 py-3.5 text-sm transition-all duration-200 outline-none w-full font-sans hover:border-[#0a5c8a]/60 hover:bg-white focus:border-[#c9a84c] focus:bg-white focus:ring-1 focus:ring-[#c9a84c] focus:shadow-[0_0_12px_rgba(201,168,76,0.15)] appearance-none cursor-pointer pr-10">
-                        <option value="1">1 Guest</option>
-                        <option value="2">2 Guests</option>
-                        <option value="3">3 Guests</option>
-                        <option value="4">4 Guests</option>
-                        <option value="5+">5+ Guests</option>
-                      </select>
-                      <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[#6b8a9a]">
-                        <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                          <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/>
-                        </svg>
-                      </div>
-                    </div>
-                    <span v-if="bookingErrors.guests" class="text-xs text-rose-600 mt-1 font-sans">{{ bookingErrors.guests }}</span>
+                <div v-if="selectedAddons.length > 0" class="flex justify-between">
+                  <span>{{ $t("bookingPopup.addons") }}:</span>
+                  <span class="font-bold text-amber-300">{{ selectedAddons.length }} {{ $t("bookingPopup.selected") }}</span>
+                </div>
+                <div class="pt-3 mt-3 border-t border-white/20 flex justify-between items-end">
+                  <div>
+                    <span class="block text-[10px] text-emerald-300 font-bold mb-0.5">{{ $t("bookingPopup.taxesIncluded") }}</span>
+                    <span class="text-base sm:text-lg font-bold">{{ $t("bookingPopup.totalToPay") }}:</span>
                   </div>
-
-                  <div class="flex flex-col sm:col-span-2">
-                    <label for="booking-notes" class="text-[10px] font-semibold tracking-wider text-[#6b8a9a] uppercase mb-1.5">
-                      Special Requests or Preferences
-                    </label>
-                    <input type="text" id="booking-notes" v-model="bookingForm.notes" placeholder="Private yacht charter, dietary restrictions..."
-                      class="bg-[#f7fbfd] border border-[#dce6ec] text-[#2a3f4f] placeholder-[#6b8a9a] rounded-lg px-4 py-3.5 text-sm transition-all duration-200 outline-none w-full font-sans hover:border-[#0a5c8a]/60 hover:bg-white focus:border-[#c9a84c] focus:bg-white focus:ring-1 focus:ring-[#c9a84c] focus:shadow-[0_0_12px_rgba(201,168,76,0.15)]">
-                  </div>
+                  <span class="text-2xl sm:text-3xl font-extrabold text-white">{{ totalPriceFormatted }}</span>
                 </div>
               </div>
             </div>
 
-            <!-- Action Footer -->
-            <div class="mt-8 pt-6 border-t border-[#dce6ec] flex flex-col sm:flex-row items-center justify-between gap-4">
-              <p class="text-xs text-[#6b8a9a] text-center sm:text-left leading-relaxed">
-                No charge at booking. Review payment terms in business policies.
-              </p>
-              <button type="submit" :disabled="bookingLoading" class="w-full sm:w-auto bg-gradient-to-r from-[#0a5c8a] to-[#1a8bc4] hover:from-[#1a8bc4] hover:to-[#0a5c8a] text-white font-medium text-xs tracking-widest uppercase py-4 px-8 rounded-lg shadow-lg hover:shadow-xl hover:translate-y-[-1px] active:translate-y-0 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-[#0a5c8a] focus:ring-offset-2 disabled:opacity-50">
-                <span v-if="bookingLoading" class="flex items-center gap-1.5 justify-center">
-                  <svg class="animate-spin h-3.5 w-3.5 text-white" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Requesting...
-                </span>
-                <span v-else>Request Reservation</span>
-              </button>
-            </div>
-          </form>
-        </div>
+          </div>
 
+          <!-- Footer Actions -->
+          <div class="px-6 py-4.5 border-t border-[#f1f5f9] bg-white z-10">
+            <button 
+              @click="confirmBooking"
+              :disabled="bookingSubmitting"
+              class="w-full py-4 rounded-xl bg-gradient-to-r from-[#062d4d] to-[#0d4f8b] hover:from-[#0a3f6b] hover:to-[#0f5c9e] text-white font-extrabold text-sm sm:text-base shadow-lg transition-all hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-60 disabled:pointer-events-none"
+            >
+              <span v-if="bookingSubmitting" class="animate-spin text-lg">⏳</span>
+              <span>{{ bookingSubmitting ? $t('bookingPopup.confirming') : $t('bookingPopup.confirmReservation') }}</span>
+              <span v-if="!bookingSubmitting">→</span>
+            </button>
+            <p class="text-center text-[10px] text-[#059669] font-bold mt-2 flex items-center justify-center gap-1">
+              <span>🔒</span> {{ $t("bookingPopup.sslEncrypted") }}
+            </p>
+          </div>
+
+        </div>
       </div>
     </Transition>
 
-    <!-- 6. Gallery Lightbox Carousel Modal -->
+    <!-- TOAST NOTIFICATION -->
     <Transition name="fade">
-      <div v-if="showLightbox" class="fixed inset-0 z-[2500] flex flex-col justify-between bg-dark/95 backdrop-blur-xl" @click="closeLightbox">
-        <!-- Lightbox Header -->
-        <div class="p-6 flex justify-between items-center text-white relative z-10" @click.stop>
-          <div class="font-jost">
-            <span class="text-[9px] tracking-widest text-gold uppercase font-bold">{{ categoryName }} Experience</span>
-            <div class="text-xs text-white/50">{{ lightboxIndex + 1 }} / {{ galleryImages.length }}</div>
-          </div>
-          <button @click="closeLightbox" class="w-10 h-10 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-white transition-all cursor-pointer">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-
-        <!-- Lightbox Main Content -->
-        <div class="flex-1 flex items-center justify-center px-4 md:px-12 relative">
-          <!-- Prev Button -->
-          <button 
-            @click.stop="prevLightboxImage" 
-            class="absolute left-4 md:left-8 z-10 w-12 h-12 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-white transition-all cursor-pointer hover:scale-105 active:scale-95"
-            aria-label="Previous image"
-          >
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-
-          <!-- Current Image Container -->
-          <div class="max-w-5xl max-h-[70vh] flex flex-col items-center" @click.stop>
-            <img 
-              :src="galleryImages[lightboxIndex].url" 
-              :alt="galleryImages[lightboxIndex].title" 
-              class="max-w-full max-h-[60vh] object-contain rounded-lg shadow-2xl border border-white/5 transition-all duration-300"
-            />
-          </div>
-
-          <!-- Next Button -->
-          <button 
-            @click.stop="nextLightboxImage" 
-            class="absolute right-4 md:right-8 z-10 w-12 h-12 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center text-white transition-all cursor-pointer hover:scale-105 active:scale-95"
-            aria-label="Next image"
-          >
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </div>
-
-        <!-- Lightbox Caption Footer -->
-        <div class="p-8 text-center text-white max-w-2xl mx-auto relative z-10" @click.stop>
-          <span class="text-[10px] tracking-widest text-gold uppercase font-semibold font-jost">{{ galleryImages[lightboxIndex].tag }}</span>
-          <h3 class="font-playfair text-2xl font-bold mb-2">{{ galleryImages[lightboxIndex].title }}</h3>
-          <p class="text-white/70 text-xs font-jost leading-relaxed">{{ galleryImages[lightboxIndex].desc }}</p>
-        </div>
+      <div 
+        v-if="showToast" 
+        class="fixed bottom-6 right-6 z-50 bg-[#062d4d] text-white border border-[#c9a84c]/40 px-5 py-3 rounded-xl shadow-2xl text-xs font-bold flex items-center gap-3 animate-in slide-in-from-bottom-3"
+      >
+        <span class="text-emerald-400">✓</span>
+        <span>{{ toastMessage }}</span>
       </div>
     </Transition>
 
-    <!-- Footer -->
-    <footer class="py-6 text-center border-t border-gold/10 bg-dark relative z-10 mt-16 md:mt-24">
-      <p class="text-[9px] uppercase tracking-widest text-white/40">© {{ new Date().getFullYear() }} SeeDora Travel. All rights reserved.</p>
-    </footer>
+    <!-- FOOTER -->
+    <Footer class="mt-16" />
+
   </div>
 </template>
 
 <style scoped>
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.3s ease;
+.shadow-xs {
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
-.fade-enter-from, .fade-leave-to {
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
   opacity: 0;
-}
-
-@keyframes slide-up {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-.animate-slide-up {
-  animation: slide-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-/* Carousel Transitions */
-.slide-next-enter-active,
-.slide-next-leave-active,
-.slide-prev-enter-active,
-.slide-prev-leave-active {
-  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.slide-next-enter-from {
-  opacity: 0;
-  transform: translateX(30px) scale(0.98);
-}
-.slide-next-leave-to {
-  opacity: 0;
-  transform: translateX(-30px) scale(0.98);
-}
-
-.slide-prev-enter-from {
-  opacity: 0;
-  transform: translateX(-30px) scale(0.98);
-}
-.slide-prev-leave-to {
-  opacity: 0;
-  transform: translateX(30px) scale(0.98);
-}
-
-/* Custom Scrollbar for reviews */
-::-webkit-scrollbar {
-  width: 5px;
-}
-::-webkit-scrollbar-track {
-  background: rgba(201, 168, 76, 0.05);
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(201, 168, 76, 0.25);
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(201, 168, 76, 0.45);
-}
-
-/* Page Layout details */
-.stat-box {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.09);
-  border-radius: 12px;
-  padding: 14px;
-  backdrop-filter: blur(4px);
-}
-.stat-label {
-  font-family: 'Jost', sans-serif;
-  font-size: 9px;
-  color: rgba(255, 255, 255, 0.4);
-  display: block;
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  margin-bottom: 4px;
-}
-.stat-value {
-  font-family: 'Jost', sans-serif;
-  color: var(--white);
-  font-weight: 600;
-  font-size: 13px;
-}
-
-.booking-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 12px;
-  padding: 16px;
-  backdrop-filter: blur(8px);
-}
-.rate-from {
-  font-size: 9px;
-  color: rgba(255, 255, 255, 0.5);
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-.rate-amount {
-  font-size: 26px;
-  color: var(--sun-light);
-  font-weight: bold;
-}
-.rate-per {
-  font-size: 9px;
-  color: rgba(255, 255, 255, 0.5);
-}
-.reserve-btn {
-  background: linear-gradient(135deg, var(--sun), var(--sun-light));
-  color: var(--white);
-  border: none;
-  padding: 12px 22px;
-  border-radius: 8px;
-  font-family: 'Jost', sans-serif;
-  font-size: 11px;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  cursor: pointer;
-  box-shadow: 0 10px 25px rgba(232, 130, 10, 0.3);
-  transition: all 0.3s ease;
-}
-.reserve-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 15px 30px rgba(232, 130, 10, 0.45);
-  background: linear-gradient(135deg, var(--sun-light), var(--sun));
-}
-
-.review-carousel-card {
-  width: 100%;
-  background: linear-gradient(to bottom, #ffffff, var(--cream));
-  border: 1px solid rgba(201, 168, 76, 0.16);
-  border-radius: 12px;
-  padding: 24px;
-  box-shadow: 0 10px 25px rgba(13, 31, 45, 0.03);
-  transition: all 0.3s ease;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-.review-carousel-card:hover {
-  box-shadow: 0 15px 35px rgba(201, 168, 76, 0.08);
-  border-color: rgba(201, 168, 76, 0.3);
-}
-
-/* Picture Gallery Styles */
-.gallery-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
-}
-@media (min-width: 1024px) {
-  .gallery-grid {
-    grid-template-columns: repeat(4, 1fr);
-  }
-}
-.gallery-card {
-  border-radius: 12px;
-  overflow: hidden;
-  position: relative;
-  height: 260px;
-  cursor: pointer;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-  border: 1px solid rgba(201, 168, 76, 0.15);
-  transition: transform 0.4s ease, box-shadow 0.4s ease, border-color 0.4s ease;
-}
-.gallery-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 20px 45px rgba(201, 168, 76, 0.18);
-  border-color: rgba(201, 168, 76, 0.4);
-}
-.gallery-img-bg {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  transition: transform 0.6s ease;
-}
-.gallery-card:hover .gallery-img-bg {
-  transform: scale(1.08);
-}
-.gallery-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(13,31,45,0.85) 0%, rgba(13,31,45,0.2) 60%, transparent 100%);
-  opacity: 0.9;
-}
-.gallery-info {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  padding: 20px;
-  color: var(--white);
-}
-.gallery-tag {
-  font-size: 9px;
-  color: var(--sun-light);
-  text-transform: uppercase;
-  letter-spacing: 0.15em;
-  font-weight: bold;
-  display: block;
-  margin-bottom: 4px;
-}
-.gallery-title {
-  font-size: 16px;
-  font-weight: bold;
-  line-height: 1.3;
-}
-
-/* Feedback Modal Styles */
-.feedback-card {
-  width: 100%;
-  max-width: 540px;
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(201, 168, 76, 0.4);
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 30px 70px rgba(6, 28, 40, 0.4), 0 0 50px rgba(201, 168, 76, 0.18);
-  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.modal-close-btn {
-  position: absolute;
-  top: 16px;
-  right: 16px;
-  z-index: 50;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: rgba(13, 31, 45, 0.1);
-  border: 1px solid rgba(201, 168, 76, 0.2);
-  color: var(--dark);
-  font-size: 18px;
-  font-weight: bold;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-.modal-close-btn:hover {
-  background: var(--sun);
-  border-color: var(--sun-light);
-  color: var(--white);
-  transform: rotate(90deg);
-}
-
-/* Fonts configurations */
-.font-playfair {
-  font-family: 'Playfair Display', serif;
-}
-.font-jost {
-  font-family: 'Jost', sans-serif;
-}
-.font-cormorant {
-  font-family: 'Cormorant Garamond', serif;
+  transform: translateY(8px);
 }
 </style>

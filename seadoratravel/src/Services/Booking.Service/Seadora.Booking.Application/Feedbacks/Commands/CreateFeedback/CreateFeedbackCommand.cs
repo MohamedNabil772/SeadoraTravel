@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using MediatR;
 using Seadora.Booking.Domain.Entities;
 using Seadora.Booking.Application.Common.Interfaces;
+using Seadora.Booking.Application.DTOs;
+using Mapster;
 
 namespace Seadora.Booking.Application.Feedbacks.Commands.CreateFeedback;
 
@@ -13,9 +15,9 @@ public record CreateFeedbackCommand(
     string Comment,
     string CustomerName,
     string CustomerEmail
-) : IRequest<Feedback>;
+) : IRequest<FeedbackDto>;
 
-public class CreateFeedbackCommandHandler : IRequestHandler<CreateFeedbackCommand, Feedback>
+public class CreateFeedbackCommandHandler : IRequestHandler<CreateFeedbackCommand, FeedbackDto>
 {
     private readonly IBookingDbContext _context;
 
@@ -24,7 +26,7 @@ public class CreateFeedbackCommandHandler : IRequestHandler<CreateFeedbackComman
         _context = context;
     }
 
-    public async Task<Feedback> Handle(CreateFeedbackCommand request, CancellationToken cancellationToken)
+    public async Task<FeedbackDto> Handle(CreateFeedbackCommand request, CancellationToken cancellationToken)
     {
         if (request.Rating < 0.5 || request.Rating > 5.0)
         {
@@ -45,6 +47,6 @@ public class CreateFeedbackCommandHandler : IRequestHandler<CreateFeedbackComman
         _context.Feedbacks.Add(feedback);
         await _context.SaveChangesAsync(cancellationToken);
 
-        return feedback;
+        return feedback.Adapt<FeedbackDto>();
     }
 }

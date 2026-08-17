@@ -7,9 +7,9 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: light dark;
-  color: #2a3f4f;
-  background-color: #faf7f2;
+  color-scheme: light;
+  color: #24303F;
+  background-color: #F1F5F9;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -19,8 +19,232 @@
 
 body {
   margin: 0;
-  display: flex;
-  place-content: center;
-  min-width: 320px;
+  background-color: #F1F5F9;
+  min-width: 100vw;
   min-height: 100vh;
+  color: #24303F;
+}
+
+/* Global resets for vue-router app view mounts */
+#app {
+  width: 100%;
+}
+
+/* TailAdmin Global Style Overrides */
+.table-container {
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 4px !important;
+  box-shadow: 0px 8px 13px -3px rgba(0, 0, 0, 0.07) !important;
+  overflow: hidden !important;
+  margin-top: 24px !important;
+}
+
+.data-table {
+  width: 100% !important;
+  border-collapse: collapse !important;
+}
+
+.data-table th {
+  padding: 16px 24px !important;
+  text-align: left !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  color: #64748B !important;
+  background: #F7F9FC !important;
+  border-bottom: 1px solid #E2E8F0 !important;
+}
+
+.data-table td {
+  padding: 16px 24px !important;
+  border-bottom: 1px solid #E2E8F0 !important;
+  font-size: 14px !important;
+  color: #24303F !important;
+}
+
+.data-table tr:hover {
+  background: #F9FAFB !important;
+}
+
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.page-header h2 {
+  font-size: 24px !important;
+  font-weight: 700 !important;
+  color: #1C2434 !important;
+  margin-bottom: 4px !important;
+}
+
+.page-header p {
+  color: #64748B !important;
+  font-size: 14px !important;
+}
+
+.btn-create, .btn-action-primary {
+  padding: 10px 22px !important;
+  background: #3C50E0 !important;
+  border: none !important;
+  border-radius: 4px !important;
+  color: #fff !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+  transition: all 0.3s !important;
+  box-shadow: none !important;
+}
+.btn-create:hover, .btn-action-primary:hover {
+  background: #2B3CA6 !important;
+}
+
+.btn-action-secondary {
+  padding: 10px 22px !important;
+  background: #fff !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 4px !important;
+  color: #64748B !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  font-size: 14px !important;
+  transition: all 0.2s !important;
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05) !important;
+}
+.btn-action-secondary:hover {
+  background: #F7F9FC !important;
+  color: #1C2434 !important;
+}
+
+.modal-card {
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 4px !important;
+  box-shadow: 0px 8px 13px -3px rgba(0, 0, 0, 0.07) !important;
+  color: #24303F !important;
+}
+
+.modal-header h3 {
+  color: #1C2434 !important;
+  font-weight: 700 !important;
+}
+
+.form-group label {
+  color: #64748B !important;
+  font-weight: 600 !important;
+  text-transform: uppercase !important;
+}
+
+.form-group input, .form-group select, .form-group textarea {
+  padding: 12px 14px !important;
+  background: #FFFFFF !important;
+  border: 1.5px solid #E2E8F0 !important;
+  border-radius: 4px !important;
+  color: #24303F !important;
+  transition: border-color 0.2s !important;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  border-color: #3C50E0 !important;
+}
+
+.btn-cancel {
+  padding: 10px 22px !important;
+  background: #fff !important;
+  border: 1px solid #E2E8F0 !important;
+  border-radius: 4px !important;
+  color: #64748B !important;
+  cursor: pointer !important;
+  font-weight: 600 !important;
+}
+.btn-cancel:hover {
+  background: #F7F9FC !important;
+}
+
+.btn-save {
+  padding: 10px 24px !important;
+  background: #3C50E0 !important;
+  border: none !important;
+  border-radius: 4px !important;
+  color: #fff !important;
+  cursor: pointer !important;
+  font-weight: 600 !important;
+}
+.btn-save:hover {
+  background: #2B3CA6 !important;
+}
+
+.status-badge.pending, .status-badge-inline.pending {
+  background: rgba(232, 130, 10, 0.1) !important;
+  color: #e8820a !important;
+  border: 1px solid rgba(232, 130, 10, 0.2) !important;
+}
+.status-badge.confirmed, .status-badge-inline.confirmed {
+  background: rgba(60, 80, 224, 0.1) !important;
+  color: #3C50E0 !important;
+  border: 1px solid rgba(60, 80, 224, 0.2) !important;
+}
+.status-badge.completed, .status-badge-inline.completed {
+  background: rgba(16, 185, 129, 0.1) !important;
+  color: #10B981 !important;
+  border: 1px solid rgba(16, 185, 129, 0.2) !important;
+}
+.status-badge.cancelled, .status-badge-inline.cancelled {
+  background: rgba(211, 64, 83, 0.1) !important;
+  color: #D34053 !important;
+  border: 1px solid rgba(211, 64, 83, 0.2) !important;
+}
+
+/* Category & general badges */
+.category-badge {
+  padding: 4px 12px !important;
+  background: rgba(60, 80, 224, 0.08) !important;
+  color: #3C50E0 !important;
+  border-radius: 4px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  border: none !important;
+}
+
+.cycle-badge {
+  padding: 4px 10px !important;
+  background: rgba(60, 80, 224, 0.08) !important;
+  color: #3C50E0 !important;
+  border-radius: 4px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  display: inline-block !important;
+}
+
+.tour-name, .customer-name {
+  color: #1C2434 !important;
+  font-weight: 600 !important;
+}
+.customer-email {
+  color: #64748B !important;
+}
+.price-cell {
+  color: #10B981 !important;
+  font-weight: 600 !important;
+}
+
+.btn-edit-action:hover {
+  background: #EFF4FB !important;
+}
+.btn-delete-action:hover {
+  background: rgba(211, 64, 83, 0.1) !important;
+}
+
+.empty-state {
+  color: #64748B !important;
+}
+.loading {
+  color: #64748B !important;
+}
+.spinner {
+  border: 3px solid rgba(60, 80, 224, 0.1) !important;
+  border-top-color: #3C50E0 !important;
 }

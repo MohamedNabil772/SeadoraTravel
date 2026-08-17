@@ -20,6 +20,14 @@ public class FilesController : ControllerBase
         if (file == null || file.Length == 0)
             return BadRequest("No file uploaded");
 
+        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".pdf" };
+        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        if (!allowedExtensions.Contains(extension))
+            return BadRequest("Invalid file type.");
+
+        if (file.Length > 5 * 1024 * 1024) // 5 MB
+            return BadRequest("File size exceeds 5MB limit.");
+
         using var stream = file.OpenReadStream();
         var fileId = await _storageService.UploadFileAsync(stream, file.FileName, file.ContentType);
 

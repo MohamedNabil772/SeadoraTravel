@@ -3,20 +3,41 @@
     "destinations": "Destinations",
     "tours": "Tours",
     "aboutUs": "About Us",
-    "bookNow": "Book Now"
+    "bookNow": "Book Now",
+    "explore": "Explore",
+    "login": "Login"
   },
   "hero": {
-    "badge": "Premium Egypt Travel Since 2010",
-    "title": "Discover <em>Egypt</em><br>Like Never Before",
-    "description": "From the crystalline waters of Hurghada to the ancient wonders of Luxor — SeeDora crafts extraordinary journeys across Egypt's most breathtaking landscapes.",
-    "exploreBtn": "Explore Tours",
-    "consultationBtn": "Free Consultation",
+    "badge": "Red Sea & Pharaonic Luxury Expeditions",
+    "title": "Discover <em>Egypt</em><br>Where Every Wave Tells A Story",
+    "description": "From the turquoise coral lagoons of Hurghada to the golden temples of Luxor and the Nile Valley — SeeDora curates bespoke private VIP journeys crafted with perfection.",
+    "exploreBtn": "Explore Journeys",
+    "browseAll": "Browse All Tours",
+    "vipConcierge": "24/7 VIP Concierge",
+    "searchPlaceholder": "Search VIP tours, diving, Nile cruises, pyramids...",
+    "searchBtn": "Explore Journeys",
+    "trending": "Trending Expeditions:",
+    "eliteStandard": "Red Sea Elite Standard",
+    "handcrafted": "Handcrafted Luxury Experiences",
+    "bestPriceGuarantee": "Best Price & Quality Guarantee",
+    "officialPermits": "Official Tourism Ministry Permits",
+    "freeCancellation": "Free Cancellation Available",
+    "satisfactionRate": "satisfaction from travelers worldwide",
+    "scroll": "Scroll to Explore",
+    "quickTags": {
+      "diving": "Red Sea Diving",
+      "luxor": "Ancient Luxor",
+      "cairo": "Pyramids & Cairo",
+      "cruise": "Luxury Nile Cruises",
+      "safari": "Desert Safari"
+    },
     "stats": {
       "guests": "Happy Guests",
-      "packages": "Tour Packages",
-      "years": "Years of Excellence"
-    },
-    "scroll": "Explore"
+      "packages": "Curated Tours",
+      "years": "Years of Excellence",
+      "experience": "Years of Luxury Travel",
+      "yearsLabel": "Years"
+    }
   },
   "destinations": {
     "eyebrow": "Where We Take You",
@@ -152,7 +173,7 @@
       "placeholders": {
         "firstName": "Maria",
         "lastName": "Schmidt",
-        "email": "maria@email.com",
+        "email": "maria{'@'}email.com",
         "message": "Tell us your travel dates, group size and wishes..."
       },
       "interests": {
@@ -177,5 +198,308 @@
     "privacy": "Privacy Policy",
     "terms": "Terms",
     "madeWith": "Made with ❤️ in Egypt"
+  },
+  "bookingPopup": {
+    "header": "Reserve Your Experience",
+    "subHeader": "Direct operator booking with instant confirmation",
+    "leadTraveler": "Lead Traveler & WhatsApp",
+    "whatsappVoucher": "WhatsApp Voucher",
+    "fullName": "Full Name",
+    "email": "Email Address",
+    "whatsapp": "WhatsApp Number",
+    "hotelPickup": "Hotel Pickup & Timing Details",
+    "hotelName": "Hotel / Resort Name",
+    "roomNumber": "Room Number",
+    "pickupTime": "Pickup Time / Departure Slot",
+    "passportPhoto": "Passport / ID Photo",
+    "securityPermits": "Security Permits",
+    "uploadPassport": "Upload Passport / ID Photo",
+    "supportsFormats": "Supports JPG, PNG, WEBP, or PDF up to 10MB",
+    "encryptedWarning": "Encrypted & strictly required by Coast Guard",
+    "specialRequests": "Special Requests / Dietary Notes",
+    "specialRequestsPlaceholder": "Optional: Vegetarian meals, anniversary...",
+    "bookingSummary": "Booking Summary",
+    "travelDate": "Travel Date",
+    "guests": "Guests",
+    "adults": "Adults",
+    "children": "Children",
+    "taxesIncluded": "Taxes & Fees Included",
+    "totalToPay": "Total to Pay",
+    "confirmReservation": "Confirm Reservation",
+    "confirming": "Confirming Reservation...",
+    "sslEncrypted": "256-Bit SSL Encrypted · Free Cancellation up to 24h before",
+    "whatsappNotice": "Your digital tour voucher and driver pickup updates will be sent directly to this WhatsApp number.",
+    "preferredTime": "Preferred Pickup Time (Flexible / Custom)",
+    "freeChoice": "Free Choice",
+    "flexibleNotice": "Select any preferred time between 07:00 and 20:00 for your private/custom departure.",
+    "conciergeCoordination": "Concierge Pickup Coordination",
+    "conciergeNotice": "The exact pickup time will be calculated based on your hotel's geographic location and sent directly to your WhatsApp.",
+    "readyForPermit": "Ready for permit",
+    "uploadingDoc": "Uploading document...",
+    "addons": "Add-ons",
+    "selected": "selected"
+  },
+  "validation": {
+    "fullNameRequired": "Full name is required",
+    "emailInvalid": "Please enter a valid email address",
+    "whatsappInvalid": "Please enter a valid WhatsApp number",
+    "hotelNameRequired": "Hotel / Resort name is required",
+    "passportRequired": "Passport / ID photo is required for coast guard permits"
+  },
+  "toast": {
+    "bookingConfirmed": "Booking confirmed! A WhatsApp confirmation voucher has been sent.",
+    "formErrors": "Please correct the errors in the form.",
+    "tourSaved": "Tour saved to favorites",
+    "linkCopied": "Link copied to clipboard"
+  },
+  "placeholders": {
+    "fullName": "e.g. John Smith",
+    "email": "name{'@'}example.com",
+    "whatsapp": "+20 100 123 4567",
+    "hotelName": "e.g. Sunrise Diamond Beach Resort",
+    "roomNumber": "e.g. 2104",
+    "specialRequests": "Optional: Vegetarian meals, anniversary celebration, child booster seat...",
+    "search": "Search tours...",
+    "date": "Select Date",
+    "message": "Tell us about your requirements..."
+  },
+  "tours": {
+    "travelDate": "Travel Date"
+  },
+  "concierge": {
+    "welcome": "Welcome to Seadora Travel! How may I assist you with your luxury Red Sea experience today?",
+    "prompts": {
+      "recommend": "🏝️ Recommend Best Tours",
+      "weekend": "📅 Check Weekend Availability",
+      "payment": "💳 Payment & Cancellation",
+      "passport": "🛂 Why Passport Upload?"
+    },
+    "recommendationFallback": "Here are some of our top-rated experiences I recommend for you:",
+    "connectionError": "I am sorry, I am having trouble connecting to the server.",
+    "processingError": "I am sorry, an error occurred while processing your request.",
+    "title": "Seadora Concierge",
+    "online": "Online",
+    "copied": "Copied!",
+    "bookNow": "Book Now",
+    "placeholder": "Message Concierge..."
+  },
+  "calendar": {
+    "weekdays": {
+      "mo": "Mo",
+      "tu": "Tu",
+      "we": "We",
+      "th": "Th",
+      "fr": "Fr",
+      "sa": "Sa",
+      "su": "Su"
+    },
+    "subtitle": "Select your departure date",
+    "prevMonth": "Previous Month",
+    "nextMonth": "Next Month",
+    "available": "Available",
+    "limitedSpots": "Limited Spots",
+    "spotsLeft": "Only {count} spots left",
+    "soldOut": "Sold Out",
+    "pastDate": "Past Date",
+    "legendAvailable": "Available",
+    "legendLimited": "Limited Spots",
+    "legendSoldOut": "Sold Out",
+    "selectDates": "Select Dates",
+    "clear": "Clear",
+    "resetDate": "Reset Date",
+    "done": "Done",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "weekend": "Weekend",
+    "nextWeek": "Next Week",
+    "thisWeekend": "This Weekend",
+    "next7Days": "Next 7 Days",
+    "next14Days": "Next 14 Days",
+    "thisMonth": "This Month",
+    "allDates": "All Dates",
+    "departureDate": "Departure Date"
+  },
+  "booking": {
+    "tabs": {
+      "step1": "Step 1 (Dates & Guests)",
+      "step2": "Step 2 (Guest Information & Hotel)",
+      "step3": "Step 3 (Confirmation & Voucher)"
+    },
+    "labels": {
+      "fullName": "Full Name",
+      "email": "Email",
+      "whatsapp": "WhatsApp/Phone",
+      "hotelNameRoom": "Hotel Name & Room",
+      "specialRequests": "Special Requests / Dietary",
+      "guideLanguage": "Guide Language",
+      "hotelPickup": "Hotel Pickup",
+      "tripType": "Trip Type",
+      "passportPhoto": "Passport Photo (Required for security clearance)",
+      "roomNo": "Room No",
+      "hotelName": "Hotel Name (Pickup)"
+    },
+    "placeholders": {
+      "fullName": "e.g. Alexander Wright",
+      "email": "e.g. alex@example.com",
+      "whatsapp": "e.g. +44 7123 456789",
+      "hotelNameRoom": "e.g. Steigenberger ALDAU Beach Hotel, Room 304",
+      "hotelName": "e.g. Steigenberger ALDAU Beach Hotel",
+      "roomNo": "e.g. Room 304",
+      "specialRequests": "e.g. Vegetarian, celebrating anniversary, child seat required..."
+    },
+    "options": {
+      "languages": {
+        "en": "English",
+        "de": "German",
+        "fr": "French",
+        "it": "Italian",
+        "ru": "Russian",
+        "ar": "Arabic"
+      },
+      "pickup": {
+        "yes": "Yes - complimentary hotel pickup",
+        "no": "No - meet at marina"
+      },
+      "tripType": {
+        "group": "Group Excursion (Shared)",
+        "private": "Private Excursion (Exclusive)"
+      }
+    },
+    "pricing": {
+      "basePrice": "Base Price",
+      "guests": "Guests",
+      "totalAmount": "Total Amount",
+      "taxesIncluded": "Taxes & Port Fees Included",
+      "instantVoucher": "Instant WhatsApp Voucher"
+    },
+    "actions": {
+      "confirm": "Confirm & Receive WhatsApp Voucher",
+      "back": "Back",
+      "close": "Close",
+      "processing": "Processing..."
+    },
+    "modal": {
+      "title": "Reserve Experience",
+      "subtitle": "Luxury Booking Portal",
+      "noPayment": "No payment is taken at this step. Your personal travel butler will confirm availability and secure the booking.",
+      "uploadPassport": "Upload Passport Photo (JPEG, PNG)",
+      "maxSize": "Max size 5MB",
+      "totalValue": "Total Value",
+      "perPerson": "/ person",
+      "selectedPackage": "Selected Package",
+      "value": "Value",
+      "eliteGuides": "Elite Local Guides",
+      "eliteGuidesDesc": "Accompanied by dedicated private Egyptologists",
+      "flexibleCancel": "Flexible Cancellation",
+      "flexibleCancelDesc": "Free changes up to 72 hours prior to departure",
+      "stripeSecured": "Stripe Secured",
+      "encryptedConnection": "Encrypted Connection",
+      "seedoraGold": "SeeDora Gold",
+      "signatureService": "Signature Service",
+      "heroTitle": "Begin Your <br>Luxury Egypt <br>Journey",
+      "heroDesc": "Crafted by certified Egyptologists and luxury hospitality specialists, our tours offer unmatched access and elite accommodations."
+    }
+  },
+  "tourDetails": {
+    "home": "Home",
+    "allTours": "All Tours",
+    "bestseller": "Bestseller",
+    "reviewsCount": "4,288 reviews",
+    "durationLabel": "5 Hours",
+    "freeCancel": "Free Cancellation (Up to 24h)",
+    "hotelTransfer": "Hotel Transfer",
+    "included": "Included",
+    "liveGuide": "Live Guide",
+    "guideLangs": "EN, DE, IT, FR, RU",
+    "mobileTicket": "Mobile Ticket",
+    "instantVoucher": "Instant Voucher",
+    "viewAllPhotos": "View All 30 Photos",
+    "hookQuote": "Trade the resort for open desert, and let one golden evening hold five unforgettable adventures.",
+    "navigation": {
+      "overview": "Overview",
+      "highlights": "Highlights",
+      "itinerary": "Itinerary / Program",
+      "includes": "Inclusions & Exclusions",
+      "info": "Meeting & Pickup",
+      "reviews": "Guest Reviews",
+      "faq": "FAQ"
+    },
+    "descHeading": "Experience Description",
+    "readMore": "Read Full Description",
+    "showLess": "Show Less",
+    "highlightsHeading": "Tour Highlights",
+    "itineraryHeading": "Experience Itinerary & Timeline",
+    "includesHeading": "What's Included & Excluded",
+    "includedTitle": "Included in Tour",
+    "excludedTitle": "Not Included",
+    "infoHeading": "Important Information & Advice",
+    "whatToBringTitle": "What to Bring",
+    "notSuitableTitle": "Not Suitable For",
+    "notSuitableText": "Pregnant women, travelers with severe back/neck problems, or children under 6 for quad driving.",
+    "reviewsHeading": "Customer Reviews & Ratings",
+    "reviewsSub": "Verified traveler reviews from recent safari departures",
+    "verifiedBooking": "Verified Booking",
+    "faqHeading": "Frequently Asked Questions",
+    "sidebar": {
+      "startingFrom": "Starting from",
+      "saveBadge": "SAVE 25%",
+      "perPerson": "per person",
+      "step1": "Select Departure Date",
+      "step2": "Select Package Option",
+      "step3": "Number of Guests",
+      "adults": "Adults",
+      "adultsAge": "Age 12+",
+      "children": "Children",
+      "childrenAge": "Age 6-11 (50%)",
+      "step4": "Popular Add-ons (Optional)",
+      "totalAmount": "Subtotal",
+      "taxesIncluded": "Total Price (taxes included)",
+      "bookBtn": "Book Now",
+      "instantConfirmation": "Reserve & Pay Later",
+      "trust1": "256-Bit SSL Encrypted & Secure Checkout",
+      "trust2": "24/7 Concierge Assistance",
+      "trust3": "Best Price Guarantee — Direct Operator",
+      "guideLanguage": "Guide Language",
+      "hotelPickupLocation": "Hotel Pickup Location",
+      "notesAndSpecialRequests": "Notes & Special Requests",
+      "placeholders": {
+        "hotelName": "Enter your hotel name for pickup",
+        "specialRequests": "Any special requirements or dietary notes..."
+      }
+    },
+    "reviewForm": {
+      "title": "Write a Review",
+      "yourRating": "Your Rating",
+      "yourName": "Your Name",
+      "reviewTitle": "Review Title",
+      "shareExperience": "Share your experience...",
+      "submitReview": "Submit Review"
+    }
+  },
+  "auth": {
+    "welcomeTitle": "Unlock VIP Journeys",
+    "welcomeSubtitle": "Exclusive Privileges for SeeDora Members",
+    "tabs": {
+      "phone": "Phone / WhatsApp",
+      "email": "Email Sign In"
+    },
+    "phone": {
+      "label": "Mobile Number",
+      "placeholder": "+1 234 567 8900",
+      "submit": "Send WhatsApp OTP"
+    },
+    "email": {
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "name@example.com",
+      "passwordLabel": "Password",
+      "passwordPlaceholder": "********",
+      "submit": "Sign In"
+    },
+    "social": {
+      "divider": "OR CONTINUE WITH",
+      "google": "Google",
+      "facebook": "Facebook",
+      "apple": "Apple"
+    }
   }
 }

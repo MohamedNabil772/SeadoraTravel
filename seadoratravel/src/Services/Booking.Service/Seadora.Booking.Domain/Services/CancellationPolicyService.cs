@@ -16,9 +16,6 @@ public class CancellationPolicyService : ICancellationPolicyService
 {
     public decimal CalculateRefundAmount(Entities.Booking booking, decimal totalCost, DateTime cancellationRequestTime)
     {
-        /* 
-        // PENDING ACTIVATION: Online Payment Cancellation Rules
-        
         var hoursUntilTour = (booking.BookingDate - cancellationRequestTime).TotalHours;
 
         if (hoursUntilTour >= 72)
@@ -39,28 +36,19 @@ public class CancellationPolicyService : ICancellationPolicyService
         
         // Default fallback
         return totalCost;
-        */
-
-        // Current inactive state: always return full amount
-        return totalCost;
     }
 
     public bool IsCashReservationValid(Entities.Booking booking, DateTime currentTime)
     {
-        /*
-        // PENDING ACTIVATION: Cash Payment 48-hour rule
-        
         // If the booking is marked as "Cash" and is still "Pending", 
         // it becomes invalid (should be cancelled) if we are within 48 hours of the tour.
         var hoursUntilTour = (booking.BookingDate - currentTime).TotalHours;
         
-        if (booking.Status == "Pending" && hoursUntilTour <= 48)
+        if (booking.Status == Seadora.Booking.Domain.Enums.BookingStatus.Pending && hoursUntilTour <= 48)
         {
             return false; // Invalid, trigger cancellation
         }
-        */
 
-        // Current inactive state: always valid
         return true;
     }
 }

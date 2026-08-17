@@ -4,7 +4,7 @@
 > It is the single source of truth for understanding the system architecture, current state,
 > and known issues. **Update this file whenever changes are made.**
 
-> **Last Updated**: 2026-07-06
+> **Last Updated**: 2026-07-26
 
 ---
 
@@ -237,7 +237,7 @@ Vue 3 SPA ──HTTP──► YARP Gateway (:8000) ──proxy──► Microser
 
 **AuthResponse** DTO: `record AuthResponse(string Token, string Email)`
 
-No Queries exist — no user profile or user listing endpoints.
+Queries and Commands exist for User Management CRUD: GET all users, GET roles, POST create user, PUT update user, DELETE user.
 
 #### API Endpoints (Controller-based)
 
@@ -245,6 +245,11 @@ No Queries exist — no user profile or user listing endpoints.
 |---|---|---|---|
 | `POST` | `/api/Auth/register` | Anonymous | `RegisterCommand` |
 | `POST` | `/api/Auth/login` | Anonymous | `LoginCommand` |
+| `GET` | `/api/Users` | Admin | Retrieves all users with their roles |
+| `GET` | `/api/Users/roles` | Admin | Retrieves all available roles |
+| `POST` | `/api/Users` | Admin | Creates a new user and assigns roles |
+| `PUT` | `/api/Users/{id}` | Admin | Updates user information and roles |
+| `DELETE` | `/api/Users/{id}` | Admin | Deletes user (with self-deletion guard) |
 | `GET` | `/WeatherForecast` | Anonymous | ⚠️ Scaffold leftover |
 
 #### JWT Configuration
@@ -536,7 +541,7 @@ Pinia store `contact.ts` — contact form with loading/success/error states (sim
 | `/categories` | `CategoriesView` | Complete CRUD for categories with localized tab inputs |
 | `/bookings` | `BookingsView` | Table of bookings with status badges and Confirm/Complete/Cancel actions |
 | `/feedback` | `FeedbackView` | Star ratings and comments of customer feedbacks |
-| `/users` | `UsersView` | Simple placeholder |
+| `/users` | `UsersView` | Complete user list, create, update, delete, and role management CRUD |
 
 #### Layout
 `DashboardLayout.vue` — sidebar (Dashboard, Tours, Destinations, Categories, Bookings, Feedback, Users, Logout) + header with route name + admin avatar
@@ -691,6 +696,11 @@ Glass Boat, Desert Safari Quad, Luxor Full Day, Pyramids of Giza, Red Sea Diving
 
 | Date | Change | Author |
 |---|---|---|
+| 2026-08-03 | Implemented Egyptra-inspired client UX: SEO-friendly query parameter URL slug filters (location/category), local search inputs supporting localized values and tag matching, custom Mega Menu Explore drop-downs in Navbar, user profile auth modals for VIP Guest logins with client-side heart favorites, link sharing clipboard copying, and golden Toast notifications. Swapped emoji placeholders globally with custom inline SVGs. | AI Assistant |
+| 2026-07-28 | Implemented backend API for user management and role retrieval under Identity Service, and built the corresponding admin dashboard User Management view page with search and role management capabilities. | AI Assistant |
+| 2026-07-26 | Implemented Bookinga-style two-column luxury boarding ticket and invoice receipt templates on booking success | AI Assistant |
+| 2026-07-26 | Refactored and modernized booking and contact forms across the SPA and static page with luxury golden aesthetics | AI Assistant |
+| 2026-07-26 | Enhanced front-ends with luxury aesthetics, SVG logos, high-res destination images, and staggered scroll reveals | AI Assistant |
 | 2026-07-06 | Implemented feedback visibility control toggles on admin panel and API backend | AI Assistant |
 | 2026-07-06 | Implemented full admin dashboard routing, auth store, CRUD endpoints, and views | AI Assistant |
 | 2026-07-06 | Initial codebase memory document created from full investigation | AI Assistant |

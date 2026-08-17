@@ -2,6 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import { getFullImageUrl } from '@/shared/utils/helpers'
 
 const { t, locale, te } = useI18n()
 
@@ -13,13 +14,18 @@ interface Category {
 
 interface Tour {
   id: string;
-  names: Record<string, string>;
-  descriptions: Record<string, string>;
+  slug?: string;
+  title?: string;
+  description?: string;
+  names?: Record<string, string>;
+  descriptions?: Record<string, string>;
   categoryId: string;
   price: number;
   duration: string;
-  includes: string[];
-  imageUrl: string;
+  includes?: string[];
+  imageUrl?: string;
+  mainImage?: string;
+  images?: string[];
   emoji?: string;
   bgGradient?: string;
   badge?: string;
@@ -42,7 +48,7 @@ const getSlug = (name: string) => {
 }
 
 const openDetailsPage = (tour: Tour) => {
-  const slug = getSlug(tour.names?.['en'] || 'tour')
+  const slug = tour.slug || getSlug(tour.title || tour.names?.['en'] || 'tour')
   router.push(`/tour/${slug}`)
 }
 
@@ -85,9 +91,13 @@ const filterTrips = (catId: string) => {
   currentCategoryId.value = catId
 }
 
-const getLocalized = (dict: Record<string, string>, fallback: string) => {
+const getLocalized = (dict: any, fallback: string = '') => {
   if (!dict) return fallback;
-  return dict[locale.value] || dict['en'] || fallback;
+  if (typeof dict === 'string') return dict;
+  if (typeof dict === 'object') {
+    return dict[locale.value] || dict['en'] || Object.values(dict)[0] || fallback;
+  }
+  return fallback;
 }
 
 const openBookingModal = (tour: Tour) => {
@@ -172,8 +182,8 @@ const submitBooking = async () => {
         class="trip-card cursor-pointer"
         @click="openDetailsPage(trip)"
       >
-        <div class="trip-img" :style="{ background: trip.bgGradient || (categories.find(c => c.id === trip.categoryId)?.names['en'] === 'Sea & Diving' ? 'linear-gradient(135deg,#063a5c,#1a9b8a)' : categories.find(c => c.id === trip.categoryId)?.names['en'] === 'Culture & History' ? 'linear-gradient(135deg,#8b6914,#c9a84c)' : 'linear-gradient(135deg,#7c4a14,#e8820a)') }">
-          <div class="trip-img-emoji">{{ trip.emoji || categories.find(c => c.id === trip.categoryId)?.icon || '🌍' }}</div>
+        <div class="trip-img" :style="{ background: (trip.imageUrl || trip.mainImage) ? `url(${getFullImageUrl(trip.imageUrl || trip.mainImage)}) center/cover` : (trip.bgGradient || (categories.find(c => c.id === trip.categoryId)?.names['en'] === 'Sea & Diving' ? 'linear-gradient(135deg,#063a5c,#1a9b8a)' : categories.find(c => c.id === trip.categoryId)?.names['en'] === 'Culture & History' ? 'linear-gradient(135deg,#8b6914,#c9a84c)' : 'linear-gradient(135deg,#7c4a14,#e8820a)')) }">
+          <div v-if="!(trip.imageUrl || trip.mainImage)" class="trip-img-emoji">{{ trip.emoji || categories.find(c => c.id === trip.categoryId)?.icon || '🌍' }}</div>
           <span class="trip-duration">
             {{ te('trips.durations.' + trip.duration) ? t('trips.durations.' + trip.duration) : trip.duration }}
           </span>
@@ -184,10 +194,10 @@ const submitBooking = async () => {
         <div class="trip-body">
           <div class="trip-cat">Hurghada · {{ getLocalized(categories.find(c => c.id === trip.categoryId)?.names || {}, 'Adventure') }}</div>
           <div class="trip-name">
-            {{ getLocalized(trip.names, 'Unnamed Tour') }}
+            {{ trip.title || getLocalized(trip.names, 'Unnamed Tour') }}
           </div>
           <div class="trip-desc">
-            {{ getLocalized(trip.descriptions, '') }}
+            {{ trip.description || getLocalized(trip.descriptions, '') }}
           </div>
           <div class="trip-includes">
             <span v-for="inc in trip.includes" :key="inc" class="trip-tag">
@@ -244,16 +254,16 @@ const submitBooking = async () => {
             <div v-else>
               <span class="text-[9px] tracking-widest text-gold uppercase font-bold text-center block mb-1.5 font-sans">Luxury Booking Portal</span>
               <h3 class="text-2xl font-bold text-dark mb-2 text-center font-serif">Reserve Experience</h3>
-              <p class="text-sea font-serif text-base text-center mb-6 max-w-xs mx-auto border-b border-gold/15 pb-4">{{ selectedTour ? getLocalized(selectedTour.names, '') : '' }}</p>
+              <p class="text-sea font-serif text-base text-center mb-6 max-w-xs mx-auto border-b border-gold/15 pb-4">{{ selectedTour ? (selectedTour.title || getLocalized(selectedTour.names, '')) : '' }}</p>
               
               <form @submit.prevent="submitBooking" class="space-y-4 font-sans">
                 <div>
                   <label class="block text-[9px] font-bold text-muted mb-1.5 uppercase tracking-widest font-sans">Full Name</label>
-                  <input v-model="customerName" type="text" required class="w-full p-3 border border-gold/30 rounded-lg focus:ring-1 focus:ring-sea focus:border-sea bg-cream/35 focus:bg-white outline-none text-xs font-jost transition-all" placeholder="Enter your name">
+                  <input v-model="customerName" type="text" required class="w-full p-3 border border-gold/30 rounded-lg focus:ring-1 focus:ring-sea focus:border-sea bg-cream/35 focus:bg-white outline-none text-xs font-jost transition-all" :placeholder="$t('placeholders.fullName')">
                 </div>
-                <div>
-                  <label class="block text-[9px] font-bold text-muted mb-1.5 uppercase tracking-widest font-sans">Email Address</label>
-                  <input v-model="customerEmail" type="email" required class="w-full p-3 border border-gold/30 rounded-lg focus:ring-1 focus:ring-sea focus:border-sea bg-cream/35 focus:bg-white outline-none text-xs font-jost transition-all" placeholder="maria@example.com">
+                <div class="space-y-1.5">
+                  <label class="block text-[11px] font-medium text-dark/70 uppercase tracking-wider font-cormorant">Email Address</label>
+                  <input v-model="customerEmail" type="email" required class="w-full p-3 border border-gold/30 rounded-lg focus:ring-1 focus:ring-sea focus:border-sea bg-cream/35 focus:bg-white outline-none text-xs font-jost transition-all" :placeholder="$t('placeholders.email')">
                 </div>
                 
                 <div class="pt-4 mt-6 border-t border-gold/15 flex justify-between items-center bg-cream/30 p-4 rounded-xl border border-gold/10">

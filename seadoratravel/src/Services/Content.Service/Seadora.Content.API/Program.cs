@@ -1,8 +1,14 @@
 using System.Text.Json.Serialization;
 using Seadora.Content.Application;
 using Seadora.Content.Infrastructure;
-
+using Seadora.Common.Middlewares;
 var builder = WebApplication.CreateBuilder(args);
+
+builder.WebHost.ConfigureKestrel(options =>
+{
+    // Allow up to 100 MB for Excel imports downstream
+    options.Limits.MaxRequestBodySize = 104857600; 
+});
 
 builder.Services.AddCors(options =>
 {
@@ -40,6 +46,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+app.UseSeadoraExceptionHandler();
 
 app.UseCors("AllowAll");
 app.UseHttpsRedirection();

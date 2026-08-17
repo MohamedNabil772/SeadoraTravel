@@ -7,31 +7,79 @@ export default {
   theme: {
     extend: {
       colors: {
-        sea: {
-          DEFAULT: '#0a5c8a',
-          light: '#1a8bc4',
-          deep: '#063a5c',
+        // Luxury Core Palette
+        primary: {
+          DEFAULT: '#0A192F', // Deep Navy
+          light: '#172A45',
+          dark: '#020C1B',
         },
-        sun: {
-          DEFAULT: '#e8820a',
-          light: '#f5a435',
-          pale: '#fdf3e0',
+        secondary: {
+          DEFAULT: '#D4AF37', // Refined Gold
+          light: '#F4D03F',
+          dark: '#997A00',
         },
-        grass: {
-          DEFAULT: '#2e7d4f',
-          light: '#4caf78',
+        surface: {
+          DEFAULT: '#FFFFFF',
+          sunken: '#F8F9FA',
+          elevated: '#FFFFFF',
         },
+        text: {
+          main: '#1A202C',
+          muted: '#718096',
+          inverse: '#F7FAFC',
+        },
+        border: {
+          DEFAULT: '#E2E8F0',
+          light: '#EDF2F7',
+        },
+        // Legacy colors to prevent immediate breaking
+        stroke: '#E2E8F0',
+        strokedark: '#2E3A47',
+        dark: '#1C2434',
+        boxdark: '#24303F',
+        boxdark2: '#1A222F',
+        body: '#64748B',
+        bodydark1: '#DEE4EE',
+        bodydark2: '#8A99AD',
+        whiten: '#F9FAFB',
+        whiter: '#F5F7FD',
+        'meta-1': '#D34053',
+        'meta-3': '#10B981',
+        'meta-4': '#313D4A',
+        'meta-5': '#259AE6',
+        'meta-6': '#FFBA00',
+        
+        sea: { DEFAULT: '#0a5c8a', light: '#1a8bc4', deep: '#063a5c' },
+        sun: { DEFAULT: '#e8820a', light: '#f5a435', pale: '#fdf3e0' },
+        grass: { DEFAULT: '#2e7d4f', light: '#4caf78' },
         gold: '#c9a84c',
         cream: '#faf7f2',
-        dark: '#0d1f2d',
-        text: '#2a3f4f',
-        muted: '#6b8a9a',
       },
       fontFamily: {
         serif: ['"Playfair Display"', 'serif'],
         cormorant: ['"Cormorant Garamond"', 'serif'],
-        sans: ['Jost', 'sans-serif'],
+        sans: ['Jost', 'system-ui', 'sans-serif'],
       },
+      boxShadow: {
+        default: '0px 2px 4px rgba(0, 0, 0, 0.04), 0px 4px 6px rgba(0, 0, 0, 0.04)',
+        card: '0 4px 20px rgba(0,0,0,0.03)',
+        'card-hover': '0 8px 30px rgba(0,0,0,0.06)',
+        glass: '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
+      },
+      animation: {
+        'fade-in': 'fadeIn 300ms ease-out',
+        'slide-up': 'slideUp 400ms cubic-bezier(0.16, 1, 0.3, 1)',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '10%': { opacity: '1' },
+        },
+        slideUp: {
+          '0%': { opacity: '0', transform: 'translateY(10px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        }
+      }
     },
   },
   plugins: [],

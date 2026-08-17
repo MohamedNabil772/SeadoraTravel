@@ -1,0 +1,15 @@
+**/bin/
+**/obj/
+**/node_modules/
+**/.vs/
+**/.vscode/
+**/.idea/
+**/.git/
+**/.zai/
+Dockerfile
+docker-compose*.yml
+*.user
+*.suo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

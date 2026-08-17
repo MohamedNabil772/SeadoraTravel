@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using Seadora.Identity.Domain.Entities;
@@ -10,7 +11,21 @@ public static class IdentitySeeder
     public static async Task SeedAsync(IServiceProvider serviceProvider)
     {
         var context = serviceProvider.GetRequiredService<SeadoraIdentityDbContext>();
-        await context.Database.EnsureCreatedAsync();
+        await context.Database.MigrateAsync();
+
+        try
+        {
+            await context.Database.ExecuteSqlRawAsync(@"
+                ALTER TABLE ""AspNetUsers"" ADD COLUMN IF NOT EXISTS ""GoogleId"" text;
+                ALTER TABLE ""AspNetUsers"" ADD COLUMN IF NOT EXISTS ""FacebookId"" text;
+                ALTER TABLE ""AspNetUsers"" ADD COLUMN IF NOT EXISTS ""AppleId"" text;
+                ALTER TABLE ""AspNetUsers"" ADD COLUMN IF NOT EXISTS ""FullName"" text;
+                ALTER TABLE ""AspNetUsers"" ADD COLUMN IF NOT EXISTS ""AvatarUrl"" text;
+                ALTER TABLE ""AspNetUsers"" ADD COLUMN IF NOT EXISTS ""CreatedAt"" timestamp with time zone DEFAULT now();
+                ALTER TABLE ""AspNetUsers"" ADD COLUMN IF NOT EXISTS ""LastLoginAt"" timestamp with time zone;
+            ");
+        }
+        catch { }
 
         var roleManager = serviceProvider.GetRequiredService<RoleManager<Role>>();
         var userManager = serviceProvider.GetRequiredService<UserManager<User>>();

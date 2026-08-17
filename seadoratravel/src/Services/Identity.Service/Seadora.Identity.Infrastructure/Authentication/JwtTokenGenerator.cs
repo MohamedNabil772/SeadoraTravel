@@ -31,6 +31,7 @@ public class JwtTokenGenerator : IJwtTokenGenerator
             new(JwtRegisteredClaimNames.Email, user.Email!),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new(ClaimTypes.NameIdentifier, user.Id),
+            new(JwtRegisteredClaimNames.Name, !string.IsNullOrEmpty(user.FullName) ? user.FullName : $"{user.FirstName} {user.LastName}".Trim()),
             new("firstName", user.FirstName),
             new("lastName", user.LastName)
         };

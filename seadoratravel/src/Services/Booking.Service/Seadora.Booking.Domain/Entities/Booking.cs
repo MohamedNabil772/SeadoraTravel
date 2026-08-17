@@ -1,3 +1,6 @@
+using System;
+using Seadora.Booking.Domain.Enums;
+
 namespace Seadora.Booking.Domain.Entities;
 
 public class Booking
@@ -6,6 +9,23 @@ public class Booking
     public Guid TourId { get; set; }
     public string CustomerName { get; set; } = string.Empty;
     public string CustomerEmail { get; set; } = string.Empty;
+    public string? WhatsApp { get; set; }
+    public string? HotelName { get; set; }
+    public string? RoomNumber { get; set; }
+    public string? PassportFileName { get; set; }
+    public string? TripType { get; set; }
     public DateTime BookingDate { get; set; }
-    public string Status { get; set; } = "Pending";
+    public BookingStatus Status { get; set; } = BookingStatus.Pending;
+    public bool IsPaid { get; set; } = false;
+    public string Attendance { get; set; } = "Pending";
+    
+    // New fields for direct bookings
+    public DateTime? TourDate { get; set; }
+    public string? PickupTime { get; set; }
+    public int Guests { get; set; } = 1;
+    public bool HotelPickup { get; set; }
+    public Guid? PackageId { get; set; }
+    public decimal TotalPrice { get; set; }
+    public List<BookingAddonSnapshot> SelectedAddons { get; set; } = new();
+    public List<GuestDetail> GuestsList { get; set; } = new();
 }
