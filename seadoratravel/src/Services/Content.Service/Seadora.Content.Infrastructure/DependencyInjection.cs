@@ -29,6 +29,8 @@ public static class DependencyInjection
         services.AddScoped<IExcelLocalizationService, Seadora.Content.Infrastructure.Services.ExcelLocalizationService>();
         services.AddScoped<IQuestPdfGeneratorService, Seadora.Content.Infrastructure.Services.QuestPdfGeneratorService>();
         
+        services.AddHttpClient<IExchangeRateService, Seadora.Content.Infrastructure.Services.ExchangeRateService>();
+        
         return services;
     }
 }

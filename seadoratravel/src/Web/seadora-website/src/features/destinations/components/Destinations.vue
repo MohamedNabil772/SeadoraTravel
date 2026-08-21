@@ -2,57 +2,102 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import type { Destination } from '../../../core/models/Destination'
 
-const { t } = useI18n()
+const { t, locale } = useI18n()
 const router = useRouter()
 
-const destinations = [
-  {
-    id: 'hurghada',
-    guid: '00000000-0000-0000-0000-000000000011',
-    name: 'Hurghada',
-    bgClass: 'bg-hurghada',
-    categoryTag: '🤿 Red Sea Capital',
-    highlights: ['VIP Cruises', 'Diving', 'Islands']
-  },
-  {
-    id: 'cairo',
-    guid: '00000000-0000-0000-0000-000000000013',
-    name: 'Cairo',
-    bgClass: 'bg-cairo',
-    categoryTag: '🏺 Ancient Wonders & GEM',
-    highlights: ['Pyramids', 'Grand Museum', 'Nile']
-  },
-  {
-    id: 'luxor',
-    guid: '00000000-0000-0000-0000-000000000012',
-    name: 'Luxor',
-    bgClass: 'bg-luxor',
-    categoryTag: '🏛️ Pharaonic Valley',
-    highlights: ['Valley of Kings', 'Karnak', 'Balloon']
-  },
-  {
-    id: 'sharm',
-    guid: '00000000-0000-0000-0000-000000000014',
-    name: 'Sharm El-Sheikh',
-    bgClass: 'bg-sharm',
-    categoryTag: '🏖️ Coral Coast',
-    highlights: ['Ras Mohammed', 'Luxury Resorts']
-  }
-]
+// Extended destination for fallback logic
+interface LocalDestination extends Destination {
+  guid?: string
+  name?: any
+  description?: any
+  categoryTag?: any
+  bgClass?: string
+  imagePath?: string
+}
 
+const destinations = ref<LocalDestination[]>([])
+const loading = ref(true)
 const toursCount = ref<Record<string, number>>({})
 
-const selectDestination = (destId: string) => {
-  router.push({ path: '/tours', query: { location: destId } })
+const selectDestination = (dest: LocalDestination) => {
+  router.push({ path: '/tours', query: { destination: dest.id || dest.guid } })
+}
+
+const getLocalized = (field: any) => {
+  if (!field) return ''
+  if (typeof field === 'string') return field
+  return field[locale.value] || field['en'] || ''
+}
+
+const getLocalizedArray = (field: any) => {
+  if (!field) return []
+  if (Array.isArray(field)) return field
+  
+  const localizedString = field[locale.value] || field['en'] || ''
+  if (typeof localizedString === 'string') {
+    return localizedString.split(',').map((s: string) => s.trim()).filter((s: string) => s.length > 0)
+  }
+  if (Array.isArray(localizedString)) return localizedString
+  
+  return []
 }
 
 onMounted(async () => {
   try {
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-    const res = await fetch(`${API_URL}/api/content/api/tours`)
-    if (res.ok) {
-      const tours = await res.json()
+    
+    // Fetch Destinations
+    const destRes = await fetch(`${API_URL}/api/content/api/destinations`).catch(() => null);
+    if (destRes && destRes.ok) {
+      destinations.value = await destRes.json()
+    } else {
+      // Fallback if API is missing or fails
+      destinations.value = [
+        {
+          id: 'hurghada',
+          guid: '00000000-0000-0000-0000-000000000011',
+          names: { en: 'Hurghada', ru: 'Хургада', de: 'Hurghada', it: 'Hurghada', cs: 'Hurghada' },
+          categoryTag: { en: '🤿 Red Sea Capital' },
+          highlights: { en: 'VIP Cruises, Diving, Islands' },
+          bgClass: 'bg-hurghada',
+          flagEmoji: '🇪🇬'
+        },
+        {
+          id: 'cairo',
+          guid: '00000000-0000-0000-0000-000000000013',
+          names: { en: 'Cairo', ru: 'Каир' },
+          categoryTag: { en: '🏺 Ancient Wonders' },
+          highlights: { en: 'Pyramids, Museum' },
+          bgClass: 'bg-cairo',
+          flagEmoji: '🇪🇬'
+        },
+        {
+          id: 'luxor',
+          guid: '00000000-0000-0000-0000-000000000012',
+          names: { en: 'Luxor', ru: 'Луксор' },
+          categoryTag: { en: '🏛️ Pharaonic Valley' },
+          highlights: { en: 'Valley of Kings, Karnak' },
+          bgClass: 'bg-luxor',
+          flagEmoji: '🇪🇬'
+        },
+        {
+          id: 'sharm',
+          guid: '00000000-0000-0000-0000-000000000014',
+          names: { en: 'Sharm El-Sheikh', ru: 'Шарм-эль-Шейх' },
+          categoryTag: { en: '🏖️ Coral Coast' },
+          highlights: { en: 'Ras Mohammed, Resorts' },
+          bgClass: 'bg-sharm',
+          flagEmoji: '🇪🇬'
+        }
+      ]
+    }
+
+    // Fetch Tours to count
+    const tourRes = await fetch(`${API_URL}/api/content/api/tours`).catch(() => null);
+    if (tourRes && tourRes.ok) {
+      const tours = await tourRes.json()
       const counts: Record<string, number> = {}
       tours.forEach((t: any) => {
         if (t.destinationId) {
@@ -62,9 +107,41 @@ onMounted(async () => {
       toursCount.value = counts
     }
   } catch (err) {
-    console.error('Failed to fetch tours counts in Destinations:', err)
+    console.error('Failed to fetch destinations/tours:', err)
+  } finally {
+    loading.value = false
   }
 })
+
+const getTourCount = (dest: LocalDestination) => {
+  if (dest.tourCount !== undefined) return dest.tourCount
+  return toursCount.value[dest.guid || dest.id] || 0
+}
+
+const getBgStyle = (dest: LocalDestination) => {
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+  let url = dest.imageUrl || dest.imagePath
+  
+  if (!url) {
+    const fallbackMap: Record<string, string> = {
+      hurghada: '/images/hurghada.jpg',
+      cairo: '/images/cairo.jpg',
+      luxor: '/images/luxor.jpg',
+      sharm: '/images/sharm.jpg',
+    }
+    const nameStr = dest.names?.en?.toLowerCase() || dest.name?.en?.toLowerCase() || ''
+    url = fallbackMap[dest.id] || fallbackMap[nameStr] || ''
+  } else if (!url.startsWith('http') && !url.startsWith('/')) {
+    url = `${API_URL}/${url}`
+  } else if (url.startsWith('/api/files')) {
+    url = `${API_URL}${url}`
+  }
+  
+  if (url) {
+    return { backgroundImage: `url(${url})` }
+  }
+  return {}
+}
 </script>
 
 <template>
@@ -81,35 +158,65 @@ onMounted(async () => {
       </p>
     </div>
 
-    <div class="dest-bento-grid stagger-container" v-reveal="'stagger-container'">
+    <!-- Loading Skeleton -->
+    <div v-if="loading" class="dest-bento-grid">
+      <div 
+        v-for="i in 4" 
+        :key="`skeleton-${i}`"
+        class="bento-card skeleton-card"
+        :class="`bento-card-${i}`"
+      >
+        <div class="skeleton-bg"></div>
+        <div class="dest-content">
+          <div class="dest-header">
+            <div class="skeleton-tag"></div>
+            <div class="skeleton-badge"></div>
+          </div>
+          <div class="dest-footer">
+            <div class="skeleton-title"></div>
+            <div class="skeleton-desc"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loaded Data -->
+    <div v-else class="dest-bento-grid stagger-container" v-reveal="'stagger-container'">
       <div 
         v-for="(dest, index) in destinations" 
-        :key="dest.id"
+        :key="dest.id || index"
         class="bento-card"
-        :class="`bento-card-${index + 1}`"
-        @click="selectDestination(dest.id)"
+        :class="`bento-card-${(index % 4) + 1}`"
+        tabindex="0"
+        @click="selectDestination(dest)"
+        @keydown.enter="selectDestination(dest)"
+        @keydown.space.prevent="selectDestination(dest)"
       >
-        <div class="dest-bg" :class="dest.bgClass"></div>
+        <div class="dest-bg" :class="dest.bgClass" :style="getBgStyle(dest)"></div>
         <div class="dest-overlay"></div>
         
         <div class="dest-content">
           <div class="dest-header">
-            <span class="category-tag">{{ dest.categoryTag }}</span>
+            <span class="category-tag">
+              <span v-if="dest.flagEmoji || dest.flag" class="flag-emoji">{{ dest.flagEmoji || dest.flag }}</span>
+              {{ getLocalized(dest.categoryTag) || 'Destination' }}
+            </span>
             <div class="tour-count-badge">
               <span class="pulse-dot"></span>
-              {{ toursCount[dest.guid] || 0 }} Tours
+              {{ getTourCount(dest) }} {{ t('destinations.tours', 'Tours') }}
             </div>
           </div>
           
           <div class="dest-footer">
-            <h3 class="dest-name">{{ dest.name }}</h3>
+            <h3 class="dest-name">{{ getLocalized(dest.names || dest.name) }}</h3>
+            <p v-if="dest.descriptions || dest.description" class="dest-desc">{{ getLocalized(dest.descriptions || dest.description) }}</p>
             
             <div class="dest-hover-content">
               <div class="highlights">
-                <span v-for="hl in dest.highlights" :key="hl" class="highlight-pill">{{ hl }}</span>
+                <span v-for="hl in getLocalizedArray(dest.highlights)" :key="hl" class="highlight-pill">{{ hl }}</span>
               </div>
               <button class="explore-btn">
-                Explore Experiences
+                {{ t('destinations.explore', 'Explore Experiences') }}
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
               </button>
             </div>
@@ -222,6 +329,12 @@ onMounted(async () => {
   font-weight: 500;
   color: white;
   letter-spacing: 0.02em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.flag-emoji {
+  font-size: 1.1em;
 }
 
 .tour-count-badge {
@@ -270,6 +383,17 @@ onMounted(async () => {
   margin: 0;
   text-shadow: 0 2px 10px rgba(6, 45, 77, 0.4);
   transition: color 0.4s ease;
+}
+
+.dest-desc {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .bento-card:hover .dest-name {
@@ -353,11 +477,54 @@ onMounted(async () => {
   color: #c9a84c;
 }
 
+/* ─── LOADING SKELETON ─── */
+.skeleton-card {
+  background: rgba(6, 45, 77, 0.05);
+  border: 1px solid rgba(6, 45, 77, 0.1);
+  pointer-events: none;
+}
+.skeleton-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(201,168,76,0.05) 25%, rgba(201,168,76,0.1) 50%, rgba(201,168,76,0.05) 75%);
+  background-size: 400% 100%;
+  animation: shimmer 1.5s infinite;
+}
+@keyframes shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+.skeleton-tag {
+  width: 120px;
+  height: 28px;
+  background: rgba(0,0,0,0.1);
+  border-radius: 20px;
+}
+.skeleton-badge {
+  width: 80px;
+  height: 28px;
+  background: rgba(0,0,0,0.1);
+  border-radius: 20px;
+}
+.skeleton-title {
+  width: 60%;
+  height: 40px;
+  background: rgba(0,0,0,0.1);
+  border-radius: 4px;
+  margin-bottom: 8px;
+}
+.skeleton-desc {
+  width: 80%;
+  height: 16px;
+  background: rgba(0,0,0,0.1);
+  border-radius: 4px;
+}
+
 /* ─── BACKGROUND IMAGES ─── */
-.bg-hurghada { background-image: url('/images/hurghada.jpg') !important; }
-.bg-cairo { background-image: url('/images/cairo.jpg') !important; }
-.bg-luxor { background-image: url('/images/luxor.jpg') !important; }
-.bg-sharm { background-image: url('/images/sharm.jpg') !important; }
+.bg-hurghada { background-image: url('/images/hurghada.jpg'); }
+.bg-cairo { background-image: url('/images/cairo.jpg'); }
+.bg-luxor { background-image: url('/images/luxor.jpg'); }
+.bg-sharm { background-image: url('/images/sharm.jpg'); }
 
 /* ─── RESPONSIVE ─── */
 @media (max-width: 1024px) {
@@ -392,4 +559,3 @@ onMounted(async () => {
   }
 }
 </style>
-

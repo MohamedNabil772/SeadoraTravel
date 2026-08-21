@@ -1,23 +1,73 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, reactive } from 'vue'
+import { contactApi } from '../api/contactApi'
+
+const form = reactive({
+  fullName: '',
+  email: '',
+  phone: '',
+  destinationInterest: '',
+  dateOrGuests: '',
+  message: ''
+})
 
 const isSubmitting = ref(false)
 const isSuccess = ref(false)
+const toastMessage = ref('')
+const toastType = ref<'success' | 'error'>('success')
+const showToast = ref(false)
 
-const handleSubmit = () => {
-  isSubmitting.value = true
+const triggerToast = (message: string, type: 'success' | 'error' = 'success') => {
+  toastMessage.value = message
+  toastType.value = type
+  showToast.value = true
   setTimeout(() => {
+    showToast.value = false
+  }, 4000)
+}
+
+const handleSubmit = async () => {
+  if (isSubmitting.value) return;
+  isSubmitting.value = true
+  
+  try {
+    await contactApi.submitInquiry({ ...form })
+    
     isSubmitting.value = false
     isSuccess.value = true
+    triggerToast('✓ Request Received — Our VIP Concierge will contact you shortly', 'success')
+    
+    // Reset form
+    form.fullName = ''
+    form.email = ''
+    form.phone = ''
+    form.destinationInterest = ''
+    form.dateOrGuests = ''
+    form.message = ''
+    
     setTimeout(() => {
       isSuccess.value = false
     }, 4000)
-  }, 1200)
+  } catch (error) {
+    isSubmitting.value = false
+    triggerToast('Network failure. Please try again later.', 'error')
+  }
 }
 </script>
 
 <template>
   <section class="section" id="contact">
+    <!-- Custom Luxury Toast -->
+    <Transition name="toast">
+      <div v-if="showToast" :class="['luxury-toast', toastType]">
+        <div class="toast-icon">
+          <svg v-if="toastType === 'success'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+        </div>
+        <span>{{ toastMessage }}</span>
+      </div>
+    </Transition>
+
     <div class="contact-wrapper">
       <div class="contact-left" v-reveal="'reveal-fade-up'">
         <div class="vip-badge">
@@ -106,18 +156,18 @@ const handleSubmit = () => {
           <div class="form-row">
             <div class="form-group">
               <label>Full Name</label>
-              <input type="text" placeholder="e.g. John Doe" required>
+              <input type="text" v-model="form.fullName" placeholder="e.g. John Doe" required>
             </div>
             <div class="form-group">
               <label>Email Address</label>
-              <input type="email" placeholder="john@example.com" required>
+              <input type="email" v-model="form.email" placeholder="john@example.com" required>
             </div>
           </div>
           <div class="form-row">
             <div class="form-group">
               <label>Destination / Interest</label>
               <div class="select-wrapper">
-                <select required>
+                <select v-model="form.destinationInterest" required>
                   <option value="" disabled selected>Select an experience...</option>
                   <option>Luxury Red Sea Cruise</option>
                   <option>Cairo Historical Tour</option>
@@ -133,17 +183,20 @@ const handleSubmit = () => {
             </div>
             <div class="form-group">
               <label>Date / Guest Count</label>
-              <input type="text" placeholder="e.g. Oct 12, 2 Guests" required>
+              <input type="text" v-model="form.dateOrGuests" placeholder="e.g. Oct 12, 2 Guests" required>
             </div>
           </div>
           <div class="form-group">
             <label>Message / Special Wishes</label>
-            <textarea placeholder="Tell us about your expectations, dietary requirements, or any special celebrations..." required></textarea>
+            <textarea v-model="form.message" placeholder="Tell us about your expectations, dietary requirements, or any special celebrations..." required></textarea>
           </div>
           
           <button type="submit" class="btn-submit luxury-btn" :class="{ 'is-loading': isSubmitting, 'is-success': isSuccess }">
             <span class="btn-text" v-if="!isSubmitting && !isSuccess">Send VIP Request</span>
-            <span class="btn-text" v-else-if="isSubmitting">Processing...</span>
+            <span class="btn-text" v-else-if="isSubmitting">
+              <svg class="spinner" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>
+              Processing...
+            </span>
             <span class="btn-text" v-else>✓ Request Received</span>
             <div class="shine-sweep"></div>
           </button>
@@ -551,5 +604,50 @@ const handleSubmit = () => {
     width: 100%;
     margin-bottom: 8px;
   }
+}
+
+/* Spinner Animation */
+.spinner {
+  animation: spin 1s linear infinite;
+  margin-right: 8px;
+}
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+
+/* Luxury Toast Styles */
+.luxury-toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(201, 168, 76, 0.3);
+  box-shadow: 0 10px 30px rgba(10, 27, 40, 0.1);
+  padding: 16px 24px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  z-index: 1000;
+  font-family: var(--font-sans, system-ui);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--sea-deep, #0A1B28);
+}
+.luxury-toast.success .toast-icon {
+  color: #2ecc71;
+}
+.luxury-toast.error .toast-icon {
+  color: #e74c3c;
+}
+.toast-enter-active,
+.toast-leave-active {
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.toast-enter-from,
+.toast-leave-to {
+  opacity: 0;
+  transform: translateY(20px) scale(0.95);
 }
 </style>

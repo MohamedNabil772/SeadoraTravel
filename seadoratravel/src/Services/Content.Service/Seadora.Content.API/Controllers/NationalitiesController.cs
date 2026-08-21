@@ -6,8 +6,8 @@ using Seadora.Content.Application.Nationalities;
 namespace Seadora.Content.API.Controllers;
 
 [ApiController]
-[Route("api/v1/[controller]")]
-[Authorize(Policy = "AdminPolicy")]
+[Route("api/v1/nationalities")]
+[Route("api/nationalities")]
 public class NationalitiesController : ControllerBase
 {
     private readonly IMediator _mediator;
@@ -35,6 +35,12 @@ public class NationalitiesController : ControllerBase
     {
         if (id != command.Id) return BadRequest();
         return Ok(await _mediator.Send(command));
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        return Ok(await _mediator.Send(new DeleteNationalityCommand(id)));
     }
 
     [HttpPatch("{id}/toggle-active")]

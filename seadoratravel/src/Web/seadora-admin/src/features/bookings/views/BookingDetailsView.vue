@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import api from '@/services/api'
+import { useToast } from '@/composables/useToast'
 
 interface Booking {
   id: string
@@ -52,7 +53,8 @@ async function loadData() {
     const allBookingsRes = await api.get(`/api/booking/api/bookings?tourId=${bData.tourId}`)
     const targetDate = new Date(bData.bookingDate).toDateString()
 
-    tripGuests.value = allBookingsRes.data.filter((b: any) => {
+    const allBookings = Array.isArray(allBookingsRes.data) ? allBookingsRes.data : (allBookingsRes.data?.items || [])
+    tripGuests.value = allBookings.filter((b: any) => {
       return new Date(b.bookingDate).toDateString() === targetDate
     })
   } catch (e) {
@@ -84,6 +86,8 @@ function formatDate(dateStr?: string) {
   })
 }
 
+const toast = useToast()
+
 async function togglePayment(guest: Booking) {
   actionLoading.value = true
   try {
@@ -93,9 +97,10 @@ async function togglePayment(guest: Booking) {
       isPaid: newPaid
     })
     guest.isPaid = newPaid
+    toast.success('Payment status updated successfully')
   } catch (e) {
     console.error(e)
-    alert('Failed to update payment status.')
+    toast.error('Failed to update payment status.')
   } finally {
     actionLoading.value = false
   }
@@ -109,9 +114,10 @@ async function setAttendance(guest: Booking, status: string) {
       attendance: status
     })
     guest.attendance = status
+    toast.success('Attendance updated successfully')
   } catch (e) {
     console.error(e)
-    alert('Failed to update attendance.')
+    toast.error('Failed to update attendance.')
   } finally {
     actionLoading.value = false
   }
@@ -333,11 +339,18 @@ onMounted(loadData)
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 .btn-close-window:hover {
   background: #f8fafc;
   color: var(--dark, #1c2434);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+.btn-close-window:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 .status-badge { 
   padding: 4px 10px; 
@@ -347,7 +360,10 @@ onMounted(loadData)
   letter-spacing: 0.05em; 
   text-transform: uppercase; 
   display: inline-block; 
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+  transition: all 0.2s ease;
 }
+.status-badge:hover { filter: brightness(0.95); transform: translateY(-0.5px); }
 .status-badge.pending { background: rgba(232, 130, 10, 0.1); color: #e8820a; border: 1px solid rgba(232, 130, 10, 0.2); }
 .status-badge.confirmed { background: rgba(60, 80, 224, 0.1); color: #3C50E0; border: 1px solid rgba(60, 80, 224, 0.2); }
 .status-badge.completed { background: rgba(16, 185, 129, 0.1); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.2); }

@@ -20,18 +20,18 @@ public class FilesController : ControllerBase
         if (file == null || file.Length == 0)
             return BadRequest("No file uploaded");
 
-        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".pdf" };
+        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".svg", ".pdf", ".xlsx", ".xls", ".csv" };
         var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
         if (!allowedExtensions.Contains(extension))
             return BadRequest("Invalid file type.");
 
-        if (file.Length > 5 * 1024 * 1024) // 5 MB
-            return BadRequest("File size exceeds 5MB limit.");
+        if (file.Length > 15 * 1024 * 1024) // 15 MB
+            return BadRequest("File size exceeds 15MB limit.");
 
         using var stream = file.OpenReadStream();
         var fileId = await _storageService.UploadFileAsync(stream, file.FileName, file.ContentType);
 
-        return Ok(new { FileId = fileId });
+        return Ok(new { fileId = fileId, url = $"/api/files/{fileId}" });
     }
 
     [HttpGet("{fileId}")]
@@ -40,7 +40,8 @@ public class FilesController : ControllerBase
         try
         {
             var stream = await _storageService.GetFileAsync(fileId);
-            return File(stream, "application/octet-stream", fileId);
+            var contentType = GetContentType(fileId);
+            return File(stream, contentType);
         }
         catch (FileNotFoundException)
         {
@@ -53,5 +54,24 @@ public class FilesController : ControllerBase
     {
         await _storageService.DeleteFileAsync(fileId);
         return NoContent();
+    }
+
+    private string GetContentType(string path)
+    {
+        var types = new Dictionary<string, string>
+        {
+            {".jpg", "image/jpeg"},
+            {".jpeg", "image/jpeg"},
+            {".png", "image/png"},
+            {".webp", "image/webp"},
+            {".svg", "image/svg+xml"},
+            {".pdf", "application/pdf"},
+            {".xlsx", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"},
+            {".xls", "application/vnd.ms-excel"},
+            {".csv", "text/csv"}
+        };
+
+        var ext = Path.GetExtension(path).ToLowerInvariant();
+        return types.TryGetValue(ext, out var contentType) ? contentType : "application/octet-stream";
     }
 }

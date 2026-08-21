@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import api from '@/services/api'
+import { useConfirm } from '@/composables/useConfirm'
+import { useToast } from '@/composables/useToast'
 
 interface PaymentAgreement {
   id: string
@@ -46,12 +48,19 @@ onMounted(async () => {
 async function fetchData() {
   loading.value = true
   try {
-    const [supRes, agrRes] = await Promise.all([
+    const results = await Promise.allSettled([
       api.get('/api/content/api/suppliers'),
       api.get('/api/content/api/paymentagreements')
     ])
-    suppliers.value = supRes.data
-    agreements.value = agrRes.data
+    
+    if (results[0].status === 'fulfilled') {
+      const data = results[0].value.data
+      suppliers.value = Array.isArray(data) ? data : (data?.items || [])
+    }
+    if (results[1].status === 'fulfilled') {
+      const data = results[1].value.data
+      agreements.value = Array.isArray(data) ? data : (data?.items || [])
+    }
   } catch (err) {
     console.error('Error fetching data:', err)
   } finally {
@@ -77,29 +86,42 @@ function openEditSupplier(supplier: Supplier) {
   showSupplierModal.value = true
 }
 
+const { confirm } = useConfirm()
+const toast = useToast()
+
 async function saveSupplier() {
   try {
     if (isEditingSupplier.value) {
       await api.put(`/api/content/api/suppliers/${supplierForm.value.id}`, supplierForm.value)
+      toast.success('Supplier updated successfully')
     } else {
       await api.post('/api/content/api/suppliers', supplierForm.value)
+      toast.success('Supplier created successfully')
     }
     showSupplierModal.value = false
     await fetchData()
   } catch (err) {
     console.error('Error saving supplier:', err)
-    alert('Failed to save supplier')
+    toast.error('Failed to save supplier')
   }
 }
 
 async function deleteSupplier(id: string) {
-  if (!confirm('Are you sure you want to delete this supplier?')) return
+  const ok = await confirm({
+    title: 'Delete Supplier',
+    message: 'Are you sure you want to delete this supplier?',
+    confirmText: 'Delete',
+    type: 'danger'
+  })
+  if (!ok) return
+
   try {
     await api.delete(`/api/content/api/suppliers/${id}`)
+    toast.success('Supplier deleted successfully')
     await fetchData()
   } catch (err) {
     console.error('Error deleting supplier:', err)
-    alert('Failed to delete supplier')
+    toast.error('Failed to delete supplier')
   }
 }
 
@@ -110,22 +132,32 @@ async function saveAgreement() {
     await api.post('/api/content/api/paymentagreements', {
       name: agreementForm.value.name
     })
+    toast.success('Payment agreement created successfully')
     agreementForm.value.name = ''
     showAgreementModal.value = false
     await fetchData()
   } catch (err) {
     console.error('Error saving agreement:', err)
+    toast.error('Failed to save agreement')
   }
 }
 
 async function deleteAgreement(id: string) {
-  if (!confirm('Delete this payment agreement? Tours/Suppliers referencing it might be affected.')) return
+  const ok = await confirm({
+    title: 'Delete Payment Agreement',
+    message: 'Delete this payment agreement? Tours/Suppliers referencing it might be affected.',
+    confirmText: 'Delete',
+    type: 'danger'
+  })
+  if (!ok) return
+
   try {
     await api.delete(`/api/content/api/paymentagreements/${id}`)
+    toast.success('Payment agreement deleted successfully')
     await fetchData()
   } catch (err) {
     console.error('Error deleting agreement:', err)
-    alert('Could not delete. Make sure it is not referenced by any supplier.')
+    toast.error('Could not delete. Make sure it is not referenced by any supplier.')
   }
 }
 </script>
@@ -265,45 +297,53 @@ async function deleteAgreement(id: string) {
 .page-header h2 { font-size: 24px; font-weight: 700; color: #1C2434; margin-bottom: 4px; }
 .page-header p { color: #64748B; font-size: 14px; }
 
-.btn-action-primary { padding: 10px 22px; background: #3C50E0; border: none; border-radius: 4px; color: #fff; font-weight: 600; cursor: pointer; font-size: 14px; transition: all 0.3s; }
-.btn-action-primary:hover { background: #2B3CA6; }
+.btn-action-primary { padding: 10px 22px; background: #3C50E0; border: none; border-radius: 4px; color: #fff; font-weight: 600; cursor: pointer; font-size: 14px; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); will-change: transform; }
+.btn-action-primary:hover { background: #2B3CA6; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(60, 80, 224, 0.2); }
+.btn-action-primary:active { transform: scale(0.97); box-shadow: 0 2px 4px rgba(60, 80, 224, 0.1); }
 
-.btn-action-secondary { padding: 10px 22px; background: #fff; border: 1px solid #E2E8F0; border-radius: 4px; color: #64748B; font-weight: 600; cursor: pointer; font-size: 14px; transition: all 0.2s; box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05); }
-.btn-action-secondary:hover { background: #F7F9FC; color: #1C2434; }
+.btn-action-secondary { padding: 10px 22px; background: #fff; border: 1px solid #E2E8F0; border-radius: 4px; color: #64748B; font-weight: 600; cursor: pointer; font-size: 14px; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05); will-change: transform; }
+.btn-action-secondary:hover { background: #F7F9FC; color: #1C2434; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); }
+.btn-action-secondary:active { transform: scale(0.97); box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02); }
 
 .table-container { background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 4px; box-shadow: 0px 8px 13px -3px rgba(0, 0, 0, 0.07); overflow: hidden; }
 .data-table { width: 100%; border-collapse: collapse; }
 .data-table th { padding: 16px 24px; text-align: left; font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: #64748B; background: #F7F9FC; border-bottom: 1px solid #E2E8F0; }
-.data-table td { padding: 16px 24px; border-bottom: 1px solid #E2E8F0; font-size: 14px; color: #24303F; }
+.data-table td { padding: 16px 24px; border-bottom: 1px solid #E2E8F0; font-size: 14px; color: #24303F; transition: background 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+.data-table tr { transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
 .data-table tr:hover { background: #F9FAFB; }
 
 .cycle-badge { padding: 4px 10px; background: rgba(60, 80, 224, 0.08); color: #3C50E0; border-radius: 4px; font-size: 12px; font-weight: 600; display: inline-block; }
 
 .actions { display: flex; gap: 8px; }
-.btn-edit-action, .btn-delete-action { background: none; border: none; cursor: pointer; font-size: 18px; padding: 4px; border-radius: 4px; transition: background 0.2s; }
-.btn-edit-action:hover { background: #EFF4FB; }
-.btn-delete-action:hover { background: rgba(211, 64, 83, 0.1); }
+.btn-edit-action, .btn-delete-action { background: none; border: none; cursor: pointer; font-size: 18px; padding: 4px; border-radius: 4px; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); will-change: transform; }
+.btn-edit-action:hover { background: #EFF4FB; transform: translateY(-1px); }
+.btn-edit-action:active { transform: scale(0.95); }
+.btn-delete-action:hover { background: rgba(211, 64, 83, 0.1); transform: translateY(-1px); }
+.btn-delete-action:active { transform: scale(0.95); }
 
 /* Modal overlay styles */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
-.modal-card { background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 4px; box-shadow: 0px 8px 13px -3px rgba(0, 0, 0, 0.07); width: 100%; max-width: 480px; display: flex; flex-direction: column; overflow: hidden; color: #24303F; }
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px; transition: opacity 0.2s ease-out; }
+.modal-card { background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 4px; box-shadow: 0px 8px 13px -3px rgba(0, 0, 0, 0.07); width: 100%; max-width: 480px; display: flex; flex-direction: column; overflow: hidden; color: #24303F; transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
 .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid #E2E8F0; }
 .modal-header h3 { font-size: 18px; font-weight: 700; color: #1C2434; }
-.btn-close { background: none; border: none; color: #8A99AD; cursor: pointer; font-size: 18px; }
+.btn-close { background: none; border: none; color: #8A99AD; cursor: pointer; font-size: 18px; transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1); will-change: transform; }
+.btn-close:active { transform: scale(0.95); }
 
 .modal-form { padding: 20px; display: flex; flex-direction: column; gap: 16px; max-height: 80vh; overflow-y: auto; }
 .form-group { display: flex; flex-direction: column; gap: 6px; }
 .form-group label { color: #64748B; font-size: 12px; font-weight: 600; text-transform: uppercase; }
 .form-group input, .form-group select, .form-group textarea {
-  padding: 12px 14px; background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 4px; color: #24303F; outline: none; font-size: 14px; transition: border-color 0.2s;
+  padding: 12px 14px; background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 4px; color: #24303F; outline: none; font-size: 14px; transition: border-color 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #3C50E0; }
 
 .modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px; }
-.btn-cancel { padding: 10px 22px; background: #fff; border: 1px solid #E2E8F0; border-radius: 4px; color: #64748B; cursor: pointer; font-weight: 600; }
-.btn-cancel:hover { background: #F7F9FC; }
-.btn-save { padding: 10px 24px; background: #3C50E0; border: none; border-radius: 4px; color: #fff; font-weight: 600; cursor: pointer; }
-.btn-save:hover { background: #2B3CA6; }
+.btn-cancel { padding: 10px 22px; background: #fff; border: 1px solid #E2E8F0; border-radius: 4px; color: #64748B; cursor: pointer; font-weight: 600; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); will-change: transform; }
+.btn-cancel:hover { background: #F7F9FC; transform: translateY(-1px); }
+.btn-cancel:active { transform: scale(0.97); }
+.btn-save { padding: 10px 24px; background: #3C50E0; border: none; border-radius: 4px; color: #fff; font-weight: 600; cursor: pointer; transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); will-change: transform; }
+.btn-save:hover { background: #2B3CA6; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(60, 80, 224, 0.2); }
+.btn-save:active { transform: scale(0.97); }
 
 .agreement-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: #F7F9FC; border: 1px solid #E2E8F0; border-radius: 4px; margin-bottom: 8px; width: 100%; }
 

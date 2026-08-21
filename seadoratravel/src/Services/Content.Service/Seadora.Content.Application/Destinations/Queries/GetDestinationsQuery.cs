@@ -12,7 +12,19 @@ public class GetDestinationsQueryHandler(IContentDbContext context) : IRequestHa
 {
     public async Task<List<DestinationDto>> Handle(GetDestinationsQuery request, CancellationToken cancellationToken)
     {
-        var destinations = await context.Destinations.ToListAsync(cancellationToken);
-        return destinations.Adapt<List<DestinationDto>>();
+        var destinations = await context.Destinations
+            .Include(d => d.Tours)
+            .ToListAsync(cancellationToken);
+            
+        var dtos = destinations.Adapt<List<DestinationDto>>();
+        
+        // Manual mapping for TourCount if Mapster doesn't handle it
+        foreach(var dto in dtos)
+        {
+            var entity = destinations.First(d => d.Id == dto.Id);
+            dto.TourCount = entity.Tours?.Count ?? 0;
+        }
+        
+        return dtos;
     }
 }

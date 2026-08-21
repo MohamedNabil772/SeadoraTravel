@@ -1,23 +1,24 @@
 <template>
   <div class="flex items-center space-x-4 mb-6">
-    <div class="relative flex p-1 bg-navy-900 rounded-lg shadow-inner">
+    <div class="relative flex p-1 bg-gray-900 rounded-lg shadow-inner">
       <div
-        class="absolute inset-y-1 bg-navy-700 rounded-md shadow-sm transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]"
+        class="absolute inset-y-1 bg-gray-700 rounded-md shadow-sm transition-all duration-300 ease-[cubic-bezier(0.23,1,0.32,1)]"
         :style="indicatorStyle"
       ></div>
       <button
-        v-for="(locale, index) in locales"
+        v-for="(locale, index) in computedLocales"
         :key="locale.code"
         ref="tabRefs"
         @click="setLocale(locale.code, index)"
-        class="relative z-10 px-4 py-1.5 text-sm font-medium transition-colors duration-300 rounded-md"
+        class="relative z-10 px-4 py-1.5 text-sm font-medium transition-colors duration-300 rounded-md flex items-center gap-2"
         :class="modelValue === locale.code ? 'text-white' : 'text-gray-400 hover:text-gray-200'"
       >
+        <span v-if="locale.flag" class="text-base">{{ locale.flag }}</span>
         {{ locale.label }}
       </button>
     </div>
     <div class="text-xs flex items-center space-x-2" :class="saveStateClass">
-      <div v-if="saveState === 'saving'" class="w-2 h-2 rounded-full bg-luxury-gold animate-pulse"></div>
+      <div v-if="saveState === 'saving'" class="w-2 h-2 rounded-full bg-yellow-500 animate-pulse"></div>
       <div v-else-if="saveState === 'saved'" class="w-2 h-2 rounded-full bg-green-500"></div>
       <span>{{ saveMessage }}</span>
     </div>
@@ -26,21 +27,35 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, nextTick, onMounted } from 'vue';
+import { useLanguageStore } from '../../languages/store/languageStore';
 
-const props = defineProps({
-  modelValue: { type: String, required: true },
-  locales: { 
-    type: Array, 
-    default: () => [
-      { code: 'en', label: 'English' },
-      { code: 'ar', label: 'Arabic' },
-      { code: 'fr', label: 'French' }
-    ]
-  },
-  saveState: { type: String, default: 'idle' } // 'idle', 'saving', 'saved', 'error'
+export interface LocaleItem {
+  code: string
+  label: string
+  flag?: string
+}
+
+const props = withDefaults(defineProps<{
+  modelValue: string
+  locales?: LocaleItem[] | null
+  saveState?: string
+}>(), {
+  locales: null,
+  saveState: 'idle'
 });
 
 const emit = defineEmits(['update:modelValue']);
+const store = useLanguageStore();
+
+const computedLocales = computed(() => {
+  if (props.locales && props.locales.length > 0) return props.locales;
+  return store.activeLanguages.map((l: any) => ({
+    code: l.code,
+    label: l.name,
+    flag: l.flag
+  }));
+});
+
 const tabRefs = ref<HTMLElement[]>([]);
 const activeIndex = ref(0);
 const indicatorStyle = ref({ left: '4px', width: '0px' });
@@ -62,17 +77,22 @@ const setLocale = (code: string, index: number) => {
 };
 
 onMounted(() => {
-  const index = props.locales.findIndex(l => l.code === props.modelValue);
+  store.init();
+  const index = computedLocales.value.findIndex(l => l.code === props.modelValue);
   if (index !== -1) activeIndex.value = index;
   nextTick(updateIndicator);
 });
 
 watch(() => props.modelValue, (newVal) => {
-  const index = props.locales.findIndex(l => l.code === newVal);
+  const index = computedLocales.value.findIndex(l => l.code === newVal);
   if (index !== -1 && index !== activeIndex.value) {
     activeIndex.value = index;
     nextTick(updateIndicator);
   }
+});
+
+watch(computedLocales, () => {
+  nextTick(updateIndicator);
 });
 
 const saveMessage = computed(() => {
@@ -83,7 +103,7 @@ const saveMessage = computed(() => {
 });
 
 const saveStateClass = computed(() => {
-  if (props.saveState === 'saving') return 'text-luxury-gold';
+  if (props.saveState === 'saving') return 'text-yellow-500';
   if (props.saveState === 'saved') return 'text-green-500';
   if (props.saveState === 'error') return 'text-red-500';
   return 'text-gray-500 opacity-0';

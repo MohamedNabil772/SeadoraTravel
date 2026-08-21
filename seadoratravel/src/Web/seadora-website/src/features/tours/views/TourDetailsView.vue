@@ -876,6 +876,12 @@ const tourNotSuitable = computed(() => {
   return i18nContent.value.notSuitableText
 })
 
+const tourNotes = computed(() => {
+  if (tour.value?.notes?.[locale.value]) return tour.value.notes[locale.value]
+  if (tour.value?.notes?.['en']) return tour.value.notes['en']
+  return tour.value?.notes || ''
+})
+
 // Dynamic Pickup Timing based on Admin Settings
 const pickupTimeType = computed(() => tour.value?.pickupTimeType || 'FixedSlots')
 const availablePickupTimes = computed(() => {
@@ -893,15 +899,29 @@ const availablePickupTimes = computed(() => {
 const dynamicOptions = computed(() => {
   if (tour.value?.packages && Array.isArray(tour.value.packages) && tour.value.packages.length > 0) {
     return tour.value.packages.map((pkg: any) => {
-      const title = typeof pkg.name === 'object' ? (pkg.name[locale.value] || pkg.name['en']) : (pkg.name || pkg.title || 'Package')
-      const subtitle = typeof pkg.description === 'object' ? (pkg.description[locale.value] || pkg.description['en']) : (pkg.description || pkg.subtitle || '')
+      const title = pkg.titles ? (pkg.titles[locale.value] || pkg.titles['en'] || Object.values(pkg.titles)[0] || 'Package')
+        : (typeof pkg.name === 'object' ? (pkg.name[locale.value] || pkg.name['en']) : (pkg.name || pkg.title || 'Package'))
+      
+      const subtitle = pkg.descriptions ? (pkg.descriptions[locale.value] || pkg.descriptions['en'] || Object.values(pkg.descriptions)[0] || '')
+        : (typeof pkg.description === 'object' ? (pkg.description[locale.value] || pkg.description['en']) : (pkg.description || pkg.subtitle || ''))
+      
+      let rawFeatures = pkg.features
+      if (typeof rawFeatures === 'object' && !Array.isArray(rawFeatures)) {
+        rawFeatures = rawFeatures[locale.value] || rawFeatures['en'] || Object.values(rawFeatures)[0] || []
+      }
+      const features = Array.isArray(rawFeatures) 
+        ? rawFeatures 
+        : (typeof rawFeatures === 'string' ? rawFeatures.split(',').map((s: string) => s.trim()).filter(Boolean) : [])
+
       return {
         id: pkg.id,
         title,
         subtitle,
+        features: features.map((f: any) => typeof f === 'object' ? (f[locale.value] || f['en'] || f) : String(f)),
         basePriceEur: Number(pkg.price) || Number(tour.value?.price) || 25,
         wasPriceEur: Number(pkg.originalPrice) || Math.round((Number(pkg.price) || Number(tour.value?.price) || 25) * 1.25),
-        departureTime: '15:30'
+        departureTime: '15:30',
+        badge: pkg.badge || (pkg.badges ? (pkg.badges[locale.value] || pkg.badges['en']) : '')
       }
     })
   }
@@ -969,7 +989,15 @@ const rawTotalPriceEur = computed(() => {
   }
   selectedAddons.value.forEach(id => {
     const addon = availableAddons.value.find((a: any) => a.id === id)
-    if (addon) totalEur += addon.priceEur
+    if (addon) {
+      const price = addon.priceEur || addon.price || 0
+      const isPerPerson = addon.pricingType === 'PerPerson' || addon.isPerPerson === true
+      if (isPerPerson) {
+        totalEur += price * (Math.max(1, adultsCount.value) + childrenCount.value)
+      } else {
+        totalEur += price
+      }
+    }
   })
   return totalEur
 })
@@ -1433,7 +1461,7 @@ watch(routeSlug, () => {
         </h1>
 
         <!-- Rating & Trust Pills Header Row -->
-        <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] sm:text-xs">
           <!-- Rating -->
           <div class="flex items-center gap-1.5 bg-[#ecfdf5] border border-[#a7f3d0] px-2.5 py-1 rounded-full text-[#065f46] font-bold">
             <span class="text-amber-500 text-sm">★</span>
@@ -1441,24 +1469,35 @@ watch(routeSlug, () => {
             <span class="text-[#047857] font-normal underline cursor-pointer">({{ tourReviewCount.toLocaleString() }} {{ $t('tourDetails.navigation.reviews') || 'reviews' }})</span>
           </div>
 
-          <!-- Bestseller badge -->
-          <span class="bg-[#fef3c7] text-[#92400e] border border-[#fde68a] px-2.5 py-1 rounded-full font-bold flex items-center gap-1">
-            <span>👑</span> {{ i18nContent.bestseller }}
-          </span>
-
           <!-- Location -->
-          <span class="text-[#475569] flex items-center gap-1 font-medium">
+          <span class="bg-gray-100 border border-gray-200 text-[#475569] px-2.5 py-1 rounded-full flex items-center gap-1 font-medium">
             <span>📍</span> {{ i18nContent.egypt || 'Egypt' }}
           </span>
 
           <!-- Duration -->
-          <span class="text-[#475569] flex items-center gap-1 font-medium">
+          <span class="bg-gray-100 border border-gray-200 text-[#475569] px-2.5 py-1 rounded-full flex items-center gap-1 font-medium">
             <span>⏱️</span> {{ tourDuration }}
           </span>
 
-          <!-- Free Cancellation -->
-          <span class="text-[#059669] font-bold flex items-center gap-1">
-            <span>✓</span> {{ i18nContent.freeCancel }}
+          <!-- Badges -->
+          <span v-if="tour?.isBestseller !== false" class="bg-[#fef3c7] text-[#92400e] border border-[#fde68a] px-2.5 py-1 rounded-full font-bold flex items-center gap-1">
+            <span>👑</span> {{ i18nContent.bestseller || 'Bestseller' }}
+          </span>
+          
+          <span v-if="tour?.isTopRated" class="bg-[#e0e7ff] text-[#3730a3] border border-[#c7d2fe] px-2.5 py-1 rounded-full font-bold flex items-center gap-1">
+            <span>⭐</span> Top Rated
+          </span>
+          
+          <span v-if="tour?.reserveAndPayLater !== false" class="bg-[#f0f9ff] text-[#0284c7] border border-[#bae6fd] px-2.5 py-1 rounded-full font-bold flex items-center gap-1">
+            <span>💳</span> Reserve & Pay Later
+          </span>
+
+          <span v-if="tour?.freeCancellation !== false" class="bg-[#ecfdf5] text-[#059669] border border-[#a7f3d0] px-2.5 py-1 rounded-full font-bold flex items-center gap-1">
+            <span>✓</span> {{ i18nContent.freeCancel || 'Free Cancellation' }}
+          </span>
+          
+          <span v-if="tour?.hotelPickup !== false" class="bg-gray-100 text-[#475569] border border-gray-200 px-2.5 py-1 rounded-full font-bold flex items-center gap-1">
+            <span>🚐</span> Hotel Pickup
           </span>
         </div>
       </div>
@@ -1700,13 +1739,24 @@ watch(routeSlug, () => {
                 </ul>
               </div>
 
-              <div class="bg-[#fff7ed] p-5 rounded-2xl border border-[#ffedd5]">
-                <h4 class="text-xs sm:text-sm font-bold text-[#c2410c] mb-2.5 flex items-center gap-2">
-                  <span>⚠️</span> {{ i18nContent.notSuitableTitle }}
-                </h4>
-                <p class="text-xs sm:text-sm text-[#9a3412] leading-relaxed">
-                  {{ tourNotSuitable }}
-                </p>
+              <div class="flex flex-col gap-5">
+                <div class="bg-[#fff7ed] p-5 rounded-2xl border border-[#ffedd5] flex-1">
+                  <h4 class="text-xs sm:text-sm font-bold text-[#c2410c] mb-2.5 flex items-center gap-2">
+                    <span>⚠️</span> {{ i18nContent.notSuitableTitle }}
+                  </h4>
+                  <p class="text-xs sm:text-sm text-[#9a3412] leading-relaxed">
+                    {{ tourNotSuitable }}
+                  </p>
+                </div>
+
+                <div v-if="tourNotes" class="bg-[#f0fdfa] p-5 rounded-2xl border border-[#ccfbf1] flex-1">
+                  <h4 class="text-xs sm:text-sm font-bold text-[#0f766e] mb-2.5 flex items-center gap-2">
+                    <span>💡</span> Notes / Need to Know
+                  </h4>
+                  <p class="text-xs sm:text-sm text-[#115e59] leading-relaxed">
+                    {{ tourNotes }}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -1897,6 +1947,11 @@ watch(routeSlug, () => {
                         <span class="text-xs sm:text-sm font-extrabold text-[#062d4d] block">{{ currencyStore.formatPrice(opt.basePriceEur) }}</span>
                       </div>
                     </div>
+                    <ul v-if="opt.features && opt.features.length" class="mt-2 space-y-1">
+                      <li v-for="(feat, fIdx) in opt.features" :key="fIdx" class="text-[10px] sm:text-xs text-[#475569] flex items-start gap-1">
+                        <span class="text-emerald-500 font-bold">✓</span> {{ feat }}
+                      </li>
+                    </ul>
                   </div>
                 </div>
               </div>
@@ -2395,12 +2450,12 @@ watch(routeSlug, () => {
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(10px) scale(0.98);
 }
 </style>

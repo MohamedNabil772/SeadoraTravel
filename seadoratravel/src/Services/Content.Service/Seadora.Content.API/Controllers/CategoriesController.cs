@@ -8,14 +8,16 @@ using Seadora.Content.Application.DTOs;
 namespace Seadora.Content.API.Controllers;
 
 [ApiController]
+[Route("api/categories")]
 [Route("api/admin/categories")]
-[Authorize(Policy = "AdminOnly")]
 public class CategoriesController(ISender mediator) : ControllerBase
 {
     [HttpGet]
+    [AllowAnonymous]
     public async Task<ActionResult<List<CategoryDto>>> Get() => Ok(await mediator.Send(new GetCategoriesQuery()));
 
     [HttpGet("{id:guid}")]
+    [AllowAnonymous]
     public async Task<ActionResult<CategoryDto>> GetById(Guid id) => Ok(await mediator.Send(new GetCategoryByIdQuery(id)));
 
     [HttpPost]

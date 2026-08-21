@@ -10,7 +10,7 @@ export class ApiBookingRepository implements IBookingRepository {
 
   async getBookings(): Promise<Booking[]> {
     const res = await this.client.get('/api/booking/api/bookings')
-    return res.data
+    return Array.isArray(res.data) ? res.data : (res.data?.items || [])
   }
 
   async getBookingById(id: string): Promise<Booking> {

@@ -8,7 +8,8 @@ public class Category
     public Dictionary<string, string> Names { get; set; } = new();
     public Dictionary<string, string> Descriptions { get; set; } = new();
     
-    public string IconName { get; set; } = string.Empty; // Emoji or CSS class
+    public string? IconName { get; set; } // Emoji or CSS class
+    public string? CustomIconUrl { get; set; }
     public int Order { get; set; }
     public string CoverImageUrl { get; set; } = string.Empty;
     

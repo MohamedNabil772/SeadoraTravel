@@ -8,14 +8,16 @@ using Seadora.Content.Application.DTOs;
 namespace Seadora.Content.API.Controllers;
 
 [ApiController]
+[Route("api/destinations")]
 [Route("api/admin/destinations")]
-[Authorize(Policy = "AdminOnly")]
 public class DestinationsController(ISender mediator) : ControllerBase
 {
     [HttpGet]
+    [AllowAnonymous]
     public async Task<ActionResult<List<DestinationDto>>> Get() => Ok(await mediator.Send(new GetDestinationsQuery()));
 
     [HttpGet("{id:guid}")]
+    [AllowAnonymous]
     public async Task<ActionResult<DestinationDto>> GetById(Guid id) => Ok(await mediator.Send(new GetDestinationByIdQuery(id)));
 
     [HttpPost]

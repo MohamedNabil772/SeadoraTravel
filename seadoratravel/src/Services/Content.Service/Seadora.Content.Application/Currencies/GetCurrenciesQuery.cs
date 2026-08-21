@@ -1,4 +1,4 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Seadora.Content.Application.Common.Interfaces;
 using Seadora.Content.Domain.Entities;
@@ -25,6 +25,7 @@ public class GetCurrenciesQueryHandler : IRequestHandler<GetCurrenciesQuery, Lis
             query = query.Where(x => x.IsActive);
         }
 
-        return await query.ToListAsync(cancellationToken);
+        var list = await query.ToListAsync(cancellationToken);
+        return list.OrderByDescending(c => c.IsBase).ThenBy(c => c.Code).ToList();
     }
 }

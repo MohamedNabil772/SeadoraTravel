@@ -17,6 +17,11 @@ public class LocalStorageService : IStorageService
 
     public async Task<string> UploadFileAsync(Stream fileStream, string fileName, string contentType)
     {
+        if (!Directory.Exists(_storagePath))
+        {
+            Directory.CreateDirectory(_storagePath);
+        }
+
         var fileId = Guid.NewGuid().ToString() + Path.GetExtension(fileName);
         var filePath = Path.Combine(_storagePath, fileId);
 

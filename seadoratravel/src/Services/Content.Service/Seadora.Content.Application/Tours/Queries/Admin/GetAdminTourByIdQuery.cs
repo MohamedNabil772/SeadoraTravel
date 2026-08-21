@@ -17,18 +17,40 @@ public record AdminTourDetailDto(
     Guid Id,
     Dictionary<string, string> Names,
     Dictionary<string, string> Descriptions,
+    Dictionary<string, string> Highlights,
     decimal Price,
     string Currency,
+    decimal? OriginalPrice,
+    decimal? DiscountPercentage,
     string Duration,
+    string StartTime,
+    decimal Rating,
+    int ReviewCount,
+    string ImageUrl,
+    string Emoji,
+    string BgGradient,
+    string Badge,
     Guid DestinationId,
     Guid CategoryId,
     Guid? SupplierId,
     decimal SupplierPercentage,
     int MaxAllocations,
+    bool IsTopRated,
+    bool IsBestseller,
+    bool IsInHighDemand,
+    bool ReserveAndPayLater,
+    bool HotelPickup,
+    bool FreeCancellation,
+    bool IsPrivateOption,
+    List<AdminTourPackageDto> Packages,
+    string PickupTimeType,
+    List<string> AvailablePickupTimes,
     List<AdminItineraryDto> Itinerary,
+    List<AdminInclusionDto> Inclusions,
+    List<AdminInclusionDto> Exclusions,
+    AdminImportantInfoDto ImportantInfo,
     List<AdminFaqDto> Faqs,
     List<AdminAddonDto> Addons,
-    List<AdminInclusionDto> Inclusions,
     List<AdminMediaDto> Media
 );
 
@@ -42,41 +64,45 @@ public class GetAdminTourByIdQueryHandler : IRequestHandler<GetAdminTourByIdQuer
         var t = await _context.Tours.AsNoTracking().FirstOrDefaultAsync(x => x.Id == request.Id, cancellationToken);
         if (t == null) return null;
 
-        var inclusionsList = new List<AdminInclusionDto>();
-        if (t.Inclusions != null)
-        {
-            foreach (var inc in t.Inclusions)
-            {
-                inclusionsList.Add(new AdminInclusionDto(inc.Names, true));
-            }
-        }
-        if (t.Exclusions != null)
-        {
-            foreach (var exc in t.Exclusions)
-            {
-                inclusionsList.Add(new AdminInclusionDto(exc.Names, false));
-            }
-        }
-
-        var mediaList = t.MediaUrls?.Select(u => new AdminMediaDto(u, u == t.ImageUrl)).ToList() ?? new List<AdminMediaDto>();
-
         return new AdminTourDetailDto(
             t.Id,
             t.Names ?? new Dictionary<string, string>(),
             t.Descriptions ?? new Dictionary<string, string>(),
+            t.Highlights ?? new Dictionary<string, string>(),
             t.Price,
             t.Currency ?? "EUR",
-            t.Duration,
+            t.OriginalPrice,
+            t.DiscountPercentage,
+            t.Duration ?? string.Empty,
+            t.StartTime ?? string.Empty,
+            t.Rating,
+            t.ReviewCount,
+            t.ImageUrl ?? string.Empty,
+            t.Emoji ?? string.Empty,
+            t.BgGradient ?? string.Empty,
+            t.Badge ?? string.Empty,
             t.DestinationId,
             t.CategoryId,
             t.SupplierId,
             t.SupplierPercentage,
             t.MaxAllocations,
-            t.Itinerary?.Select(i => new AdminItineraryDto(i.Titles, i.Descriptions, i.Time)).ToList() ?? new List<AdminItineraryDto>(),
-            t.Faqs?.Select(f => new AdminFaqDto(f.Questions, f.Answers)).ToList() ?? new List<AdminFaqDto>(),
-            t.Addons?.Select(a => new AdminAddonDto(a.Names, a.PriceEur)).ToList() ?? new List<AdminAddonDto>(),
-            inclusionsList,
-            mediaList
+            t.IsTopRated,
+            t.IsBestseller,
+            t.IsInHighDemand,
+            t.ReserveAndPayLater,
+            t.HotelPickup,
+            t.FreeCancellation,
+            t.IsPrivateOption,
+            t.Packages?.Select(p => new AdminTourPackageDto(p.Id, p.Titles ?? new Dictionary<string, string>(), p.Descriptions ?? new Dictionary<string, string>(), p.Price, p.Badge ?? string.Empty, p.Features ?? new Dictionary<string, string>())).ToList() ?? new List<AdminTourPackageDto>(),
+            t.PickupTimeType ?? "FixedSlots",
+            t.AvailablePickupTimes ?? new List<string>(),
+            t.Itinerary?.Select(i => new AdminItineraryDto(i.ItineraryType, i.DayNumber, i.TimeString, i.Titles ?? new Dictionary<string, string>(), i.Descriptions ?? new Dictionary<string, string>())).ToList() ?? new List<AdminItineraryDto>(),
+            t.Inclusions?.Select(inc => new AdminInclusionDto(inc.Names ?? new Dictionary<string, string>())).ToList() ?? new List<AdminInclusionDto>(),
+            t.Exclusions?.Select(exc => new AdminInclusionDto(exc.Names ?? new Dictionary<string, string>())).ToList() ?? new List<AdminInclusionDto>(),
+            t.ImportantInformation != null ? new AdminImportantInfoDto(t.ImportantInformation.WhatToBring ?? new(), t.ImportantInformation.NotSuitableFor ?? new(), t.ImportantInformation.Notes ?? new()) : new AdminImportantInfoDto(new(), new(), new()),
+            t.Faqs?.Select(f => new AdminFaqDto(f.Questions ?? new Dictionary<string, string>(), f.Answers ?? new Dictionary<string, string>())).ToList() ?? new List<AdminFaqDto>(),
+            t.Addons?.Select(a => new AdminAddonDto(a.Id, a.Names ?? new Dictionary<string, string>(), a.Descriptions ?? new Dictionary<string, string>(), a.PriceEur, a.IsPerPerson, a.Icon ?? "✨", a.Category ?? "Optional")).ToList() ?? new List<AdminAddonDto>(),
+            t.Media?.Select(m => new AdminMediaDto(m.Url, m.Captions ?? new Dictionary<string, string>())).ToList() ?? new List<AdminMediaDto>()
         );
     }
 }

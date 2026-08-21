@@ -100,6 +100,37 @@ const getLocalized = (dict: any, fallback: string = '') => {
   return fallback;
 }
 
+const generateGradient = (id: string) => {
+  if (!id) return 'linear-gradient(135deg,#7c4a14,#e8820a)'
+  const hash = id.split('').reduce((acc, char) => char.charCodeAt(0) + ((acc << 5) - acc), 0)
+  const color1 = `hsl(${Math.abs(hash) % 360}, 70%, 30%)`
+  const color2 = `hsl(${(Math.abs(hash) + 40) % 360}, 80%, 40%)`
+  return `linear-gradient(135deg, ${color1}, ${color2})`
+}
+
+const getCategory = (catId: string) => categories.value.find(c => c.id === catId)
+
+const getTourBackground = (trip: Tour) => {
+  if (trip.imageUrl || trip.mainImage) {
+    return `url(${getFullImageUrl(trip.imageUrl || trip.mainImage)}) center/cover`;
+  }
+  const cat = getCategory(trip.categoryId);
+  if (cat && (cat as any).coverImageUrl) {
+    return `url(${getFullImageUrl((cat as any).coverImageUrl)}) center/cover`;
+  }
+  return trip.bgGradient || generateGradient(trip.categoryId);
+}
+
+const getCategoryIcon = (catId: string) => {
+  const cat = getCategory(catId);
+  return cat ? cat.icon : '🌍';
+}
+
+const getCategoryName = (catId: string) => {
+  const cat = getCategory(catId);
+  return cat ? getLocalized(cat.names, 'Adventure') : 'Adventure';
+}
+
 const openBookingModal = (tour: Tour) => {
   selectedTour.value = tour;
   showModal.value = true;
@@ -189,15 +220,15 @@ const submitBooking = async () => {
 
     <div v-if="loading" class="text-center text-white py-10 relative z-10">Loading tours...</div>
 
-    <div v-else class="trips-grid">
+    <TransitionGroup v-else name="list" tag="div" class="trips-grid">
       <div 
         v-for="trip in filteredTrips" 
         :key="trip.id"
-        class="trip-card cursor-pointer"
+        class="trip-card cursor-pointer list-item"
         @click="openDetailsPage(trip)"
       >
-        <div class="trip-img" :style="{ background: (trip.imageUrl || trip.mainImage) ? `url(${getFullImageUrl(trip.imageUrl || trip.mainImage)}) center/cover` : (trip.bgGradient || (categories.find(c => c.id === trip.categoryId)?.names['en'] === 'Sea & Diving' ? 'linear-gradient(135deg,#063a5c,#1a9b8a)' : categories.find(c => c.id === trip.categoryId)?.names['en'] === 'Culture & History' ? 'linear-gradient(135deg,#8b6914,#c9a84c)' : 'linear-gradient(135deg,#7c4a14,#e8820a)')) }">
-          <div v-if="!(trip.imageUrl || trip.mainImage)" class="trip-img-emoji">{{ trip.emoji || categories.find(c => c.id === trip.categoryId)?.icon || '🌍' }}</div>
+        <div class="trip-img" :style="{ background: getTourBackground(trip) }">
+          <div v-if="!(trip.imageUrl || trip.mainImage)" class="trip-img-emoji">{{ trip.emoji || getCategoryIcon(trip.categoryId) || '🌍' }}</div>
           <span class="trip-duration">
             {{ te('trips.durations.' + trip.duration) ? t('trips.durations.' + trip.duration) : trip.duration }}
           </span>
@@ -206,7 +237,7 @@ const submitBooking = async () => {
           </span>
         </div>
         <div class="trip-body">
-          <div class="trip-cat">Hurghada · {{ getLocalized(categories.find(c => c.id === trip.categoryId)?.names || {}, 'Adventure') }}</div>
+          <div class="trip-cat">{{ getCategoryName(trip.categoryId) }}</div>
           <div class="trip-name">
             {{ trip.title || getLocalized(trip.names, 'Unnamed Tour') }}
           </div>
@@ -230,7 +261,7 @@ const submitBooking = async () => {
           </div>
         </div>
       </div>
-    </div>
+    </TransitionGroup>
 
     <!-- Booking Modal -->
     <Transition name="fade">
@@ -452,5 +483,18 @@ const submitBooking = async () => {
 
 .animate-scale-up {
   animation: scale-up 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.list-enter-active,
+.list-leave-active {
+  transition: all 0.4s ease;
+}
+.list-enter-from,
+.list-leave-to {
+  opacity: 0;
+  transform: translateY(20px);
+}
+.list-leave-active {
+  position: absolute;
 }
 </style>

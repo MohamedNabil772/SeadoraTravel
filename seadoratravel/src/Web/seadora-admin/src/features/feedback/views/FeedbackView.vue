@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import api from '@/services/api'
+import { useToast } from '@/composables/useToast'
 
 interface Feedback {
   id: string
@@ -71,6 +72,8 @@ function getStars(rating: number) {
   return '★'.repeat(Math.round(rating)) + '☆'.repeat(5 - Math.round(rating))
 }
 
+const toast = useToast()
+
 async function toggleVisibility(f: Feedback) {
   actionLoading.value = true
   const newVisibility = !f.isVisible
@@ -80,9 +83,10 @@ async function toggleVisibility(f: Feedback) {
       IsVisible: newVisibility
     })
     f.isVisible = newVisibility
+    toast.success('Visibility status updated')
   } catch (e) {
     console.error('Failed to toggle visibility', e)
-    alert('Failed to update visibility status.')
+    toast.error('Failed to update visibility status.')
   } finally {
     actionLoading.value = false
   }

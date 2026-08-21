@@ -8,7 +8,8 @@ using Seadora.Identity.Application.Authentication.Commands.VerifyWhatsAppOtp;
 namespace Seadora.Identity.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/auth")]
+[Route("auth")]
 public class AuthController : ControllerBase
 {
     private readonly ISender _mediator;

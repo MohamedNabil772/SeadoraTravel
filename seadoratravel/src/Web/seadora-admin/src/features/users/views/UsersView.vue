@@ -2,6 +2,8 @@
 import { ref, onMounted, computed } from 'vue'
 import api from '@/services/api'
 import { useAuthStore } from '@/features/auth/store/auth'
+import { useConfirm } from '@/composables/useConfirm'
+import { useToast } from '@/composables/useToast'
 
 const authStore = useAuthStore()
 
@@ -95,6 +97,9 @@ function openEditModal(user: User) {
   showModal.value = true
 }
 
+const { confirm } = useConfirm()
+const toast = useToast()
+
 async function saveUser() {
   actionLoading.value = true
   try {
@@ -109,8 +114,10 @@ async function saveUser() {
 
     if (isEdit.value) {
       await api.put(`/api/auth/api/users/${form.value.id}`, payload)
+      toast.success('User updated successfully')
     } else {
       await api.post('/api/auth/api/users', payload)
+      toast.success('User created successfully')
     }
 
     showModal.value = false
@@ -118,7 +125,7 @@ async function saveUser() {
   } catch (e: any) {
     console.error('Failed to save user', e)
     const err = e.response?.data?.errors?.join(', ') || e.response?.data?.error || 'Failed to save user.'
-    alert(err)
+    toast.error(err)
   } finally {
     actionLoading.value = false
   }
@@ -126,19 +133,27 @@ async function saveUser() {
 
 async function deleteUser(user: User) {
   if (user.email === authStore.user?.email) {
-    alert('You cannot delete your own admin account.')
+    toast.error('You cannot delete your own admin account.')
     return
   }
 
-  if (!confirm(`Are you sure you want to delete user ${user.firstName} ${user.lastName} (${user.email})?`)) return
+  const ok = await confirm({
+    title: 'Delete User',
+    message: `Are you sure you want to delete user ${user.firstName} ${user.lastName} (${user.email})?`,
+    confirmText: 'Delete',
+    type: 'danger'
+  })
+  if (!ok) return
+
   actionLoading.value = true
   try {
     await api.delete(`/api/auth/api/users/${user.id}`)
+    toast.success('User deleted successfully')
     await fetchData()
   } catch (e: any) {
     console.error('Failed to delete user', e)
     const err = e.response?.data?.error || 'Failed to delete user.'
-    alert(err)
+    toast.error(err)
   } finally {
     actionLoading.value = false
   }

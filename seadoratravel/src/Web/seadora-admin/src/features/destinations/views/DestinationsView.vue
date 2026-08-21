@@ -1,30 +1,68 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import api from '@/services/api'
-import DestinationDrawerForm from '../components/DestinationDrawerForm.vue'
+import DestinationModalForm from '../components/DestinationModalForm.vue'
+import { useConfirm } from '@/composables/useConfirm'
+import { useToast } from '@/composables/useToast'
 
 interface Destination {
   id: string
   names: Record<string, string>
   descriptions: Record<string, string>
+  highlights?: Record<string, string>
   imageUrl: string
-  flag: string
+  flag?: string
+  flagEmoji?: string
   isFeatured?: boolean
+  toursCount?: number
 }
 
 const destinations = ref<Destination[]>([])
 const loading = ref(true)
 const actionLoading = ref(false)
-const showDrawer = ref(false)
+const showModal = ref(false)
 const isEdit = ref(false)
 const selectedDestination = ref<Destination | null>(null)
 const viewMode = ref<'table' | 'grid'>('grid')
+const searchQuery = ref('')
+
+const { confirm } = useConfirm()
+const toast = useToast()
+
+const defaultFallbackImg = 'https://images.unsplash.com/photo-1506929562872-bb421503ef21?auto=format&fit=crop&w=800&q=80'
+
+function resolveImageUrl(url?: string): string {
+  if (!url) return defaultFallbackImg
+  if (url.startsWith('http://') || url.startsWith('https://')) return url
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+  if (url.startsWith('/api/files/') || url.startsWith('api/files/')) {
+    const cleanPath = url.startsWith('/') ? url : `/${url}`
+    return `${API_URL}${cleanPath}`
+  }
+  return url
+}
+
+function handleImageError(event: Event) {
+  const target = event.target as HTMLImageElement
+  if (target && target.src !== defaultFallbackImg) {
+    target.src = defaultFallbackImg
+  }
+}
+
+const filteredDestinations = computed(() => {
+  if (!searchQuery.value) return destinations.value
+  const query = searchQuery.value.toLowerCase()
+  return destinations.value.filter(dest => 
+    dest.names?.en?.toLowerCase().includes(query) || 
+    dest.descriptions?.en?.toLowerCase().includes(query)
+  )
+})
 
 async function fetchDestinations() {
   loading.value = true
   try {
     const res = await api.get('/api/content/api/destinations')
-    destinations.value = res.data
+    destinations.value = Array.isArray(res.data) ? res.data : (res.data?.items || [])
   } catch (e) {
     console.error('Failed to fetch destinations', e)
   } finally {
@@ -32,16 +70,16 @@ async function fetchDestinations() {
   }
 }
 
-function openCreateDrawer() {
+function openCreateModal() {
   isEdit.value = false
   selectedDestination.value = null
-  showDrawer.value = true
+  showModal.value = true
 }
 
-function openEditDrawer(dest: Destination) {
+function openEditModal(dest: Destination) {
   isEdit.value = true
   selectedDestination.value = { ...dest }
-  showDrawer.value = true
+  showModal.value = true
 }
 
 async function saveDestination(formData: any) {
@@ -50,37 +88,48 @@ async function saveDestination(formData: any) {
     const payload = {
       names: formData.names,
       descriptions: formData.descriptions,
+      highlights: formData.highlights,
       imageUrl: formData.imageUrl,
-      flag: formData.flag,
+      flagEmoji: formData.flag || formData.flagEmoji,
       isFeatured: formData.isFeatured
     }
 
     if (isEdit.value && formData.id) {
       await api.put(`/api/content/api/destinations/${formData.id}`, { id: formData.id, ...payload })
+      toast.success('Destination updated successfully')
     } else {
       await api.post('/api/content/api/destinations', payload)
+      toast.success('Destination created successfully')
     }
 
-    showDrawer.value = false
+    showModal.value = false
     await fetchDestinations()
   } catch (e) {
     console.error('Failed to save destination', e)
-    alert('Failed to save destination.')
+    toast.error('Failed to save destination.')
   } finally {
     actionLoading.value = false
   }
 }
 
 async function deleteDestination(id: string) {
-  if (!confirm('Are you sure you want to delete this destination? (Note: It must have no associated tours to be deleted)')) return
+  const ok = await confirm({
+    title: 'Delete Destination',
+    message: 'Are you sure you want to delete this destination? (Note: It must have no associated tours to be deleted)',
+    confirmText: 'Delete',
+    type: 'danger'
+  })
+  if (!ok) return
+
   actionLoading.value = true
   try {
     await api.delete(`/api/content/api/destinations/${id}`)
+    toast.success('Destination deleted successfully')
     await fetchDestinations()
   } catch (e: any) {
     console.error('Failed to delete destination', e)
     const err = e.response?.data?.error || 'Failed to delete destination.'
-    alert(err)
+    toast.error(err)
   } finally {
     actionLoading.value = false
   }
@@ -97,6 +146,10 @@ onMounted(fetchDestinations)
         <p>Manage travel areas, regions, default images, and translations.</p>
       </div>
       <div class="header-actions">
+        <div class="search-bar">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" v-model="searchQuery" placeholder="Search destinations..." />
+        </div>
         <div class="view-toggle">
           <button 
             :class="{ active: viewMode === 'table' }" 
@@ -113,7 +166,7 @@ onMounted(fetchDestinations)
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
           </button>
         </div>
-        <button @click="openCreateDrawer" class="btn-create">+ Add Destination</button>
+        <button @click="openCreateModal" class="btn-create">+ Add Destination</button>
       </div>
     </div>
 
@@ -124,20 +177,27 @@ onMounted(fetchDestinations)
     </div>
 
     <!-- Empty State -->
-    <div v-else-if="destinations.length === 0" class="empty-state table-container">
+    <div v-else-if="filteredDestinations.length === 0" class="empty-state table-container">
       <div class="empty-icon">🌍</div>
-      <p>No destinations found.</p>
-      <button @click="openCreateDrawer" class="btn-ghost">Add your first destination</button>
+      <p v-if="searchQuery">No destinations match your search.</p>
+      <p v-else>No destinations found.</p>
+      <button v-if="!searchQuery" @click="openCreateModal" class="btn-ghost">Add your first destination</button>
     </div>
 
     <!-- Grid View -->
     <div v-else-if="viewMode === 'grid'" class="destinations-grid">
-      <div v-for="dest in destinations" :key="dest.id" class="destination-card">
+      <div v-for="dest in filteredDestinations" :key="dest.id" class="destination-card">
         <div class="card-image-wrap">
-          <img :src="dest.imageUrl || 'https://images.unsplash.com/photo-1506929562872-bb421503ef21?auto=format&fit=crop&w=800&q=80'" :alt="dest.names?.en" class="card-image" />
-          <div v-if="dest.isFeatured" class="featured-badge">Featured</div>
+          <img :src="resolveImageUrl(dest.imageUrl)" :alt="dest.names?.en" class="card-image" @error="handleImageError" />
+          <div class="badges-container">
+            <div v-if="dest.isFeatured" class="featured-badge">Featured</div>
+            <div v-if="dest.toursCount !== undefined" class="tour-count-badge">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.6L3 8l5 4-3 3-3-1-1 1 3 4 4 3 1-1-1-3 3-3 4 5l1.2-.7c.4-.2.7-.6.6-1.1z"></path></svg>
+              {{ dest.toursCount }} {{ dest.toursCount === 1 ? 'Tour' : 'Tours' }}
+            </div>
+          </div>
           <div class="card-actions">
-            <button @click="openEditDrawer(dest)" class="btn-action" title="Edit" :disabled="actionLoading">
+            <button @click="openEditModal(dest)" class="btn-action" title="Edit" :disabled="actionLoading">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
             </button>
             <button @click="deleteDestination(dest.id)" class="btn-action btn-delete" title="Delete" :disabled="actionLoading">
@@ -147,10 +207,16 @@ onMounted(fetchDestinations)
         </div>
         <div class="card-content">
           <div class="card-title-row">
-            <span class="flag-emoji">{{ dest.flag }}</span>
+            <span class="flag-emoji">{{ dest.flagEmoji || dest.flag || '📍' }}</span>
             <h3 class="card-title">{{ dest.names?.en || 'Untitled' }}</h3>
           </div>
           <p class="card-desc">{{ dest.descriptions?.en || 'No description provided.' }}</p>
+          <div v-if="dest.highlights?.en" class="highlights-container">
+            <span v-for="(highlight, idx) in dest.highlights.en.split(',').slice(0, 3)" :key="idx" class="highlight-pill">
+              {{ highlight.trim() }}
+            </span>
+            <span v-if="dest.highlights.en.split(',').length > 3" class="highlight-pill more-pill">+{{ dest.highlights.en.split(',').length - 3 }}</span>
+          </div>
         </div>
       </div>
     </div>
@@ -168,11 +234,11 @@ onMounted(fetchDestinations)
           </tr>
         </thead>
         <tbody>
-          <tr v-for="dest in destinations" :key="dest.id">
+          <tr v-for="dest in filteredDestinations" :key="dest.id">
             <td>
               <div class="thumb-wrapper">
-                <img :src="dest.imageUrl || 'https://images.unsplash.com/photo-1506929562872-bb421503ef21?auto=format&fit=crop&w=150&q=80'" class="thumb-image" />
-                <span class="thumb-flag">{{ dest.flag }}</span>
+                <img :src="resolveImageUrl(dest.imageUrl)" class="thumb-image" @error="handleImageError" />
+                <span class="thumb-flag">{{ dest.flagEmoji || dest.flag || '📍' }}</span>
               </div>
             </td>
             <td class="name-cell">{{ dest.names?.en || 'Untitled' }}</td>
@@ -183,7 +249,7 @@ onMounted(fetchDestinations)
             </td>
             <td>
               <div class="actions">
-                <button @click="openEditDrawer(dest)" class="btn-action" title="Edit" :disabled="actionLoading">
+                <button @click="openEditModal(dest)" class="btn-action" title="Edit" :disabled="actionLoading">
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
                 </button>
                 <button @click="deleteDestination(dest.id)" class="btn-action btn-delete" title="Delete" :disabled="actionLoading">
@@ -196,9 +262,9 @@ onMounted(fetchDestinations)
       </table>
     </div>
 
-    <!-- Drawer Form -->
-    <DestinationDrawerForm
-      v-model="showDrawer"
+    <!-- Modal Form -->
+    <DestinationModalForm
+      v-model="showModal"
       :isEdit="isEdit"
       :destination="selectedDestination"
       :actionLoading="actionLoading"
@@ -215,6 +281,12 @@ onMounted(fetchDestinations)
 .page-header h2 { font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 4px; letter-spacing: -0.02em; }
 .page-header p { color: #8eafc2; font-size: 14px; margin: 0; }
 .header-actions { display: flex; align-items: center; gap: 16px; }
+
+.search-bar { display: flex; align-items: center; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 0 12px; transition: all 0.2s; }
+.search-bar:focus-within { border-color: #1a8bc4; background: rgba(0,0,0,0.3); box-shadow: 0 0 0 2px rgba(26,139,196,0.2); }
+.search-icon { color: #5c7585; margin-right: 8px; }
+.search-bar input { background: transparent; border: none; color: #fff; padding: 10px 0; outline: none; width: 220px; font-size: 14px; }
+.search-bar input::placeholder { color: #5c7585; }
 
 .view-toggle { display: flex; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; }
 .view-toggle button {
@@ -237,6 +309,7 @@ onMounted(fetchDestinations)
   box-shadow: 0 4px 12px rgba(232, 130, 10, 0.2);
 }
 .btn-create:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(232, 130, 10, 0.3); }
+.btn-create:active { transform: translateY(0) scale(0.97); }
 
 /* Grid View */
 .destinations-grid {
@@ -300,6 +373,9 @@ onMounted(fetchDestinations)
 .flag-emoji { font-size: 20px; }
 .card-title { font-size: 18px; font-weight: 600; color: #fff; margin: 0; }
 .card-desc { color: #8eafc2; font-size: 14px; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.5; }
+.highlights-container { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
+.highlight-pill { background: rgba(26,139,196,0.15); color: #82c0e3; font-size: 11px; font-weight: 500; padding: 4px 8px; border-radius: 12px; border: 1px solid rgba(26,139,196,0.3); }
+.more-pill { background: rgba(255,255,255,0.1); color: #fff; border-color: rgba(255,255,255,0.2); }
 
 /* Table View */
 .table-container { 

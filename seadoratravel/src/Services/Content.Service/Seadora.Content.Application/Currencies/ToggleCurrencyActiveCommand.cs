@@ -1,4 +1,4 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Seadora.Content.Application.Common.Interfaces;
 
@@ -20,6 +20,10 @@ public class ToggleCurrencyActiveCommandHandler : IRequestHandler<ToggleCurrency
         var currency = await _context.Currencies.FindAsync(new object[] { request.Id }, cancellationToken);
 
         if (currency == null)
+            return false;
+
+        // Base currency cannot be deactivated
+        if (currency.IsBase && !request.IsActive)
             return false;
 
         currency.IsActive = request.IsActive;

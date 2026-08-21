@@ -10,7 +10,7 @@ export class ApiTourRepository implements ITourRepository {
 
   async getTours(): Promise<Tour[]> {
     const res = await this.client.get('/api/content/api/tours')
-    return res.data
+    return Array.isArray(res.data) ? res.data : (res.data?.items || [])
   }
 
   async getTourById(id: string): Promise<Tour> {

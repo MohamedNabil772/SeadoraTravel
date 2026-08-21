@@ -26,8 +26,8 @@ public class QuestPdfGeneratorService : IQuestPdfGeneratorService
 
         if (tour == null) return Array.Empty<byte>();
 
-        var name = tour.Names.GetValueOrDefault("en", "Unnamed Tour");
-        var description = tour.Descriptions.GetValueOrDefault("en", "No description available.");
+        var name = tour.Names?.GetValueOrDefault("en") ?? "Unnamed Tour";
+        var description = tour.Descriptions?.GetValueOrDefault("en") ?? "No description available.";
 
         var document = Document.Create(container =>
         {
@@ -48,8 +48,8 @@ public class QuestPdfGeneratorService : IQuestPdfGeneratorService
                     {
                         x.Spacing(20);
 
-                        x.Item().Text($"Destination: {tour.Destination?.Names.GetValueOrDefault("en", "Unknown")}").FontSize(14);
-                        x.Item().Text($"Category: {tour.Category?.Names.GetValueOrDefault("en", "Unknown")}").FontSize(14);
+                        x.Item().Text($"Destination: {tour.Destination?.Names?.GetValueOrDefault("en") ?? "Unknown"}").FontSize(14);
+                        x.Item().Text($"Category: {tour.Category?.Names?.GetValueOrDefault("en") ?? "Unknown"}").FontSize(14);
                         x.Item().Text($"Price: {tour.Price} {tour.Currency}").FontSize(14);
                         x.Item().Text($"Duration: {tour.Duration}").FontSize(14);
 
@@ -61,7 +61,7 @@ public class QuestPdfGeneratorService : IQuestPdfGeneratorService
                             x.Item().Text("Itinerary:").SemiBold().FontSize(16);
                             foreach (var item in tour.Itinerary)
                             {
-                                x.Item().Text($"- {item.Title.GetValueOrDefault("en", "Day")}: {item.Description.GetValueOrDefault("en", "")}");
+                                x.Item().Text($"- {item.Titles?.GetValueOrDefault("en") ?? "Day"}: {item.Descriptions?.GetValueOrDefault("en") ?? ""}");
                             }
                         }
                     });
@@ -117,8 +117,8 @@ public class QuestPdfGeneratorService : IQuestPdfGeneratorService
 
                         foreach (var tour in tours)
                         {
-                            bool missingEn = !tour.Names.ContainsKey("en");
-                            bool missingAr = !tour.Names.ContainsKey("ar");
+                            bool missingEn = tour.Names == null || !tour.Names.ContainsKey("en");
+                            bool missingAr = tour.Names == null || !tour.Names.ContainsKey("ar");
 
                             if (missingEn || missingAr)
                             {

@@ -16,12 +16,23 @@ public class ContentDbContext : DbContext, IContentDbContext
     public DbSet<Language> Languages => Set<Language>();
     public DbSet<Currency> Currencies => Set<Currency>();
     public DbSet<Nationality> Nationalities => Set<Nationality>();
+    public DbSet<Seadora.Content.Domain.Entities.Translation> Translations => Set<Seadora.Content.Domain.Entities.Translation>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
         // Configure JSON conversion for dictionaries/collections
+        modelBuilder.Entity<Seadora.Content.Domain.Entities.Translation>().Property(t => t.Values).HasColumnType("jsonb");
+        modelBuilder.Entity<Seadora.Content.Domain.Entities.Translation>().HasIndex(t => new { t.Key, t.Namespace }).IsUnique();
+
+        modelBuilder.Entity<Language>().HasIndex(l => l.Code).IsUnique();
+        modelBuilder.Entity<Language>().HasIndex(l => l.Order);
+
+        modelBuilder.Entity<Currency>().HasIndex(c => c.Code).IsUnique();
+        modelBuilder.Entity<Nationality>().HasIndex(n => n.Code).IsUnique();
+        modelBuilder.Entity<Nationality>().HasIndex(n => n.CountryName);
+
         modelBuilder.Entity<Category>().Property(c => c.Names).HasColumnType("jsonb");
         modelBuilder.Entity<Category>().Property(c => c.Descriptions).HasColumnType("jsonb");
         
@@ -34,15 +45,56 @@ public class ContentDbContext : DbContext, IContentDbContext
         modelBuilder.Entity<Tour>().Property(t => t.Highlights).HasColumnType("jsonb");
         modelBuilder.Entity<Tour>().Property(t => t.AvailablePickupTimes).HasColumnType("jsonb");
 
-        // Owned types mapped to JSONB using ToJson()
-        modelBuilder.Entity<Tour>().OwnsMany(t => t.Packages, b => b.ToJson());
-        modelBuilder.Entity<Tour>().OwnsMany(t => t.Itinerary, b => b.ToJson());
-        modelBuilder.Entity<Tour>().OwnsMany(t => t.Inclusions, b => b.ToJson());
-        modelBuilder.Entity<Tour>().OwnsMany(t => t.Exclusions, b => b.ToJson());
-        modelBuilder.Entity<Tour>().OwnsOne(t => t.ImportantInformation, b => b.ToJson());
-        modelBuilder.Entity<Tour>().OwnsMany(t => t.Faqs, b => b.ToJson());
-        modelBuilder.Entity<Tour>().OwnsMany(t => t.Addons, b => b.ToJson());
-        modelBuilder.Entity<Tour>().OwnsMany(t => t.Media, b => b.ToJson());
+
+        var jsonOptions = (System.Text.Json.JsonSerializerOptions?)null;
+
+        modelBuilder.Entity<Tour>().Property(t => t.Packages)
+            .HasConversion(
+                v => System.Text.Json.JsonSerializer.Serialize(v, jsonOptions),
+                v => System.Text.Json.JsonSerializer.Deserialize<List<TourPackage>>(v, jsonOptions) ?? new List<TourPackage>())
+            .HasColumnType("jsonb");
+
+        modelBuilder.Entity<Tour>().Property(t => t.Itinerary)
+            .HasConversion(
+                v => System.Text.Json.JsonSerializer.Serialize(v, jsonOptions),
+                v => System.Text.Json.JsonSerializer.Deserialize<List<TourItinerary>>(v, jsonOptions) ?? new List<TourItinerary>())
+            .HasColumnType("jsonb");
+
+        modelBuilder.Entity<Tour>().Property(t => t.Inclusions)
+            .HasConversion(
+                v => System.Text.Json.JsonSerializer.Serialize(v, jsonOptions),
+                v => System.Text.Json.JsonSerializer.Deserialize<List<TourInclusion>>(v, jsonOptions) ?? new List<TourInclusion>())
+            .HasColumnType("jsonb");
+
+        modelBuilder.Entity<Tour>().Property(t => t.Exclusions)
+            .HasConversion(
+                v => System.Text.Json.JsonSerializer.Serialize(v, jsonOptions),
+                v => System.Text.Json.JsonSerializer.Deserialize<List<TourInclusion>>(v, jsonOptions) ?? new List<TourInclusion>())
+            .HasColumnType("jsonb");
+
+        modelBuilder.Entity<Tour>().Property(t => t.ImportantInformation)
+            .HasConversion(
+                v => System.Text.Json.JsonSerializer.Serialize(v, jsonOptions),
+                v => System.Text.Json.JsonSerializer.Deserialize<ImportantInfo>(v, jsonOptions) ?? new ImportantInfo())
+            .HasColumnType("jsonb");
+
+        modelBuilder.Entity<Tour>().Property(t => t.Faqs)
+            .HasConversion(
+                v => System.Text.Json.JsonSerializer.Serialize(v, jsonOptions),
+                v => System.Text.Json.JsonSerializer.Deserialize<List<TourFaq>>(v, jsonOptions) ?? new List<TourFaq>())
+            .HasColumnType("jsonb");
+
+        modelBuilder.Entity<Tour>().Property(t => t.Addons)
+            .HasConversion(
+                v => System.Text.Json.JsonSerializer.Serialize(v, jsonOptions),
+                v => System.Text.Json.JsonSerializer.Deserialize<List<TourAddon>>(v, jsonOptions) ?? new List<TourAddon>())
+            .HasColumnType("jsonb");
+
+        modelBuilder.Entity<Tour>().Property(t => t.Media)
+            .HasConversion(
+                v => System.Text.Json.JsonSerializer.Serialize(v, jsonOptions),
+                v => System.Text.Json.JsonSerializer.Deserialize<List<TourMedia>>(v, jsonOptions) ?? new List<TourMedia>())
+            .HasColumnType("jsonb");
 
         // Supplier relations
         modelBuilder.Entity<Supplier>()

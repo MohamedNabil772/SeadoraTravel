@@ -1,10 +1,10 @@
-using MediatR;
+﻿using MediatR;
 using Seadora.Content.Application.Common.Interfaces;
 using Seadora.Content.Domain.Entities;
 
 namespace Seadora.Content.Application.Nationalities;
 
-public record CreateNationalityCommand(string Code, string Name, bool IsActive) : IRequest<Guid>;
+public record CreateNationalityCommand(string Code, string CountryName, string NationalityName, string FlagEmoji, bool IsActive) : IRequest<Guid>;
 
 public class CreateNationalityCommandHandler : IRequestHandler<CreateNationalityCommand, Guid>
 {
@@ -20,8 +20,10 @@ public class CreateNationalityCommandHandler : IRequestHandler<CreateNationality
         var nationality = new Nationality
         {
             Id = Guid.NewGuid(),
-            Code = request.Code,
-            Name = request.Name,
+            Code = request.Code.ToUpper().Trim(),
+            CountryName = request.CountryName.Trim(),
+            NationalityName = request.NationalityName.Trim(),
+            FlagEmoji = request.FlagEmoji.Trim(),
             IsActive = request.IsActive
         };
 

@@ -11,7 +11,39 @@ public static class BookingDbContextSeed
 {
     public static async Task SeedAsync(BookingDbContext context)
     {
-        await context.Database.MigrateAsync();
+        try
+        {
+            await context.Database.MigrateAsync();
+        }
+        catch { }
+
+        await context.Database.ExecuteSqlRawAsync(@"
+            CREATE TABLE IF NOT EXISTS ""Notifications"" (
+                ""Id"" uuid NOT NULL PRIMARY KEY,
+                ""Title"" text NOT NULL,
+                ""Message"" text NOT NULL,
+                ""Type"" text NOT NULL,
+                ""ReferenceId"" text,
+                ""MetadataJson"" text,
+                ""IsRead"" boolean NOT NULL DEFAULT FALSE,
+                ""CreatedAt"" timestamp with time zone NOT NULL,
+                ""ReadAt"" timestamp with time zone
+            );
+
+            CREATE TABLE IF NOT EXISTS ""ContactInquiries"" (
+                ""Id"" uuid NOT NULL PRIMARY KEY,
+                ""FullName"" text NOT NULL,
+                ""Email"" text NOT NULL,
+                ""Phone"" text,
+                ""DestinationInterest"" text,
+                ""DateOrGuests"" text,
+                ""Message"" text NOT NULL,
+                ""Status"" text NOT NULL,
+                ""AdminNotes"" text,
+                ""CreatedAt"" timestamp with time zone NOT NULL,
+                ""UpdatedAt"" timestamp with time zone
+            );
+        ");
 
         if (await context.Feedbacks.AnyAsync())
         {
@@ -164,6 +196,33 @@ public static class BookingDbContextSeed
         context.Feedbacks.AddRange(feedbacks);
         context.Bookings.AddRange(bookings);
         
+        if (!await context.ContactInquiries.AnyAsync())
+        {
+            var inquiry1 = new ContactInquiry(
+                "Lord Alistair Sterling",
+                "sterling@luxurytravel.co.uk",
+                "+447911123456",
+                "Luxury Red Sea Cruise",
+                "Nov 15, 4 Guests",
+                "We require a private yacht charter with full butler service and diving instructor."
+            );
+            var inquiry2 = new ContactInquiry(
+                "Princess Sarah Al-Saud",
+                "sarah.concierge@saudiroyal.org",
+                "+966500123456",
+                "Bespoke Nile River Elegance",
+                "Dec 20, 8 Guests",
+                "Requesting private dahabiya sailing between Luxor and Aswan with private Egyptologist."
+            );
+            context.ContactInquiries.AddRange(inquiry1, inquiry2);
+
+            context.Notifications.AddRange(
+                Notification.CreateInquiryNotification(inquiry1.Id, inquiry1.FullName, inquiry1.DestinationInterest ?? "VIP Experience", inquiry1.Email),
+                Notification.CreateInquiryNotification(inquiry2.Id, inquiry2.FullName, inquiry2.DestinationInterest ?? "Bespoke Journey", inquiry2.Email),
+                Notification.CreateBookingNotification(Guid.NewGuid(), "SEA-782910", "Hans Müller", "Grand Egyptian Museum & Pyramids VIP", 240)
+            );
+        }
+
         await context.SaveChangesAsync();
     }
 }

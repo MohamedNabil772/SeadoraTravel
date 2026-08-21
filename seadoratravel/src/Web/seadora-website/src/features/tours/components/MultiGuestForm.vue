@@ -72,14 +72,9 @@
                 </div>
                 
                 <!-- Nationality -->
-                <div class="space-y-1.5">
+                <div class="space-y-1.5 z-20">
                   <label class="block text-xs font-bold text-slate-700">Nationality <span class="text-red-500">*</span></label>
-                  <input 
-                    type="text" 
-                    v-model="guest.nationality"
-                    class="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium focus:outline-none focus:border-[#062d4d] focus:ring-1 focus:ring-[#062d4d] transition-colors bg-white"
-                    placeholder="e.g. British, German"
-                  />
+                  <CountrySelect v-model="guest.nationality" />
                 </div>
 
                 <!-- Email & Phone (Lead Only) -->
@@ -188,6 +183,7 @@
 
 <script setup lang="ts">
 import { ref, watch, onMounted } from 'vue'
+import CountrySelect from './CountrySelect.vue'
 
 const props = defineProps({
   totalGuests: {

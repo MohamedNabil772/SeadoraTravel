@@ -8,7 +8,8 @@ namespace Seadora.Content.Application.Categories.Commands;
 public record CreateCategoryCommand(
     Dictionary<string, string> Names,
     Dictionary<string, string> Descriptions,
-    string IconName,
+    string? IconName,
+    string? CustomIconUrl,
     int Order,
     string CoverImageUrl) : IRequest<Guid>;
 

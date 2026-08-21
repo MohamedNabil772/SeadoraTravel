@@ -10,7 +10,7 @@ export class ApiCategoryRepository implements ICategoryRepository {
 
   async getCategories(): Promise<Category[]> {
     const res = await this.client.get('/api/content/api/categories')
-    return res.data
+    return Array.isArray(res.data) ? res.data : (res.data?.items || [])
   }
 
   async getCategoryById(id: string): Promise<Category> {

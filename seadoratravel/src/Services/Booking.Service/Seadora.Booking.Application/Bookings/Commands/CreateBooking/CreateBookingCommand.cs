@@ -113,6 +113,15 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
         };
 
         _context.Bookings.Add(booking);
+        
+        var notification = Seadora.Booking.Domain.Entities.Notification.Create(
+            Seadora.Booking.Domain.Enums.NotificationType.BookingCreated,
+            "New VIP Tour Booking",
+            $"New booking #{booking.Id.ToString().Substring(0, 8).ToUpper()} created by {request.CustomerName} for ${booking.TotalPrice:N2}",
+            booking.Id.ToString()
+        );
+        _context.Notifications.Add(notification);
+
         await _context.SaveChangesAsync(cancellationToken);
 
         if (!string.IsNullOrWhiteSpace(booking.WhatsApp))

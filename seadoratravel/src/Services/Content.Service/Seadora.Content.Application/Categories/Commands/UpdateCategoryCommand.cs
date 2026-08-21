@@ -9,7 +9,8 @@ public record UpdateCategoryCommand(
     Guid Id,
     Dictionary<string, string> Names,
     Dictionary<string, string> Descriptions,
-    string IconName,
+    string? IconName,
+    string? CustomIconUrl,
     int Order,
     string CoverImageUrl) : IRequest<Unit>;
 

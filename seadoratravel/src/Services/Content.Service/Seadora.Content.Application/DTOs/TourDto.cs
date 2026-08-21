@@ -46,7 +46,7 @@ public class TourDto
     public bool IsPrivateOption { get; set; }
 
     // Rich Tabs Data
-    public Dictionary<string, List<string>> Highlights { get; set; } = new();
+    public Dictionary<string, string> Highlights { get; set; } = new();
     public List<TourItineraryItemDto> Itinerary { get; set; } = new();
     public Dictionary<string, List<string>> Inclusions { get; set; } = new();
     public Dictionary<string, List<string>> Exclusions { get; set; } = new();
@@ -61,6 +61,7 @@ public class TourDto
     public List<string> AvailablePickupTimes { get; set; } = new();
 
     public List<TourAddon> Addons { get; set; } = new();
+    public List<TourMedia> Media { get; set; } = new();
 
     public List<TourDateAvailabilityDto> AvailableDates { get; set; } = new();
 }

@@ -10,7 +10,8 @@ using System.Threading.Tasks;
 namespace Seadora.Identity.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/users")]
+[Route("users")]
 [Authorize(Roles = "Admin")]
 public class UsersController : ControllerBase
 {

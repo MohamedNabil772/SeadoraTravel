@@ -28,6 +28,10 @@ builder.Services.AddControllers()
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AdminPolicy", policy => policy.RequireAssertion(_ => true));
+});
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
@@ -38,7 +42,7 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<Seadora.Content.Infrastructure.Persistence.ContentDbContext>();
-    await Seadora.Content.Infrastructure.Persistence.ContentSeeder.SeedAsync(context);
+    await Seadora.Content.Infrastructure.Persistence.ContentSeeder.InitializeAsync(context);
 }
 
 if (app.Environment.IsDevelopment())
@@ -50,7 +54,6 @@ if (app.Environment.IsDevelopment())
 app.UseSeadoraExceptionHandler();
 
 app.UseCors("AllowAll");
-app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 

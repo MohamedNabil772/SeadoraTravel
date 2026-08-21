@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Seadora.Content.Application.Common.Interfaces;
 using Seadora.Content.Application.DTOs;
 using Mapster;
@@ -11,9 +12,14 @@ public class GetDestinationByIdQueryHandler(IContentDbContext context) : IReques
 {
     public async Task<DestinationDto> Handle(GetDestinationByIdQuery request, CancellationToken cancellationToken)
     {
-        var destination = await context.Destinations.FindAsync(new object[] { request.Id }, cancellationToken);
+        var destination = await context.Destinations
+            .Include(d => d.Tours)
+            .FirstOrDefaultAsync(d => d.Id == request.Id, cancellationToken);
+            
         if (destination == null) throw new KeyNotFoundException("Destination not found");
         
-        return destination.Adapt<DestinationDto>();
+        var dto = destination.Adapt<DestinationDto>();
+        dto.TourCount = destination.Tours?.Count ?? 0;
+        return dto;
     }
 }

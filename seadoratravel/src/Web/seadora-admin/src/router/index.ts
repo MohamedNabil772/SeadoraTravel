@@ -100,6 +100,13 @@ const router = createRouter({
           name: 'nationalities',
           component: () => import('../features/nationalities/views/NationalitiesView.vue'),
           meta: { title: 'Nationalities' }
+        },
+        {
+          path: 'inquiries',
+          alias: 'contact-requests',
+          name: 'inquiries',
+          component: () => import('../features/inquiries/views/InquiriesView.vue'),
+          meta: { title: 'VIP Inquiries & Contact Requests' }
         }
       ]
     }

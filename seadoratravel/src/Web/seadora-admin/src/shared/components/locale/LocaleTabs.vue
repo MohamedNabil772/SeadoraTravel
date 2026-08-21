@@ -1,12 +1,26 @@
 <script setup lang="ts">
-import { ref, onMounted, watch, nextTick } from 'vue';
+import { ref, onMounted, watch, nextTick, computed } from 'vue';
+import { useLanguageStore } from '../../../features/languages/store/languageStore';
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   modelValue: string;
-  locales: { code: string; label: string; flag: string; status: 'complete' | 'missing' | 'draft' }[];
-}>();
+  locales?: { code: string; label: string; flag?: string; status?: 'complete' | 'missing' | 'draft' }[] | null;
+}>(), {
+  locales: null
+});
 
 const emit = defineEmits(['update:modelValue']);
+const store = useLanguageStore();
+
+const computedLocales = computed(() => {
+  if (props.locales && props.locales.length > 0) return props.locales;
+  return store.activeLanguages.map((l: any) => ({
+    code: l.code,
+    label: l.name,
+    flag: l.flag,
+    status: 'complete'
+  }));
+});
 
 const tabsRef = ref<HTMLElement[]>([]);
 const activePillStyle = ref({
@@ -31,14 +45,22 @@ const updatePillPosition = async (index: number) => {
 };
 
 watch(() => props.modelValue, async (newVal) => {
-  const index = props.locales.findIndex(l => l.code === newVal);
+  const index = computedLocales.value.findIndex(l => l.code === newVal);
   if (index !== -1) {
     updatePillPosition(index);
   }
 });
 
+watch(computedLocales, () => {
+  nextTick(() => {
+    const index = computedLocales.value.findIndex(l => l.code === props.modelValue);
+    if (index !== -1) updatePillPosition(index);
+  });
+});
+
 onMounted(() => {
-  const index = props.locales.findIndex(l => l.code === props.modelValue);
+  store.init();
+  const index = computedLocales.value.findIndex(l => l.code === props.modelValue);
   if (index !== -1) {
     updatePillPosition(index);
   }
@@ -54,7 +76,7 @@ onMounted(() => {
       ></div>
       
       <button
-        v-for="(locale, index) in locales"
+        v-for="(locale, index) in computedLocales"
         :key="locale.code"
         ref="tabsRef"
         @click="selectTab(index, locale.code)"
@@ -62,10 +84,11 @@ onMounted(() => {
         :class="{ 'is-active': modelValue === locale.code }"
         type="button"
       >
-        <span class="flag" aria-hidden="true">{{ locale.flag }}</span>
+        <span v-if="locale.flag" class="flag" aria-hidden="true">{{ locale.flag }}</span>
         <span class="label">{{ locale.label }}</span>
         
         <span 
+          v-if="locale.status"
           class="status-badge" 
           :class="`status-${locale.status}`"
           :title="locale.status"

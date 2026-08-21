@@ -37,9 +37,10 @@ const userInitials = computed(() => {
   return names.map(n => n[0]).join('').toUpperCase().slice(0, 2)
 })
 
-const setLang = (lang: string) => {
-  locale.value = lang
-  localStorage.setItem('seadora_lang', lang)
+import { loadLanguageAsync } from '@/i18n'
+
+const setLang = async (lang: string) => {
+  await loadLanguageAsync(lang)
   isMenuOpen.value = false // close menu on switch
   showLangDropdown.value = false
 }

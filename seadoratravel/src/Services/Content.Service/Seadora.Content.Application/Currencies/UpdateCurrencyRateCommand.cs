@@ -1,4 +1,4 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Seadora.Content.Application.Common.Interfaces;
 
@@ -23,6 +23,7 @@ public class UpdateCurrencyRateCommandHandler : IRequestHandler<UpdateCurrencyRa
             return false;
 
         currency.ExchangeRate = request.ExchangeRate;
+        currency.IsManualRate = true; // Mark as manual override since user customized it
         await _context.SaveChangesAsync(cancellationToken);
 
         return true;

@@ -13,5 +13,6 @@ public interface IContentDbContext
     DbSet<Language> Languages { get; }
     DbSet<Currency> Currencies { get; }
     DbSet<Nationality> Nationalities { get; }
+    DbSet<Translation> Translations { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

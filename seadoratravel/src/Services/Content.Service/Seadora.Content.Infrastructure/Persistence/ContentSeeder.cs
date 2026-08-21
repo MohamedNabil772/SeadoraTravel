@@ -9,23 +9,367 @@ namespace Seadora.Content.Infrastructure.Persistence;
 
 public static class ContentSeeder
 {
-    public static async Task SeedAsync(ContentDbContext context)
+    public static async Task InitializeAsync(ContentDbContext context)
     {
-        await context.Database.MigrateAsync();
+        try
+        {
+            await context.Database.MigrateAsync();
+        }
+        catch { }
 
-        if (await context.Tours.AnyAsync())
+        await context.Database.ExecuteSqlAsync($@"
+            CREATE TABLE IF NOT EXISTS ""Languages"" (
+                ""Id"" uuid NOT NULL PRIMARY KEY,
+                ""Code"" text NOT NULL,
+                ""Name"" text NOT NULL,
+                ""NativeName"" text NOT NULL DEFAULT '',
+                ""FlagEmoji"" text NOT NULL DEFAULT '',
+                ""IsRtl"" boolean NOT NULL DEFAULT false,
+                ""IsDefault"" boolean NOT NULL DEFAULT false,
+                ""Order"" integer NOT NULL DEFAULT 0,
+                ""IsActive"" boolean NOT NULL DEFAULT true
+            );
+            ALTER TABLE ""Languages"" ADD COLUMN IF NOT EXISTS ""FlagEmoji"" text DEFAULT '';
+            ALTER TABLE ""Languages"" ADD COLUMN IF NOT EXISTS ""IsRtl"" boolean DEFAULT false;
+            ALTER TABLE ""Languages"" ADD COLUMN IF NOT EXISTS ""IsDefault"" boolean DEFAULT false;
+            ALTER TABLE ""Languages"" ADD COLUMN IF NOT EXISTS ""Order"" integer DEFAULT 0;
+            CREATE TABLE IF NOT EXISTS ""Currencies"" (
+                ""Id"" uuid NOT NULL PRIMARY KEY,
+                ""Code"" text NOT NULL,
+                ""Name"" text NOT NULL,
+                ""Symbol"" text NOT NULL,
+                ""ExchangeRate"" numeric NOT NULL DEFAULT 1.0,
+                ""LiveExchangeRate"" numeric NULL,
+                ""IsBase"" boolean NOT NULL DEFAULT false,
+                ""IsManualRate"" boolean NOT NULL DEFAULT false,
+                ""LastRateSyncAt"" timestamp with time zone NULL,
+                ""IsActive"" boolean NOT NULL DEFAULT true
+            );
+            ALTER TABLE ""Currencies"" ADD COLUMN IF NOT EXISTS ""LiveExchangeRate"" numeric NULL;
+            ALTER TABLE ""Currencies"" ADD COLUMN IF NOT EXISTS ""IsBase"" boolean NOT NULL DEFAULT false;
+            ALTER TABLE ""Currencies"" ADD COLUMN IF NOT EXISTS ""IsManualRate"" boolean NOT NULL DEFAULT false;
+            ALTER TABLE ""Currencies"" ADD COLUMN IF NOT EXISTS ""LastRateSyncAt"" timestamp with time zone NULL;
+
+            CREATE TABLE IF NOT EXISTS ""Nationalities"" (
+                ""Id"" uuid NOT NULL PRIMARY KEY,
+                ""Code"" text NOT NULL,
+                ""CountryName"" text NOT NULL DEFAULT '',
+                ""NationalityName"" text NOT NULL DEFAULT '',
+                ""FlagEmoji"" text NOT NULL DEFAULT '',
+                ""IsActive"" boolean NOT NULL DEFAULT true
+            );
+            ALTER TABLE ""Nationalities"" ALTER COLUMN ""Name"" DROP NOT NULL;
+            ALTER TABLE ""Nationalities"" ALTER COLUMN ""Name"" SET DEFAULT '';
+            ALTER TABLE ""Nationalities"" ADD COLUMN IF NOT EXISTS ""CountryName"" text NOT NULL DEFAULT '';
+            ALTER TABLE ""Nationalities"" ADD COLUMN IF NOT EXISTS ""NationalityName"" text NOT NULL DEFAULT '';
+            ALTER TABLE ""Nationalities"" ADD COLUMN IF NOT EXISTS ""FlagEmoji"" text NOT NULL DEFAULT '';
+            CREATE TABLE IF NOT EXISTS ""Translations"" (
+                ""Id"" uuid NOT NULL PRIMARY KEY,
+                ""Key"" text NOT NULL,
+                ""Namespace"" text NOT NULL DEFAULT 'common',
+                ""Values"" jsonb NOT NULL DEFAULT '{{}}',
+                ""UpdatedAt"" timestamp with time zone NOT NULL DEFAULT NOW()
+            );
+            CREATE UNIQUE INDEX IF NOT EXISTS ""IX_Translations_Key_Namespace"" ON ""Translations"" (""Key"", ""Namespace"");
+            ALTER TABLE ""Categories"" DROP COLUMN IF EXISTS ""Icon"";
+            ALTER TABLE ""Categories"" ADD COLUMN IF NOT EXISTS ""CoverImageUrl"" text DEFAULT '';
+            ALTER TABLE ""Categories"" ADD COLUMN IF NOT EXISTS ""IconName"" text DEFAULT '';
+            ALTER TABLE ""Categories"" ADD COLUMN IF NOT EXISTS ""CustomIconUrl"" text DEFAULT '';
+            ALTER TABLE ""Categories"" ADD COLUMN IF NOT EXISTS ""Order"" integer DEFAULT 0;
+            ALTER TABLE ""Categories"" ADD COLUMN IF NOT EXISTS ""Names"" jsonb DEFAULT '{{}}';
+            ALTER TABLE ""Categories"" ADD COLUMN IF NOT EXISTS ""Descriptions"" jsonb DEFAULT '{{}}';
+            
+            ALTER TABLE ""Destinations"" DROP COLUMN IF EXISTS ""Flag"";
+            ALTER TABLE ""Destinations"" DROP COLUMN IF EXISTS ""Latitude"";
+            ALTER TABLE ""Destinations"" DROP COLUMN IF EXISTS ""Longitude"";
+            ALTER TABLE ""Destinations"" ADD COLUMN IF NOT EXISTS ""FlagEmoji"" text DEFAULT '';
+            ALTER TABLE ""Destinations"" ADD COLUMN IF NOT EXISTS ""Highlights"" jsonb DEFAULT '{{}}';
+            ALTER TABLE ""Destinations"" ADD COLUMN IF NOT EXISTS ""Names"" jsonb DEFAULT '{{}}';
+            ALTER TABLE ""Destinations"" ADD COLUMN IF NOT EXISTS ""Descriptions"" jsonb DEFAULT '{{}}';
+
+            ALTER TABLE ""Tours"" ADD COLUMN IF NOT EXISTS ""Names"" jsonb DEFAULT '{{}}';
+            ALTER TABLE ""Tours"" ADD COLUMN IF NOT EXISTS ""Descriptions"" jsonb DEFAULT '{{}}';
+            ALTER TABLE ""Tours"" ADD COLUMN IF NOT EXISTS ""Highlights"" jsonb DEFAULT '{{}}';
+            ALTER TABLE ""Tours"" ADD COLUMN IF NOT EXISTS ""AvailablePickupTimes"" jsonb DEFAULT '[]';
+            ALTER TABLE ""Tours"" ADD COLUMN IF NOT EXISTS ""Packages"" jsonb DEFAULT '[]';
+            ALTER TABLE ""Tours"" ADD COLUMN IF NOT EXISTS ""Itinerary"" jsonb DEFAULT '[]';
+            ALTER TABLE ""Tours"" ADD COLUMN IF NOT EXISTS ""Inclusions"" jsonb DEFAULT '[]';
+            ALTER TABLE ""Tours"" ADD COLUMN IF NOT EXISTS ""Exclusions"" jsonb DEFAULT '[]';
+            ALTER TABLE ""Tours"" ADD COLUMN IF NOT EXISTS ""ImportantInformation"" jsonb DEFAULT '{{}}';
+            ALTER TABLE ""Tours"" ADD COLUMN IF NOT EXISTS ""Faqs"" jsonb DEFAULT '[]';
+            ALTER TABLE ""Tours"" ADD COLUMN IF NOT EXISTS ""Addons"" jsonb DEFAULT '[]';
+            ALTER TABLE ""Tours"" ADD COLUMN IF NOT EXISTS ""Media"" jsonb DEFAULT '[]';
+        ");
+
+        await context.Tours.ExecuteDeleteAsync();
+        await context.Destinations.ExecuteDeleteAsync();
+        await context.Categories.ExecuteDeleteAsync();
+        await context.Languages.ExecuteDeleteAsync();
+        await context.Currencies.ExecuteDeleteAsync();
+        await context.Nationalities.ExecuteDeleteAsync();
+        await context.Translations.ExecuteDeleteAsync();
+
+        // Seed Languages
+        if (!await context.Languages.AnyAsync())
         {
-            context.Tours.RemoveRange(context.Tours);
+            context.Languages.AddRange(new List<Language>
+            {
+                new Language { Id = Guid.NewGuid(), Code = "en", Name = "English", NativeName = "English", FlagEmoji = "🇬🇧", IsRtl = false, IsDefault = true, Order = 1, IsActive = true },
+                new Language { Id = Guid.NewGuid(), Code = "de", Name = "German", NativeName = "Deutsch", FlagEmoji = "🇩🇪", IsRtl = false, IsDefault = false, Order = 2, IsActive = true },
+                new Language { Id = Guid.NewGuid(), Code = "it", Name = "Italian", NativeName = "Italiano", FlagEmoji = "🇮🇹", IsRtl = false, IsDefault = false, Order = 3, IsActive = true },
+                new Language { Id = Guid.NewGuid(), Code = "fr", Name = "French", NativeName = "Français", FlagEmoji = "🇫🇷", IsRtl = false, IsDefault = false, Order = 4, IsActive = true },
+                new Language { Id = Guid.NewGuid(), Code = "ru", Name = "Russian", NativeName = "Русский", FlagEmoji = "🇷🇺", IsRtl = false, IsDefault = false, Order = 5, IsActive = true }
+            });
             await context.SaveChangesAsync();
         }
-        if (await context.Destinations.AnyAsync())
+
+        // Seed Translations
+        if (!await context.Translations.AnyAsync())
         {
-            context.Destinations.RemoveRange(context.Destinations);
+            context.Translations.AddRange(new List<Translation>
+            {
+                new Translation
+                {
+                    Id = Guid.NewGuid(),
+                    Key = "Home",
+                    Namespace = "nav",
+                    Values = new Dictionary<string, string> { { "en", "Home" }, { "de", "Startseite" }, { "fr", "Accueil" }, { "it", "Home" }, { "ru", "Главная" } },
+                    UpdatedAt = DateTime.UtcNow
+                },
+                new Translation
+                {
+                    Id = Guid.NewGuid(),
+                    Key = "Tours",
+                    Namespace = "nav",
+                    Values = new Dictionary<string, string> { { "en", "Tours" }, { "de", "Touren" }, { "fr", "Circuits" }, { "it", "Tour" }, { "ru", "Туры" } },
+                    UpdatedAt = DateTime.UtcNow
+                },
+                new Translation
+                {
+                    Id = Guid.NewGuid(),
+                    Key = "BookNow",
+                    Namespace = "common",
+                    Values = new Dictionary<string, string> { { "en", "Book Now" }, { "de", "Jetzt Buchen" }, { "fr", "Réserver" }, { "it", "Prenota Ora" }, { "ru", "Забронировать" } },
+                    UpdatedAt = DateTime.UtcNow
+                }
+            });
             await context.SaveChangesAsync();
         }
-        if (await context.Categories.AnyAsync())
+
+                // Seed Currencies (EUR Base, USD, EGP)
+        if (!await context.Currencies.AnyAsync())
         {
-            context.Categories.RemoveRange(context.Categories);
+            context.Currencies.AddRange(new List<Currency>
+            {
+                new Currency { Id = Guid.NewGuid(), Code = "EUR", Name = "Euro", Symbol = "?", ExchangeRate = 1.0m, LiveExchangeRate = 1.0m, IsBase = true, IsManualRate = false, LastRateSyncAt = DateTime.UtcNow, IsActive = true },
+                new Currency { Id = Guid.NewGuid(), Code = "USD", Name = "US Dollar", Symbol = "$", ExchangeRate = 1.085m, LiveExchangeRate = 1.085m, IsBase = false, IsManualRate = false, LastRateSyncAt = DateTime.UtcNow, IsActive = true },
+                new Currency { Id = Guid.NewGuid(), Code = "EGP", Name = "Egyptian Pound", Symbol = "E?", ExchangeRate = 52.50m, LiveExchangeRate = 52.50m, IsBase = false, IsManualRate = false, LastRateSyncAt = DateTime.UtcNow, IsActive = true }
+            });
+            await context.SaveChangesAsync();
+        }
+
+                // Seed All World Nationalities (195 Sovereign Nations)
+        if (!await context.Nationalities.AnyAsync())
+        {
+            context.Nationalities.AddRange(new List<Nationality>
+        {
+            new Nationality { Id = Guid.NewGuid(), Code = "AF", CountryName = "Afghanistan", NationalityName = "Afghan", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "AL", CountryName = "Albania", NationalityName = "Albanian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "DZ", CountryName = "Algeria", NationalityName = "Algerian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "AD", CountryName = "Andorra", NationalityName = "Andorran", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "AO", CountryName = "Angola", NationalityName = "Angolan", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "AG", CountryName = "Antigua and Barbuda", NationalityName = "Antiguan", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "AR", CountryName = "Argentina", NationalityName = "Argentine", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "AM", CountryName = "Armenia", NationalityName = "Armenian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "AU", CountryName = "Australia", NationalityName = "Australian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "AT", CountryName = "Austria", NationalityName = "Austrian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "AZ", CountryName = "Azerbaijan", NationalityName = "Azerbaijani", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "BS", CountryName = "Bahamas", NationalityName = "Bahamian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "BH", CountryName = "Bahrain", NationalityName = "Bahraini", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "BD", CountryName = "Bangladesh", NationalityName = "Bangladeshi", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "BB", CountryName = "Barbados", NationalityName = "Barbadian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "BY", CountryName = "Belarus", NationalityName = "Belarusian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "BE", CountryName = "Belgium", NationalityName = "Belgian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "BZ", CountryName = "Belize", NationalityName = "Belizean", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "BJ", CountryName = "Benin", NationalityName = "Beninese", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "BT", CountryName = "Bhutan", NationalityName = "Bhutanese", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "BO", CountryName = "Bolivia", NationalityName = "Bolivian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "BA", CountryName = "Bosnia and Herzegovina", NationalityName = "Bosnian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "BW", CountryName = "Botswana", NationalityName = "Motswana", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "BR", CountryName = "Brazil", NationalityName = "Brazilian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "BN", CountryName = "Brunei", NationalityName = "Bruneian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "BG", CountryName = "Bulgaria", NationalityName = "Bulgarian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "BF", CountryName = "Burkina Faso", NationalityName = "Burkinabe", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "BI", CountryName = "Burundi", NationalityName = "Burundian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "CV", CountryName = "Cabo Verde", NationalityName = "Cabo Verdean", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "KH", CountryName = "Cambodia", NationalityName = "Cambodian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "CM", CountryName = "Cameroon", NationalityName = "Cameroonian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "CA", CountryName = "Canada", NationalityName = "Canadian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "CF", CountryName = "Central African Republic", NationalityName = "Central African", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "TD", CountryName = "Chad", NationalityName = "Chadian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "CL", CountryName = "Chile", NationalityName = "Chilean", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "CN", CountryName = "China", NationalityName = "Chinese", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "CO", CountryName = "Colombia", NationalityName = "Colombian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "KM", CountryName = "Comoros", NationalityName = "Comorian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "CG", CountryName = "Congo", NationalityName = "Congolese", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "CD", CountryName = "DR Congo", NationalityName = "Congolese", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "CR", CountryName = "Costa Rica", NationalityName = "Costa Rican", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "CI", CountryName = "Ivory Coast", NationalityName = "Ivorian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "HR", CountryName = "Croatia", NationalityName = "Croatian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "CU", CountryName = "Cuba", NationalityName = "Cuban", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "CY", CountryName = "Cyprus", NationalityName = "Cypriot", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "CZ", CountryName = "Czech Republic", NationalityName = "Czech", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "DK", CountryName = "Denmark", NationalityName = "Danish", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "DJ", CountryName = "Djibouti", NationalityName = "Djiboutian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "DM", CountryName = "Dominica", NationalityName = "Dominican", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "DO", CountryName = "Dominican Republic", NationalityName = "Dominican", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "EC", CountryName = "Ecuador", NationalityName = "Ecuadorian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "EG", CountryName = "Egypt", NationalityName = "Egyptian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "SV", CountryName = "El Salvador", NationalityName = "Salvadoran", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "GQ", CountryName = "Equatorial Guinea", NationalityName = "Equatorial Guinean", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "ER", CountryName = "Eritrea", NationalityName = "Eritrean", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "EE", CountryName = "Estonia", NationalityName = "Estonian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "SZ", CountryName = "Eswatini", NationalityName = "Eswatini", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "ET", CountryName = "Ethiopia", NationalityName = "Ethiopian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "FJ", CountryName = "Fiji", NationalityName = "Fijian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "FI", CountryName = "Finland", NationalityName = "Finnish", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "FR", CountryName = "France", NationalityName = "French", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "GA", CountryName = "Gabon", NationalityName = "Gabonese", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "GM", CountryName = "Gambia", NationalityName = "Gambian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "GE", CountryName = "Georgia", NationalityName = "Georgian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "DE", CountryName = "Germany", NationalityName = "German", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "GH", CountryName = "Ghana", NationalityName = "Ghanaian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "GR", CountryName = "Greece", NationalityName = "Greek", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "GD", CountryName = "Grenada", NationalityName = "Grenadian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "GT", CountryName = "Guatemala", NationalityName = "Guatemalan", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "GN", CountryName = "Guinea", NationalityName = "Guinean", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "GW", CountryName = "Guinea-Bissau", NationalityName = "Bissau-Guinean", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "GY", CountryName = "Guyana", NationalityName = "Guyanese", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "HT", CountryName = "Haiti", NationalityName = "Haitian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "HN", CountryName = "Honduras", NationalityName = "Honduran", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "HU", CountryName = "Hungary", NationalityName = "Hungarian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "IS", CountryName = "Iceland", NationalityName = "Icelandic", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "IN", CountryName = "India", NationalityName = "Indian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "ID", CountryName = "Indonesia", NationalityName = "Indonesian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "IR", CountryName = "Iran", NationalityName = "Iranian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "IQ", CountryName = "Iraq", NationalityName = "Iraqi", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "IE", CountryName = "Ireland", NationalityName = "Irish", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "IL", CountryName = "Israel", NationalityName = "Israeli", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "IT", CountryName = "Italy", NationalityName = "Italian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "JM", CountryName = "Jamaica", NationalityName = "Jamaican", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "JP", CountryName = "Japan", NationalityName = "Japanese", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "JO", CountryName = "Jordan", NationalityName = "Jordanian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "KZ", CountryName = "Kazakhstan", NationalityName = "Kazakhstani", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "KE", CountryName = "Kenya", NationalityName = "Kenyan", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "KI", CountryName = "Kiribati", NationalityName = "I-Kiribati", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "KP", CountryName = "North Korea", NationalityName = "North Korean", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "KR", CountryName = "South Korea", NationalityName = "South Korean", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "KW", CountryName = "Kuwait", NationalityName = "Kuwaiti", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "KG", CountryName = "Kyrgyzstan", NationalityName = "Kyrgyz", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "LA", CountryName = "Laos", NationalityName = "Laotian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "LV", CountryName = "Latvia", NationalityName = "Latvian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "LB", CountryName = "Lebanon", NationalityName = "Lebanese", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "LS", CountryName = "Lesotho", NationalityName = "Basotho", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "LR", CountryName = "Liberia", NationalityName = "Liberian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "LY", CountryName = "Libya", NationalityName = "Libyan", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "LI", CountryName = "Liechtenstein", NationalityName = "Liechtensteiner", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "LT", CountryName = "Lithuania", NationalityName = "Lithuanian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "LU", CountryName = "Luxembourg", NationalityName = "Luxembourger", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "MG", CountryName = "Madagascar", NationalityName = "Malagasy", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "MW", CountryName = "Malawi", NationalityName = "Malawian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "MY", CountryName = "Malaysia", NationalityName = "Malaysian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "MV", CountryName = "Maldives", NationalityName = "Maldivian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "ML", CountryName = "Mali", NationalityName = "Malian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "MT", CountryName = "Malta", NationalityName = "Maltese", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "MH", CountryName = "Marshall Islands", NationalityName = "Marshallese", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "MR", CountryName = "Mauritania", NationalityName = "Mauritanian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "MU", CountryName = "Mauritius", NationalityName = "Mauritian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "MX", CountryName = "Mexico", NationalityName = "Mexican", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "FM", CountryName = "Micronesia", NationalityName = "Micronesian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "MD", CountryName = "Moldova", NationalityName = "Moldovan", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "MC", CountryName = "Monaco", NationalityName = "Monegasque", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "MN", CountryName = "Mongolia", NationalityName = "Mongolian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "ME", CountryName = "Montenegro", NationalityName = "Montenegrin", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "MA", CountryName = "Morocco", NationalityName = "Moroccan", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "MZ", CountryName = "Mozambique", NationalityName = "Mozambican", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "MM", CountryName = "Myanmar", NationalityName = "Burmese", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "NA", CountryName = "Namibia", NationalityName = "Namibian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "NR", CountryName = "Nauru", NationalityName = "Nauruan", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "NP", CountryName = "Nepal", NationalityName = "Nepali", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "NL", CountryName = "Netherlands", NationalityName = "Dutch", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "NZ", CountryName = "New Zealand", NationalityName = "New Zealander", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "NI", CountryName = "Nicaragua", NationalityName = "Nicaraguan", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "NE", CountryName = "Niger", NationalityName = "Nigerien", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "NG", CountryName = "Nigeria", NationalityName = "Nigerian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "MK", CountryName = "North Macedonia", NationalityName = "Macedonian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "NO", CountryName = "Norway", NationalityName = "Norwegian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "OM", CountryName = "Oman", NationalityName = "Omani", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "PK", CountryName = "Pakistan", NationalityName = "Pakistani", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "PW", CountryName = "Palau", NationalityName = "Palauan", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "PS", CountryName = "Palestine", NationalityName = "Palestinian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "PA", CountryName = "Panama", NationalityName = "Panamanian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "PG", CountryName = "Papua New Guinea", NationalityName = "Papua New Guinean", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "PY", CountryName = "Paraguay", NationalityName = "Paraguayan", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "PE", CountryName = "Peru", NationalityName = "Peruvian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "PH", CountryName = "Philippines", NationalityName = "Filipino", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "PL", CountryName = "Poland", NationalityName = "Polish", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "PT", CountryName = "Portugal", NationalityName = "Portuguese", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "QA", CountryName = "Qatar", NationalityName = "Qatari", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "RO", CountryName = "Romania", NationalityName = "Romanian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "RU", CountryName = "Russia", NationalityName = "Russian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "RW", CountryName = "Rwanda", NationalityName = "Rwandan", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "KN", CountryName = "Saint Kitts and Nevis", NationalityName = "Kittitian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "LC", CountryName = "Saint Lucia", NationalityName = "Saint Lucian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "VC", CountryName = "Saint Vincent and the Grenadines", NationalityName = "Vincentian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "WS", CountryName = "Samoa", NationalityName = "Samoan", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "SM", CountryName = "San Marino", NationalityName = "Sammarinese", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "ST", CountryName = "Sao Tome and Principe", NationalityName = "Sao Tomean", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "SA", CountryName = "Saudi Arabia", NationalityName = "Saudi", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "SN", CountryName = "Senegal", NationalityName = "Senegalese", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "RS", CountryName = "Serbia", NationalityName = "Serbian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "SC", CountryName = "Seychelles", NationalityName = "Seychellois", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "SL", CountryName = "Sierra Leone", NationalityName = "Sierra Leonean", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "SG", CountryName = "Singapore", NationalityName = "Singaporean", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "SK", CountryName = "Slovakia", NationalityName = "Slovak", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "SI", CountryName = "Slovenia", NationalityName = "Slovenian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "SB", CountryName = "Solomon Islands", NationalityName = "Solomon Islander", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "SO", CountryName = "Somalia", NationalityName = "Somali", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "ZA", CountryName = "South Africa", NationalityName = "South African", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "SS", CountryName = "South Sudan", NationalityName = "South Sudanese", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "ES", CountryName = "Spain", NationalityName = "Spanish", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "LK", CountryName = "Sri Lanka", NationalityName = "Sri Lankan", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "SD", CountryName = "Sudan", NationalityName = "Sudanese", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "SR", CountryName = "Suriname", NationalityName = "Surinamese", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "SE", CountryName = "Sweden", NationalityName = "Swedish", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "CH", CountryName = "Switzerland", NationalityName = "Swiss", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "SY", CountryName = "Syria", NationalityName = "Syrian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "TJ", CountryName = "Tajikistan", NationalityName = "Tajik", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "TZ", CountryName = "Tanzania", NationalityName = "Tanzanian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "TH", CountryName = "Thailand", NationalityName = "Thai", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "TL", CountryName = "Timor-Leste", NationalityName = "Timorese", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "TG", CountryName = "Togo", NationalityName = "Togolese", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "TO", CountryName = "Tonga", NationalityName = "Tongan", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "TT", CountryName = "Trinidad and Tobago", NationalityName = "Trinidadian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "TN", CountryName = "Tunisia", NationalityName = "Tunisian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "TR", CountryName = "Turkey", NationalityName = "Turkish", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "TM", CountryName = "Turkmenistan", NationalityName = "Turkmen", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "TV", CountryName = "Tuvalu", NationalityName = "Tuvaluan", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "UG", CountryName = "Uganda", NationalityName = "Ugandan", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "UA", CountryName = "Ukraine", NationalityName = "Ukrainian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "AE", CountryName = "United Arab Emirates", NationalityName = "Emirati", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "GB", CountryName = "United Kingdom", NationalityName = "British", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "US", CountryName = "United States", NationalityName = "American", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "UY", CountryName = "Uruguay", NationalityName = "Uruguayan", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "UZ", CountryName = "Uzbekistan", NationalityName = "Uzbek", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "VU", CountryName = "Vanuatu", NationalityName = "Ni-Vanuatu", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "VA", CountryName = "Vatican City", NationalityName = "Vatican", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "VE", CountryName = "Venezuela", NationalityName = "Venezuelan", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "VN", CountryName = "Vietnam", NationalityName = "Vietnamese", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "YE", CountryName = "Yemen", NationalityName = "Yemeni", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "ZM", CountryName = "Zambia", NationalityName = "Zambian", FlagEmoji = "????", IsActive = true },
+            new Nationality { Id = Guid.NewGuid(), Code = "ZW", CountryName = "Zimbabwe", NationalityName = "Zimbabwean", FlagEmoji = "????", IsActive = true },
+        }
+            );
             await context.SaveChangesAsync();
         }
 
@@ -81,30 +425,38 @@ public static class ContentSeeder
             new Category { 
                 Id = Guid.Parse("00000000-0000-0000-0000-000000000001"), 
                 Names = new Dictionary<string, string> { 
-                    { "en", "Diving & Water Sports" }, { "ar", "غوص ورياضات مائية" }, { "fr", "Plongée & Sports Nautiques" }, { "de", "Tauchen & Wassersport" }, { "it", "Immersioni e Sport Acquatici" }, { "ru", "Дайвинг и водные виды спорта" } 
+                    { "en", "Diving & Water Sports" }, { "de", "Tauchen & Wassersport" }, { "fr", "Plongée & Sports Nautiques" }, { "it", "Immersioni e Sport Acquatici" }, { "ru", "Дайвинг и водные виды спорта" } 
                 },
-                Icon = "🤿"
+                Descriptions = new Dictionary<string, string> { { "en", "Explore the vibrant underwater life." }, { "de", "Erkunden Sie das pulsierende Unterwasserleben." }, { "fr", "Explorez la vie sous-marine vibrante." }, { "it", "Esplora la vibrante vita sottomarina." }, { "ru", "Исследуйте яркую подводную жизнь." } },
+                IconName = "diving",
+                CoverImageUrl = "/images/categories/diving.jpg"
             },
             new Category { 
                 Id = Guid.Parse("00000000-0000-0000-0000-000000000002"), 
                 Names = new Dictionary<string, string> { 
-                    { "en", "Culture & History" }, { "ar", "ثقافة وتاريخ" }, { "fr", "Culture & Histoire" }, { "de", "Kultur & Geschichte" }, { "it", "Cultura e Storia" }, { "ru", "Культура и история" } 
+                    { "en", "Culture & History" }, { "de", "Kultur & Geschichte" }, { "fr", "Culture & Histoire" }, { "it", "Cultura e Storia" }, { "ru", "Культура и история" } 
                 },
-                Icon = "🏛️"
+                Descriptions = new Dictionary<string, string> { { "en", "Journey into ancient civilizations." }, { "de", "Reise in alte Zivilisationen." }, { "fr", "Voyage dans les anciennes civilisations." }, { "it", "Viaggio nelle antiche civiltà." }, { "ru", "Путешествие в древние цивилизации." } },
+                IconName = "culture",
+                CoverImageUrl = "/images/categories/culture.jpg"
             },
             new Category { 
                 Id = Guid.Parse("00000000-0000-0000-0000-000000000003"), 
                 Names = new Dictionary<string, string> { 
-                    { "en", "Safari & Adventure" }, { "ar", "سفاري ومغامرات" }, { "fr", "Safari & Aventure" }, { "de", "Safari & Abenteuer" }, { "it", "Safari e Avventura" }, { "ru", "Сафари и приключения" } 
+                    { "en", "Safari & Adventure" }, { "de", "Safari & Abenteuer" }, { "fr", "Safari & Aventure" }, { "it", "Safari e Avventura" }, { "ru", "Сафари и приключения" } 
                 },
-                Icon = "🏜️"
+                Descriptions = new Dictionary<string, string> { { "en", "Thrilling desert adventures." }, { "de", "Aufregende Wüstenabenteuer." }, { "fr", "Aventures palpitantes dans le désert." }, { "it", "Emozionanti avventure nel deserto." }, { "ru", "Захватывающие приключения в пустыне." } },
+                IconName = "safari",
+                CoverImageUrl = "/images/categories/safari.jpg"
             },
             new Category { 
                 Id = Guid.Parse("00000000-0000-0000-0000-000000000004"), 
                 Names = new Dictionary<string, string> { 
-                    { "en", "Boat & Sea Trips" }, { "ar", "رحلات بحرية وقوارب" }, { "fr", "Excursions en bateau" }, { "de", "Boot- & Seefahrten" }, { "it", "Gite in Barca e Mare" }, { "ru", "Морские прогулки" } 
+                    { "en", "Boat & Sea Trips" }, { "de", "Boot- & Seefahrten" }, { "fr", "Excursions en bateau" }, { "it", "Gite in Barca e Mare" }, { "ru", "Морские прогулки" } 
                 },
-                Icon = "🛳️"
+                Descriptions = new Dictionary<string, string> { { "en", "Relaxing trips on the sea." }, { "de", "Entspannende Ausflüge auf dem Meer." }, { "fr", "Voyages relaxants sur la mer." }, { "it", "Viaggi rilassanti sul mare." }, { "ru", "Расслабляющие поездки по морю." } },
+                IconName = "boat",
+                CoverImageUrl = "/images/categories/boat.jpg"
             }
         };
         if (!await context.Categories.AnyAsync())
@@ -116,10 +468,11 @@ public static class ContentSeeder
         // 2. Seed Destinations
         var destinations = new List<Destination>
         {
-            new Destination { Id = Guid.Parse("00000000-0000-0000-0000-000000000011"), Names = new Dictionary<string, string> { { "en", "Hurghada" } }, Descriptions = new Dictionary<string, string> { { "en", "The Red Sea Riviera" } }, ImageUrl = "/images/tours/5616cea0-2d17-48e7-9f08-69716378b9ef.JPG", Flag = "🌊" },
-            new Destination { Id = Guid.Parse("00000000-0000-0000-0000-000000000012"), Names = new Dictionary<string, string> { { "en", "Luxor" } }, Descriptions = new Dictionary<string, string> { { "en", "The World's Greatest Open-Air Museum" } }, ImageUrl = "/images/tours/1aab19b3-0bfb-4bd9-8c90-96ec7f2ce686.JPG", Flag = "🏺" },
-            new Destination { Id = Guid.Parse("00000000-0000-0000-0000-000000000013"), Names = new Dictionary<string, string> { { "en", "Cairo" } }, Descriptions = new Dictionary<string, string> { { "en", "The City of a Thousand Minarets" } }, ImageUrl = "/images/tours/ea0bf799-cf52-49c9-ae03-00a17367deed.JPG", Flag = "🏛️" },
-            new Destination { Id = Guid.Parse("00000000-0000-0000-0000-000000000014"), Names = new Dictionary<string, string> { { "en", "Sharm El-Sheikh" } }, Descriptions = new Dictionary<string, string> { { "en", "The City of Peace" } }, ImageUrl = "/images/tours/099c10ac-0473-43a5-9b75-86c0b110d627.JPG", Flag = "🌴" }
+            new Destination { Id = Guid.Parse("00000000-0000-0000-0000-000000000011"), Names = new Dictionary<string, string> { { "en", "Hurghada" }, { "de", "Hurghada" }, { "fr", "Hurghada" }, { "it", "Hurghada" }, { "ru", "Хургада" } }, Descriptions = new Dictionary<string, string> { { "en", "The Red Sea Riviera" }, { "de", "Die Riviera des Roten Meeres" }, { "fr", "La Riviera de la mer Rouge" }, { "it", "La Riviera del Mar Rosso" }, { "ru", "Ривьера Красного моря" } }, Highlights = new Dictionary<string, string> { { "en", "Beautiful beaches, great diving." }, { "de", "Schöne Strände, tolles Tauchen." }, { "fr", "Belles plages, super plongée." }, { "it", "Spiagge bellissime, ottime immersioni." }, { "ru", "Красивые пляжи, отличный дайвинг." } }, ImageUrl = "/images/hurghada.jpg", FlagEmoji = "🏖️" },
+            new Destination { Id = Guid.Parse("00000000-0000-0000-0000-000000000012"), Names = new Dictionary<string, string> { { "en", "Luxor" }, { "de", "Luxor" }, { "fr", "Louxor" }, { "it", "Luxor" }, { "ru", "Луксор" } }, Descriptions = new Dictionary<string, string> { { "en", "The World's Greatest Open-Air Museum" }, { "de", "Das größte Freilichtmuseum der Welt" }, { "fr", "Le plus grand musée en plein air du monde" }, { "it", "Il più grande museo all'aperto del mondo" }, { "ru", "Величайший в мире музей под открытым небом" } }, Highlights = new Dictionary<string, string> { { "en", "Karnak Temple, Valley of Kings." }, { "de", "Karnak-Tempel, Tal der Könige." }, { "fr", "Temple de Karnak, Vallée des Rois." }, { "it", "Tempio di Karnak, Valle dei Re." }, { "ru", "Карнакский храм, Долина царей." } }, ImageUrl = "/images/luxor.jpg", FlagEmoji = "🏺" },
+            new Destination { Id = Guid.Parse("00000000-0000-0000-0000-000000000013"), Names = new Dictionary<string, string> { { "en", "Cairo" }, { "de", "Kairo" }, { "fr", "Le Caire" }, { "it", "Il Cairo" }, { "ru", "Каир" } }, Descriptions = new Dictionary<string, string> { { "en", "The City of a Thousand Minarets" }, { "de", "Die Stadt der tausend Minarette" }, { "fr", "La ville aux mille minarets" }, { "it", "La città dei mille minareti" }, { "ru", "Город тысячи минаретов" } }, Highlights = new Dictionary<string, string> { { "en", "Pyramids of Giza, Egyptian Museum." }, { "de", "Pyramiden von Gizeh, Ägyptisches Museum." }, { "fr", "Pyramides de Gizeh, Musée égyptien." }, { "it", "Piramidi di Giza, Museo Egizio." }, { "ru", "Пирамиды Гизы, Египетский музей." } }, ImageUrl = "/images/cairo.jpg", FlagEmoji = "🇪🇬" },
+            new Destination { Id = Guid.Parse("00000000-0000-0000-0000-000000000014"), Names = new Dictionary<string, string> { { "en", "Sharm El-Sheikh" }, { "de", "Sharm El-Sheikh" }, { "fr", "Charm el-Cheikh" }, { "it", "Sharm El-Sheikh" }, { "ru", "Шарм-эш-Шейх" } }, Descriptions = new Dictionary<string, string> { { "en", "The City of Peace" }, { "de", "Die Stadt des Friedens" }, { "fr", "La ville de la paix" }, { "it", "La città della pace" }, { "ru", "Город мира" } }, Highlights = new Dictionary<string, string> { { "en", "Naama Bay, Ras Mohammed." }, { "de", "Naama Bay, Ras Mohammed." }, { "fr", "Naama Bay, Ras Mohammed." }, { "it", "Naama Bay, Ras Mohammed." }, { "ru", "Наама Бэй, Рас Мохаммед." } }, ImageUrl = "/images/sharm.jpg", FlagEmoji = "🐠" },
+            new Destination { Id = Guid.Parse("00000000-0000-0000-0000-000000000015"), Names = new Dictionary<string, string> { { "en", "Marsa Alam" }, { "de", "Marsa Alam" }, { "fr", "Marsa Alam" }, { "it", "Marsa Alam" }, { "ru", "Марса Алам" } }, Descriptions = new Dictionary<string, string> { { "en", "Diving Paradise" }, { "de", "Taucherparadies" }, { "fr", "Paradis de la plongée" }, { "it", "Paradiso delle immersioni" }, { "ru", "Рай для дайвинга" } }, Highlights = new Dictionary<string, string> { { "en", "Abu Dabbab, Dolphin House." }, { "de", "Abu Dabbab, Dolphin House." }, { "fr", "Abu Dabbab, Dolphin House." }, { "it", "Abu Dabbab, Dolphin House." }, { "ru", "Абу Даббаб, Дом Дельфинов." } }, ImageUrl = "/images/tours/a54ea17e-0023-4be6-bdb2-ea071d4f834c.JPG", FlagEmoji = "🐢" }
         };
         if (!await context.Destinations.AnyAsync())
         {
@@ -321,46 +674,71 @@ public static class ContentSeeder
                 new TourPackage
                 {
                     Id = Guid.NewGuid(),
-                    Titles = new Dictionary<string, string> { { "en", "Standard Package" } },
-                    Descriptions = new Dictionary<string, string> { { "en", "Includes all basic amenities" } },
+                    Titles = new Dictionary<string, string> { { "en", "Standard Package" }, { "de", "Standardpaket" }, { "fr", "Forfait Standard" }, { "it", "Pacchetto Standard" }, { "ru", "Стандартный пакет" } },
+                    Descriptions = new Dictionary<string, string> { { "en", "Includes all basic amenities" }, { "de", "Inklusive aller grundlegenden Annehmlichkeiten" }, { "fr", "Comprend toutes les commodités de base" }, { "it", "Include tutti i servizi di base" }, { "ru", "Включает все базовые удобства" } },
                     Price = tour.Price,
                     Badge = "Popular",
-                    Features = new Dictionary<string, List<string>> { { "en", new List<string> { "Guided tour", "Transportation" } } },
-                    Inclusions = new List<TourInclusion> {
-                        new TourInclusion { Names = new Dictionary<string, string> { { "en", "Lunch" } } },
-                        new TourInclusion { Names = new Dictionary<string, string> { { "en", "Snorkeling Equipment" } } }
-                    },
-                    Exclusions = new List<TourInclusion> {
-                        new TourInclusion { Names = new Dictionary<string, string> { { "en", "National Park Fee" } } }
-                    }
+                    Features = new Dictionary<string, string> { { "en", "Guided tour, Transportation" }, { "de", "Führung, Transport" }, { "fr", "Visite guidée, Transport" }, { "it", "Visita guidata, Trasporto" }, { "ru", "Экскурсия, Транспорт" } }
                 }
             };
             
-            tour.Highlights = new Dictionary<string, List<string>>
+            tour.Highlights = new Dictionary<string, string>
             {
-                { "en", new List<string> { "Experience the best of the region", "Memorable moments guaranteed", "Expert local guides" } }
+                { "en", "Experience the best of the region; Memorable moments guaranteed; Expert local guides" }, { "de", "Erleben Sie das Beste der Region; Unvergessliche Momente garantiert; Kompetente lokale Führer" }, { "fr", "Découvrez le meilleur de la région ; Moments mémorables garantis ; Guides locaux experts" }, { "it", "Vivi il meglio della regione; Momenti indimenticabili garantiti; Guide locali esperte" }, { "ru", "Почувствуйте лучшее в регионе; Незабываемые моменты гарантированы; Опытные местные гиды" }
             };
             
-            tour.Itinerary = GetItineraryForTour(tour.Id);
+            tour.Itinerary = GenerateDefaultItinerary();
 
-            tour.Inclusions = new Dictionary<string, List<string>>
+            tour.Inclusions = new List<TourInclusion>
             {
-                { "en", tour.Includes != null && tour.Includes.Any() ? tour.Includes : new List<string> { "Hotel pickup and drop-off", "Professional guide" } }
+                new TourInclusion { Names = new Dictionary<string, string> { { "en", "Hotel pickup and drop-off" }, { "de", "Hotelabholung und -rückgabe" }, { "fr", "Prise en charge et retour à l'hôtel" }, { "it", "Prelievo e rientro in hotel" }, { "ru", "Трансфер из отеля и обратно" } } },
+                new TourInclusion { Names = new Dictionary<string, string> { { "en", "Professional guide" }, { "de", "Professioneller Guide" }, { "fr", "Guide professionnel" }, { "it", "Guida professionale" }, { "ru", "Профессиональный гид" } } }
             };
 
-            tour.Exclusions = new Dictionary<string, List<string>>
+            tour.Exclusions = new List<TourInclusion>
             {
-                { "en", new List<string> { "Personal expenses", "Gratuities", "Meals not mentioned" } }
+                new TourInclusion { Names = new Dictionary<string, string> { { "en", "Personal expenses" }, { "de", "Persönliche Ausgaben" }, { "fr", "Dépenses personnelles" }, { "it", "Spese personali" }, { "ru", "Личные расходы" } } },
+                new TourInclusion { Names = new Dictionary<string, string> { { "en", "Gratuities" }, { "de", "Trinkgelder" }, { "fr", "Pourboires" }, { "it", "Mance" }, { "ru", "Чаевые" } } }
             };
 
             tour.ImportantInformation = new ImportantInfo
             {
-                WhatToBring = new Dictionary<string, List<string>> { { "en", new List<string> { "Comfortable shoes", "Camera", "Sunscreen" } } },
-                NotSuitableFor = new Dictionary<string, List<string>> { { "en", new List<string> { "People with mobility impairments" } } },
-                Notes = new Dictionary<string, List<string>> { { "en", new List<string> { "Subject to favorable weather conditions" } } }
+                WhatToBring = new Dictionary<string, string> { { "en", "Comfortable shoes, Camera, Sunscreen" }, { "de", "Bequeme Schuhe, Kamera, Sonnencreme" }, { "fr", "Chaussures confortables, appareil photo, crème solaire" }, { "it", "Scarpe comode, fotocamera, crema solare" }, { "ru", "Удобная обувь, камера, солнцезащитный крем" } },
+                NotSuitableFor = new Dictionary<string, string> { { "en", "People with mobility impairments" }, { "de", "Menschen mit Mobilitätseinschränkungen" }, { "fr", "Personnes à mobilité réduite" }, { "it", "Persone con disabilità motorie" }, { "ru", "Люди с ограниченными физическими возможностями" } },
+                Notes = new Dictionary<string, string> { { "en", "Subject to favorable weather conditions" }, { "de", "Abhängig von günstigen Wetterbedingungen" }, { "fr", "Sous réserve de conditions météorologiques favorables" }, { "it", "Soggetto a condizioni meteorologiche favorevoli" }, { "ru", "При благоприятных погодных условиях" } }
             };
 
-            tour.Faqs = GetStandardFaqs();
+            tour.Faqs = GenerateDefaultFaqs();
+
+            tour.Addons = new List<TourAddon>
+            {
+                new TourAddon
+                {
+                    Id = Guid.NewGuid(),
+                    Names = new Dictionary<string, string> { { "en", "VIP Hotel Transfer" }, { "de", "VIP-Hoteltransfer" }, { "fr", "Transfert VIP Hôtel" }, { "it", "Trasferimento VIP in Hotel" }, { "ru", "VIP-трансфер из отеля" } },
+                    Descriptions = new Dictionary<string, string> { { "en", "Private air-conditioned vehicle" }, { "de", "Privates klimatisiertes Fahrzeug" }, { "fr", "Véhicule privé climatisé" }, { "it", "Veicolo privato climatizzato" }, { "ru", "Частный автомобиль с кондиционером" } },
+                    PriceEur = 25,
+                    IsPerPerson = false,
+                    Icon = "🚗",
+                    Category = "Transport"
+                },
+                new TourAddon
+                {
+                    Id = Guid.NewGuid(),
+                    Names = new Dictionary<string, string> { { "en", "Professional Photo/Video Package" }, { "de", "Professionelles Foto-/Videopaket" }, { "fr", "Forfait Photo/Vidéo Professionnel" }, { "it", "Pacchetto Foto/Video Professionale" }, { "ru", "Профессиональный пакет фото/видео" } },
+                    Descriptions = new Dictionary<string, string> { { "en", "High-res digital photos and drone footage" }, { "de", "Hochauflösende Digitalfotos und Drohnenaufnahmen" }, { "fr", "Photos numériques haute résolution et images de drone" }, { "it", "Foto digitali ad alta risoluzione e riprese con drone" }, { "ru", "Цифровые фотографии высокого разрешения и съемка с дрона" } },
+                    PriceEur = 40,
+                    IsPerPerson = false,
+                    Icon = "📸",
+                    Category = "Photography"
+                }
+            };
+
+            tour.Media = (tour.MediaUrls ?? new List<string>()).Select(url => new TourMedia
+            {
+                Url = url,
+                Captions = new Dictionary<string, string> { { "en", tour.Names.GetValueOrDefault("en", "Tour Experience") }, { "de", tour.Names.GetValueOrDefault("de", "Tour Erlebnis") }, { "fr", tour.Names.GetValueOrDefault("fr", "Expérience de Tour") }, { "it", tour.Names.GetValueOrDefault("it", "Esperienza di Tour") }, { "ru", tour.Names.GetValueOrDefault("ru", "Тур Опыт") } }
+            }).ToList();
         }
 
         context.Tours.AddRange(tours);
@@ -372,9 +750,9 @@ public static class ContentSeeder
         // Default itinerary for all
         return new List<TourItinerary>
         {
-            new TourItinerary { Time = "08:00 AM", Titles = new Dictionary<string, string> { { "en", "Pickup & Departure" } }, Descriptions = new Dictionary<string, string> { { "en", "Meet at the hotel lobby and head to the destination." } } },
-            new TourItinerary { Time = "10:30 AM", Titles = new Dictionary<string, string> { { "en", "Main Activity" } }, Descriptions = new Dictionary<string, string> { { "en", "Enjoy the primary activity of the tour." } } },
-            new TourItinerary { Time = "02:00 PM", Titles = new Dictionary<string, string> { { "en", "Return Journey" } }, Descriptions = new Dictionary<string, string> { { "en", "Head back to your hotel." } } }
+            new TourItinerary { Titles = new Dictionary<string, string> { { "en", "Pickup & Departure" }, { "de", "Abholung & Abfahrt" }, { "fr", "Prise en charge et départ" }, { "it", "Prelievo e partenza" }, { "ru", "Встреча и отправление" } }, Descriptions = new Dictionary<string, string> { { "en", "Meet at the hotel lobby and head to the destination." }, { "de", "Treffen Sie sich in der Hotellobby und fahren Sie zum Ziel." }, { "fr", "Rendez-vous dans le hall de l'hôtel et dirigez-vous vers la destination." }, { "it", "Incontro nella hall dell'hotel e partenza per la destinazione." }, { "ru", "Встреча в холле отеля и отправление в пункт назначения." } } },
+            new TourItinerary { Titles = new Dictionary<string, string> { { "en", "Main Activity" }, { "de", "Hauptaktivität" }, { "fr", "Activité Principale" }, { "it", "Attività Principale" }, { "ru", "Основная активность" } }, Descriptions = new Dictionary<string, string> { { "en", "Enjoy the primary activity of the tour." }, { "de", "Genießen Sie die Hauptaktivität der Tour." }, { "fr", "Profitez de l'activité principale de la visite." }, { "it", "Goditi l'attività principale del tour." }, { "ru", "Наслаждайтесь основной деятельностью тура." } } },
+            new TourItinerary { Titles = new Dictionary<string, string> { { "en", "Return Journey" }, { "de", "Rückfahrt" }, { "fr", "Voyage de retour" }, { "it", "Viaggio di Ritorno" }, { "ru", "Обратный путь" } }, Descriptions = new Dictionary<string, string> { { "en", "Head back to your hotel." }, { "de", "Fahren Sie zurück zu Ihrem Hotel." }, { "fr", "Retournez à votre hôtel." }, { "it", "Torna al tuo hotel." }, { "ru", "Возвращение в отель." } } }
         };
     }
 
@@ -384,28 +762,28 @@ public static class ContentSeeder
         {
             new TourFaq
             {
-                Questions = new Dictionary<string, string> { { "en", "How do I receive my Booking Confirmation?" } },
-                Answers = new Dictionary<string, string> { { "en", "You will receive an instant WhatsApp voucher and an email confirmation immediately upon reservation." } }
+                Questions = new Dictionary<string, string> { { "en", "How do I receive my Booking Confirmation?" }, { "de", "Wie erhalte ich meine Buchungsbestätigung?" }, { "fr", "Comment puis-je recevoir ma confirmation de réservation?" }, { "it", "Come ricevo la mia conferma di prenotazione?" }, { "ru", "Как мне получить подтверждение бронирования?" } },
+                Answers = new Dictionary<string, string> { { "en", "You will receive an instant WhatsApp voucher and an email confirmation immediately upon reservation." }, { "de", "Sie erhalten sofort nach der Reservierung einen WhatsApp-Gutschein und eine E-Mail-Bestätigung." }, { "fr", "Vous recevrez un bon WhatsApp instantané et une confirmation par e-mail immédiatement après la réservation." }, { "it", "Riceverai un voucher WhatsApp istantaneo e una conferma via e-mail immediatamente dopo la prenotazione." }, { "ru", "Вы получите мгновенный ваучер WhatsApp и подтверждение по электронной почте сразу после бронирования." } }
             },
             new TourFaq
             {
-                Questions = new Dictionary<string, string> { { "en", "What Payment Options are available?" } },
-                Answers = new Dictionary<string, string> { { "en", "We offer secure online card payment during booking, or you can choose our flexible Pay-on-Pickup option." } }
+                Questions = new Dictionary<string, string> { { "en", "What Payment Options are available?" }, { "de", "Welche Zahlungsoptionen stehen zur Verfügung?" }, { "fr", "Quelles sont les options de paiement disponibles?" }, { "it", "Quali opzioni di pagamento sono disponibili?" }, { "ru", "Какие варианты оплаты доступны?" } },
+                Answers = new Dictionary<string, string> { { "en", "We offer secure online card payment during booking, or you can choose our flexible Pay-on-Pickup option." }, { "de", "Wir bieten eine sichere Online-Kartenzahlung während der Buchung oder Sie können unsere flexible Pay-on-Pickup-Option wählen." }, { "fr", "Nous proposons un paiement par carte en ligne sécurisé lors de la réservation, ou vous pouvez choisir notre option de paiement flexible lors de la prise en charge." }, { "it", "Offriamo il pagamento sicuro con carta online durante la prenotazione, oppure puoi scegliere la nostra flessibile opzione Pay-on-Pickup." }, { "ru", "Мы предлагаем безопасную оплату картой онлайн во время бронирования, или вы можете выбрать гибкий вариант оплаты при получении." } }
             },
             new TourFaq
             {
-                Questions = new Dictionary<string, string> { { "en", "What is the Cancellation Policy?" } },
-                Answers = new Dictionary<string, string> { { "en", "Free cancellation up to 72 hours before departure. A 25% penalty applies if canceled within 48 hours, and a 50% penalty if canceled under 24 hours." } }
+                Questions = new Dictionary<string, string> { { "en", "What is the Cancellation Policy?" }, { "de", "Was ist die Stornierungsrichtlinie?" }, { "fr", "Quelle est la politique d'annulation?" }, { "it", "Qual è la politica di cancellazione?" }, { "ru", "Какова политика отмены?" } },
+                Answers = new Dictionary<string, string> { { "en", "Free cancellation up to 72 hours before departure. A 25% penalty applies if canceled within 48 hours, and a 50% penalty if canceled under 24 hours." }, { "de", "Kostenlose Stornierung bis zu 72 Stunden vor der Abreise. Bei Stornierung innerhalb von 48 Stunden wird eine Gebühr von 25% erhoben, bei Stornierung innerhalb von 24 Stunden eine Gebühr von 50%." }, { "fr", "Annulation gratuite jusqu'à 72 heures avant le départ. Une pénalité de 25% s'applique en cas d'annulation dans les 48 heures, et une pénalité de 50% en cas d'annulation à moins de 24 heures." }, { "it", "Cancellazione gratuita fino a 72 ore prima della partenza. Si applica una penale del 25% in caso di cancellazione entro 48 ore e una penale del 50% in caso di cancellazione entro 24 ore." }, { "ru", "Бесплатная отмена за 72 часа до отправления. Штраф 25% применяется при отмене за 48 часов и штраф 50% при отмене менее чем за 24 часа." } }
             },
             new TourFaq
             {
-                Questions = new Dictionary<string, string> { { "en", "How does Hotel Pickup work?" } },
-                Answers = new Dictionary<string, string> { { "en", "Please wait in your hotel lobby at the scheduled pickup time. Our guide will verify your room number upon arrival." } }
+                Questions = new Dictionary<string, string> { { "en", "How does Hotel Pickup work?" }, { "de", "Wie funktioniert die Abholung vom Hotel?" }, { "fr", "Comment fonctionne la prise en charge à l'hôtel?" }, { "it", "Come funziona il prelievo in hotel?" }, { "ru", "Как работает встреча в отеле?" } },
+                Answers = new Dictionary<string, string> { { "en", "Please wait in your hotel lobby at the scheduled pickup time. Our guide will verify your room number upon arrival." }, { "de", "Bitte warten Sie zum vereinbarten Abholzeitpunkt in Ihrer Hotellobby. Unser Guide wird Ihre Zimmernummer bei der Ankunft überprüfen." }, { "fr", "Veuillez patienter dans le hall de votre hôtel à l'heure de prise en charge prévue. Notre guide vérifiera votre numéro de chambre à son arrivée." }, { "it", "Attendi nella hall dell'hotel all'orario di prelievo programmato. La nostra guida verificherà il numero della tua camera all'arrivo." }, { "ru", "Пожалуйста, подождите в холле вашего отеля в назначенное время встречи. Наш гид проверит номер вашей комнаты по прибытии." } }
             },
             new TourFaq
             {
-                Questions = new Dictionary<string, string> { { "en", "Why do I need to upload my Passport/ID?" } },
-                Answers = new Dictionary<string, string> { { "en", "Mandatory Coast Guard and Tourism Police permits require passport or ID copies for all maritime and desert excursions to ensure your safety and compliance with local laws." } }
+                Questions = new Dictionary<string, string> { { "en", "Why do I need to upload my Passport/ID?" }, { "de", "Warum muss ich meinen Pass/Ausweis hochladen?" }, { "fr", "Pourquoi dois-je télécharger mon passeport / carte d'identité?" }, { "it", "Perché devo caricare il mio passaporto/carta d'identità?" }, { "ru", "Зачем мне нужно загружать свой паспорт/удостоверение личности?" } },
+                Answers = new Dictionary<string, string> { { "en", "Mandatory Coast Guard and Tourism Police permits require passport or ID copies for all maritime and desert excursions to ensure your safety and compliance with local laws." }, { "de", "Zwingende Genehmigungen der Küstenwache und Tourismuspolizei erfordern Pass- oder Ausweiskopien für alle Meeres- und Wüstenausflüge, um Ihre Sicherheit und Einhaltung lokaler Gesetze zu gewährleisten." }, { "fr", "Les permis obligatoires de la Garde côtière et de la police du tourisme exigent des copies de passeport ou de carte d'identité pour toutes les excursions maritimes et dans le désert afin d'assurer votre sécurité et votre conformité avec les lois locales." }, { "it", "I permessi obbligatori della Guardia Costiera e della Polizia Turistica richiedono copie del passaporto o del documento d'identità per tutte le escursioni marittime e nel deserto per garantire la tua sicurezza e il rispetto delle leggi locali." }, { "ru", "Обязательные разрешения Береговой охраны и Туристической полиции требуют копии паспорта или удостоверения личности для всех морских и пустынных экскурсий для обеспечения вашей безопасности и соблюдения местных законов." } }
             }
         };
     }

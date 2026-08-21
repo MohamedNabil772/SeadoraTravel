@@ -797,6 +797,12 @@ const tourNotSuitable = computed(() => {
   return i18nContent.value.notSuitableText
 })
 
+const tourNotes = computed(() => {
+  if (tour.value?.notes?.[locale.value]) return tour.value.notes[locale.value]
+  if (tour.value?.notes?.['en']) return tour.value.notes['en']
+  return tour.value?.notes || ''
+})
+
 // Dynamic Pickup Timing based on Admin Settings
 const pickupTimeType = computed(() => tour.value?.pickupTimeType || 'FixedSlots')
 const availablePickupTimes = computed(() => {
@@ -816,10 +822,12 @@ const dynamicOptions = computed(() => {
     return tour.value.packages.map((pkg: any) => {
       const title = typeof pkg.name === 'object' ? (pkg.name[locale.value] || pkg.name['en']) : (pkg.name || pkg.title || 'Package')
       const subtitle = typeof pkg.description === 'object' ? (pkg.description[locale.value] || pkg.description['en']) : (pkg.description || pkg.subtitle || '')
+      const features = Array.isArray(pkg.features) ? pkg.features : (pkg.features ? [pkg.features] : [])
       return {
         id: pkg.id,
         title,
         subtitle,
+        features: features.map((f: any) => typeof f === 'object' ? (f[locale.value] || f['en'] || f) : f),
         basePriceEur: Number(pkg.price) || Number(tour.value?.price) || 25,
         wasPriceEur: Number(pkg.originalPrice) || Math.round((Number(pkg.price) || Number(tour.value?.price) || 25) * 1.25),
         departureTime: '15:30'
@@ -1645,13 +1653,24 @@ watch(routeSlug, () => {
                 </ul>
               </div>
 
-              <div class="bg-[#fff7ed] p-5 rounded-2xl border border-[#ffedd5]">
-                <h4 class="text-xs sm:text-sm font-bold text-[#c2410c] mb-2.5 flex items-center gap-2">
-                  <span>⚠️</span> {{ i18nContent.notSuitableTitle }}
-                </h4>
-                <p class="text-xs sm:text-sm text-[#9a3412] leading-relaxed">
-                  {{ tourNotSuitable }}
-                </p>
+              <div class="flex flex-col gap-5">
+                <div class="bg-[#fff7ed] p-5 rounded-2xl border border-[#ffedd5] flex-1">
+                  <h4 class="text-xs sm:text-sm font-bold text-[#c2410c] mb-2.5 flex items-center gap-2">
+                    <span>⚠️</span> {{ i18nContent.notSuitableTitle }}
+                  </h4>
+                  <p class="text-xs sm:text-sm text-[#9a3412] leading-relaxed">
+                    {{ tourNotSuitable }}
+                  </p>
+                </div>
+
+                <div v-if="tourNotes" class="bg-[#f0fdfa] p-5 rounded-2xl border border-[#ccfbf1] flex-1">
+                  <h4 class="text-xs sm:text-sm font-bold text-[#0f766e] mb-2.5 flex items-center gap-2">
+                    <span>💡</span> Notes / Need to Know
+                  </h4>
+                  <p class="text-xs sm:text-sm text-[#115e59] leading-relaxed">
+                    {{ tourNotes }}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
@@ -1805,6 +1824,11 @@ watch(routeSlug, () => {
                         <span class="text-xs sm:text-sm font-extrabold text-[#062d4d] block">{{ currencyStore.formatPrice(opt.basePriceEur) }}</span>
                       </div>
                     </div>
+                    <ul v-if="opt.features && opt.features.length" class="mt-2 space-y-1">
+                      <li v-for="(feat, fIdx) in opt.features" :key="fIdx" class="text-[10px] sm:text-xs text-[#475569] flex items-start gap-1">
+                        <span class="text-emerald-500 font-bold">✓</span> {{ feat }}
+                      </li>
+                    </ul>
                   </div>
                 </div>
               </div>

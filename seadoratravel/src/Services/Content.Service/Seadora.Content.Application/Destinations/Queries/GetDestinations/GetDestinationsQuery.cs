@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Seadora.Content.Application.Common.Interfaces;
 using Seadora.Content.Application.DTOs;
@@ -22,7 +22,17 @@ public class GetDestinationsQueryHandler : IRequestHandler<GetDestinationsQuery,
 
     public async Task<List<DestinationDto>> Handle(GetDestinationsQuery request, CancellationToken cancellationToken)
     {
-        var dests = await _context.Destinations.ToListAsync(cancellationToken);
-        return dests.Adapt<List<DestinationDto>>();
+        return await _context.Destinations
+            .Select(d => new DestinationDto
+            {
+                Id = d.Id,
+                Names = d.Names,
+                Descriptions = d.Descriptions,
+                Highlights = d.Highlights,
+                ImageUrl = d.ImageUrl,
+                FlagEmoji = d.FlagEmoji,
+                TourCount = d.Tours.Count
+            })
+            .ToListAsync(cancellationToken);
     }
 }

@@ -18,8 +18,29 @@ public record AdminTourSummaryDto(
     Dictionary<string, string> Names,
     decimal Price,
     string Currency,
+    decimal? OriginalPrice,
+    decimal? DiscountPercentage,
+    string Duration,
+    string StartTime,
+    decimal Rating,
+    int ReviewCount,
+    string ImageUrl,
+    string Emoji,
+    string BgGradient,
+    string Badge,
     Guid DestinationId,
-    Guid CategoryId
+    Guid CategoryId,
+    Guid? SupplierId,
+    decimal SupplierPercentage,
+    int MaxAllocations,
+    bool IsTopRated,
+    bool IsBestseller,
+    bool IsInHighDemand,
+    bool ReserveAndPayLater,
+    bool HotelPickup,
+    bool FreeCancellation,
+    bool IsPrivateOption,
+    string PickupTimeType
 );
 
 public class GetAdminToursQueryHandler : IRequestHandler<GetAdminToursQuery, List<AdminTourSummaryDto>>
@@ -32,11 +53,32 @@ public class GetAdminToursQueryHandler : IRequestHandler<GetAdminToursQuery, Lis
         var tours = await _context.Tours.AsNoTracking().ToListAsync(cancellationToken);
         return tours.Select(t => new AdminTourSummaryDto(
             t.Id,
-            t.Names,
+            t.Names ?? new Dictionary<string, string>(),
             t.Price,
-            t.Currency,
+            t.Currency ?? "EUR",
+            t.OriginalPrice,
+            t.DiscountPercentage,
+            t.Duration ?? string.Empty,
+            t.StartTime ?? string.Empty,
+            t.Rating,
+            t.ReviewCount,
+            t.ImageUrl ?? string.Empty,
+            t.Emoji ?? string.Empty,
+            t.BgGradient ?? string.Empty,
+            t.Badge ?? string.Empty,
             t.DestinationId,
-            t.CategoryId
+            t.CategoryId,
+            t.SupplierId,
+            t.SupplierPercentage,
+            t.MaxAllocations,
+            t.IsTopRated,
+            t.IsBestseller,
+            t.IsInHighDemand,
+            t.ReserveAndPayLater,
+            t.HotelPickup,
+            t.FreeCancellation,
+            t.IsPrivateOption,
+            t.PickupTimeType ?? "FixedSlots"
         )).ToList();
     }
 }

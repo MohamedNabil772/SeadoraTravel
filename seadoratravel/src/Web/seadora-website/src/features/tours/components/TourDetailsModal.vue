@@ -21,6 +21,8 @@ interface Tour {
   badge?: string;
   mediaUrls?: string[];
   images?: string[];
+  originalPrice?: number;
+  discountPercentage?: number;
 }
 
 interface Review {
@@ -271,7 +273,11 @@ const getStarDisplayWidth = (star: number, rating: number) => {
               <div class="booking-row">
                 <div class="text-left font-jost">
                   <div class="rate-from">Private Tour Rate</div>
-                  <div class="rate-amount">€{{ tour.price }}</div>
+                  <div class="flex items-center gap-2">
+                    <div class="rate-amount">€{{ tour.price }}</div>
+                    <div v-if="tour.originalPrice && tour.originalPrice > tour.price" class="text-white/40 line-through text-sm">€{{ tour.originalPrice }}</div>
+                    <div v-if="tour.discountPercentage" class="bg-red-500/20 text-red-300 text-[10px] px-1.5 py-0.5 rounded font-bold">{{ tour.discountPercentage }}% OFF</div>
+                  </div>
                   <div class="rate-per">/person</div>
                 </div>
                 <button 

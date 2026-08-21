@@ -8,15 +8,23 @@ namespace Seadora.Content.Application.Destinations.Commands;
 public record CreateDestinationCommand(
     Dictionary<string, string> Names,
     Dictionary<string, string> Descriptions,
+    Dictionary<string, string> Highlights,
     string ImageUrl,
-    string Flag) : IRequest<Guid>;
+    string FlagEmoji) : IRequest<Guid>;
 
 public class CreateDestinationCommandHandler(IContentDbContext context) : IRequestHandler<CreateDestinationCommand, Guid>
 {
     public async Task<Guid> Handle(CreateDestinationCommand request, CancellationToken cancellationToken)
     {
-        var destination = request.Adapt<Destination>();
-        destination.Id = Guid.NewGuid();
+        var destination = new Destination
+        {
+            Id = Guid.NewGuid(),
+            Names = request.Names ?? new(),
+            Descriptions = request.Descriptions ?? new(),
+            Highlights = request.Highlights ?? new(),
+            ImageUrl = request.ImageUrl ?? "",
+            FlagEmoji = request.FlagEmoji ?? ""
+        };
         context.Destinations.Add(destination);
         await context.SaveChangesAsync(cancellationToken);
         return destination.Id;

@@ -3,6 +3,8 @@ import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/services/api'
 import ExcelImportModal from '../components/ExcelImportModal.vue'
+import { useConfirm } from '@/composables/useConfirm'
+import { useToast } from '@/composables/useToast'
 
 interface Tour {
   id: string
@@ -79,16 +81,21 @@ const durations = [
 async function loadData() {
   loading.value = true
   try {
-    const [toursRes, destsRes, catsRes, supsRes] = await Promise.all([
+    const [toursRes, destsRes, catsRes, supsRes] = await Promise.allSettled([
       api.get('/api/content/api/tours'),
       api.get('/api/content/api/destinations'),
       api.get('/api/content/api/categories'),
       api.get('/api/content/api/suppliers')
     ])
-    tours.value = toursRes.data
-    destinations.value = destsRes.data
-    categories.value = catsRes.data
-    suppliers.value = supsRes.data
+    
+    tours.value = toursRes.status === 'fulfilled' ? (Array.isArray(toursRes.value.data) ? toursRes.value.data : (toursRes.value.data?.items || [])) : []
+    destinations.value = destsRes.status === 'fulfilled' ? (Array.isArray(destsRes.value.data) ? destsRes.value.data : (destsRes.value.data?.items || [])) : []
+    categories.value = catsRes.status === 'fulfilled' ? (Array.isArray(catsRes.value.data) ? catsRes.value.data : (catsRes.value.data?.items || [])) : []
+    suppliers.value = supsRes.status === 'fulfilled' ? (Array.isArray(supsRes.value.data) ? supsRes.value.data : (supsRes.value.data?.items || [])) : []
+
+    if (toursRes.status === 'rejected' || destsRes.status === 'rejected' || catsRes.status === 'rejected' || supsRes.status === 'rejected') {
+      console.warn('Some endpoints failed to load, returning partial data.')
+    }
   } catch (e) {
     console.error('Failed to load tours dashboard data', e)
   } finally {
@@ -110,6 +117,9 @@ function getDurationLabel(d: string) {
   return match ? match.label : d
 }
 
+const { confirm } = useConfirm()
+const toast = useToast()
+
 function openCreateModal() {
   router.push('/tours/create')
 }
@@ -119,14 +129,22 @@ function openEditModal(tour: Tour) {
 }
 
 async function deleteTour(id: string) {
-  if (!confirm('Are you sure you want to delete this tour?')) return
+  const ok = await confirm({
+    title: 'Delete Tour',
+    message: 'Are you sure you want to delete this tour?',
+    confirmText: 'Delete',
+    type: 'danger'
+  })
+  if (!ok) return
+
   actionLoading.value = true
   try {
     await api.delete(`/api/content/api/tours/${id}`)
+    toast.success('Tour deleted successfully')
     await loadData()
   } catch (e) {
     console.error('Failed to delete tour', e)
-    alert('Failed to delete tour.')
+    toast.error('Failed to delete tour.')
   } finally {
     actionLoading.value = false
   }
@@ -143,6 +161,18 @@ function handleExcelImport(file: File) {
   // Add implementation here later
 }
 
+function downloadTemplate() {
+  console.log('Downloading template...')
+}
+
+function exportTranslations() {
+  console.log('Exporting translations...')
+}
+
+function generatePDF() {
+  console.log('Generating PDF...')
+}
+
 onMounted(loadData)
 </script>
 
@@ -153,8 +183,11 @@ onMounted(loadData)
         <h2>Tours Management</h2>
         <p>Manage all tour packages, localizations, categories, and prices.</p>
       </div>
-      <div style="display: flex; gap: 12px;">
-        <button @click="isExcelModalOpen = true" class="btn-create" style="background: #10B981;">📥 Import Excel</button>
+      <div class="header-actions">
+        <button @click="downloadTemplate" class="btn-secondary">📄 Template</button>
+        <button @click="isExcelModalOpen = true" class="btn-secondary">⬇️ Import</button>
+        <button @click="exportTranslations" class="btn-secondary">⬆️ Export</button>
+        <button @click="generatePDF" class="btn-secondary">📄 PDF Brochure</button>
         <button @click="openCreateModal" class="btn-create">+ Add New Tour</button>
       </div>
     </div>
@@ -245,10 +278,17 @@ onMounted(loadData)
 
 <style scoped>
 .posts-page { color: #24303F; }
+.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
 .page-header h2 { font-size: 24px; font-weight: 700; color: #1C2434; margin-bottom: 4px; }
 .page-header p { color: #64748B; font-size: 14px; }
+
+.header-actions { display: flex; gap: 12px; align-items: center; }
 .btn-create { padding: 10px 22px; background: #3C50E0; border: none; border-radius: 4px; color: #fff; font-weight: 600; cursor: pointer; font-size: 14px; transition: all 0.3s; }
 .btn-create:hover { background: #2B3CA6; }
+.btn-create:active { transform: scale(0.97); }
+.btn-secondary { padding: 10px 16px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 4px; color: #1C2434; font-weight: 600; cursor: pointer; font-size: 14px; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.btn-secondary:hover { background: #F7F9FC; border-color: #CBD5E1; }
+.btn-secondary:active { transform: scale(0.97); }
 
 .filters { display: flex; gap: 12px; margin-bottom: 24px; }
 .search-input { flex: 1; padding: 12px 16px; background: #fff; border: 1.5px solid #E2E8F0; border-radius: 4px; color: #24303F; font-size: 14px; outline: none; transition: border-color 0.2s; }

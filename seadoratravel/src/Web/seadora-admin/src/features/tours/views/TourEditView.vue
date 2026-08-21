@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import api from '@/services/api'
+import { useToast } from '@/composables/useToast'
 
 interface Destination {
   id: string
@@ -23,6 +24,7 @@ interface Supplier {
 
 const route = useRoute()
 const router = useRouter()
+const toast = useToast()
 
 const isEdit = ref(false)
 const loading = ref(true)
@@ -82,14 +84,24 @@ const languages = [
 async function loadData() {
   loading.value = true
   try {
-    const [destsRes, catsRes, supsRes] = await Promise.all([
+    const results = await Promise.allSettled([
       api.get('/api/content/api/destinations'),
       api.get('/api/content/api/categories'),
       api.get('/api/content/api/suppliers')
     ])
-    destinations.value = destsRes.data
-    categories.value = catsRes.data
-    suppliers.value = supsRes.data
+    
+    if (results[0].status === 'fulfilled') {
+      const data = results[0].value.data
+      destinations.value = Array.isArray(data) ? data : (data?.items || [])
+    }
+    if (results[1].status === 'fulfilled') {
+      const data = results[1].value.data
+      categories.value = Array.isArray(data) ? data : (data?.items || [])
+    }
+    if (results[2].status === 'fulfilled') {
+      const data = results[2].value.data
+      suppliers.value = Array.isArray(data) ? data : (data?.items || [])
+    }
 
     const tourId = route.params.id as string
     if (tourId && tourId !== 'create') {
@@ -169,7 +181,7 @@ async function handleMediaUpload(e: Event) {
     }
   } catch (e) {
     console.error('File upload failed', e)
-    alert('Failed to upload some media files.')
+    toast.error('Failed to upload some media files.')
   } finally {
     uploadLoading.value = false
     target.value = ''
@@ -232,7 +244,7 @@ async function handleCoverImageUpload(e: Event) {
     form.value.imageUrl = `${API_URL}/api/files/${fileId}`
   } catch (e) {
     console.error('Cover upload failed', e)
-    alert('Failed to upload cover image.')
+    toast.error('Failed to upload cover image.')
   } finally {
     coverLoading.value = false
     target.value = ''
@@ -272,7 +284,7 @@ async function saveTour() {
     router.push('/tours')
   } catch (e) {
     console.error('Failed to save tour', e)
-    alert('Failed to save tour. See console for details.')
+    toast.error('Failed to save tour. See console for details.')
   } finally {
     saveLoading.value = false
   }
@@ -751,11 +763,16 @@ onMounted(loadData)
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   display: inline-block;
+  will-change: transform;
 }
 .btn-upload:hover {
   background: #2b3bb3;
+  transform: translateY(-1px);
+}
+.btn-upload:active {
+  transform: scale(0.97);
 }
 .btn-cancel {
   background: #ffffff;
@@ -766,31 +783,47 @@ onMounted(loadData)
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
 }
 .btn-cancel:hover {
   background: #f8fafc;
   color: var(--dark, #1c2434);
+  transform: translateY(-1px);
+}
+.btn-cancel:active {
+  transform: scale(0.97);
 }
 .btn-primary-action {
   background: var(--primary, #3c50e0);
   color: #ffffff;
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
 }
 .btn-primary-action:hover {
   background: #2b3bb3;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(60, 80, 224, 0.2);
+}
+.btn-primary-action:active {
+  transform: scale(0.97);
 }
 .btn-secondary-action {
   background: #f1f5f9;
   color: var(--dark, #1c2434);
   border-radius: 6px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: transform;
 }
 .btn-secondary-action:hover {
   background: #e2e8f0;
+  transform: translateY(-1px);
+}
+.btn-secondary-action:active {
+  transform: scale(0.97);
 }
 .spinner-small {
   border: 2px solid rgba(60, 80, 224, 0.1);

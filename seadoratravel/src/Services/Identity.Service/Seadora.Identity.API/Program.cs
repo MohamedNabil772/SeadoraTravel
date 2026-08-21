@@ -39,7 +39,6 @@ if (app.Environment.IsDevelopment())
 app.UseSeadoraExceptionHandler();
 
 app.UseCors("AllowAll");
-app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

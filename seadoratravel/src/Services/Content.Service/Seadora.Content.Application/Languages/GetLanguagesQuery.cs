@@ -25,6 +25,11 @@ public class GetLanguagesQueryHandler : IRequestHandler<GetLanguagesQuery, List<
             query = query.Where(x => x.IsActive);
         }
 
-        return await query.ToListAsync(cancellationToken);
+        var languages = await query
+            .OrderBy(l => l.Order)
+            .ThenBy(l => l.Name)
+            .ToListAsync(cancellationToken);
+            
+        return languages;
     }
 }

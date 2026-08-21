@@ -10,7 +10,7 @@ export class ApiDestinationRepository implements IDestinationRepository {
 
   async getDestinations(): Promise<Destination[]> {
     const res = await this.client.get('/api/content/api/destinations')
-    return res.data
+    return Array.isArray(res.data) ? res.data : (res.data?.items || [])
   }
 
   async getDestinationById(id: string): Promise<Destination> {

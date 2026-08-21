@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import api from '@/services/api'
+import { useToast } from '@/composables/useToast'
 
 interface Booking {
   id: string
@@ -37,7 +38,8 @@ async function loadData() {
       api.get('/api/booking/api/bookings'),
       api.get('/api/content/api/tours')
     ])
-    bookings.value = bookingsRes.data
+    const rawBookings = bookingsRes.data
+    bookings.value = Array.isArray(rawBookings) ? rawBookings : (rawBookings?.items || [])
     tours.value = toursRes.data
   } catch (e) {
     console.error('Failed to load bookings data', e)
@@ -47,16 +49,19 @@ async function loadData() {
 }
 
 function getBookedCount(tourId: string, dateStr: string) {
+  if (!bookings.value || bookings.value.length === 0) return 0
   const targetDate = new Date(dateStr).toDateString()
   return bookings.value.filter(b => b.tourId === tourId && new Date(b.bookingDate).toDateString() === targetDate).length
 }
 
 function getMaxAllocations(tourId: string) {
+  if (!tours.value || tours.value.length === 0) return 20
   const tour = tours.value.find(t => t.id === tourId)
   return tour ? (tour as any).maxAllocations || 20 : 20
 }
 
 function getTourName(tourId: string) {
+  if (!tours.value || tours.value.length === 0) return 'Unknown Tour'
   const tour = tours.value.find(t => t.id === tourId)
   return tour ? (tour.names?.en || 'Untitled Tour') : 'Unknown Tour'
 }
@@ -73,6 +78,8 @@ function formatDate(dateStr: string) {
   })
 }
 
+const toast = useToast()
+
 async function updateStatus(bookingId: string, status: string) {
   actionLoading.value = true
   try {
@@ -80,12 +87,14 @@ async function updateStatus(bookingId: string, status: string) {
       id: bookingId,
       status: status
     })
+    toast.success('Booking status updated successfully')
     // Reload bookings
     const bookingsRes = await api.get('/api/booking/api/bookings')
-    bookings.value = bookingsRes.data
+    const rawBookings = bookingsRes.data
+    bookings.value = Array.isArray(rawBookings) ? rawBookings : (rawBookings?.items || [])
   } catch (e) {
     console.error('Failed to update booking status', e)
-    alert('Failed to update booking status.')
+    toast.error('Failed to update booking status.')
   } finally {
     actionLoading.value = false
   }
@@ -225,16 +234,45 @@ onMounted(loadData)
 .customer-email { font-size: 12px; color: #64748B; margin-top: 2px; }
 .tour-name { font-weight: 500; }
 
-.status-badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; display: inline-block; }
+.status-badge { 
+  padding: 4px 10px; 
+  border-radius: 20px; 
+  font-size: 11px; 
+  font-weight: 600; 
+  letter-spacing: 0.05em; 
+  text-transform: uppercase; 
+  display: inline-block; 
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+  transition: all 0.2s ease;
+}
+.status-badge:hover { filter: brightness(0.95); transform: translateY(-0.5px); }
 .status-badge.pending { background: rgba(232, 130, 10, 0.1); color: #e8820a; border: 1px solid rgba(232, 130, 10, 0.2); }
 .status-badge.confirmed { background: rgba(60, 80, 224, 0.1); color: #3C50E0; border: 1px solid rgba(60, 80, 224, 0.2); }
 .status-badge.completed { background: rgba(16, 185, 129, 0.1); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.2); }
 .status-badge.cancelled { background: rgba(211, 64, 83, 0.1); color: #D34053; border: 1px solid rgba(211, 64, 83, 0.2); }
 
 .actions { display: flex; gap: 8px; align-items: center; }
-.btn-action { padding: 8px 14px; border: none; border-radius: 4px; color: #fff; font-size: 12px; font-weight: 600; cursor: pointer; transition: opacity 0.2s; }
-.btn-action:hover { opacity: 0.9; }
-.btn-action:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn-action { 
+  padding: 8px 14px; 
+  border: none; 
+  border-radius: 6px; 
+  color: #fff; 
+  font-size: 12px; 
+  font-weight: 600; 
+  cursor: pointer; 
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.btn-action:hover { 
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  opacity: 0.95; 
+}
+.btn-action:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+.btn-action:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
 
 .btn-action.confirm { background: #3C50E0; }
 .btn-action.complete { background: #10B981; }

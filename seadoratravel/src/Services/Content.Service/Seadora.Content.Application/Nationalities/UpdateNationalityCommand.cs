@@ -1,10 +1,10 @@
-using MediatR;
+﻿using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Seadora.Content.Application.Common.Interfaces;
 
 namespace Seadora.Content.Application.Nationalities;
 
-public record UpdateNationalityCommand(Guid Id, string Code, string Name, bool IsActive) : IRequest<bool>;
+public record UpdateNationalityCommand(Guid Id, string Code, string CountryName, string NationalityName, string FlagEmoji, bool IsActive) : IRequest<bool>;
 
 public class UpdateNationalityCommandHandler : IRequestHandler<UpdateNationalityCommand, bool>
 {
@@ -22,12 +22,13 @@ public class UpdateNationalityCommandHandler : IRequestHandler<UpdateNationality
         if (nationality == null)
             return false;
 
-        nationality.Code = request.Code;
-        nationality.Name = request.Name;
+        nationality.Code = request.Code.ToUpper().Trim();
+        nationality.CountryName = request.CountryName.Trim();
+        nationality.NationalityName = request.NationalityName.Trim();
+        nationality.FlagEmoji = request.FlagEmoji.Trim();
         nationality.IsActive = request.IsActive;
 
         await _context.SaveChangesAsync(cancellationToken);
-
         return true;
     }
 }
