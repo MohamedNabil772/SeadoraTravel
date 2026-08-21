@@ -59,6 +59,15 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Booking;Username=postgres;Password=postgres
+      # SMTP relay (send-only). Set these to your Hostinger mailbox / relay creds.
+      - Smtp__Host=${SMTP_HOST:-}
+      - Smtp__Port=${SMTP_PORT:-587}
+      - Smtp__UseSsl=${SMTP_USESSL:-true}
+      - Smtp__Username=${SMTP_USERNAME:-}
+      - Smtp__Password=${SMTP_PASSWORD:-}
+      - Smtp__FromAddress=${SMTP_FROM:-noreply@seadoratravel.com}
+      - Smtp__FromName=${SMTP_FROMNAME:-Seadora Travel}
+      - Smtp__LogoUrl=${SMTP_LOGO_URL:-}
     depends_on:
       postgres:
         condition: service_healthy
@@ -88,6 +97,25 @@ services:
     environment:
       - VITE_API_URL=http://localhost:8000
 
+  backup:
+    image: postgres:15-alpine
+    restart: on-failure
+    environment:
+      - PGPASSWORD=${POSTGRES_PASSWORD:-postgres}
+      - BACKUP_INTERVAL=${BACKUP_INTERVAL:-86400}
+      - BACKUP_RETENTION_DAYS=${BACKUP_RETENTION_DAYS:-7}
+    volumes:
+      - ./backup/backup.sh:/backup.sh:ro
+      - seadora-uploads:/data/uploads:ro
+      - seadora-backups:/backups
+    entrypoint: ["/bin/sh", "/backup.sh"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
 volumes:
   seadora-uploads:
   seadora-db-data:
+  # ponytail: named volume keeps backups on the KVM. To pull them off-server,
+  # bind-mount a host dir instead:  seadora-backups: { driver_opts: ... }  or `docker cp`.
+  seadora-backups:

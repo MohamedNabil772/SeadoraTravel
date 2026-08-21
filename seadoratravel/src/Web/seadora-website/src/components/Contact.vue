@@ -1,17 +1,54 @@
 <script setup lang="ts">
+import { reactive, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 
 const { t } = useI18n()
 
-const handleSubmit = (e: Event) => {
-  const btn = (e.target as HTMLFormElement).querySelector('.btn-submit') as HTMLElement
+const form = reactive({
+  firstName: '',
+  lastName: '',
+  email: '',
+  interest: '',
+  message: ''
+})
+const submitting = ref(false)
+
+const handleSubmit = async (e: Event) => {
+  const formEl = e.target as HTMLFormElement
+  const btn = formEl.querySelector('.btn-submit') as HTMLElement
   const orig = btn.innerHTML
-  btn.innerHTML = '✓ Message Sent!'
-  btn.style.background = 'linear-gradient(135deg, var(--grass), var(--grass-light))'
-  setTimeout(() => {
-    btn.innerHTML = orig
-    btn.style.background = ''
-  }, 3000)
+
+  if (submitting.value) return
+  submitting.value = true
+  try {
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+    const res = await fetch(`${API_URL}/api/booking/api/contact`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        firstName: form.firstName,
+        lastName: form.lastName,
+        email: form.email,
+        interest: form.interest,
+        message: form.message
+      })
+    })
+    if (!res.ok) throw new Error('Request failed')
+
+    btn.innerHTML = '✓ Message Sent!'
+    btn.style.background = 'linear-gradient(135deg, var(--grass), var(--grass-light))'
+    formEl.reset()
+    form.firstName = form.lastName = form.email = form.interest = form.message = ''
+  } catch {
+    btn.innerHTML = '✕ Failed — try again'
+    btn.style.background = 'linear-gradient(135deg, #c0392b, #e74c3c)'
+  } finally {
+    setTimeout(() => {
+      btn.innerHTML = orig
+      btn.style.background = ''
+      submitting.value = false
+    }, 3000)
+  }
 }
 </script>
 
@@ -40,7 +77,7 @@ const handleSubmit = (e: Event) => {
             <div class="icon icon-email">✉️</div>
             <div>
               <div class="detail">Email</div>
-              <div class="value"><a href="mailto:info@sedoratravel.com">info@sedoratravel.com</a></div>
+              <div class="value"><a href="mailto:info@seadoratravel.com">info@seadoratravel.com</a></div>
             </div>
           </div>
           <div class="contact-item">
@@ -60,20 +97,20 @@ const handleSubmit = (e: Event) => {
           <div class="form-row">
             <div class="form-group">
               <label>{{ t('contact.form.firstName') }}</label>
-              <input type="text" :placeholder="t('contact.form.placeholders.firstName')">
+              <input v-model="form.firstName" type="text" required :placeholder="t('contact.form.placeholders.firstName')">
             </div>
             <div class="form-group">
               <label>{{ t('contact.form.lastName') }}</label>
-              <input type="text" :placeholder="t('contact.form.placeholders.lastName')">
+              <input v-model="form.lastName" type="text" required :placeholder="t('contact.form.placeholders.lastName')">
             </div>
           </div>
           <div class="form-group">
             <label>{{ t('contact.form.email') }}</label>
-            <input type="email" :placeholder="t('contact.form.placeholders.email')">
+            <input v-model="form.email" type="email" required :placeholder="t('contact.form.placeholders.email')">
           </div>
           <div class="form-group">
             <label>{{ t('contact.form.interest') }}</label>
-            <select>
+            <select v-model="form.interest">
               <option>{{ t('contact.form.interests.hurghada') }}</option>
               <option>{{ t('contact.form.interests.cairo') }}</option>
               <option>{{ t('contact.form.interests.luxor') }}</option>
@@ -85,7 +122,7 @@ const handleSubmit = (e: Event) => {
           </div>
           <div class="form-group">
             <label>{{ t('contact.form.message') }}</label>
-            <textarea :placeholder="t('contact.form.placeholders.message')"></textarea>
+            <textarea v-model="form.message" required :placeholder="t('contact.form.placeholders.message')"></textarea>
           </div>
           <button type="submit" class="btn-submit">
             {{ t('contact.form.submit') }}

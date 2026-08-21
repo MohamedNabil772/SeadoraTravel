@@ -62,6 +62,13 @@ function handleLogout() {
           <span class="ml-3">Feedback ⭐</span>
         </RouterLink>
         <RouterLink 
+          to="/contact-requests" 
+          class="flex items-center px-4 py-3 rounded-lg hover:bg-sea transition-colors"
+          active-class="bg-sea"
+        >
+          <span class="ml-3">Contact Requests ✉️</span>
+        </RouterLink>
+        <RouterLink 
           to="/users" 
           class="flex items-center px-4 py-3 rounded-lg hover:bg-sea transition-colors"
           active-class="bg-sea"

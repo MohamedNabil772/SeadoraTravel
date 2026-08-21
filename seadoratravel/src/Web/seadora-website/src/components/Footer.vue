@@ -50,7 +50,7 @@ const { t } = useI18n()
         </h4>
         <ul>
           <li><a href="tel:+201001296641">📞 +20 100 129 6641</a></li>
-          <li><a href="mailto:info@sedoratravel.com">✉️ info@sedoratravel.com</a></li>
+          <li><a href="mailto:info@seadoratravel.com">✉️ info@seadoratravel.com</a></li>
           <li><a href="#">📍 Hurghada, Egypt</a></li>
           <li><a href="#">💬 WhatsApp Us</a></li>
         </ul>

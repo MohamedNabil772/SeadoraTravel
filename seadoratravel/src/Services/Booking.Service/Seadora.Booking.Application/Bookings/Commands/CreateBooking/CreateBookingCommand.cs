@@ -1,6 +1,8 @@
 using MediatR;
+using Microsoft.Extensions.Logging;
 using Seadora.Booking.Domain.Entities;
 using Seadora.Booking.Application.Common.Interfaces;
+using Seadora.Booking.Application.Common.Email;
 
 namespace Seadora.Booking.Application.Bookings.Commands.CreateBooking;
 
@@ -9,12 +11,19 @@ public record CreateBookingCommand(Guid TourId, string CustomerName, string Cust
 public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand, Guid>
 {
     private readonly IBookingDbContext _context;
+    private readonly IEmailSender _emailSender;
+    private readonly ILogger<CreateBookingCommandHandler> _logger;
     private static readonly System.Text.RegularExpressions.Regex EmailRegex = 
         new(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", System.Text.RegularExpressions.RegexOptions.Compiled | System.Text.RegularExpressions.RegexOptions.IgnoreCase);
 
-    public CreateBookingCommandHandler(IBookingDbContext context)
+    public CreateBookingCommandHandler(
+        IBookingDbContext context,
+        IEmailSender emailSender,
+        ILogger<CreateBookingCommandHandler> logger)
     {
         _context = context;
+        _emailSender = emailSender;
+        _logger = logger;
     }
 
     public async Task<Guid> Handle(CreateBookingCommand request, CancellationToken cancellationToken)
@@ -56,6 +65,22 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
 
         _context.Bookings.Add(booking);
         await _context.SaveChangesAsync(cancellationToken);
+
+        // ponytail: email failure must not fail the booking; log and move on.
+        try
+        {
+            await _emailSender.SendAsync(
+                booking.CustomerEmail,
+                "Your Seadora Travel booking is received",
+                $"Hi {booking.CustomerName},<br/><br/>We received your booking (ref {booking.Id}). " +
+                "Our team will confirm the details shortly.<br/><br/>Seadora Travel",
+                replyTo: ContactChannels.InfoAddress,
+                cancellationToken: cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send booking confirmation email to {Email}.", booking.CustomerEmail);
+        }
 
         return booking.Id;
     }

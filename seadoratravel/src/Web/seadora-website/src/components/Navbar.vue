@@ -21,7 +21,7 @@ const languages = [
   <div class="lang-bar">
     <div class="contact-info">
       <span>📞 <a href="tel:+201001296641">+20 100 129 6641</a></span>
-      <span>✉️ <a href="mailto:info@sedoratravel.com">info@sedoratravel.com</a></span>
+      <span>✉️ <a href="mailto:info@seadoratravel.com">info@seadoratravel.com</a></span>
     </div>
     <div class="lang-selector">
       <button 

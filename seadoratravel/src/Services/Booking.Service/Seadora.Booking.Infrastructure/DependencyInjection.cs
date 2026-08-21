@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Seadora.Booking.Application.Common.Interfaces;
+using Seadora.Booking.Infrastructure.Email;
 using Seadora.Booking.Infrastructure.Persistence;
 
 namespace Seadora.Booking.Infrastructure;
@@ -16,7 +17,10 @@ public static class DependencyInjection
                 b => b.EnableRetryOnFailure(5, TimeSpan.FromSeconds(10), null)));
             
         services.AddScoped<IBookingDbContext>(provider => provider.GetRequiredService<BookingDbContext>());
-        
+
+        services.Configure<SmtpSettings>(configuration.GetSection("Smtp"));
+        services.AddScoped<IEmailSender, SmtpEmailSender>();
+
         return services;
     }
 }

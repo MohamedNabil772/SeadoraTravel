@@ -10,8 +10,11 @@ public static class ContentSeeder
 {
     public static async Task SeedAsync(ContentDbContext context)
     {
-        await context.Database.EnsureDeletedAsync();
         await context.Database.EnsureCreatedAsync();
+
+        // ponytail: seed only when empty so admin edits to categories/tours/destinations
+        // survive redeploys. Schema changes need EF migrations (none yet); add when the model changes.
+        if (await context.Categories.AnyAsync()) return;
 
         // 1. Seed Categories
         var categories = new List<Category>

@@ -9,4 +9,5 @@ public class BookingDbContext : DbContext, IBookingDbContext
 
     public DbSet<Seadora.Booking.Domain.Entities.Booking> Bookings => Set<Seadora.Booking.Domain.Entities.Booking>();
     public DbSet<Seadora.Booking.Domain.Entities.Feedback> Feedbacks => Set<Seadora.Booking.Domain.Entities.Feedback>();
+    public DbSet<Seadora.Booking.Domain.Entities.ContactInquiry> ContactInquiries => Set<Seadora.Booking.Domain.Entities.ContactInquiry>();
 }

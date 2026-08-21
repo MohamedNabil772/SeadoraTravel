@@ -10,7 +10,8 @@ public static class BookingDbContextSeed
 {
     public static async Task SeedAsync(BookingDbContext context)
     {
-        await context.Database.EnsureDeletedAsync();
+        // ponytail: no more EnsureDeleted — bookings and contact requests must survive redeploys.
+        // Schema changes need EF migrations (none yet); add when the model changes.
         await context.Database.EnsureCreatedAsync();
 
         if (await context.Feedbacks.AnyAsync()) return;
