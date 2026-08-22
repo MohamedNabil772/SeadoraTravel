@@ -108,7 +108,7 @@ const handleSubmit = async () => {
               <div class="item-header">
                 <span class="detail">Email</span>
               </div>
-              <div class="value"><a href="mailto:info@sedoratravel.com">info@sedoratravel.com</a></div>
+              <div class="value"><a href="mailto:info@seadoratravel.com">info@seadoratravel.com</a></div>
             </div>
           </div>
           

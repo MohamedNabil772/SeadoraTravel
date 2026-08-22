@@ -16,12 +16,14 @@ public class UpdateBookingStatusCommandHandler : IRequestHandler<UpdateBookingSt
 {
     private readonly IBookingDbContext _context;
     private readonly IWhatsAppNotificationService _whatsAppService;
+    private readonly IEmailSender _emailSender;
     private readonly ILogger<UpdateBookingStatusCommandHandler> _logger;
 
-    public UpdateBookingStatusCommandHandler(IBookingDbContext context, IWhatsAppNotificationService whatsAppService, ILogger<UpdateBookingStatusCommandHandler> logger)
+    public UpdateBookingStatusCommandHandler(IBookingDbContext context, IWhatsAppNotificationService whatsAppService, IEmailSender emailSender, ILogger<UpdateBookingStatusCommandHandler> logger)
     {
         _context = context;
         _whatsAppService = whatsAppService;
+        _emailSender = emailSender;
         _logger = logger;
     }
 
@@ -67,6 +69,16 @@ public class UpdateBookingStatusCommandHandler : IRequestHandler<UpdateBookingSt
                 {
                     _logger.LogWarning(ex, "Failed to send WhatsApp confirmation for booking {BookingId}", booking.Id);
                 }
+            }
+
+            try
+            {
+                var html = Seadora.Booking.Application.Common.Email.BookingEmail.BuildConfirmationHtml(booking);
+                await _emailSender.SendTemplatedAsync(booking.CustomerEmail, "Booking Confirmed - Seadora Travel", html, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send email confirmation for booking {BookingId}", booking.Id);
             }
         }
 

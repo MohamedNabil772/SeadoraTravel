@@ -179,7 +179,7 @@ namespace Seadora.Content.Application.Concierge
                 }
                 return "Let me check the availability for you. Please specify the tour and date.";
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return "I'm sorry, I couldn't check the availability at this moment.";
             }

@@ -95,7 +95,7 @@ onUnmounted(() => {
       </span>
       <span>
         <LuxuryIcons name="mail" size="12" color="currentColor" style="opacity: 0.85; flex-shrink: 0;" />
-        <a href="mailto:info@sedoratravel.com" class="hover-underline">info@sedoratravel.com</a>
+        <a href="mailto:info@seadoratravel.com" class="hover-underline">info@seadoratravel.com</a>
       </span>
     </div>
     <div class="selectors-wrapper">

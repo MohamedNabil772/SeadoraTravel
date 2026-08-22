@@ -45,17 +45,7 @@ public static class BookingDbContextSeed
             );
         ");
 
-        if (await context.Feedbacks.AnyAsync())
-        {
-            context.Feedbacks.RemoveRange(context.Feedbacks);
-            await context.SaveChangesAsync();
-        }
-        
-        if (await context.Bookings.AnyAsync())
-        {
-            context.Bookings.RemoveRange(context.Bookings);
-            await context.SaveChangesAsync();
-        }
+        if (await context.Feedbacks.AnyAsync()) return;
 
         var feedbacks = new List<Feedback>
         {

@@ -97,4 +97,27 @@ public class InquiriesController : ControllerBase
             return BadRequest(new { error = ex.Message });
         }
     }
+
+    public class ReplyRequest
+    {
+        public string ReplyMessage { get; set; } = string.Empty;
+    }
+
+    [HttpPost("{id:guid}/reply")]
+    public async Task<IActionResult> Reply(Guid id, [FromBody] ReplyRequest request)
+    {
+        try
+        {
+            await _mediator.Send(new Seadora.Booking.Application.Inquiries.Commands.ReplyToContactInquiry.ReplyToContactInquiryCommand(id, request.ReplyMessage));
+            return NoContent();
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { error = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { error = ex.Message });
+        }
+    }
 }

@@ -31,6 +31,9 @@ public static class DependencyInjection
         services.Configure<TwilioSettings>(configuration.GetSection(TwilioSettings.SectionName));
         services.AddHttpClient<IWhatsAppNotificationService, TwilioWhatsAppService>();
         
+        services.Configure<SmtpSettings>(configuration.GetSection(SmtpSettings.SectionName));
+        services.AddScoped<IEmailSender, Seadora.Booking.Infrastructure.Email.SmtpEmailSender>();
+        
         return services;
     }
 }

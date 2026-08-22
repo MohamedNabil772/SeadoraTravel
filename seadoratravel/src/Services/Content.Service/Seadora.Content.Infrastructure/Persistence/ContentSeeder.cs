@@ -101,13 +101,7 @@ public static class ContentSeeder
             ALTER TABLE ""Tours"" ADD COLUMN IF NOT EXISTS ""Media"" jsonb DEFAULT '[]';
         ");
 
-        await context.Tours.ExecuteDeleteAsync();
-        await context.Destinations.ExecuteDeleteAsync();
-        await context.Categories.ExecuteDeleteAsync();
-        await context.Languages.ExecuteDeleteAsync();
-        await context.Currencies.ExecuteDeleteAsync();
-        await context.Nationalities.ExecuteDeleteAsync();
-        await context.Translations.ExecuteDeleteAsync();
+        if (await context.Categories.AnyAsync()) return;
 
         // Seed Languages
         if (!await context.Languages.AnyAsync())

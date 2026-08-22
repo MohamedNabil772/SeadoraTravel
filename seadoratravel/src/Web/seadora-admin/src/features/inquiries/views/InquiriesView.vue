@@ -98,9 +98,41 @@ const isDrawerOpen = ref(false)
 const selectedInquiry = ref<any>(null)
 const adminNotes = ref('')
 const newStatus = ref('')
+const isSendingReply = ref(false)
+const replyMessage = ref('')
 
 const { confirm } = useConfirm()
 const toast = useToast()
+
+const sendReply = async () => {
+  if (!selectedInquiry.value || !replyMessage.value.trim()) return
+
+  isSendingReply.value = true
+  try {
+    const res = await fetch(`/api/booking/api/inquiries/${selectedInquiry.value.id}/reply`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ message: replyMessage.value })
+    })
+
+    if (!res.ok) throw new Error('Failed to send reply')
+
+    toast.success('Reply sent successfully')
+    
+    const index = inquiries.value.findIndex(i => i.id === selectedInquiry.value.id)
+    if (index !== -1) {
+      inquiries.value[index].status = 'Replied'
+      newStatus.value = 'Replied'
+    }
+    replyMessage.value = ''
+  } catch (e: any) {
+    toast.error('Failed to send reply', e.message)
+  } finally {
+    isSendingReply.value = false
+  }
+}
 
 const openDrawer = (inquiry: any) => {
   selectedInquiry.value = { ...inquiry }
@@ -417,6 +449,30 @@ const getStatusColor = (status: string) => {
               </div>
               <div class="text-xs text-text-muted mt-2 text-right">
                 Received: {{ formatDateTime(selectedInquiry?.createdAt) }}
+              </div>
+            </div>
+
+            <!-- Email Reply -->
+            <div class="pt-4 border-t border-border/60">
+              <h3 class="text-xs font-bold text-text-muted uppercase tracking-wider mb-3">Reply to Guest</h3>
+              <div class="space-y-3">
+                <textarea 
+                  v-model="replyMessage"
+                  rows="4"
+                  placeholder="Type your reply here. This will be sent as an email to the guest..."
+                  class="w-full px-3 py-2 text-sm bg-white border border-border/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 resize-none"
+                ></textarea>
+                <div class="flex justify-end">
+                  <button 
+                    @click="sendReply"
+                    :disabled="isSendingReply || !replyMessage.trim()"
+                    class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 flex items-center gap-2"
+                  >
+                    <Mail v-if="!isSendingReply" class="w-4 h-4" />
+                    <svg v-else class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    {{ isSendingReply ? 'Sending...' : 'Send Email Reply' }}
+                  </button>
+                </div>
               </div>
             </div>
 

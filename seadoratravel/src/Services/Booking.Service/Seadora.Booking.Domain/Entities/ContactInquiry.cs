@@ -14,6 +14,8 @@ public class ContactInquiry
     public string Message { get; private set; } = string.Empty;
     public InquiryStatus Status { get; private set; }
     public string? AdminNotes { get; private set; }
+    public string? ReplyMessage { get; private set; }
+    public DateTime? RepliedAt { get; private set; }
     public DateTime CreatedAt { get; private set; }
     public DateTime? UpdatedAt { get; private set; }
 
@@ -41,6 +43,14 @@ public class ContactInquiry
     public void UpdateAdminNotes(string notes)
     {
         AdminNotes = notes;
+        UpdatedAt = DateTime.UtcNow;
+    }
+
+    public void Reply(string replyMessage)
+    {
+        ReplyMessage = replyMessage;
+        RepliedAt = DateTime.UtcNow;
+        Status = InquiryStatus.Replied;
         UpdatedAt = DateTime.UtcNow;
     }
 }

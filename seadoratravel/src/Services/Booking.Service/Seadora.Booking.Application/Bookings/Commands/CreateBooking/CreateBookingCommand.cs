@@ -29,14 +29,16 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
 {
     private readonly IBookingDbContext _context;
     private readonly IWhatsAppNotificationService _whatsAppService;
+    private readonly IEmailSender _emailSender;
     private readonly ILogger<CreateBookingCommandHandler> _logger;
     private static readonly System.Text.RegularExpressions.Regex EmailRegex = 
         new(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", System.Text.RegularExpressions.RegexOptions.Compiled | System.Text.RegularExpressions.RegexOptions.IgnoreCase);
 
-    public CreateBookingCommandHandler(IBookingDbContext context, IWhatsAppNotificationService whatsAppService, ILogger<CreateBookingCommandHandler> logger)
+    public CreateBookingCommandHandler(IBookingDbContext context, IWhatsAppNotificationService whatsAppService, IEmailSender emailSender, ILogger<CreateBookingCommandHandler> logger)
     {
         _context = context;
         _whatsAppService = whatsAppService;
+        _emailSender = emailSender;
         _logger = logger;
     }
 
@@ -134,6 +136,16 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
             {
                 _logger.LogWarning(ex, "Failed to send WhatsApp confirmation for booking {BookingId}", booking.Id);
             }
+        }
+
+        try
+        {
+            var html = Seadora.Booking.Application.Common.Email.BookingEmail.BuildReceiptHtml(booking);
+            await _emailSender.SendAsync(booking.CustomerEmail, "Booking Received - Seadora Travel", html, cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to send email receipt for booking {BookingId}", booking.Id);
         }
 
         return booking.Id;
