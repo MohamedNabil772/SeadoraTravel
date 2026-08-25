@@ -38,11 +38,19 @@ public static class BookingDbContextSeed
                 ""DestinationInterest"" text,
                 ""DateOrGuests"" text,
                 ""Message"" text NOT NULL,
-                ""Status"" text NOT NULL,
+                ""Status"" integer NOT NULL DEFAULT 0,
                 ""AdminNotes"" text,
+                ""ReplyMessage"" text,
+                ""RepliedAt"" timestamp with time zone,
                 ""CreatedAt"" timestamp with time zone NOT NULL,
                 ""UpdatedAt"" timestamp with time zone
             );
+
+            ALTER TABLE ""ContactInquiries"" ADD COLUMN IF NOT EXISTS ""ReplyMessage"" text;
+            ALTER TABLE ""ContactInquiries"" ADD COLUMN IF NOT EXISTS ""RepliedAt"" timestamp with time zone;
+            ALTER TABLE ""ContactInquiries"" ADD COLUMN IF NOT EXISTS ""AdminNotes"" text;
+            ALTER TABLE ""ContactInquiries"" ADD COLUMN IF NOT EXISTS ""DestinationInterest"" text;
+            ALTER TABLE ""ContactInquiries"" ADD COLUMN IF NOT EXISTS ""DateOrGuests"" text;
 
             ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""CustomerName"" text DEFAULT '';
             ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""CustomerEmail"" text DEFAULT '';
