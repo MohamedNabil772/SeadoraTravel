@@ -1,0 +1,123 @@
+services:
+  postgres:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-postgres}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    volumes:
+      - seadora-db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: src/ApiGateway/Dockerfile
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8000:8080"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+    depends_on:
+      - identity-service
+      - content-service
+      - booking-service
+      - file-server
+
+  identity-service:
+    build:
+      context: .
+      dockerfile: src/Services/Identity.Service/Seadora.Identity.API/Dockerfile
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - JwtSettings__Secret=${JWT_SECRET}
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Identity;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  content-service:
+    build:
+      context: .
+      dockerfile: src/Services/Content.Service/Seadora.Content.API/Dockerfile
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Content;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  booking-service:
+    build:
+      context: .
+      dockerfile: src/Services/Booking.Service/Seadora.Booking.API/Dockerfile
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Booking;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
+      - Smtp__Host=${SMTP_HOST:-smtp.hostinger.com}
+      - Smtp__Port=${SMTP_PORT:-587}
+      - Smtp__UseSsl=${SMTP_USESSL:-true}
+      - Smtp__Username=${SMTP_USERNAME:-}
+      - Smtp__Password=${SMTP_PASSWORD:-}
+      - Smtp__FromAddress=${SMTP_FROM:-noreply@seadoratravel.com}
+      - Smtp__FromName=${SMTP_FROMNAME:-Seadora Travel}
+      - Smtp__LogoUrl=${SMTP_LOGO_URL:-https://seadoratravel.com/logo.png}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  file-server:
+    build:
+      context: .
+      dockerfile: src/Services/FileServer/Seadora.FileServer.API/Dockerfile
+    restart: unless-stopped
+    volumes:
+      - seadora-uploads:/app/uploads
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+
+  seadora-website:
+    build:
+      context: ./src/Web/seadora-website
+      args:
+        - VITE_API_URL=https://api.seadoratravel.com
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3000:80"
+
+  seadora-admin:
+    build:
+      context: ./src/Web/seadora-admin
+      args:
+        - VITE_API_URL=https://api.seadoratravel.com
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:3001:80"
+
+  backup:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      - PGPASSWORD=${POSTGRES_PASSWORD}
+      - BACKUP_INTERVAL=${BACKUP_INTERVAL:-86400}
+      - BACKUP_RETENTION_DAYS=${BACKUP_RETENTION_DAYS:-7}
+    volumes:
+      - ./backup/backup.sh:/backup.sh:ro
+      - seadora-uploads:/data/uploads:ro
+      - seadora-backups:/backups
+    entrypoint: ["/bin/sh", "/backup.sh"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  seadora-uploads:
+  seadora-db-data:
+  seadora-backups:
