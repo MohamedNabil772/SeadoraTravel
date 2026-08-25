@@ -43,6 +43,26 @@ public static class BookingDbContextSeed
                 ""CreatedAt"" timestamp with time zone NOT NULL,
                 ""UpdatedAt"" timestamp with time zone
             );
+
+            ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""CustomerName"" text DEFAULT '';
+            ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""CustomerEmail"" text DEFAULT '';
+            ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""WhatsApp"" text NULL;
+            ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""HotelName"" text NULL;
+            ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""RoomNumber"" text NULL;
+            ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""PassportFileName"" text NULL;
+            ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""TripType"" text NULL;
+            ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""BookingDate"" timestamp with time zone DEFAULT now();
+            ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""Status"" integer DEFAULT 0;
+            ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""IsPaid"" boolean DEFAULT false;
+            ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""Attendance"" text DEFAULT 'Pending';
+            ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""TourDate"" timestamp with time zone NULL;
+            ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""PickupTime"" text NULL;
+            ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""Guests"" integer DEFAULT 1;
+            ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""HotelPickup"" boolean DEFAULT false;
+            ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""PackageId"" uuid NULL;
+            ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""TotalPrice"" numeric DEFAULT 0;
+            ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""SelectedAddons"" jsonb DEFAULT '[]'::jsonb;
+            ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""GuestsList"" jsonb DEFAULT '[]'::jsonb;
         ");
 
         if (await context.Feedbacks.AnyAsync()) return;

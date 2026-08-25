@@ -58,8 +58,7 @@ public static class ContentSeeder
                 ""FlagEmoji"" text NOT NULL DEFAULT '',
                 ""IsActive"" boolean NOT NULL DEFAULT true
             );
-            ALTER TABLE ""Nationalities"" ALTER COLUMN ""Name"" DROP NOT NULL;
-            ALTER TABLE ""Nationalities"" ALTER COLUMN ""Name"" SET DEFAULT '';
+            ALTER TABLE ""Nationalities"" ADD COLUMN IF NOT EXISTS ""Name"" text DEFAULT '';
             ALTER TABLE ""Nationalities"" ADD COLUMN IF NOT EXISTS ""CountryName"" text NOT NULL DEFAULT '';
             ALTER TABLE ""Nationalities"" ADD COLUMN IF NOT EXISTS ""NationalityName"" text NOT NULL DEFAULT '';
             ALTER TABLE ""Nationalities"" ADD COLUMN IF NOT EXISTS ""FlagEmoji"" text NOT NULL DEFAULT '';
@@ -99,6 +98,9 @@ public static class ContentSeeder
             ALTER TABLE ""Tours"" ADD COLUMN IF NOT EXISTS ""Faqs"" jsonb DEFAULT '[]';
             ALTER TABLE ""Tours"" ADD COLUMN IF NOT EXISTS ""Addons"" jsonb DEFAULT '[]';
             ALTER TABLE ""Tours"" ADD COLUMN IF NOT EXISTS ""Media"" jsonb DEFAULT '[]';
+            ALTER TABLE ""Tours"" ADD COLUMN IF NOT EXISTS ""PickupTimeType"" text DEFAULT 'FixedSlots';
+            ALTER TABLE ""Tours"" ADD COLUMN IF NOT EXISTS ""OriginalPrice"" numeric NULL;
+            ALTER TABLE ""Tours"" ADD COLUMN IF NOT EXISTS ""DiscountPercentage"" numeric NULL;
         ");
 
         if (await context.Categories.AnyAsync()) return;
