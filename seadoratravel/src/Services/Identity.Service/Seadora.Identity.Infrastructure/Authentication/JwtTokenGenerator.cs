@@ -7,6 +7,7 @@ using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using Seadora.Identity.Application.Common.Interfaces;
+using Seadora.Common.Tenancy;
 using Seadora.Identity.Domain.Entities;
 
 namespace Seadora.Identity.Infrastructure.Authentication;
@@ -36,7 +37,8 @@ public class JwtTokenGenerator : IJwtTokenGenerator
             new(ClaimTypes.NameIdentifier, user.Id),
             new(JwtRegisteredClaimNames.Name, !string.IsNullOrEmpty(user.FullName) ? user.FullName : $"user.FirstName user.LastName".Trim()),
             new("firstName", user.FirstName),
-            new("lastName", user.LastName)
+            new("lastName", user.LastName),
+            new(SeadoraBranches.BranchClaimType, SeadoraBranches.HeadOfficeClaimValue)
         };
 
         foreach (var role in roles)
