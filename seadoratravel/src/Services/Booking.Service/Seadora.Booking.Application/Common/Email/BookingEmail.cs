@@ -17,8 +17,8 @@ public static class BookingEmail
     private const string CardBorder = "#EAE3D6";
     private const string GreenEmerald = "#2E7D4F";
     private const string LogoUrl = "https://seadoratravel.com/logo-emblem.png";
-    private const string WhatsAppUrl = "https://wa.me/201001296641";
-    private const string WebsiteUrl = "https://seadoratravel.com";
+    private const string WhatsAppUrl = ContactChannels.WhatsAppUrl;
+    private const string WebsiteUrl = ContactChannels.WebsiteUrl;
 
     private class EmailStrings
     {
@@ -367,7 +367,7 @@ public static class BookingEmail
                                         SEADORA LUXURY TRAVEL
                                     </p>
                                     <p style='margin: 0 0 10px 0; font-size: 11px;'>
-                                        {s.FooterMarina} • Tel: +20 100 129 6641
+                                        {s.FooterMarina} • Tel: {ContactChannels.WhatsAppNumber}
                                     </p>
                                     <p style='margin: 0 0 14px 0; color: rgba(255,255,255,0.45); font-size: 11px;'>
                                         Inquiries: <a href='mailto:{ContactChannels.InfoEmail}' style='color: {GoldAccent}; font-weight: 600;'>{ContactChannels.InfoEmail}</a> • Website: <a href='{WebsiteUrl}' style='color: {GoldAccent}; font-weight: 600;'>{WebsiteUrl}</a>
