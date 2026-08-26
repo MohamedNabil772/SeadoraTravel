@@ -8,15 +8,15 @@ namespace Seadora.Booking.Application.Common.Email;
 public static class BookingEmail
 {
     private const string BrandNavy = "#062D4D";
-    private const string BrandOcean = "#0A456C";
-    private const string BrandAzure = "#0D5485";
+    private const string BrandDark = "#06152B";
     private const string GoldPrimary = "#D4AF37";
-    private const string GoldLight = "#F5D77F";
-    private const string GoldBright = "#FFF3CC";
-    private const string BackgroundWarm = "#F8F6F0";
+    private const string GoldAccent = "#C9A84C";
+    private const string GoldAmber = "#D97706";
+    private const string BackgroundLight = "#F4F6F9";
+    private const string CardWhite = "#FFFFFF";
     private const string TextCharcoal = "#1E293B";
     private const string TextMuted = "#64748B";
-    private const string CardBorder = "#E2D9C8";
+    private const string BorderLight = "#E2E8F0";
     private const string GreenEmerald = "#059669";
     private const string LogoUrl = "https://seadoratravel.com/logo-emblem.png";
     private const string WhatsAppUrl = ContactChannels.WhatsAppUrl;
@@ -264,12 +264,9 @@ public static class BookingEmail
 
     private static string GetEmailHeader(EmailStrings s, string preheader, string statusPill, string title, bool isConfirmed = false)
     {
-        var badgeBg = isConfirmed 
-            ? "linear-gradient(135deg, #166534 0%, #15803d 100%)" 
-            : "linear-gradient(135deg, rgba(212,175,55,0.3) 0%, rgba(245,215,127,0.15) 100%)";
-        var badgeBorder = isConfirmed ? "#4ADE80" : GoldPrimary;
-        var badgeColor = isConfirmed ? "#FFFFFF" : GoldBright;
-        var badgeShadow = isConfirmed ? "0 4px 14px rgba(22,101,52,0.4)" : "0 4px 14px rgba(212,175,55,0.25)";
+        var badgeBg = isConfirmed ? "#ECFDF5" : "#FEF3C7";
+        var badgeBorder = isConfirmed ? "#10B981" : "#F59E0B";
+        var badgeColor = isConfirmed ? "#047857" : "#B45309";
 
         return $@"
         <!DOCTYPE html>
@@ -283,7 +280,7 @@ public static class BookingEmail
                 body {{
                     margin: 0;
                     padding: 0;
-                    background-color: {BackgroundWarm};
+                    background-color: {BackgroundLight};
                     font-family: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
                     -webkit-font-smoothing: antialiased;
                     color: {TextCharcoal};
@@ -297,41 +294,41 @@ public static class BookingEmail
                 }}
             </style>
         </head>
-        <body style='margin: 0; padding: 0; background-color: {BackgroundWarm};'>
+        <body style='margin: 0; padding: 0; background-color: {BackgroundLight};'>
             <!-- Hidden Preheader for Mail Inboxes -->
             <div style='display: none; font-size: 1px; color: #fff; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;'>
                 {preheader}
             </div>
 
-            <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' style='background-color: {BackgroundWarm}; width: 100%; padding: 32px 0;'>
+            <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' style='background-color: {BackgroundLight}; width: 100%; padding: 32px 0;'>
                 <tr>
                     <td align='center'>
                         <!-- Main Luxury Card Container -->
-                        <table role='presentation' class='email-container' width='600' cellspacing='0' cellpadding='0' border='0' style='width: 600px; max-width: 600px; background-color: #ffffff; border-radius: 24px; overflow: hidden; border: 1px solid {CardBorder}; box-shadow: 0 16px 48px rgba(6,45,77,0.12);'>
+                        <table role='presentation' class='email-container' width='600' cellspacing='0' cellpadding='0' border='0' style='width: 600px; max-width: 600px; background-color: #ffffff; border-radius: 20px; overflow: hidden; border: 1px solid {BorderLight}; box-shadow: 0 10px 30px rgba(0,0,0,0.06);'>
                             
-                            <!-- Luxury Deep Navy Header -->
+                            <!-- Bright Luminous Header with Subtle Gold Top Accent -->
                             <tr>
-                                <td style='background: linear-gradient(135deg, #06152B 0%, #0D2342 100%); background-color: #06152B; padding: 42px 30px; text-align: center; border-bottom: 3px solid {GoldPrimary};'>
+                                <td style='background: linear-gradient(180deg, #FFFFFF 0%, #FAF9F5 100%); background-color: #FFFFFF; padding: 38px 28px; text-align: center; border-top: 4px solid {GoldPrimary}; border-bottom: 1.5px solid {BorderLight};'>
                                     <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0'>
                                         <tr>
                                             <td align='center'>
                                                 <!-- Emblem -->
-                                                <img src='{LogoUrl}' alt='Seadora Emblem' width='56' height='56' style='display: block; margin: 0 auto 16px auto; width: 56px; height: 56px; filter: drop-shadow(0 4px 16px rgba(212,175,55,0.55));' />
+                                                <img src='{LogoUrl}' alt='Seadora Emblem' width='58' height='58' style='display: block; margin: 0 auto 14px auto; width: 58px; height: 58px;' />
 
-                                                <!-- Bright Radiant Gold Brand Title -->
-                                                <h1 style='margin: 0; font-family: ""Playfair Display"", Georgia, serif; font-size: 26px; font-weight: 800; color: #FFDF73; letter-spacing: 4px; text-transform: uppercase; text-shadow: 0 0 20px rgba(245,215,127,0.5), 0 2px 6px rgba(0,0,0,0.8);'>
+                                                <!-- Luxury Deep Navy & Gold Brand Typography -->
+                                                <h1 style='margin: 0; font-family: ""Playfair Display"", Georgia, serif; font-size: 26px; font-weight: 800; color: {BrandNavy}; letter-spacing: 3.5px; text-transform: uppercase;'>
                                                     SEADORA TRAVEL
                                                 </h1>
-                                                <div style='margin: 6px auto 8px auto; color: #D4AF37; font-size: 10px; letter-spacing: 5px;'>
+                                                <div style='margin: 6px auto 6px auto; color: {GoldPrimary}; font-size: 10px; letter-spacing: 4px;'>
                                                     ✦ • ✦
                                                 </div>
-                                                <p style='margin: 0; font-size: 11px; font-weight: 500; color: #F5D77F; letter-spacing: 2px; text-transform: uppercase;'>
+                                                <p style='margin: 0; font-size: 11px; font-weight: 600; color: {GoldAccent}; letter-spacing: 2px; text-transform: uppercase;'>
                                                     {s.HeaderSubtitle}
                                                 </p>
 
                                                 <!-- Status Badge Pill -->
-                                                <div style='margin-top: 22px;'>
-                                                    <span style='display: inline-block; padding: 7px 22px; background: {badgeBg}; border: 1.5px solid {badgeBorder}; border-radius: 30px; font-size: 11px; font-weight: 700; color: {badgeColor}; letter-spacing: 1.5px; text-transform: uppercase; box-shadow: {badgeShadow};'>
+                                                <div style='margin-top: 18px;'>
+                                                    <span style='display: inline-block; padding: 6px 20px; background: {badgeBg}; border: 1.5px solid {badgeBorder}; border-radius: 30px; font-size: 11px; font-weight: 700; color: {badgeColor}; letter-spacing: 1.5px; text-transform: uppercase;'>
                                                         {statusPill}
                                                     </span>
                                                 </div>
@@ -347,20 +344,20 @@ public static class BookingEmail
         return $@"
                             <!-- Concierge Direct Action Bar -->
                             <tr>
-                                <td style='background-color: #FDFBF7; padding: 30px 34px; border-top: 1px solid {CardBorder}; text-align: center;'>
+                                <td style='background-color: #FAF9F5; padding: 28px 32px; border-top: 1.5px solid {BorderLight}; text-align: center;'>
                                     <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0'>
                                         <tr>
                                             <td align='center'>
                                                 <p style='margin: 0 0 8px 0; font-size: 13px; font-weight: 700; color: {BrandNavy}; text-transform: uppercase; letter-spacing: 1px;'>
                                                     {s.ConciergeTitle}
                                                 </p>
-                                                <p style='margin: 0 0 18px 0; font-size: 13px; color: {TextMuted}; line-height: 1.5;'>
+                                                <p style='margin: 0 0 16px 0; font-size: 13px; color: {TextMuted}; line-height: 1.5;'>
                                                     {s.ConciergeDesc}
                                                 </p>
                                                 <table role='presentation' cellspacing='0' cellpadding='0' border='0' align='center'>
                                                     <tr>
-                                                        <td style='border-radius: 12px; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); background-color: #25D366; text-align: center; box-shadow: 0 6px 20px rgba(37,211,102,0.3);'>
-                                                            <a href='{WhatsAppUrl}' target='_blank' style='display: inline-block; padding: 13px 28px; font-size: 13px; font-weight: 700; color: #ffffff; letter-spacing: 0.5px;'>
+                                                        <td style='border-radius: 12px; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); background-color: #25D366; text-align: center; box-shadow: 0 6px 18px rgba(37,211,102,0.25);'>
+                                                            <a href='{WhatsAppUrl}' target='_blank' style='display: inline-block; padding: 12px 26px; font-size: 13px; font-weight: 700; color: #ffffff; letter-spacing: 0.5px;'>
                                                                 {s.WhatsAppCta}
                                                             </a>
                                                         </td>
@@ -372,17 +369,17 @@ public static class BookingEmail
                                 </td>
                             </tr>
 
-                            <!-- Elevated Brand Dark Footer -->
+                            <!-- Elevated Luxury Navy Gradient Footer -->
                             <tr>
-                                <td style='background: linear-gradient(145deg, #0A4368 0%, #062D4D 100%); background-color: {BrandNavy}; padding: 34px 24px; text-align: center; color: rgba(255,255,255,0.7); font-size: 12px; line-height: 1.6; border-top: 1px solid rgba(212,175,55,0.3);'>
+                                <td style='background: linear-gradient(145deg, #0A2540 0%, #06152B 100%); background-color: {BrandDark}; padding: 34px 24px; text-align: center; color: rgba(255,255,255,0.7); font-size: 12px; line-height: 1.6; border-top: 2px solid {GoldPrimary};'>
                                     <p style='margin: 0 0 6px 0; font-family: ""Playfair Display"", Georgia, serif; font-size: 15px; font-weight: 700; color: #FFFFFF; letter-spacing: 2px;'>
                                         SEADORA LUXURY TRAVEL
                                     </p>
-                                    <p style='margin: 0 0 10px 0; font-size: 11px; color: rgba(255,255,255,0.8);'>
+                                    <p style='margin: 0 0 10px 0; font-size: 11px; color: rgba(255,255,255,0.85);'>
                                         {s.FooterMarina} • Tel: {ContactChannels.WhatsAppNumber}
                                     </p>
                                     <p style='margin: 0 0 16px 0; color: rgba(255,255,255,0.5); font-size: 11px;'>
-                                        Inquiries: <a href='mailto:{ContactChannels.InfoEmail}' style='color: {GoldLight}; font-weight: 600;'>{ContactChannels.InfoEmail}</a> • Website: <a href='{WebsiteUrl}' style='color: {GoldLight}; font-weight: 600;'>{WebsiteUrl}</a>
+                                        Inquiries: <a href='mailto:{ContactChannels.InfoEmail}' style='color: {GoldPrimary}; font-weight: 600;'>{ContactChannels.InfoEmail}</a> • Website: <a href='{WebsiteUrl}' style='color: {GoldPrimary}; font-weight: 600;'>{WebsiteUrl}</a>
                                     </p>
                                     <div style='border-top: 1px solid rgba(255,255,255,0.12); padding-top: 16px; font-size: 11px; color: rgba(255,255,255,0.4);'>
                                         &copy; {DateTime.UtcNow.Year} Seadora Travel. {s.FooterRights}
@@ -418,8 +415,8 @@ public static class BookingEmail
         sb.Append($@"
         <!-- Body Content -->
         <tr>
-            <td class='mobile-p-20' style='padding: 38px 36px 28px 36px;'>
-                <p style='margin: 0 0 6px 0; font-size: 12px; font-weight: 700; color: {GoldPrimary}; text-transform: uppercase; letter-spacing: 1.5px;'>
+            <td class='mobile-p-20' style='padding: 36px 34px 26px 34px; background-color: #FFFFFF;'>
+                <p style='margin: 0 0 6px 0; font-size: 12px; font-weight: 700; color: {GoldAmber}; text-transform: uppercase; letter-spacing: 1.5px;'>
                     ★ VIP Hospitality
                 </p>
                 <h2 style='margin: 0 0 16px 0; font-family: ""Playfair Display"", Georgia, serif; font-size: 23px; font-weight: 700; color: {BrandNavy}; line-height: 1.3;'>
@@ -429,22 +426,22 @@ public static class BookingEmail
                     {s.ReceivedIntro}
                 </p>
 
-                <!-- Boarding Pass Style Ticket Card -->
-                <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' style='background-color: #FDFBF7; border: 1.5px solid {CardBorder}; border-radius: 18px; overflow: hidden; margin-bottom: 28px; box-shadow: 0 8px 24px rgba(6,45,77,0.06);'>
+                <!-- Boarding Pass Style Ticket Card with White Header -->
+                <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' style='background-color: #F8FAFC; border: 1.5px solid {BorderLight}; border-radius: 16px; overflow: hidden; margin-bottom: 28px;'>
                     <tr>
-                        <td style='background: linear-gradient(145deg, #0A456C 0%, #062D4D 100%); padding: 16px 22px; border-bottom: 2px solid {GoldPrimary};'>
+                        <td style='background-color: #FFFFFF; padding: 16px 22px; border-bottom: 2px solid {GoldPrimary};'>
                             <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0'>
                                 <tr>
                                     <td>
-                                        <span style='font-size: 10px; font-weight: 700; color: {GoldLight}; text-transform: uppercase; letter-spacing: 1.5px;'>
+                                        <span style='font-size: 10px; font-weight: 700; color: {TextMuted}; text-transform: uppercase; letter-spacing: 1.5px;'>
                                             {s.VoucherRef}
                                         </span>
-                                        <div style='font-family: ""Playfair Display"", serif; font-size: 20px; font-weight: 800; color: #FFFFFF; letter-spacing: 2px;'>
+                                        <div style='font-family: ""Playfair Display"", serif; font-size: 20px; font-weight: 800; color: {BrandNavy}; letter-spacing: 2px;'>
                                             #{refCode}
                                         </div>
                                     </td>
                                     <td align='right'>
-                                        <span style='display: inline-block; padding: 5px 14px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; font-size: 11px; font-weight: 600; color: #ffffff;'>
+                                        <span style='display: inline-block; padding: 5px 14px; background: #FEF3C7; border: 1px solid #F59E0B; border-radius: 20px; font-size: 11px; font-weight: 700; color: #92400E;'>
                                             {(booking.TripType ?? s.DefaultExperience)}
                                         </span>
                                     </td>
@@ -472,14 +469,14 @@ public static class BookingEmail
                                     </td>
                                     <td class='mobile-col' width='50%' valign='top'>
                                         <div style='font-size: 11px; font-weight: 600; color: {TextMuted}; text-transform: uppercase; letter-spacing: 0.5px;'>{s.TotalAmount}</div>
-                                        <div style='font-size: 18px; font-weight: 800; color: #D97706; margin-top: 4px;'>${booking.TotalPrice:N2}</div>
+                                        <div style='font-size: 18px; font-weight: 800; color: {GoldAmber}; margin-top: 4px;'>${booking.TotalPrice:N2}</div>
                                     </td>
                                 </tr>
                             </table>
                         </td>
                     </tr>
                     <tr>
-                        <td style='background-color: #F5EFE6; padding: 14px 20px; border-top: 1px dashed {CardBorder}; font-size: 12px; color: {TextCharcoal};'>
+                        <td style='background-color: #F1F5F9; padding: 14px 20px; border-top: 1px dashed {BorderLight}; font-size: 12px; color: {TextCharcoal};'>
                             <strong>📍 {s.PickupLocation}:</strong> {hotelInfo}
                         </td>
                     </tr>
@@ -489,7 +486,7 @@ public static class BookingEmail
         if (booking.SelectedAddons != null && booking.SelectedAddons.Count > 0)
         {
             sb.Append($@"
-                <div style='margin-bottom: 26px; padding: 16px 20px; background-color: #FDFBF7; border-radius: 14px; border: 1px solid {CardBorder};'>
+                <div style='margin-bottom: 26px; padding: 16px 20px; background-color: #F8FAFC; border-radius: 14px; border: 1px solid {BorderLight};'>
                     <div style='font-size: 11px; font-weight: 700; color: {BrandNavy}; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;'>
                         {s.SelectedAddonsLabel}
                     </div>
@@ -503,7 +500,7 @@ public static class BookingEmail
 
         sb.Append($@"
                 <!-- Next Steps Info Box -->
-                <div style='background-color: #FDFBF7; border-left: 4px solid {GoldPrimary}; padding: 18px 20px; border-radius: 10px; margin-bottom: 24px;'>
+                <div style='background-color: #F8FAFC; border-left: 4px solid {GoldPrimary}; padding: 18px 20px; border-radius: 8px; margin-bottom: 24px;'>
                     <h4 style='margin: 0 0 6px 0; font-size: 13px; font-weight: 700; color: {BrandNavy}; text-transform: uppercase; letter-spacing: 0.5px;'>
                         {s.WhatNextTitle}
                     </h4>
@@ -538,8 +535,8 @@ public static class BookingEmail
         sb.Append($@"
         <!-- Body Content -->
         <tr>
-            <td class='mobile-p-20' style='padding: 38px 36px 28px 36px;'>
-                <p style='margin: 0 0 6px 0; font-size: 12px; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: 1.5px;'>
+            <td class='mobile-p-20' style='padding: 36px 34px 26px 34px; background-color: #FFFFFF;'>
+                <p style='margin: 0 0 6px 0; font-size: 12px; font-weight: 700; color: {GreenEmerald}; text-transform: uppercase; letter-spacing: 1.5px;'>
                     ✓ {s.StatusConfirmed}
                 </p>
                 <h2 style='margin: 0 0 16px 0; font-family: ""Playfair Display"", Georgia, serif; font-size: 23px; font-weight: 700; color: {BrandNavy}; line-height: 1.3;'>
@@ -549,22 +546,22 @@ public static class BookingEmail
                     {s.ConfirmedIntro}
                 </p>
 
-                <!-- Boarding Pass Style Voucher Card -->
-                <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' style='background-color: #FDFBF7; border: 2px solid {GoldPrimary}; border-radius: 18px; overflow: hidden; margin-bottom: 28px; box-shadow: 0 10px 30px rgba(212,175,55,0.18);'>
+                <!-- Boarding Pass Style Voucher Card with Clean White Header -->
+                <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' style='background-color: #F8FAFC; border: 1.5px solid {BorderLight}; border-radius: 16px; overflow: hidden; margin-bottom: 28px; box-shadow: 0 4px 16px rgba(0,0,0,0.04);'>
                     <tr>
-                        <td style='background: linear-gradient(145deg, #0A456C 0%, #062D4D 100%); padding: 18px 22px; border-bottom: 2px solid {GoldPrimary};'>
+                        <td style='background-color: #FFFFFF; padding: 18px 22px; border-bottom: 2px solid {GreenEmerald};'>
                             <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0'>
                                 <tr>
                                     <td>
-                                        <span style='font-size: 10px; font-weight: 700; color: {GoldLight}; text-transform: uppercase; letter-spacing: 1.5px;'>
+                                        <span style='font-size: 10px; font-weight: 700; color: {TextMuted}; text-transform: uppercase; letter-spacing: 1.5px;'>
                                             {s.OfficialVoucher}
                                         </span>
-                                        <div style='font-family: ""Playfair Display"", serif; font-size: 21px; font-weight: 800; color: #FFFFFF; letter-spacing: 2px;'>
+                                        <div style='font-family: ""Playfair Display"", serif; font-size: 21px; font-weight: 800; color: {BrandNavy}; letter-spacing: 2px;'>
                                             #{refCode}
                                         </div>
                                     </td>
                                     <td align='right'>
-                                        <div style='display: inline-block; padding: 6px 16px; background: linear-gradient(135deg, #166534 0%, #15803d 100%); border: 1px solid #4ADE80; border-radius: 20px; font-size: 11px; font-weight: 700; color: #ffffff; letter-spacing: 1px; text-transform: uppercase;'>
+                                        <div style='display: inline-block; padding: 5px 14px; background: #ECFDF5; border: 1.5px solid #10B981; border-radius: 20px; font-size: 11px; font-weight: 700; color: #047857; letter-spacing: 1px; text-transform: uppercase;'>
                                             {s.StatusConfirmed}
                                         </div>
                                     </td>
@@ -573,7 +570,7 @@ public static class BookingEmail
                         </td>
                     </tr>
                     <tr>
-                        <td style='padding: 24px 20px;'>
+                        <td style='padding: 22px 20px;'>
                             <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0'>
                                 <tr>
                                     <td class='mobile-col' width='50%' valign='top' style='padding-bottom: 18px;'>
@@ -592,14 +589,14 @@ public static class BookingEmail
                                     </td>
                                     <td class='mobile-col' width='50%' valign='top'>
                                         <div style='font-size: 11px; font-weight: 600; color: {TextMuted}; text-transform: uppercase; letter-spacing: 0.5px;'>{s.TotalAmount}</div>
-                                        <div style='font-size: 19px; font-weight: 800; color: #D97706; margin-top: 4px;'>${booking.TotalPrice:N2}</div>
+                                        <div style='font-size: 18px; font-weight: 800; color: {GoldAmber}; margin-top: 4px;'>${booking.TotalPrice:N2}</div>
                                     </td>
                                 </tr>
                             </table>
                         </td>
                     </tr>
                     <tr>
-                        <td style='background-color: #F5EFE6; padding: 14px 20px; border-top: 1px dashed {CardBorder}; font-size: 12px; color: {BrandNavy};'>
+                        <td style='background-color: #F1F5F9; padding: 14px 20px; border-top: 1px dashed {BorderLight}; font-size: 12px; color: {BrandNavy};'>
                             📍 <strong>{s.PickupLocation}:</strong> {hotelInfo}
                         </td>
                     </tr>
@@ -607,7 +604,7 @@ public static class BookingEmail
 
                 <!-- Registered Guests list if present -->
                 {(booking.GuestsList != null && booking.GuestsList.Count > 0 ? $@"
-                <div style='margin-bottom: 26px; padding: 16px 20px; background-color: #FDFBF7; border-radius: 14px; border: 1px solid {CardBorder};'>
+                <div style='margin-bottom: 26px; padding: 16px 20px; background-color: #F8FAFC; border-radius: 14px; border: 1px solid {BorderLight};'>
                     <div style='font-size: 11px; font-weight: 700; color: {BrandNavy}; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;'>
                         {s.GuestsBreakdownLabel}
                     </div>
@@ -617,7 +614,7 @@ public static class BookingEmail
                 </div>" : "")}
 
                 <!-- VIP Travel Guidelines Box -->
-                <div style='background-color: #FDFBF7; border-left: 4px solid {BrandNavy}; padding: 18px 20px; border-radius: 10px; margin-bottom: 24px;'>
+                <div style='background-color: #F8FAFC; border-left: 4px solid {BrandNavy}; padding: 18px 20px; border-radius: 8px; margin-bottom: 24px;'>
                     <h4 style='margin: 0 0 8px 0; font-size: 13px; font-weight: 700; color: {BrandNavy}; text-transform: uppercase; letter-spacing: 0.5px;'>
                         {s.RemindersTitle}
                     </h4>
@@ -629,7 +626,7 @@ public static class BookingEmail
                 </div>
 
                 <!-- Cancellation Guarantee -->
-                <div style='background-color: #FEF3C7; border: 1px solid #F59E0B; padding: 15px 18px; border-radius: 10px; font-size: 12px; color: #92400E; line-height: 1.5;'>
+                <div style='background-color: #FEF3C7; border: 1px solid #F59E0B; padding: 15px 18px; border-radius: 8px; font-size: 12px; color: #92400E; line-height: 1.5;'>
                     <strong>{s.FlexibilityTitle}:</strong> {s.FlexibilityDesc}
                 </div>
             </td>
@@ -656,8 +653,8 @@ public static class BookingEmail
         sb.Append($@"
         <!-- Body Content -->
         <tr>
-            <td class='mobile-p-20' style='padding: 38px 36px 28px 36px;'>
-                <p style='margin: 0 0 6px 0; font-size: 12px; font-weight: 700; color: {GoldPrimary}; text-transform: uppercase; letter-spacing: 1.5px;'>
+            <td class='mobile-p-20' style='padding: 36px 34px 26px 34px; background-color: #FFFFFF;'>
+                <p style='margin: 0 0 6px 0; font-size: 12px; font-weight: 700; color: {GoldAmber}; text-transform: uppercase; letter-spacing: 1.5px;'>
                     Inquiry Acknowledgment
                 </p>
                 <h2 style='margin: 0 0 16px 0; font-family: ""Playfair Display"", Georgia, serif; font-size: 23px; font-weight: 700; color: {BrandNavy}; line-height: 1.3;'>
@@ -668,7 +665,7 @@ public static class BookingEmail
                 </p>
 
                 <!-- Inquiry Summary Box -->
-                <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' style='background-color: #FDFBF7; border: 1px solid {CardBorder}; border-radius: 14px; padding: 18px; margin-bottom: 24px;'>
+                <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' style='background-color: #F8FAFC; border: 1px solid {BorderLight}; border-radius: 12px; padding: 18px; margin-bottom: 24px;'>
                     <tr>
                         <td>
                             <div style='font-size: 11px; font-weight: 700; color: {BrandNavy}; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;'>Your Message / Request:</div>
@@ -705,19 +702,19 @@ public static class BookingEmail
         sb.Append($@"
         <!-- Body Content -->
         <tr>
-            <td class='mobile-p-20' style='padding: 38px 36px 28px 36px;'>
-                <p style='margin: 0 0 6px 0; font-size: 12px; font-weight: 700; color: {GoldPrimary}; text-transform: uppercase; letter-spacing: 1.5px;'>
+            <td class='mobile-p-20' style='padding: 36px 34px 26px 34px; background-color: #FFFFFF;'>
+                <p style='margin: 0 0 6px 0; font-size: 12px; font-weight: 700; color: {GoldAmber}; text-transform: uppercase; letter-spacing: 1.5px;'>
                     Seadora Concierge Team
                 </p>
                 <h2 style='margin: 0 0 16px 0; font-family: ""Playfair Display"", Georgia, serif; font-size: 23px; font-weight: 700; color: {BrandNavy}; line-height: 1.3;'>
                     Dear {inquiry.FullName},
                 </h2>
-                <div style='margin: 0 0 24px 0; font-size: 14px; color: {TextCharcoal}; line-height: 1.7; background-color: #FDFBF7; border-left: 4px solid {GoldPrimary}; padding: 20px; border-radius: 10px;'>
+                <div style='margin: 0 0 24px 0; font-size: 14px; color: {TextCharcoal}; line-height: 1.7; background-color: #F8FAFC; border-left: 4px solid {GoldPrimary}; padding: 20px; border-radius: 8px;'>
                     {replyMessage.Replace("\n", "<br/>")}
                 </div>
 
                 <!-- Original Inquiry Reference -->
-                <div style='border-top: 1px solid {CardBorder}; padding-top: 18px; margin-bottom: 20px;'>
+                <div style='border-top: 1px solid {BorderLight}; padding-top: 18px; margin-bottom: 20px;'>
                     <span style='font-size: 11px; font-weight: 600; color: {TextMuted}; text-transform: uppercase; letter-spacing: 0.5px;'>Regarding your original message:</span>
                     <p style='margin: 6px 0 0 0; font-size: 12px; color: {TextMuted}; font-style: italic;'>
                         ""{inquiry.Message}""
