@@ -312,10 +312,6 @@ public static class BookingEmail
                 .value-dark {{ color: {BrandNavy}; font-size: 16px; font-weight: 800; }}
                 .price-gold {{ color: {GoldAmber}; font-size: 22px; font-weight: 800; }}
 
-                /* Gmail iOS & Android Dark Mode Text Inversion Hack */
-                u + .body .gmail-blend-screen {{ background: #000; mix-blend-mode: screen; }}
-                u + .body .gmail-blend-difference {{ background: #000; mix-blend-mode: difference; }}
-
                 /* Outlook Web Force */
                 [data-ogsb] .email-wrapper {{ background-color: {BackgroundLight} !important; }}
                 [data-ogsb] .white-card {{ background-color: #FFFFFF !important; }}
@@ -352,11 +348,8 @@ public static class BookingEmail
             <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' class='email-wrapper' style='background-color: {BackgroundLight}; width: 100%; padding: 36px 0;'>
                 <tr>
                     <td align='center'>
-                        <!-- START GMAIL BLEND HACK WRAPPER -->
-                        <div class='gmail-blend-screen'>
-                            <div class='gmail-blend-difference'>
-                                <!-- Main Luxury Card Container with 2px Solid Gold Frame -->
-                                <table role='presentation' class='email-container white-card' width='600' cellspacing='0' cellpadding='0' border='0' style='width: 600px; max-width: 600px; background-color: #FFFFFF; border-radius: 20px; overflow: hidden; border: 2px solid {BorderGold}; box-shadow: 0 14px 40px rgba(6,45,77,0.1);'>
+                        <!-- Main Luxury Card Container with 2px Solid Gold Frame -->
+                        <table role='presentation' class='email-container white-card' width='600' cellspacing='0' cellpadding='0' border='0' style='width: 600px; max-width: 600px; background-color: #FFFFFF; border-radius: 20px; overflow: hidden; border: 2px solid {BorderGold}; box-shadow: 0 14px 40px rgba(6,45,77,0.1);'>
                             
                             <!-- Luxury Header with Gold Crown Bar -->
                             <tr>
@@ -438,10 +431,8 @@ public static class BookingEmail
                                     </div>
                                 </td>
                             </tr>
+
                         </table>
-                        <!-- END GMAIL BLEND HACK WRAPPER -->
-                            </div>
-                        </div>
                     </td>
                 </tr>
             </table>
