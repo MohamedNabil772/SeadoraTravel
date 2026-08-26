@@ -4,10 +4,10 @@ import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/features/auth/store/auth'
 import { Mail, Lock, Eye, EyeOff, ShieldCheck, AlertCircle, ArrowRight, Sparkles } from 'lucide-vue-next'
 
-const email = ref('admin@seadoratravel.com')
-const password = ref('Admin123!')
+const email = ref('')
+const password = ref('')
 const showPassword = ref(false)
-const rememberMe = ref(true)
+const rememberMe = ref(false)
 const error = ref('')
 const loading = ref(false)
 
