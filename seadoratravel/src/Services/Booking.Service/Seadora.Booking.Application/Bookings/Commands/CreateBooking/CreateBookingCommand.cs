@@ -21,6 +21,7 @@ public record CreateBookingCommand(
     bool HotelPickup = false,
     Guid? PackageId = null,
     decimal TotalPrice = 0,
+    string? Language = "en",
     List<BookingAddonSnapshot>? SelectedAddons = null,
     List<GuestDetailDto>? GuestsList = null
 ) : IRequest<Guid>;
@@ -108,6 +109,7 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
             HotelPickup = request.HotelPickup,
             PackageId = request.PackageId,
             TotalPrice = request.TotalPrice,
+            Language = string.IsNullOrWhiteSpace(request.Language) ? "en" : request.Language.ToLowerInvariant().Trim(),
             SelectedAddons = request.SelectedAddons ?? new(),
             GuestsList = guestsListDomain,
             BookingDate = DateTime.UtcNow,

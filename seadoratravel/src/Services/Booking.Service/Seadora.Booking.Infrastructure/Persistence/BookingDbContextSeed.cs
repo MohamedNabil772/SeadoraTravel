@@ -69,6 +69,7 @@ public static class BookingDbContextSeed
             ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""HotelPickup"" boolean DEFAULT false;
             ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""PackageId"" uuid NULL;
             ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""TotalPrice"" numeric DEFAULT 0;
+            ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""Language"" text DEFAULT 'en';
             ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""SelectedAddons"" jsonb DEFAULT '[]'::jsonb;
             ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""GuestsList"" jsonb DEFAULT '[]'::jsonb;
         ");

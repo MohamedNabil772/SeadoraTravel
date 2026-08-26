@@ -1208,6 +1208,7 @@ const confirmBooking = async () => {
       tourDate: selectedDate.value,
       guests: adultsCount.value + childrenCount.value,
       totalPrice: rawTotalPriceEur.value,
+      language: locale.value || 'en',
       hotelPickup: true,
       selectedAddons: addonsPayload,
       guestsList: guestInfoFormRef.value?.guests?.map((g: any) => ({

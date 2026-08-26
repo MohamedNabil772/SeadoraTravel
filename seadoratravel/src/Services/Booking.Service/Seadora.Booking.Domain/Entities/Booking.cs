@@ -26,6 +26,7 @@ public class Booking
     public bool HotelPickup { get; set; }
     public Guid? PackageId { get; set; }
     public decimal TotalPrice { get; set; }
+    public string Language { get; set; } = "en";
     public List<BookingAddonSnapshot> SelectedAddons { get; set; } = new();
     public List<GuestDetail> GuestsList { get; set; } = new();
 }
