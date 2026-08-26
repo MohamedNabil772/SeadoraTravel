@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Seadora.Content.Domain.Entities;
+using Seadora.Contracts.Enums;
 using System.Linq;
 
 namespace Seadora.Content.Infrastructure.Persistence;
@@ -114,6 +115,12 @@ public static class ContentSeeder
                 ""Order"" integer NOT NULL DEFAULT 0,
                 ""IsActive"" boolean NOT NULL DEFAULT true
             );
+            ALTER TABLE ""TourTypes"" ADD COLUMN IF NOT EXISTS ""AllocationModel"" integer NOT NULL DEFAULT 0;
+            ALTER TABLE ""TourTypes"" ADD COLUMN IF NOT EXISTS ""DefaultMinCapacity"" integer NULL;
+            ALTER TABLE ""TourTypes"" ADD COLUMN IF NOT EXISTS ""DefaultMaxCapacity"" integer NULL;
+            ALTER TABLE ""TourTypes"" ADD COLUMN IF NOT EXISTS ""RequiresGuestDetails"" boolean NOT NULL DEFAULT false;
+            ALTER TABLE ""TourTypes"" ADD COLUMN IF NOT EXISTS ""RequiresPassport"" boolean NOT NULL DEFAULT false;
+            ALTER TABLE ""TourTypes"" ADD COLUMN IF NOT EXISTS ""PayLaterAllowed"" boolean NOT NULL DEFAULT true;
             CREATE UNIQUE INDEX IF NOT EXISTS ""IX_TourTypes_Code"" ON ""TourTypes"" (""Code"");
         ");
 
@@ -130,7 +137,13 @@ public static class ContentSeeder
                     Order = 1,
                     IsActive = true,
                     Names = new Dictionary<string, string> { { "en", "Group Tour" }, { "de", "Gruppentour" }, { "it", "Tour di Gruppo" }, { "fr", "Visite en Groupe" }, { "ru", "Групповой Тур" } },
-                    Descriptions = new Dictionary<string, string> { { "en", "Shared guided excursion with fellow travelers." } }
+                    Descriptions = new Dictionary<string, string> { { "en", "Shared guided excursion with fellow travelers." } },
+                    AllocationModel = AllocationModel.Shared,
+                    DefaultMinCapacity = 1,
+                    DefaultMaxCapacity = 30,
+                    RequiresGuestDetails = true,
+                    RequiresPassport = false,
+                    PayLaterAllowed = true
                 },
                 new TourType
                 {
@@ -140,7 +153,13 @@ public static class ContentSeeder
                     Order = 2,
                     IsActive = true,
                     Names = new Dictionary<string, string> { { "en", "Private Tour" }, { "de", "Privattour" }, { "it", "Tour Privato" }, { "fr", "Visite Privée" }, { "ru", "Индивидуальный Тур" } },
-                    Descriptions = new Dictionary<string, string> { { "en", "Exclusive tour with dedicated guide and private transportation." } }
+                    Descriptions = new Dictionary<string, string> { { "en", "Exclusive tour with dedicated guide and private transportation." } },
+                    AllocationModel = AllocationModel.WholeUnit,
+                    DefaultMinCapacity = 1,
+                    DefaultMaxCapacity = 12,
+                    RequiresGuestDetails = true,
+                    RequiresPassport = false,
+                    PayLaterAllowed = true
                 },
                 new TourType
                 {
@@ -150,7 +169,13 @@ public static class ContentSeeder
                     Order = 3,
                     IsActive = true,
                     Names = new Dictionary<string, string> { { "en", "VIP Luxury Excursion" }, { "de", "VIP Luxus Exkursion" }, { "it", "Escursione VIP di Lusso" }, { "fr", "Excursion VIP de Luxe" }, { "ru", "VIP Люкс Экскурсия" } },
-                    Descriptions = new Dictionary<string, string> { { "en", "Premium bespoke luxury experience with white-glove concierge services." } }
+                    Descriptions = new Dictionary<string, string> { { "en", "Premium bespoke luxury experience with white-glove concierge services." } },
+                    AllocationModel = AllocationModel.WholeUnit,
+                    DefaultMinCapacity = 1,
+                    DefaultMaxCapacity = 8,
+                    RequiresGuestDetails = true,
+                    RequiresPassport = false,
+                    PayLaterAllowed = false
                 },
                 new TourType
                 {
@@ -160,7 +185,13 @@ public static class ContentSeeder
                     Order = 4,
                     IsActive = true,
                     Names = new Dictionary<string, string> { { "en", "Yacht & Boat Charter" }, { "de", "Yacht- & Bootscharter" }, { "it", "Noleggio Yacht e Barche" }, { "fr", "Location de Yacht et Bateau" }, { "ru", "Аренда Яхт и Катеров" } },
-                    Descriptions = new Dictionary<string, string> { { "en", "Private or premium sea cruising, island hopping, and marine excursions." } }
+                    Descriptions = new Dictionary<string, string> { { "en", "Private or premium sea cruising, island hopping, and marine excursions." } },
+                    AllocationModel = AllocationModel.WholeUnit,
+                    DefaultMinCapacity = 1,
+                    DefaultMaxCapacity = 12,
+                    RequiresGuestDetails = true,
+                    RequiresPassport = false,
+                    PayLaterAllowed = false
                 },
                 new TourType
                 {
@@ -170,7 +201,14 @@ public static class ContentSeeder
                     Order = 5,
                     IsActive = true,
                     Names = new Dictionary<string, string> { { "en", "Shore Excursion" }, { "de", "Landausflug" }, { "it", "Escursione a Terra" }, { "fr", "Excursion à Terre" }, { "ru", "Береговая Экскурсия" } },
-                    Descriptions = new Dictionary<string, string> { { "en", "Tailored cruise ship port excursions with guaranteed on-time return." } }
+                    Descriptions = new Dictionary<string, string> { { "en", "Tailored cruise ship port excursions with guaranteed on-time return." } },
+                    // ponytail: passport required - cruise pier pickups need document checks.
+                    AllocationModel = AllocationModel.Shared,
+                    DefaultMinCapacity = 1,
+                    DefaultMaxCapacity = 30,
+                    RequiresGuestDetails = true,
+                    RequiresPassport = true,
+                    PayLaterAllowed = true
                 },
                 new TourType
                 {
@@ -180,7 +218,14 @@ public static class ContentSeeder
                     Order = 6,
                     IsActive = true,
                     Names = new Dictionary<string, string> { { "en", "Multi-Day Expedition" }, { "de", "Mehrtägige Expedition" }, { "it", "Spedizione di Più Giorni" }, { "fr", "Expédition Multi-Jours" }, { "ru", "Многодневная Экспедиция" } },
-                    Descriptions = new Dictionary<string, string> { { "en", "Immersive comprehensive travel journeys spanning multiple days." } }
+                    Descriptions = new Dictionary<string, string> { { "en", "Immersive comprehensive travel journeys spanning multiple days." } },
+                    // ponytail: WholeUnit - multi-day itineraries are sold as a whole departure; passport needed for hotel check-in.
+                    AllocationModel = AllocationModel.WholeUnit,
+                    DefaultMinCapacity = 2,
+                    DefaultMaxCapacity = 16,
+                    RequiresGuestDetails = true,
+                    RequiresPassport = true,
+                    PayLaterAllowed = false
                 }
             };
             context.TourTypes.AddRange(defaultTourTypes);

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Seadora.Content.Application.Common.Interfaces;
 using Seadora.Content.Domain.Entities;
+using Seadora.Contracts.Enums;
 
 namespace Seadora.Content.API.Controllers;
 
@@ -61,6 +62,11 @@ public class TourTypesController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateTourTypeRequest request)
     {
+        if (InvalidCapacityRange(request.DefaultMinCapacity, request.DefaultMaxCapacity))
+        {
+            return BadRequest(new { message = "DefaultMaxCapacity must be greater than or equal to DefaultMinCapacity." });
+        }
+
         var entity = new TourType
         {
             Id = Guid.NewGuid(),
@@ -71,6 +77,8 @@ public class TourTypesController : ControllerBase
             Names = request.Names ?? new Dictionary<string, string>(),
             Descriptions = request.Descriptions ?? new Dictionary<string, string>()
         };
+
+        ApplyPolicy(entity, request);
 
         if (string.IsNullOrWhiteSpace(entity.Code))
         {
@@ -88,6 +96,13 @@ public class TourTypesController : ControllerBase
         var entity = await _context.TourTypes.FirstOrDefaultAsync(t => t.Id == id);
         if (entity == null) return NotFound();
 
+        var newMin = request.DefaultMinCapacity ?? entity.DefaultMinCapacity;
+        var newMax = request.DefaultMaxCapacity ?? entity.DefaultMaxCapacity;
+        if (InvalidCapacityRange(newMin, newMax))
+        {
+            return BadRequest(new { message = "DefaultMaxCapacity must be greater than or equal to DefaultMinCapacity." });
+        }
+
         if (!string.IsNullOrWhiteSpace(request.Code))
         {
             entity.Code = request.Code.Trim().ToUpperInvariant();
@@ -100,6 +115,8 @@ public class TourTypesController : ControllerBase
         entity.IsActive = request.IsActive;
         if (request.Names != null) entity.Names = request.Names;
         if (request.Descriptions != null) entity.Descriptions = request.Descriptions;
+
+        ApplyPolicy(entity, request);
 
         await _context.SaveChangesAsync(HttpContext.RequestAborted);
         return Ok(entity);
@@ -115,9 +132,33 @@ public class TourTypesController : ControllerBase
         await _context.SaveChangesAsync(HttpContext.RequestAborted);
         return NoContent();
     }
+
+    private static bool InvalidCapacityRange(int? min, int? max) =>
+        min.HasValue && max.HasValue && max.Value < min.Value;
+
+    // ponytail: nulls mean "leave as-is" so partial updates never wipe policy values.
+    private static void ApplyPolicy(TourType entity, TourTypePolicyFields p)
+    {
+        if (p.AllocationModel.HasValue) entity.AllocationModel = p.AllocationModel.Value;
+        if (p.DefaultMinCapacity.HasValue) entity.DefaultMinCapacity = p.DefaultMinCapacity.Value;
+        if (p.DefaultMaxCapacity.HasValue) entity.DefaultMaxCapacity = p.DefaultMaxCapacity.Value;
+        if (p.RequiresGuestDetails.HasValue) entity.RequiresGuestDetails = p.RequiresGuestDetails.Value;
+        if (p.RequiresPassport.HasValue) entity.RequiresPassport = p.RequiresPassport.Value;
+        if (p.PayLaterAllowed.HasValue) entity.PayLaterAllowed = p.PayLaterAllowed.Value;
+    }
 }
 
-public class CreateTourTypeRequest
+public class TourTypePolicyFields
+{
+    public AllocationModel? AllocationModel { get; set; }
+    public int? DefaultMinCapacity { get; set; }
+    public int? DefaultMaxCapacity { get; set; }
+    public bool? RequiresGuestDetails { get; set; }
+    public bool? RequiresPassport { get; set; }
+    public bool? PayLaterAllowed { get; set; }
+}
+
+public class CreateTourTypeRequest : TourTypePolicyFields
 {
     public string? Code { get; set; }
     public string? Icon { get; set; }
@@ -127,7 +168,7 @@ public class CreateTourTypeRequest
     public Dictionary<string, string>? Descriptions { get; set; }
 }
 
-public class UpdateTourTypeRequest
+public class UpdateTourTypeRequest : TourTypePolicyFields
 {
     public string? Code { get; set; }
     public string? Icon { get; set; }

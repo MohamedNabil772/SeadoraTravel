@@ -59,6 +59,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ApiGateway", "ApiGateway", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seadora.ApiGateway", "src\ApiGateway\Seadora.ApiGateway.csproj", "{EAF36ADB-E28F-46DC-A520-3C5A382D1F46}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Seadora.Contracts", "src\Services\Common\Seadora.Contracts\Seadora.Contracts.csproj", "{F794B743-3275-495D-AA3C-B3830D7A8795}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -273,6 +275,18 @@ Global
 		{EAF36ADB-E28F-46DC-A520-3C5A382D1F46}.Release|x64.Build.0 = Release|Any CPU
 		{EAF36ADB-E28F-46DC-A520-3C5A382D1F46}.Release|x86.ActiveCfg = Release|Any CPU
 		{EAF36ADB-E28F-46DC-A520-3C5A382D1F46}.Release|x86.Build.0 = Release|Any CPU
+		{F794B743-3275-495D-AA3C-B3830D7A8795}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F794B743-3275-495D-AA3C-B3830D7A8795}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F794B743-3275-495D-AA3C-B3830D7A8795}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{F794B743-3275-495D-AA3C-B3830D7A8795}.Debug|x64.Build.0 = Debug|Any CPU
+		{F794B743-3275-495D-AA3C-B3830D7A8795}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{F794B743-3275-495D-AA3C-B3830D7A8795}.Debug|x86.Build.0 = Debug|Any CPU
+		{F794B743-3275-495D-AA3C-B3830D7A8795}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F794B743-3275-495D-AA3C-B3830D7A8795}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F794B743-3275-495D-AA3C-B3830D7A8795}.Release|x64.ActiveCfg = Release|Any CPU
+		{F794B743-3275-495D-AA3C-B3830D7A8795}.Release|x64.Build.0 = Release|Any CPU
+		{F794B743-3275-495D-AA3C-B3830D7A8795}.Release|x86.ActiveCfg = Release|Any CPU
+		{F794B743-3275-495D-AA3C-B3830D7A8795}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -304,5 +318,6 @@ Global
 		{D19F4A71-6E87-4336-9A09-E341784468E1} = {05E3E03A-C0FA-C63B-A943-54F23E811AD3}
 		{FCA01246-F2C6-0AA7-D43F-FD13BE0B9D88} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{EAF36ADB-E28F-46DC-A520-3C5A382D1F46} = {FCA01246-F2C6-0AA7-D43F-FD13BE0B9D88}
+		{F794B743-3275-495D-AA3C-B3830D7A8795} = {E5E1B1E5-C062-F6BA-03D2-91D8175BF75B}
 	EndGlobalSection
 EndGlobal
