@@ -273,13 +273,20 @@ public static class BookingEmail
 
         return $@"
         <!DOCTYPE html>
-        <html lang='en'>
+        <html lang='en' xmlns='http://www.w3.org/1999/xhtml' xmlns:v='urn:schemas-microsoft-com:vml' xmlns:o='urn:schemas-microsoft-com:office:office'>
         <head>
             <meta charset='UTF-8'>
             <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+            <meta name='color-scheme' content='light dark'>
+            <meta name='supported-color-schemes' content='light dark'>
             <title>{title}</title>
             <style>
+                :root {{
+                    color-scheme: light dark;
+                    supported-color-schemes: light dark;
+                }}
                 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,400&family=Jost:wght@400;500;600;700&display=swap');
+                
                 body {{
                     margin: 0;
                     padding: 0;
@@ -290,6 +297,31 @@ public static class BookingEmail
                 }}
                 table {{ border-collapse: separate; }}
                 a {{ text-decoration: none; }}
+                
+                /* --- DARK MODE EXPLICIT OVERRIDES --- */
+                @media (prefers-color-scheme: dark) {{
+                    /* Backgrounds */
+                    body, .body-bg, .email-bg {{ background-color: #0b0f19 !important; }}
+                    .email-container, .card-bg {{ background-color: #111827 !important; border-color: #1f2937 !important; }}
+                    .header-bg {{ background-color: #06152B !important; }} /* Maintain luxury navy */
+                    .voucher-card {{ background-color: #111827 !important; border-color: {GoldPrimary} !important; }}
+                    .footer-bg {{ background-color: #06152B !important; border-top-color: rgba(212,175,55,0.3) !important; }}
+                    .info-box {{ background-color: #1f2937 !important; border-color: #374151 !important; }}
+                    
+                    /* Typography Contrast */
+                    body, p, span, td, .dark-text {{ color: #e5e7eb !important; }}
+                    h1, h2, h3, h4, .dark-heading {{ color: #F5D77F !important; }}
+                    .dark-muted {{ color: #9ca3af !important; }}
+                    .dark-brand {{ color: #D4AF37 !important; }}
+                }}
+                
+                /* Outlook.com / OWA specific selectors */
+                [data-ogsb] .body-bg, [data-ogsb] .email-bg {{ background-color: #0b0f19 !important; }}
+                [data-ogsb] .email-container, [data-ogsb] .card-bg {{ background-color: #111827 !important; border-color: #1f2937 !important; }}
+                [data-ogsc] .dark-text, [data-ogsc] p, [data-ogsc] span {{ color: #e5e7eb !important; }}
+                [data-ogsc] .dark-heading {{ color: #F5D77F !important; }}
+                [data-ogsc] .dark-muted {{ color: #9ca3af !important; }}
+
                 @media only screen and (max-width: 620px) {{
                     .email-container {{ width: 100% !important; border-radius: 0 !important; }}
                     .mobile-p-20 {{ padding: 24px 18px !important; }}
