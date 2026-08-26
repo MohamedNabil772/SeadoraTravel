@@ -484,7 +484,7 @@ public static class BookingEmail
                     <ul style='margin: 0; padding-left: 18px; font-size: 13px; color: {TextCharcoal}; line-height: 1.6;'>");
             foreach (var addon in booking.SelectedAddons)
             {
-                sb.Append($"<li style='margin-bottom: 4px;'>{addon.Name} — <strong>${addon.Price:N2}</strong></li>");
+                sb.Append($"<li style='margin-bottom: 4px;'>{addon.Title} — <strong>${addon.TotalPrice:N2}</strong></li>");
             }
             sb.Append("</ul></div>");
         }
