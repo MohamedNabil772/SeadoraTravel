@@ -133,6 +133,23 @@
             </div>
           </div>
 
+          <!-- Package Tier -->
+          <div class="space-y-1.5">
+            <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wide">
+              Package Tier
+            </label>
+            <select 
+              v-model="pkg.tier" 
+              class="w-full px-3.5 py-2 text-sm border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
+            >
+              <option value="Standard">Standard Tier</option>
+              <option value="Deluxe">Deluxe Tier</option>
+              <option value="VIP">VIP Luxury Tier</option>
+              <option value="Private">Private Charter Tier</option>
+              <option value="Custom">Custom / Bespoke</option>
+            </select>
+          </div>
+
           <!-- Badge / Tag -->
           <div class="space-y-1.5">
             <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wide">
@@ -258,6 +275,7 @@ const addPackage = () => {
     id: crypto.randomUUID ? crypto.randomUUID() : `pkg_${Date.now()}`,
     titles: {} as Record<string, string>,
     descriptions: {} as Record<string, string>,
+    tier: 'Standard',
     badge: '',
     price: form.value.price || 0,
     features: {} as Record<string, string | string[]>

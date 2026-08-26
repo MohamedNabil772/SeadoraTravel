@@ -12,7 +12,22 @@ public class GetCategoriesQueryHandler(IContentDbContext context) : IRequestHand
 {
     public async Task<List<CategoryDto>> Handle(GetCategoriesQuery request, CancellationToken cancellationToken)
     {
-        var categories = await context.Categories.OrderBy(c => c.Order).ToListAsync(cancellationToken);
-        return categories.Adapt<List<CategoryDto>>();
+        var categories = await context.Categories
+            .AsNoTracking()
+            .OrderBy(c => c.Order)
+            .Select(c => new CategoryDto
+            {
+                Id = c.Id,
+                Names = c.Names,
+                Descriptions = c.Descriptions,
+                IconName = c.IconName,
+                CustomIconUrl = c.CustomIconUrl,
+                Order = c.Order,
+                CoverImageUrl = c.CoverImageUrl,
+                TourCount = context.Tours.Count(t => t.CategoryId == c.Id)
+            })
+            .ToListAsync(cancellationToken);
+
+        return categories;
     }
 }

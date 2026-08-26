@@ -101,7 +101,119 @@ public static class ContentSeeder
             ALTER TABLE ""Tours"" ADD COLUMN IF NOT EXISTS ""PickupTimeType"" text DEFAULT 'FixedSlots';
             ALTER TABLE ""Tours"" ADD COLUMN IF NOT EXISTS ""OriginalPrice"" numeric NULL;
             ALTER TABLE ""Tours"" ADD COLUMN IF NOT EXISTS ""DiscountPercentage"" numeric NULL;
+            ALTER TABLE ""Tours"" ADD COLUMN IF NOT EXISTS ""TourTypeId"" uuid NULL;
+            ALTER TABLE ""Tours"" ADD COLUMN IF NOT EXISTS ""GroupMinCapacity"" integer NULL DEFAULT 1;
+            ALTER TABLE ""Tours"" ADD COLUMN IF NOT EXISTS ""GroupMaxCapacity"" integer NULL DEFAULT 20;
+
+            CREATE TABLE IF NOT EXISTS ""TourTypes"" (
+                ""Id"" uuid NOT NULL PRIMARY KEY,
+                ""Code"" text NOT NULL,
+                ""Names"" jsonb NOT NULL DEFAULT '{{}}',
+                ""Descriptions"" jsonb NOT NULL DEFAULT '{{}}',
+                ""Icon"" text NOT NULL DEFAULT '⛵',
+                ""Order"" integer NOT NULL DEFAULT 0,
+                ""IsActive"" boolean NOT NULL DEFAULT true
+            );
+            CREATE UNIQUE INDEX IF NOT EXISTS ""IX_TourTypes_Code"" ON ""TourTypes"" (""Code"");
         ");
+
+        // Seed Tour Types
+        if (!await context.TourTypes.AnyAsync())
+        {
+            var defaultTourTypes = new List<TourType>
+            {
+                new TourType
+                {
+                    Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
+                    Code = "GROUP",
+                    Icon = "⛵",
+                    Order = 1,
+                    IsActive = true,
+                    Names = new Dictionary<string, string> { { "en", "Group Tour" }, { "de", "Gruppentour" }, { "it", "Tour di Gruppo" }, { "fr", "Visite en Groupe" }, { "ru", "Групповой Тур" } },
+                    Descriptions = new Dictionary<string, string> { { "en", "Shared guided excursion with fellow travelers." } }
+                },
+                new TourType
+                {
+                    Id = Guid.Parse("22222222-2222-2222-2222-222222222222"),
+                    Code = "PRIVATE",
+                    Icon = "👑",
+                    Order = 2,
+                    IsActive = true,
+                    Names = new Dictionary<string, string> { { "en", "Private Tour" }, { "de", "Privattour" }, { "it", "Tour Privato" }, { "fr", "Visite Privée" }, { "ru", "Индивидуальный Тур" } },
+                    Descriptions = new Dictionary<string, string> { { "en", "Exclusive tour with dedicated guide and private transportation." } }
+                },
+                new TourType
+                {
+                    Id = Guid.Parse("33333333-3333-3333-3333-333333333333"),
+                    Code = "VIP",
+                    Icon = "✨",
+                    Order = 3,
+                    IsActive = true,
+                    Names = new Dictionary<string, string> { { "en", "VIP Luxury Excursion" }, { "de", "VIP Luxus Exkursion" }, { "it", "Escursione VIP di Lusso" }, { "fr", "Excursion VIP de Luxe" }, { "ru", "VIP Люкс Экскурсия" } },
+                    Descriptions = new Dictionary<string, string> { { "en", "Premium bespoke luxury experience with white-glove concierge services." } }
+                },
+                new TourType
+                {
+                    Id = Guid.Parse("44444444-4444-4444-4444-444444444444"),
+                    Code = "YACHT",
+                    Icon = "🛥️",
+                    Order = 4,
+                    IsActive = true,
+                    Names = new Dictionary<string, string> { { "en", "Yacht & Boat Charter" }, { "de", "Yacht- & Bootscharter" }, { "it", "Noleggio Yacht e Barche" }, { "fr", "Location de Yacht et Bateau" }, { "ru", "Аренда Яхт и Катеров" } },
+                    Descriptions = new Dictionary<string, string> { { "en", "Private or premium sea cruising, island hopping, and marine excursions." } }
+                },
+                new TourType
+                {
+                    Id = Guid.Parse("55555555-5555-5555-5555-555555555555"),
+                    Code = "SHORE_EXCURSION",
+                    Icon = "⚓",
+                    Order = 5,
+                    IsActive = true,
+                    Names = new Dictionary<string, string> { { "en", "Shore Excursion" }, { "de", "Landausflug" }, { "it", "Escursione a Terra" }, { "fr", "Excursion à Terre" }, { "ru", "Береговая Экскурсия" } },
+                    Descriptions = new Dictionary<string, string> { { "en", "Tailored cruise ship port excursions with guaranteed on-time return." } }
+                },
+                new TourType
+                {
+                    Id = Guid.Parse("66666666-6666-6666-6666-666666666666"),
+                    Code = "MULTI_DAY",
+                    Icon = "🏔️",
+                    Order = 6,
+                    IsActive = true,
+                    Names = new Dictionary<string, string> { { "en", "Multi-Day Expedition" }, { "de", "Mehrtägige Expedition" }, { "it", "Spedizione di Più Giorni" }, { "fr", "Expédition Multi-Jours" }, { "ru", "Многодневная Экспедиция" } },
+                    Descriptions = new Dictionary<string, string> { { "en", "Immersive comprehensive travel journeys spanning multiple days." } }
+                }
+            };
+            context.TourTypes.AddRange(defaultTourTypes);
+            await context.SaveChangesAsync();
+        }
+
+        // Ensure all seeded tours have TourTypeId populated so counts and badges reflect in the grids
+        var unlinkedTours = await context.Tours.Where(t => t.TourTypeId == null).ToListAsync();
+        if (unlinkedTours.Any())
+        {
+            var groupTypeId = Guid.Parse("11111111-1111-1111-1111-111111111111");
+            var privateTypeId = Guid.Parse("22222222-2222-2222-2222-222222222222");
+            var vipTypeId = Guid.Parse("33333333-3333-3333-3333-333333333333");
+            var yachtTypeId = Guid.Parse("44444444-4444-4444-4444-444444444444");
+            var shoreTypeId = Guid.Parse("55555555-5555-5555-5555-555555555555");
+            var multiDayTypeId = Guid.Parse("66666666-6666-6666-6666-666666666666");
+
+            foreach (var tour in unlinkedTours)
+            {
+                var title = tour.Names?.GetValueOrDefault("en")?.ToLowerInvariant() ?? "";
+                if (title.Contains("vip") || title.Contains("luxury"))
+                    tour.TourTypeId = vipTypeId;
+                else if (title.Contains("yacht") || title.Contains("boat") || title.Contains("submarine") || title.Contains("parasailing"))
+                    tour.TourTypeId = yachtTypeId;
+                else if (title.Contains("private") || title.Contains("balloon"))
+                    tour.TourTypeId = privateTypeId;
+                else if (title.Contains("simbel") || title.Contains("expedition"))
+                    tour.TourTypeId = multiDayTypeId;
+                else
+                    tour.TourTypeId = groupTypeId;
+            }
+            await context.SaveChangesAsync();
+        }
 
         if (await context.Categories.AnyAsync()) return;
 

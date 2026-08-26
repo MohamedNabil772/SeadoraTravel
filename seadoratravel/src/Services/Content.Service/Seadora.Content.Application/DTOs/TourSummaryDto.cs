@@ -23,4 +23,12 @@ public class TourSummaryDto
     public string MainImage { get; set; } = string.Empty;
     public string Duration { get; set; } = string.Empty;
     public List<string> Includes { get; set; } = new();
+    public int MaxAllocations { get; set; }
+    public int? GroupMinCapacity { get; set; }
+    public int? GroupMaxCapacity { get; set; }
+    public Guid? TourTypeId { get; set; }
+    public Guid? SupplierId { get; set; }
+    public decimal SupplierPercentage { get; set; }
+    public decimal? OriginalPrice { get; set; }
+    public decimal? DiscountPercentage { get; set; }
 }

@@ -22,9 +22,12 @@ public class TourDto
     
     public Guid DestinationId { get; set; }
     public Guid CategoryId { get; set; }
+    public Guid? TourTypeId { get; set; }
     public Guid? SupplierId { get; set; }
     public decimal SupplierPercentage { get; set; }
     public int MaxAllocations { get; set; }
+    public int? GroupMinCapacity { get; set; } = 1;
+    public int? GroupMaxCapacity { get; set; } = 20;
 
     // Additional Pricing & Discount Fields
     public decimal? OriginalPrice { get; set; }

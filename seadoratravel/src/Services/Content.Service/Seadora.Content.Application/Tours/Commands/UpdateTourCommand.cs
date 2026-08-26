@@ -13,43 +13,48 @@ namespace Seadora.Content.Application.Tours.Commands;
 
 public record UpdateTourCommand(
     Guid Id,
-    Dictionary<string, string> Names,
-    Dictionary<string, string> Descriptions,
-    Dictionary<string, string> Highlights,
-    decimal Price,
-    string Currency,
-    decimal? OriginalPrice,
-    decimal? DiscountPercentage,
-    string Duration,
-    string StartTime,
-    decimal Rating,
-    int ReviewCount,
-    string ImageUrl,
-    string Emoji,
-    string BgGradient,
-    string Badge,
-    Guid DestinationId,
-    Guid CategoryId,
-    Guid? SupplierId,
-    decimal SupplierPercentage,
-    int MaxAllocations,
-    bool IsTopRated,
-    bool IsBestseller,
-    bool IsInHighDemand,
-    bool ReserveAndPayLater,
-    bool HotelPickup,
-    bool FreeCancellation,
-    bool IsPrivateOption,
-    List<AdminTourPackageDto> Packages,
-    string PickupTimeType,
-    List<string> AvailablePickupTimes,
-    List<AdminItineraryDto> Itinerary,
-    List<AdminInclusionDto> Inclusions,
-    List<AdminInclusionDto> Exclusions,
-    AdminImportantInfoDto ImportantInfo,
-    List<AdminFaqDto> Faqs,
-    List<AdminAddonDto> Addons,
-    List<AdminMediaDto> Media
+    Dictionary<string, string>? Names = null,
+    Dictionary<string, string>? Descriptions = null,
+    Dictionary<string, string>? Highlights = null,
+    decimal Price = 0,
+    string? Currency = null,
+    decimal? OriginalPrice = null,
+    decimal? DiscountPercentage = null,
+    string? Duration = null,
+    string? StartTime = null,
+    decimal Rating = 0,
+    int ReviewCount = 0,
+    string? ImageUrl = null,
+    string? Emoji = null,
+    string? BgGradient = null,
+    string? Badge = null,
+    Guid DestinationId = default,
+    Guid CategoryId = default,
+    Guid? TourTypeId = null,
+    Guid? SupplierId = null,
+    decimal SupplierPercentage = 0,
+    int MaxAllocations = 20,
+    int? GroupMinCapacity = null,
+    int? GroupMaxCapacity = null,
+    bool IsTopRated = false,
+    bool IsBestseller = false,
+    bool IsInHighDemand = false,
+    bool ReserveAndPayLater = false,
+    bool HotelPickup = false,
+    bool FreeCancellation = false,
+    bool IsPrivateOption = false,
+    List<AdminTourPackageDto>? Packages = null,
+    string? PickupTimeType = null,
+    List<string>? AvailablePickupTimes = null,
+    List<AdminItineraryDto>? Itinerary = null,
+    List<AdminInclusionDto>? Inclusions = null,
+    List<AdminInclusionDto>? Exclusions = null,
+    AdminImportantInfoDto? ImportantInfo = null,
+    List<AdminFaqDto>? Faqs = null,
+    List<AdminAddonDto>? Addons = null,
+    List<AdminMediaDto>? Media = null,
+    List<string>? MediaUrls = null,
+    List<string>? Includes = null
 ) : IRequest<Unit>;
 
 public class UpdateTourCommandHandler : IRequestHandler<UpdateTourCommand, Unit>
@@ -64,29 +69,32 @@ public class UpdateTourCommandHandler : IRequestHandler<UpdateTourCommand, Unit>
     public async Task<Unit> Handle(UpdateTourCommand request, CancellationToken cancellationToken)
     {
         var tour = await _context.Tours.FirstOrDefaultAsync(t => t.Id == request.Id, cancellationToken);
-        if (tour == null) throw new KeyNotFoundException("Tour not found.");
-        if (request.Names == null || request.Names.Count == 0) throw new ArgumentException("Tour name is required.");
+        if (tour == null)
+            throw new KeyNotFoundException($"Tour with ID {request.Id} not found.");
 
-        tour.Names = request.Names;
-        tour.Descriptions = request.Descriptions ?? new Dictionary<string, string>();
-        tour.Highlights = request.Highlights ?? new Dictionary<string, string>();
-        tour.Price = request.Price;
-        tour.Currency = request.Currency ?? "EUR";
-        tour.OriginalPrice = request.OriginalPrice;
-        tour.DiscountPercentage = request.DiscountPercentage;
-        tour.Duration = request.Duration ?? string.Empty;
-        tour.StartTime = request.StartTime ?? string.Empty;
-        tour.Rating = request.Rating;
-        tour.ReviewCount = request.ReviewCount;
-        tour.ImageUrl = request.ImageUrl ?? string.Empty;
-        tour.Emoji = request.Emoji ?? string.Empty;
-        tour.BgGradient = request.BgGradient ?? string.Empty;
-        tour.Badge = request.Badge ?? string.Empty;
-        tour.DestinationId = request.DestinationId;
-        tour.CategoryId = request.CategoryId;
+        tour.Names = request.Names ?? tour.Names;
+        tour.Descriptions = request.Descriptions ?? tour.Descriptions;
+        tour.Highlights = request.Highlights ?? tour.Highlights;
+        if (request.Price > 0) tour.Price = request.Price;
+        tour.Currency = request.Currency ?? tour.Currency ?? "EUR";
+        if (request.OriginalPrice.HasValue) tour.OriginalPrice = request.OriginalPrice;
+        if (request.DiscountPercentage.HasValue) tour.DiscountPercentage = request.DiscountPercentage;
+        if (request.Duration != null) tour.Duration = request.Duration;
+        if (request.StartTime != null) tour.StartTime = request.StartTime;
+        if (request.Rating > 0) tour.Rating = request.Rating;
+        if (request.ReviewCount > 0) tour.ReviewCount = request.ReviewCount;
+        if (request.ImageUrl != null) tour.ImageUrl = request.ImageUrl;
+        if (request.Emoji != null) tour.Emoji = request.Emoji;
+        if (request.BgGradient != null) tour.BgGradient = request.BgGradient;
+        if (request.Badge != null) tour.Badge = request.Badge;
+        if (request.DestinationId != Guid.Empty) tour.DestinationId = request.DestinationId;
+        if (request.CategoryId != Guid.Empty) tour.CategoryId = request.CategoryId;
+        if (request.TourTypeId.HasValue) tour.TourTypeId = request.TourTypeId;
         tour.SupplierId = request.SupplierId;
         tour.SupplierPercentage = request.SupplierPercentage;
-        tour.MaxAllocations = request.MaxAllocations <= 0 ? 20 : request.MaxAllocations;
+        tour.MaxAllocations = request.MaxAllocations <= 0 ? (tour.MaxAllocations <= 0 ? 20 : tour.MaxAllocations) : request.MaxAllocations;
+        tour.GroupMinCapacity = request.GroupMinCapacity ?? tour.GroupMinCapacity;
+        tour.GroupMaxCapacity = request.GroupMaxCapacity ?? tour.GroupMaxCapacity;
         
         tour.IsTopRated = request.IsTopRated;
         tour.IsBestseller = request.IsBestseller;
@@ -96,50 +104,79 @@ public class UpdateTourCommandHandler : IRequestHandler<UpdateTourCommand, Unit>
         tour.FreeCancellation = request.FreeCancellation;
         tour.IsPrivateOption = request.IsPrivateOption;
         
-        tour.PickupTimeType = request.PickupTimeType ?? "FixedSlots";
-        tour.AvailablePickupTimes = request.AvailablePickupTimes ?? new List<string>();
+        if (request.PickupTimeType != null) tour.PickupTimeType = request.PickupTimeType;
+        if (request.AvailablePickupTimes != null) tour.AvailablePickupTimes = request.AvailablePickupTimes;
         
-        tour.MediaUrls = request.Media?.Select(m => m.Url).ToList() ?? new List<string>();
+        if (request.Media != null && request.Media.Count > 0)
+        {
+            tour.Media = request.Media.Select(m => new TourMedia {
+                Url = m.Url,
+                Captions = m.Captions ?? new Dictionary<string, string>()
+            }).ToList();
+            tour.MediaUrls = request.Media.Select(m => m.Url).ToList();
+        }
+        else if (request.MediaUrls != null)
+        {
+            tour.MediaUrls = request.MediaUrls;
+        }
 
-        tour.Packages = request.Packages?.Select(p => new TourPackage {
-            Id = p.Id != Guid.Empty ? p.Id : Guid.NewGuid(),
-            Titles = p.Titles ?? new Dictionary<string, string>(),
-            Descriptions = p.Descriptions ?? new Dictionary<string, string>(),
-            Price = p.Price,
-            Badge = p.Badge ?? string.Empty,
-            Features = p.Features ?? new Dictionary<string, string>()
-        }).ToList() ?? new List<TourPackage>();
+        if (request.Includes != null)
+        {
+            tour.Includes = request.Includes;
+        }
 
-        tour.Itinerary = request.Itinerary?.Select(i => new TourItinerary {
-            ItineraryType = i.ItineraryType,
-            DayNumber = i.DayNumber,
-            TimeString = i.TimeString,
-            Titles = i.Titles ?? new Dictionary<string, string>(),
-            Descriptions = i.Descriptions ?? new Dictionary<string, string>()
-        }).ToList() ?? new List<TourItinerary>();
+        if (request.Packages != null)
+        {
+            tour.Packages = request.Packages.Select(p => new TourPackage {
+                Id = p.Id != Guid.Empty ? p.Id : Guid.NewGuid(),
+                Titles = p.Titles ?? new Dictionary<string, string>(),
+                Descriptions = p.Descriptions ?? new Dictionary<string, string>(),
+                Price = p.Price,
+                Badge = p.Badge ?? string.Empty,
+                Features = p.Features ?? new Dictionary<string, string>()
+            }).ToList();
+        }
 
-        tour.Inclusions = request.Inclusions?.Select(i => new TourInclusion { Names = i.Names ?? new Dictionary<string, string>() }).ToList() ?? new List<TourInclusion>();
-        tour.Exclusions = request.Exclusions?.Select(e => new TourInclusion { Names = e.Names ?? new Dictionary<string, string>() }).ToList() ?? new List<TourInclusion>();
+        if (request.Itinerary != null)
+        {
+            tour.Itinerary = request.Itinerary.Select(i => new TourItinerary {
+                ItineraryType = i.ItineraryType,
+                DayNumber = i.DayNumber,
+                TimeString = i.TimeString,
+                Titles = i.Titles ?? new Dictionary<string, string>(),
+                Descriptions = i.Descriptions ?? new Dictionary<string, string>()
+            }).ToList();
+        }
 
-        tour.Faqs = request.Faqs?.Select(f => new TourFaq {
-            Questions = f.Questions ?? new Dictionary<string, string>(),
-            Answers = f.Answers ?? new Dictionary<string, string>()
-        }).ToList() ?? new List<TourFaq>();
+        if (request.Inclusions != null)
+        {
+            tour.Inclusions = request.Inclusions.Select(i => new TourInclusion { Names = i.Names ?? new Dictionary<string, string>() }).ToList();
+        }
+        if (request.Exclusions != null)
+        {
+            tour.Exclusions = request.Exclusions.Select(e => new TourInclusion { Names = e.Names ?? new Dictionary<string, string>() }).ToList();
+        }
 
-        tour.Addons = request.Addons?.Select(a => new TourAddon {
-            Id = a.Id != Guid.Empty ? a.Id : Guid.NewGuid(),
-            Names = a.Names ?? new Dictionary<string, string>(),
-            Descriptions = a.Descriptions ?? new Dictionary<string, string>(),
-            PriceEur = a.PriceEur,
-            IsPerPerson = a.IsPerPerson,
-            Icon = a.Icon ?? "✨",
-            Category = a.Category ?? "Optional"
-        }).ToList() ?? new List<TourAddon>();
+        if (request.Faqs != null)
+        {
+            tour.Faqs = request.Faqs.Select(f => new TourFaq {
+                Questions = f.Questions ?? new Dictionary<string, string>(),
+                Answers = f.Answers ?? new Dictionary<string, string>()
+            }).ToList();
+        }
 
-        tour.Media = request.Media?.Select(m => new TourMedia {
-            Url = m.Url,
-            Captions = m.Captions ?? new Dictionary<string, string>()
-        }).ToList() ?? new List<TourMedia>();
+        if (request.Addons != null)
+        {
+            tour.Addons = request.Addons.Select(a => new TourAddon {
+                Id = a.Id != Guid.Empty ? a.Id : Guid.NewGuid(),
+                Names = a.Names ?? new Dictionary<string, string>(),
+                Descriptions = a.Descriptions ?? new Dictionary<string, string>(),
+                PriceEur = a.PriceEur,
+                IsPerPerson = a.IsPerPerson,
+                Icon = a.Icon ?? "✨",
+                Category = a.Category ?? "Optional"
+            }).ToList();
+        }
 
         if (request.ImportantInfo != null)
         {
@@ -149,10 +186,6 @@ public class UpdateTourCommandHandler : IRequestHandler<UpdateTourCommand, Unit>
                 NotSuitableFor = request.ImportantInfo.NotSuitableFor ?? new(),
                 Notes = request.ImportantInfo.Notes ?? new()
             };
-        }
-        else 
-        {
-            tour.ImportantInformation = new ImportantInfo();
         }
 
         await _context.SaveChangesAsync(cancellationToken);

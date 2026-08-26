@@ -7,6 +7,8 @@ public class TourPackage
     public Dictionary<string, string> Descriptions { get; set; } = new();
     public decimal Price { get; set; }
     public string Badge { get; set; } = string.Empty;
+    public string Tier { get; set; } = "Standard"; // Standard, Deluxe, VIP, Private, Custom
+    public int? Capacity { get; set; }
     public Dictionary<string, string> Features { get; set; } = new();
 }
 

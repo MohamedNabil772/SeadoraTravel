@@ -37,6 +37,20 @@ public class UpdateBookingStatusCommandHandler : IRequestHandler<UpdateBookingSt
             throw new KeyNotFoundException("Booking not found.");
         }
 
+        if (request.Status == BookingStatus.Confirmed)
+        {
+            // Validation Rule: Booking cannot be confirmed until full payment is made and all customer identification/passports are provided
+            if (!booking.IsPaid)
+            {
+                throw new InvalidOperationException("Cannot confirm booking: Full payment is required before confirmation.");
+            }
+
+            if (booking.MissingIdentification)
+            {
+                throw new InvalidOperationException("Cannot confirm booking: Passenger identification or passport records are missing.");
+            }
+        }
+
         booking.Status = request.Status;
         await _context.SaveChangesAsync(cancellationToken);
 

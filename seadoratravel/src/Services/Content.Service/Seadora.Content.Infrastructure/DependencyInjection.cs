@@ -31,6 +31,8 @@ public static class DependencyInjection
         
         services.AddHttpClient<IExchangeRateService, Seadora.Content.Infrastructure.Services.ExchangeRateService>();
         
+        services.AddHostedService<Seadora.Content.Infrastructure.BackgroundServices.DailyExchangeRateSyncWorker>();
+        
         return services;
     }
 }

@@ -2,33 +2,51 @@
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/services/api'
-import ExcelImportModal from '../components/ExcelImportModal.vue'
+import ExcelImportExportModal from '@/shared/components/ExcelImportExportModal.vue'
+import LuxuryPagination from '@/shared/components/LuxuryPagination.vue'
 import { useConfirm } from '@/composables/useConfirm'
 import { useToast } from '@/composables/useToast'
+import { Plus } from 'lucide-vue-next'
 
 interface Tour {
   id: string
   names: Record<string, string>
-  descriptions: Record<string, string>
+  descriptions?: Record<string, string>
   price: number
   currency?: string
+  originalPrice?: number
+  discountPercentage?: number
   duration: string
-  includes: string[]
-  imageUrl: string
-  emoji: string
-  bgGradient: string
-  badge: string
-  destinationId: string
-  categoryId: string
+  startTime?: string
+  maxAllocations?: number
+  groupMaxCapacity?: number
+  includes?: string[]
+  imageUrl?: string
+  emoji?: string
+  bgGradient?: string
+  badge?: string
+  destinationId?: string
+  categoryId?: string
+  tourTypeId?: string
   supplierId?: string
   supplierPercentage?: number
+  isTopRated?: boolean
+  isBestseller?: boolean
+  isInHighDemand?: boolean
+  hotelPickup?: boolean
+  destinationName?: string
+  categoryName?: string
   destination?: {
     id: string
-    names: Record<string, string>
+    names?: Record<string, string>
+    flagEmoji?: string
+    flag?: string
   }
   category?: {
     id: string
-    names: Record<string, string>
+    names?: Record<string, string>
+    icon?: string
+    iconName?: string
   }
   supplier?: {
     id: string
@@ -46,13 +64,22 @@ interface Supplier {
 interface Destination {
   id: string
   names: Record<string, string>
-  flag: string
+  flagEmoji?: string
+  flag?: string
 }
 
 interface Category {
   id: string
   names: Record<string, string>
-  icon: string
+  icon?: string
+  iconName?: string
+}
+
+interface TourType {
+  id: string
+  names: Record<string, string>
+  icon?: string
+  code?: string
 }
 
 const router = useRouter()
@@ -61,12 +88,32 @@ const tours = ref<Tour[]>([])
 const destinations = ref<Destination[]>([])
 const categories = ref<Category[]>([])
 const suppliers = ref<Supplier[]>([])
+const tourTypes = ref<TourType[]>([])
 const loading = ref(true)
 const actionLoading = ref(false)
 
 const searchQuery = ref('')
 const selectedCategoryFilter = ref('all')
+const selectedDestinationFilter = ref('all')
+const selectedSupplierFilter = ref('all')
+const selectedTourTypeFilter = ref('all')
 const isExcelModalOpen = ref(false)
+
+const isAnyFilterActive = computed(() => {
+  return searchQuery.value !== '' || 
+         selectedCategoryFilter.value !== 'all' || 
+         selectedDestinationFilter.value !== 'all' ||
+         selectedSupplierFilter.value !== 'all' ||
+         selectedTourTypeFilter.value !== 'all'
+})
+
+function resetFilters() {
+  searchQuery.value = ''
+  selectedCategoryFilter.value = 'all'
+  selectedDestinationFilter.value = 'all'
+  selectedSupplierFilter.value = 'all'
+  selectedTourTypeFilter.value = 'all'
+}
 
 const durations = [
   { value: 'fullDay', label: 'Full Day' },
@@ -81,21 +128,20 @@ const durations = [
 async function loadData() {
   loading.value = true
   try {
-    const [toursRes, destsRes, catsRes, supsRes] = await Promise.allSettled([
+    const [toursRes, destsRes, catsRes, supsRes, typesRes] = await Promise.allSettled([
       api.get('/api/content/api/tours'),
       api.get('/api/content/api/destinations'),
       api.get('/api/content/api/categories'),
-      api.get('/api/content/api/suppliers')
+      api.get('/api/content/api/suppliers'),
+      api.get('/api/content/api/tour-types')
     ])
     
     tours.value = toursRes.status === 'fulfilled' ? (Array.isArray(toursRes.value.data) ? toursRes.value.data : (toursRes.value.data?.items || [])) : []
     destinations.value = destsRes.status === 'fulfilled' ? (Array.isArray(destsRes.value.data) ? destsRes.value.data : (destsRes.value.data?.items || [])) : []
     categories.value = catsRes.status === 'fulfilled' ? (Array.isArray(catsRes.value.data) ? catsRes.value.data : (catsRes.value.data?.items || [])) : []
     suppliers.value = supsRes.status === 'fulfilled' ? (Array.isArray(supsRes.value.data) ? supsRes.value.data : (supsRes.value.data?.items || [])) : []
+    tourTypes.value = typesRes.status === 'fulfilled' ? (Array.isArray(typesRes.value.data) ? typesRes.value.data : (typesRes.value.data?.items || [])) : []
 
-    if (toursRes.status === 'rejected' || destsRes.status === 'rejected' || catsRes.status === 'rejected' || supsRes.status === 'rejected') {
-      console.warn('Some endpoints failed to load, returning partial data.')
-    }
   } catch (e) {
     console.error('Failed to load tours dashboard data', e)
   } finally {
@@ -103,13 +149,87 @@ async function loadData() {
   }
 }
 
+// Lookup Resolvers for Related Data
+function getTourDestination(tour: Tour): { name: string, flag: string } {
+  if (tour.destination?.names?.en) {
+    return {
+      name: tour.destination.names.en,
+      flag: tour.destination.flagEmoji || tour.destination.flag || '📍'
+    }
+  }
+  if (tour.destinationId) {
+    const d = destinations.value.find(x => x.id === tour.destinationId)
+    if (d) {
+      return {
+        name: d.names?.en || 'Destination',
+        flag: d.flagEmoji || d.flag || '📍'
+      }
+    }
+  }
+  return {
+    name: tour.destinationName || '—',
+    flag: '📍'
+  }
+}
+
+function getTourCategory(tour: Tour): string {
+  if (tour.category?.names?.en) return tour.category.names.en
+  if (tour.categoryId) {
+    const c = categories.value.find(x => x.id === tour.categoryId)
+    if (c?.names?.en) return c.names.en
+  }
+  return tour.categoryName || 'General Tour'
+}
+
+function getTourTypeName(tour: Tour): string {
+  if (tour.tourTypeId) {
+    const tt = tourTypes.value.find(x => x.id === tour.tourTypeId)
+    if (tt?.names?.en) return tt.names.en
+  }
+  return 'VIP Experience'
+}
+
+function getTourSupplier(tour: Tour): { name: string, percent?: number } {
+  if (tour.supplier) {
+    return {
+      name: tour.supplier.nameEn || tour.supplier.nameAr || 'Partner',
+      percent: tour.supplierPercentage
+    }
+  }
+  if (tour.supplierId) {
+    const s = suppliers.value.find(x => x.id === tour.supplierId)
+    if (s) {
+      return {
+        name: s.nameEn || s.nameAr || 'Partner',
+        percent: tour.supplierPercentage
+      }
+    }
+  }
+  return {
+    name: 'Direct Operation',
+    percent: undefined
+  }
+}
+
 const filteredTours = computed(() => {
   return tours.value.filter(t => {
     const nameMatch = t.names?.en?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-                      t.names?.ru?.toLowerCase().includes(searchQuery.value.toLowerCase())
+                      t.names?.ru?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+                      t.names?.de?.toLowerCase().includes(searchQuery.value.toLowerCase())
     const catMatch = selectedCategoryFilter.value === 'all' || t.categoryId === selectedCategoryFilter.value
-    return nameMatch && catMatch
+    const destMatch = selectedDestinationFilter.value === 'all' || t.destinationId === selectedDestinationFilter.value
+    const supMatch = selectedSupplierFilter.value === 'all' || t.supplierId === selectedSupplierFilter.value
+    const typeMatch = selectedTourTypeFilter.value === 'all' || t.tourTypeId === selectedTourTypeFilter.value
+    return nameMatch && catMatch && destMatch && supMatch && typeMatch
   })
+})
+
+const currentPage = ref(1)
+const pageSize = ref(10)
+
+const paginatedTours = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  return filteredTours.value.slice(start, start + pageSize.value)
 })
 
 function getDurationLabel(d: string) {
@@ -156,56 +276,76 @@ function getCurrencySymbol(curr?: string) {
   return '€'
 }
 
-function handleExcelImport(file: File) {
-  console.log('Importing file:', file.name)
-  // Add implementation here later
-}
-
-function downloadTemplate() {
-  console.log('Downloading template...')
-}
-
-function exportTranslations() {
-  console.log('Exporting translations...')
-}
-
 function generatePDF() {
-  console.log('Generating PDF...')
+  const url = `${api.defaults.baseURL || ''}/api/content/api/admin/pdf/catalog`
+  window.open(url, '_blank')
+  toast.success('Generating PDF', 'Generating luxury QuestPDF catalog.')
 }
 
 onMounted(loadData)
 </script>
 
 <template>
-  <div class="posts-page">
+  <div class="tours-page">
     <div class="page-header">
-      <div>
+      <div class="header-content">
         <h2>Tours Management</h2>
         <p>Manage all tour packages, localizations, categories, and prices.</p>
       </div>
       <div class="header-actions">
-        <button @click="downloadTemplate" class="btn-secondary">📄 Template</button>
-        <button @click="isExcelModalOpen = true" class="btn-secondary">⬇️ Import</button>
-        <button @click="exportTranslations" class="btn-secondary">⬆️ Export</button>
-        <button @click="generatePDF" class="btn-secondary">📄 PDF Brochure</button>
-        <button @click="openCreateModal" class="btn-create">+ Add New Tour</button>
+        <button @click="isExcelModalOpen = true" class="btn-action-secondary">
+          <span>📊</span>
+          <span>Import / Export</span>
+        </button>
+        <button @click="generatePDF" class="btn-action-secondary" title="Download Luxury Printable Catalog">
+          <span>📄</span>
+          <span>Export Catalog (PDF)</span>
+        </button>
+        <button @click="openCreateModal" class="btn-create">
+          <Plus class="w-4 h-4" />
+          <span>Add Tour</span>
+        </button>
       </div>
     </div>
 
-    <!-- Filters -->
-    <div class="filters">
-      <input
-        v-model="searchQuery"
-        type="text"
-        placeholder="🔍 Search tours..."
-        class="search-input"
-      />
+    <!-- Filter Toolbar -->
+    <div class="filter-toolbar flex flex-wrap gap-3">
+      <div class="search-bar">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" v-model="searchQuery" placeholder="Search tours by name, destination, or keyword..." />
+      </div>
+      
+      <select v-model="selectedDestinationFilter" class="filter-select">
+        <option value="all">All Destinations</option>
+        <option v-for="dest in destinations" :key="dest.id" :value="dest.id">
+          {{ dest.names?.en || 'Unknown' }}
+        </option>
+      </select>
+
       <select v-model="selectedCategoryFilter" class="filter-select">
         <option value="all">All Categories</option>
         <option v-for="cat in categories" :key="cat.id" :value="cat.id">
-          {{ cat.icon }} {{ cat.names?.en || 'Unknown' }}
+          {{ cat.names?.en || 'Unknown' }}
         </option>
       </select>
+      
+      <select v-model="selectedTourTypeFilter" class="filter-select">
+        <option value="all">All Tour Types</option>
+        <option v-for="tt in tourTypes" :key="tt.id" :value="tt.id">
+          {{ tt.names?.en || 'Unknown' }}
+        </option>
+      </select>
+      
+      <select v-model="selectedSupplierFilter" class="filter-select">
+        <option value="all">All Suppliers</option>
+        <option v-for="sup in suppliers" :key="sup.id" :value="sup.id">
+          {{ sup.nameEn || sup.nameAr || 'Unknown' }}
+        </option>
+      </select>
+
+      <button v-if="isAnyFilterActive" @click="resetFilters" class="btn-action-secondary" title="Reset Filters">
+        Reset
+      </button>
     </div>
 
     <!-- Loading -->
@@ -219,43 +359,105 @@ onMounted(loadData)
       <table class="data-table">
         <thead>
           <tr>
-            <th>Tour</th>
+            <th>Experience</th>
             <th>Destination</th>
             <th>Category</th>
-            <th>Duration</th>
+            <th>Tour Type</th>
+            <th>Duration & Timing</th>
+            <th>Capacity</th>
             <th>Supplier</th>
             <th>Price</th>
-            <th>Actions</th>
+            <th align="right">Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="tour in filteredTours" :key="tour.id">
+          <tr v-for="tour in paginatedTours" :key="tour.id">
+            <!-- Experience / Tour Column -->
             <td>
               <div class="tour-cell">
-                <img v-if="tour.imageUrl" :src="tour.imageUrl" class="tour-thumb" alt="" />
-                <span v-else class="tour-emoji">{{ tour.emoji }}</span>
+                <img
+                  v-if="tour.imageUrl"
+                  :src="tour.imageUrl"
+                  class="tour-thumb"
+                  alt=""
+                  @error="tour.imageUrl = ''"
+                />
+                <span v-else class="tour-emoji">{{ tour.emoji || '✨' }}</span>
                 <div>
-                  <div class="tour-name">{{ tour.names?.en || 'Untitled' }}</div>
-                  <div class="tour-badge" v-if="tour.badge">{{ tour.badge }}</div>
+                  <div class="tour-name font-bold text-slate-900">{{ tour.names?.en || 'Untitled Tour' }}</div>
+                  <div class="flex items-center gap-1.5 mt-1">
+                    <span v-if="tour.badge" class="tour-badge">{{ tour.badge }}</span>
+                    <span v-if="tour.isBestseller" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200">★ Bestseller</span>
+                    <span v-if="tour.isTopRated" class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200">★ Top Rated</span>
+                  </div>
                 </div>
               </div>
             </td>
-            <td>{{ tour.destination?.names?.en || '—' }}</td>
+
+            <!-- Destination Column -->
             <td>
-              <span class="category-badge">{{ tour.category?.names?.en || '—' }}</span>
-            </td>
-            <td>{{ getDurationLabel(tour.duration) }}</td>
-            <td>
-              <div v-if="tour.supplier" style="font-size: 12px; color: #8eafc2;">
-                {{ tour.supplier.nameEn || tour.supplier.nameAr }} ({{ tour.supplierPercentage }}%)
+              <div class="flex items-center gap-1.5 text-xs font-semibold text-slate-800">
+                <span>{{ getTourDestination(tour).flag }}</span>
+                <span>{{ getTourDestination(tour).name }}</span>
               </div>
-              <div v-else style="font-size: 12px; color: rgba(255,255,255,0.3);">—</div>
             </td>
-            <td class="price-cell">{{ getCurrencySymbol(tour.currency) }}{{ tour.price }}</td>
+
+            <!-- Category Column -->
             <td>
-              <div class="actions">
-                <button @click="openEditModal(tour)" class="btn-edit-action" :disabled="actionLoading">✏️</button>
-                <button @click="deleteTour(tour.id)" class="btn-delete-action" :disabled="actionLoading">🗑️</button>
+              <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-800 border border-slate-200">
+                {{ getTourCategory(tour) }}
+              </span>
+            </td>
+
+            <!-- Tour Type Column -->
+            <td>
+              <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-bold bg-navy-950/5 text-primary border border-primary/20">
+                {{ getTourTypeName(tour) }}
+              </span>
+            </td>
+
+            <!-- Duration & Timing Column -->
+            <td>
+              <div class="text-xs font-medium text-slate-800">{{ getDurationLabel(tour.duration) }}</div>
+              <div v-if="tour.startTime" class="text-[10px] text-slate-500 font-mono mt-0.5">Starts {{ tour.startTime }}</div>
+            </td>
+
+            <!-- Capacity Column -->
+            <td>
+              <span class="text-xs font-medium text-slate-700">
+                {{ (tour.maxAllocations && tour.maxAllocations > 0) ? `${tour.maxAllocations} Guests` : ((tour.groupMaxCapacity && tour.groupMaxCapacity > 0) ? `${tour.groupMaxCapacity} Guests` : '20 Guests') }}
+              </span>
+            </td>
+
+            <!-- Supplier Column -->
+            <td>
+              <div class="text-xs font-medium text-slate-800">
+                {{ getTourSupplier(tour).name }}
+              </div>
+              <div v-if="getTourSupplier(tour).percent" class="text-[10px] text-slate-500 font-mono">
+                Share: {{ getTourSupplier(tour).percent }}%
+              </div>
+            </td>
+
+            <!-- Price Column -->
+            <td class="price-cell">
+              <div class="font-bold text-sm text-slate-900">
+                {{ getCurrencySymbol(tour.currency) }}{{ tour.price }}
+              </div>
+              <div v-if="tour.originalPrice && tour.originalPrice > tour.price" class="text-[10px] text-slate-400 line-through">
+                {{ getCurrencySymbol(tour.currency) }}{{ tour.originalPrice }}
+              </div>
+            </td>
+
+            <!-- Actions Column -->
+            <td>
+              <div class="actions justify-end">
+                <button @click="openEditModal(tour)" class="btn-action" title="Edit Tour" :disabled="actionLoading">
+                  ✏️
+                </button>
+                <button @click="deleteTour(tour.id)" class="btn-action btn-delete" title="Delete Tour" :disabled="actionLoading">
+                  🗑️
+                </button>
               </div>
             </td>
           </tr>
@@ -263,90 +465,311 @@ onMounted(loadData)
       </table>
 
       <div v-if="filteredTours.length === 0" class="empty-state">
-        <p>No tours found</p>
+        <p>No tours found matching your search.</p>
       </div>
+
+      <LuxuryPagination
+        v-if="filteredTours.length > 0"
+        v-model:currentPage="currentPage"
+        v-model:pageSize="pageSize"
+        :totalItems="filteredTours.length"
+      />
     </div>
 
-    <!-- Excel Import Modal -->
-    <ExcelImportModal 
-      :is-open="isExcelModalOpen" 
+    <!-- Excel Import / Export Modal -->
+    <ExcelImportExportModal
+      v-if="isExcelModalOpen"
+      :isOpen="isExcelModalOpen"
+      entity="tours"
+      entityTitle="Tours Catalog"
       @close="isExcelModalOpen = false"
-      @import="handleExcelImport"
+      @import-complete="loadData"
     />
   </div>
 </template>
 
 <style scoped>
-.posts-page { color: #24303F; }
-.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-.page-header h2 { font-size: 24px; font-weight: 700; color: #1C2434; margin-bottom: 4px; }
-.page-header p { color: #64748B; font-size: 14px; }
-
-.header-actions { display: flex; gap: 12px; align-items: center; }
-.btn-create { padding: 10px 22px; background: #3C50E0; border: none; border-radius: 4px; color: #fff; font-weight: 600; cursor: pointer; font-size: 14px; transition: all 0.3s; }
-.btn-create:hover { background: #2B3CA6; }
-.btn-create:active { transform: scale(0.97); }
-.btn-secondary { padding: 10px 16px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 4px; color: #1C2434; font-weight: 600; cursor: pointer; font-size: 14px; transition: all 0.2s; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-.btn-secondary:hover { background: #F7F9FC; border-color: #CBD5E1; }
-.btn-secondary:active { transform: scale(0.97); }
-
-.filters { display: flex; gap: 12px; margin-bottom: 24px; }
-.search-input { flex: 1; padding: 12px 16px; background: #fff; border: 1.5px solid #E2E8F0; border-radius: 4px; color: #24303F; font-size: 14px; outline: none; transition: border-color 0.2s; }
-.search-input:focus { border-color: #3C50E0; }
-.filter-select { padding: 12px 16px; background: #fff; border: 1.5px solid #E2E8F0; border-radius: 4px; color: #24303F; font-size: 14px; outline: none; cursor: pointer; transition: border-color 0.2s; }
-.filter-select:focus { border-color: #3C50E0; }
-
-.table-container { background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 4px; overflow: hidden; box-shadow: 0px 8px 13px -3px rgba(0, 0, 0, 0.07); }
-.data-table { width: 100%; border-collapse: collapse; }
-.data-table th { padding: 16px 24px; text-align: left; font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: #64748B; background: #F7F9FC; border-bottom: 1px solid #E2E8F0; }
-.data-table td { padding: 16px 24px; border-bottom: 1px solid #E2E8F0; font-size: 14px; color: #24303F; }
-.data-table tr:hover { background: #F9FAFB; }
-
-.tour-cell { display: flex; align-items: center; gap: 12px; }
-.tour-thumb { width: 44px; height: 44px; border-radius: 6px; object-fit: cover; border: 1px solid #E2E8F0; }
-.tour-emoji { font-size: 28px; }
-.tour-name { font-weight: 600; color: #1C2434; }
-.tour-badge { font-size: 11px; color: #e8820a; margin-top: 2px; }
-.category-badge { padding: 4px 12px; background: rgba(60, 80, 224, 0.08); color: #3C50E0; border-radius: 4px; font-size: 12px; font-weight: 600; }
-.price-cell { color: #10B981; font-weight: 600; }
-
-.actions { display: flex; gap: 8px; }
-.btn-edit-action, .btn-delete-action { background: none; border: none; cursor: pointer; font-size: 18px; padding: 4px; border-radius: 4px; transition: background 0.2s; }
-.btn-edit-action:hover { background: #EFF4FB; }
-.btn-delete-action:hover { background: rgba(211, 64, 83, 0.1); }
-
-.loading { text-align: center; padding: 60px; color: #64748B; }
-.spinner { width: 40px; height: 40px; border: 3px solid rgba(60, 80, 224, 0.1); border-top-color: #3C50E0; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.empty-state { text-align: center; padding: 48px; color: #64748B; }
-
-/* Modal overlay styles */
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 2000; padding: 20px; }
-.modal-card { background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 4px; box-shadow: 0px 8px 13px -3px rgba(0, 0, 0, 0.07); width: 100%; max-width: 680px; display: flex; flex-direction: column; overflow: hidden; color: #24303F; }
-.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid #E2E8F0; }
-.modal-header h3 { font-size: 18px; font-weight: 700; color: #1C2434; }
-.btn-close { background: none; border: none; color: #8A99AD; cursor: pointer; font-size: 18px; }
-
-.modal-form { padding: 20px; display: flex; flex-direction: column; gap: 16px; max-height: 80vh; overflow-y: auto; }
-.form-group { display: flex; flex-direction: column; gap: 6px; }
-.form-group label { color: #64748B; font-size: 12px; font-weight: 600; text-transform: uppercase; }
-.form-group input, .form-group select, .form-group textarea {
-  padding: 12px 14px; background: #FFFFFF; border: 1.5px solid #E2E8F0; border-radius: 4px; color: #24303F; outline: none; font-size: 14px; transition: border-color 0.2s;
+.tours-page {
+  animation: fadeIn 0.3s ease;
+  color: #1e293b;
 }
-.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: #3C50E0; }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
 
-.lang-tabs-wrapper { border: 1px solid #E2E8F0; padding: 12px; border-radius: 4px; background: #F7F9FC; }
-.lang-tabs { display: flex; gap: 4px; margin-bottom: 12px; }
-.lang-tabs button {
-  flex: 1; padding: 8px; background: #FFFFFF; border: 1px solid #E2E8F0; border-radius: 4px; color: #64748B; cursor: pointer; font-size: 11px; font-weight: 600;
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
-.lang-tabs button.active { background: #3C50E0; color: #fff; border-color: #3C50E0; }
-.lang-fields { display: flex; flex-direction: column; gap: 12px; }
 
-.modal-actions { display: flex; justify-content: flex-end; gap: 12px; margin-top: 10px; }
-.btn-cancel { padding: 10px 22px; background: #fff; border: 1px solid #E2E8F0; border-radius: 4px; color: #64748B; cursor: pointer; font-weight: 600; }
-.btn-cancel:hover { background: #F7F9FC; }
-.btn-save { padding: 10px 24px; background: #3C50E0; border: none; border-radius: 4px; color: #fff; font-weight: 600; cursor: pointer; }
-.btn-save:hover { background: #2B3CA6; }
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 16px;
+}
+
+.page-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+
+.page-header p {
+  color: #64748b;
+  font-size: 14px;
+  margin: 0;
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.filter-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+  padding: 14px 16px;
+  background: #f4f6e8;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  background: #fdfff5;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 0 16px;
+  height: 44px;
+  transition: all 0.2s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  flex-grow: 1;
+  max-width: 520px;
+}
+
+.search-bar:focus-within {
+  border-color: #0f172a;
+  box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.12);
+}
+
+.search-icon {
+  color: #64748b;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.search-bar input {
+  background: transparent;
+  border: none;
+  color: #0f172a;
+  padding: 0;
+  outline: none;
+  width: 100%;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.search-bar input::placeholder {
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.filter-select {
+  height: 44px;
+  padding: 0 16px;
+  background: #fdfff5;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 500;
+  outline: none;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s;
+  min-width: 180px;
+}
+
+.filter-select:focus {
+  border-color: #0f172a;
+  box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.12);
+}
+
+.btn-action-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: #fdfff5;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  color: #334155;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.btn-action-secondary:hover {
+  background: #f4f6e8;
+  color: #0f172a;
+  border-color: #94a3b8;
+  transform: translateY(-1px);
+}
+
+.btn-create {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 20px;
+  background: #0f172a;
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-create::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.6), transparent);
+}
+
+.btn-create:hover {
+  background: #1e293b;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.3);
+}
+
+.tour-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.tour-thumb {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  object-fit: cover;
+  border: 1px solid #e2e8f0;
+}
+
+.tour-emoji {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 20px;
+}
+
+.tour-badge {
+  display: inline-block;
+  padding: 2px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  border-radius: 4px;
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.table-container {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.data-table td {
+  padding: 16px;
+  font-size: 14px;
+  color: #334155;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.data-table tr:hover {
+  background: #f8fafc;
+}
+
+.btn-action {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-action:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #cbd5e1;
+}
+
+.btn-delete:hover {
+  background: #fef2f2;
+  color: #ef4444;
+  border-color: #fca5a5;
+}
+
+.loading, .empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #64748b;
+}
+
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #0f172a;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 16px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 </style>

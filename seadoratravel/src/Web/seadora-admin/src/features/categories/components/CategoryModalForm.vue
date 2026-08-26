@@ -226,9 +226,9 @@ async function uploadFile(event: Event, targetField: 'coverImageUrl' | 'customIc
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   z-index: 2000;
   display: flex;
   justify-content: center;
@@ -239,10 +239,10 @@ async function uploadFile(event: Event, targetField: 'coverImageUrl' | 'customIc
 .modal {
   width: 100%;
   max-width: 560px;
-  background: rgba(10, 25, 41, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
   border-radius: 16px;
-  box-shadow: 0 24px 48px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12);
   display: flex;
   flex-direction: column;
   max-height: 90vh;
@@ -272,23 +272,24 @@ async function uploadFile(event: Event, targetField: 'coverImageUrl' | 'customIc
 
 .modal-header {
   padding: 20px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid #e2e8f0;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: #ffffff;
 }
 .modal-header h3 {
   margin: 0;
-  color: #fff;
+  color: #0b1b3d;
   font-size: 1.125rem;
   font-weight: 600;
 }
 .btn-close {
   background: none;
   border: none;
-  color: #8eafc2;
+  color: #64748b;
   cursor: pointer;
-  transition: color 0.2s, transform 0.2s;
+  transition: color 0.2s, transform 0.2s, background 0.2s;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -297,8 +298,8 @@ async function uploadFile(event: Event, targetField: 'coverImageUrl' | 'customIc
   border-radius: 50%;
 }
 .btn-close:hover { 
-  color: #fff; 
-  background: rgba(255,255,255,0.1);
+  color: #0f172a; 
+  background: #f1f5f9;
   transform: scale(1.05);
 }
 
@@ -312,7 +313,7 @@ async function uploadFile(event: Event, targetField: 'coverImageUrl' | 'customIc
 }
 .modal-content::-webkit-scrollbar { width: 6px; }
 .modal-content::-webkit-scrollbar-track { background: transparent; }
-.modal-content::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 3px; }
+.modal-content::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
 
 .form-grid {
   display: grid;
@@ -326,9 +327,9 @@ async function uploadFile(event: Event, targetField: 'coverImageUrl' | 'customIc
   gap: 8px;
 }
 .form-group label, .section-label {
-  color: #8eafc2;
-  font-size: 0.8rem;
-  font-weight: 600;
+  color: #334155;
+  font-size: 0.75rem;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -336,26 +337,27 @@ async function uploadFile(event: Event, targetField: 'coverImageUrl' | 'customIc
 .text-input {
   width: 100%;
   padding: 10px 14px;
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #ffffff;
+  border: 1.5px solid #cbd5e1;
   border-radius: 8px;
-  color: #fff;
+  color: #0f172a;
   font-size: 14px;
   transition: all 0.2s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 .text-input:focus {
   outline: none;
-  border-color: #1a8bc4;
-  box-shadow: 0 0 0 3px rgba(26, 139, 196, 0.15);
+  border-color: #0b1b3d;
+  box-shadow: 0 0 0 3px rgba(11, 27, 61, 0.1);
 }
 
 .image-preview {
   margin-top: 8px;
   border-radius: 8px;
   overflow: hidden;
-  border: 1px solid rgba(255,255,255,0.1);
+  border: 1px solid #e2e8f0;
   height: 120px;
-  background: rgba(0,0,0,0.3);
+  background: #f8fafc;
 }
 .image-preview img {
   width: 100%;
@@ -369,8 +371,8 @@ async function uploadFile(event: Event, targetField: 'coverImageUrl' | 'customIc
   gap: 12px;
 }
 .locale-wrapper {
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
   border-radius: 12px;
   padding: 16px;
 }
@@ -380,49 +382,49 @@ async function uploadFile(event: Event, targetField: 'coverImageUrl' | 'customIc
 
 .modal-footer {
   padding: 20px 24px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid #e2e8f0;
   display: flex;
   justify-content: flex-end;
   gap: 12px;
-  background: rgba(0, 0, 0, 0.2);
+  background: #f8fafc;
 }
 .btn-cancel {
   padding: 10px 20px;
-  background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
-  color: #8eafc2;
+  color: #475569;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
   transition: all 0.2s;
 }
-.btn-cancel:hover:not(:disabled) { background: rgba(255, 255, 255, 0.05); color: #fff; }
+.btn-cancel:hover:not(:disabled) { background: #f8fafc; color: #0f172a; border-color: #94a3b8; }
 
 .btn-save {
   padding: 10px 24px;
-  background: linear-gradient(135deg, #1a8bc4, #146c99);
+  background: linear-gradient(135deg, #0b1b3d, #1e3a8a);
   border: none;
   border-radius: 8px;
-  color: #fff;
+  color: #ffffff;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 12px rgba(26, 139, 196, 0.2);
+  box-shadow: 0 4px 12px rgba(11, 27, 61, 0.2);
 }
 .btn-save:hover:not(:disabled) { 
   transform: translateY(-1px); 
-  box-shadow: 0 6px 16px rgba(26, 139, 196, 0.3); 
+  box-shadow: 0 6px 16px rgba(11, 27, 61, 0.3); 
 }
 .btn-save:disabled { opacity: 0.7; cursor: not-allowed; }
 
 .btn-upload {
   padding: 8px 16px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
-  color: #fff;
+  color: #334155;
   cursor: pointer;
-  font-weight: 500;
+  font-weight: 600;
   transition: all 0.2s;
   display: flex;
   align-items: center;
@@ -430,7 +432,9 @@ async function uploadFile(event: Event, targetField: 'coverImageUrl' | 'customIc
   min-width: 80px;
 }
 .btn-upload:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.15);
+  background: #f1f5f9;
+  border-color: #94a3b8;
+  color: #0f172a;
 }
 .btn-upload:disabled {
   opacity: 0.5;
@@ -440,8 +444,8 @@ async function uploadFile(event: Event, targetField: 'coverImageUrl' | 'customIc
 .loading-spinner-small {
   width: 16px;
   height: 16px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-top-color: #fff;
+  border: 2px solid #cbd5e1;
+  border-top-color: #334155;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -451,7 +455,7 @@ async function uploadFile(event: Event, targetField: 'coverImageUrl' | 'customIc
 
 .btn-remove-img {
   padding: 6px 12px;
-  background: #dc3545;
+  background: #ef4444;
   color: white;
   border: none;
   border-radius: 6px;
@@ -464,7 +468,7 @@ async function uploadFile(event: Event, targetField: 'coverImageUrl' | 'customIc
   transform: translateY(0);
 }
 .btn-remove-img:hover {
-  background: #b02a37;
+  background: #dc2626;
 }
 
 .flex { display: flex; }
@@ -479,5 +483,5 @@ async function uploadFile(event: Event, targetField: 'coverImageUrl' | 'customIc
 .transition-opacity { transition: opacity 0.2s; }
 .opacity-0 { opacity: 0; }
 .group:hover .group-hover\:opacity-100 { opacity: 1; }
-.bg-black\/50 { background-color: rgba(0, 0, 0, 0.5); }
+.bg-black\/50 { background-color: rgba(0, 0, 0, 0.4); }
 </style>

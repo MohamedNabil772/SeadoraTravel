@@ -24,10 +24,15 @@ public class Tour
     public Guid CategoryId { get; set; }
     public Category? Category { get; set; }
 
+    public Guid? TourTypeId { get; set; }
+    public TourType? TourType { get; set; }
+
     public Guid? SupplierId { get; set; }
     public Supplier? Supplier { get; set; }
     public decimal SupplierPercentage { get; set; }
     public int MaxAllocations { get; set; } = 20;
+    public int? GroupMinCapacity { get; set; } = 1;
+    public int? GroupMaxCapacity { get; set; } = 20;
 
     // Additional Pricing & Discount Fields
     public decimal? OriginalPrice { get; set; }

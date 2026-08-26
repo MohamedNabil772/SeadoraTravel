@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Configuration;
@@ -13,10 +14,12 @@ namespace Seadora.Identity.Infrastructure.Authentication;
 public class JwtTokenGenerator : IJwtTokenGenerator
 {
     private readonly IConfiguration _configuration;
+    private readonly SeadoraIdentityDbContext _context;
 
-    public JwtTokenGenerator(IConfiguration configuration)
+    public JwtTokenGenerator(IConfiguration configuration, SeadoraIdentityDbContext context)
     {
         _configuration = configuration;
+        _context = context;
     }
 
     public string GenerateToken(User user, IList<string> roles)
@@ -31,7 +34,7 @@ public class JwtTokenGenerator : IJwtTokenGenerator
             new(JwtRegisteredClaimNames.Email, user.Email!),
             new(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new(ClaimTypes.NameIdentifier, user.Id),
-            new(JwtRegisteredClaimNames.Name, !string.IsNullOrEmpty(user.FullName) ? user.FullName : $"{user.FirstName} {user.LastName}".Trim()),
+            new(JwtRegisteredClaimNames.Name, !string.IsNullOrEmpty(user.FullName) ? user.FullName : $"user.FirstName user.LastName".Trim()),
             new("firstName", user.FirstName),
             new("lastName", user.LastName)
         };
@@ -39,10 +42,28 @@ public class JwtTokenGenerator : IJwtTokenGenerator
         foreach (var role in roles)
         {
             claims.Add(new Claim(ClaimTypes.Role, role));
+            if (role == "SuperAdmin")
+            {
+                claims.Add(new Claim("permission", "*"));
+            }
         }
 
-        var expiryMinutesStr = _configuration["JwtSettings:ExpiryMinutes"];
-        var expiryMinutes = int.TryParse(expiryMinutesStr, out var parsed) ? parsed : 10080;
+        if (!roles.Contains("SuperAdmin"))
+        {
+            var roleIds = _context.Roles.Where(r => roles.Contains(r.Name!)).Select(r => r.Id).ToList();
+            var permissions = _context.RolePermissions
+                .Where(rp => roleIds.Contains(rp.RoleId))
+                .Select(rp => rp.PermissionId)
+                .Distinct()
+                .ToList();
+
+            foreach (var perm in permissions)
+            {
+                claims.Add(new Claim("permission", perm));
+            }
+        }
+
+        var expiryMinutes = 60;
 
         var tokenDescriptor = new SecurityTokenDescriptor
         {

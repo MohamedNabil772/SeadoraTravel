@@ -19,9 +19,9 @@ export default {
           dark: '#997A00',
         },
         surface: {
-          DEFAULT: '#FFFFFF',
-          sunken: '#F8F9FA',
-          elevated: '#FFFFFF',
+          DEFAULT: '#fdfff5',
+          sunken: '#f4f6e8',
+          elevated: '#fdfff5',
         },
         text: {
           main: '#1A202C',

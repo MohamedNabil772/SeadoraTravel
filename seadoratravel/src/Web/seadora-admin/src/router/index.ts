@@ -53,9 +53,21 @@ const router = createRouter({
           meta: { title: 'Categories' }
         },
         {
+          path: 'tour-types',
+          name: 'tour-types',
+          component: () => import('../features/tour-types/views/TourTypesView.vue'),
+          meta: { title: 'Tour & Trip Types' }
+        },
+        {
           path: 'bookings',
           name: 'bookings',
           component: () => import('../features/bookings/views/BookingsView.vue')
+        },
+        {
+          path: 'bookings/create',
+          name: 'booking-create',
+          component: () => import('../features/bookings/views/CreateBookingView.vue'),
+          meta: { title: 'Create VIP Booking' }
         },
         {
           path: 'bookings/:id/details',
@@ -72,6 +84,12 @@ const router = createRouter({
           path: 'users',
           name: 'users',
           component: () => import('../features/users/views/UsersView.vue')
+        },
+        {
+          path: 'roles',
+          name: 'roles',
+          component: () => import('../features/roles/views/RolesView.vue'),
+          meta: { title: 'Roles & Permissions (RBAC)' }
         },
         {
           path: 'suppliers',

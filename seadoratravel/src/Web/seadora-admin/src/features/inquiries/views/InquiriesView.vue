@@ -18,6 +18,7 @@ import {
 } from 'lucide-vue-next'
 import { useConfirm } from '@/composables/useConfirm'
 import { useToast } from '@/composables/useToast'
+import LuxuryPagination from '@/shared/components/LuxuryPagination.vue'
 
 // Mock Data for Inquiries
 const inquiries = ref([
@@ -196,6 +197,14 @@ const filteredInquiries = computed(() => {
   })
 })
 
+const currentPage = ref(1)
+const pageSize = ref(10)
+
+const paginatedInquiries = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  return filteredInquiries.value.slice(start, start + pageSize.value)
+})
+
 const totalRequests = computed(() => inquiries.value.length)
 const pendingRequests = computed(() => inquiries.value.filter(i => i.status === 'Pending').length)
 const repliedRequests = computed(() => inquiries.value.filter(i => i.status === 'Replied').length)
@@ -307,7 +316,7 @@ const getStatusColor = (status: string) => {
           </thead>
           <tbody class="divide-y divide-border/40">
             <tr 
-              v-for="inquiry in filteredInquiries" 
+              v-for="inquiry in paginatedInquiries" 
               :key="inquiry.id"
               class="hover:bg-black/[0.02] transition-colors group"
             >
@@ -369,6 +378,14 @@ const getStatusColor = (status: string) => {
           </tbody>
         </table>
       </div>
+
+      <!-- Luxury Pagination Component -->
+      <LuxuryPagination
+        v-if="filteredInquiries.length > 0"
+        v-model:currentPage="currentPage"
+        v-model:pageSize="pageSize"
+        :totalItems="filteredInquiries.length"
+      />
     </div>
 
     <!-- Slide-over Drawer for Details -->

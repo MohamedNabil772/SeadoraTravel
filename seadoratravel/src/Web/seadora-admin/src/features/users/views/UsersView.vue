@@ -4,6 +4,8 @@ import api from '@/services/api'
 import { useAuthStore } from '@/features/auth/store/auth'
 import { useConfirm } from '@/composables/useConfirm'
 import { useToast } from '@/composables/useToast'
+import LuxuryPagination from '@/shared/components/LuxuryPagination.vue'
+import { Plus } from 'lucide-vue-next'
 
 const authStore = useAuthStore()
 
@@ -59,6 +61,14 @@ const filteredUsers = computed(() => {
     u.lastName.toLowerCase().includes(query) ||
     (u.phoneNumber && u.phoneNumber.includes(query))
   )
+})
+
+const currentPage = ref(1)
+const pageSize = ref(10)
+
+const paginatedUsers = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  return filteredUsers.value.slice(start, start + pageSize.value)
 })
 
 const stats = computed(() => {
@@ -179,7 +189,10 @@ onMounted(() => {
         <h2>User Management</h2>
         <p>Create, update, and manage admin users, managers, and customers.</p>
       </div>
-      <button @click="openCreateModal" class="btn-create self-start sm:self-auto">+ Add New User</button>
+      <button @click="openCreateModal" class="btn-create self-start sm:self-auto">
+        <Plus class="w-4 h-4" />
+        <span>Add New User</span>
+      </button>
     </div>
 
     <!-- Stats Row -->
@@ -245,7 +258,7 @@ onMounted(() => {
           </tr>
         </thead>
         <tbody>
-          <tr v-for="user in filteredUsers" :key="user.id">
+          <tr v-for="user in paginatedUsers" :key="user.id">
             <td>
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center font-bold text-slate-600 uppercase">
@@ -295,6 +308,13 @@ onMounted(() => {
       <div v-if="filteredUsers.length === 0" class="empty-state">
         <p>No users found matching the query</p>
       </div>
+
+      <LuxuryPagination
+        v-if="filteredUsers.length > 0"
+        v-model:currentPage="currentPage"
+        v-model:pageSize="pageSize"
+        :totalItems="filteredUsers.length"
+      />
     </div>
 
     <!-- Edit/Create Modal Overlay -->

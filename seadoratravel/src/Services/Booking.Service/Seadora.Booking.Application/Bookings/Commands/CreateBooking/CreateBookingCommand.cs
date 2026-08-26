@@ -22,6 +22,7 @@ public record CreateBookingCommand(
     Guid? PackageId = null,
     decimal TotalPrice = 0,
     string? Language = "en",
+    bool MissingIdentification = false,
     List<BookingAddonSnapshot>? SelectedAddons = null,
     List<GuestDetailDto>? GuestsList = null
 ) : IRequest<Guid>;
@@ -71,7 +72,9 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
         }
 
         var guestsListDomain = new List<GuestDetail>();
-        if (request.GuestsList != null)
+        bool hasMissingId = false;
+
+        if (request.GuestsList != null && request.GuestsList.Count > 0)
         {
             foreach (var guest in request.GuestsList)
             {
@@ -79,18 +82,35 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
                 {
                     throw new ArgumentException("Guest FullName is required.", nameof(request.GuestsList));
                 }
+
+                bool guestHasId = !string.IsNullOrWhiteSpace(guest.PassportFileName) || !string.IsNullOrWhiteSpace(guest.PassportNumber);
+                if (!guestHasId)
+                {
+                    hasMissingId = true;
+                }
+
                 guestsListDomain.Add(new GuestDetail
                 {
                     Id = Guid.NewGuid(),
                     FullName = guest.FullName,
+                    Email = guest.Email,
+                    Phone = guest.Phone,
+                    PassportNumber = guest.PassportNumber,
                     PassportFileName = guest.PassportFileName,
-                    AgeCategory = guest.AgeCategory,
+                    AgeCategory = guest.AgeCategory ?? "Adult",
                     Nationality = guest.Nationality,
                     SpecialRequests = guest.SpecialRequests
                 });
             }
         }
-
+        else
+        {
+            // If no individual guest breakdown provided and main passport missing, mark as missing identification
+            if (string.IsNullOrWhiteSpace(request.PassportFileName))
+            {
+                hasMissingId = true;
+            }
+        }
 
         var booking = new Seadora.Booking.Domain.Entities.Booking
         {
@@ -105,11 +125,12 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
             PassportFileName = request.PassportFileName,
             TripType = request.TripType,
             TourDate = request.TourDate,
-            Guests = request.Guests,
+            Guests = request.Guests > 0 ? request.Guests : (guestsListDomain.Count > 0 ? guestsListDomain.Count : 1),
             HotelPickup = request.HotelPickup,
             PackageId = request.PackageId,
             TotalPrice = request.TotalPrice,
             Language = string.IsNullOrWhiteSpace(request.Language) ? "en" : request.Language.ToLowerInvariant().Trim(),
+            MissingIdentification = request.MissingIdentification || hasMissingId,
             SelectedAddons = request.SelectedAddons ?? new(),
             GuestsList = guestsListDomain,
             BookingDate = DateTime.UtcNow,

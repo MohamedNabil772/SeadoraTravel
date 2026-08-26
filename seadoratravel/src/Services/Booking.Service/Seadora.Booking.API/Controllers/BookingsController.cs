@@ -39,12 +39,13 @@ public class BookingsController : ControllerBase
     public async Task<IActionResult> GetAll(
         [FromQuery] Guid? tourId, 
         [FromQuery] Seadora.Booking.Domain.Enums.BookingStatus? status,
+        [FromQuery] string? search,
         [FromQuery] string? sortColumn,
         [FromQuery] string? sortOrder,
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10)
     {
-        var bookings = await _mediator.Send(new GetAllBookingsQuery(tourId, status, sortColumn, sortOrder, pageNumber, pageSize));
+        var bookings = await _mediator.Send(new GetAllBookingsQuery(tourId, status, search, sortColumn, sortOrder, pageNumber, pageSize));
         return Ok(bookings);
     }
 

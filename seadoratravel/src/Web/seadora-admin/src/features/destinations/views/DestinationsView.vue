@@ -4,6 +4,11 @@ import api from '@/services/api'
 import DestinationModalForm from '../components/DestinationModalForm.vue'
 import { useConfirm } from '@/composables/useConfirm'
 import { useToast } from '@/composables/useToast'
+import LuxuryPagination from '@/shared/components/LuxuryPagination.vue'
+import ExcelImportExportModal from '@/shared/components/ExcelImportExportModal.vue'
+import { Plus } from 'lucide-vue-next'
+
+const isExcelModalOpen = ref(false)
 
 interface Destination {
   id: string
@@ -23,8 +28,10 @@ const actionLoading = ref(false)
 const showModal = ref(false)
 const isEdit = ref(false)
 const selectedDestination = ref<Destination | null>(null)
-const viewMode = ref<'table' | 'grid'>('grid')
 const searchQuery = ref('')
+
+const currentPage = ref(1)
+const pageSize = ref(12)
 
 const { confirm } = useConfirm()
 const toast = useToast()
@@ -56,6 +63,11 @@ const filteredDestinations = computed(() => {
     dest.names?.en?.toLowerCase().includes(query) || 
     dest.descriptions?.en?.toLowerCase().includes(query)
   )
+})
+
+const paginatedDestinations = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  return filteredDestinations.value.slice(start, start + pageSize.value)
 })
 
 async function fetchDestinations() {
@@ -141,32 +153,27 @@ onMounted(fetchDestinations)
 <template>
   <div class="destinations-page">
     <div class="page-header">
-      <div>
+      <div class="header-content">
         <h2>Destinations</h2>
         <p>Manage travel areas, regions, default images, and translations.</p>
       </div>
       <div class="header-actions">
-        <div class="search-bar">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-          <input type="text" v-model="searchQuery" placeholder="Search destinations..." />
-        </div>
-        <div class="view-toggle">
-          <button 
-            :class="{ active: viewMode === 'table' }" 
-            @click="viewMode = 'table'"
-            title="List View"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>
-          </button>
-          <button 
-            :class="{ active: viewMode === 'grid' }" 
-            @click="viewMode = 'grid'"
-            title="Grid View"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-          </button>
-        </div>
-        <button @click="openCreateModal" class="btn-create">+ Add Destination</button>
+        <button @click="isExcelModalOpen = true" class="btn-action-secondary">
+          <span>📊</span>
+          <span>Import / Export</span>
+        </button>
+        <button @click="openCreateModal" class="btn-create">
+          <Plus class="w-4 h-4" />
+          <span>Add Destination</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Filter Toolbar -->
+    <div class="filter-toolbar">
+      <div class="search-bar">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="search-icon"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input type="text" v-model="searchQuery" placeholder="Search destinations by region, country, or title..." />
       </div>
     </div>
 
@@ -177,48 +184,11 @@ onMounted(fetchDestinations)
     </div>
 
     <!-- Empty State -->
-    <div v-else-if="filteredDestinations.length === 0" class="empty-state table-container">
+    <div v-else-if="filteredDestinations.length === 0" class="empty-state">
       <div class="empty-icon">🌍</div>
       <p v-if="searchQuery">No destinations match your search.</p>
       <p v-else>No destinations found.</p>
-      <button v-if="!searchQuery" @click="openCreateModal" class="btn-ghost">Add your first destination</button>
-    </div>
-
-    <!-- Grid View -->
-    <div v-else-if="viewMode === 'grid'" class="destinations-grid">
-      <div v-for="dest in filteredDestinations" :key="dest.id" class="destination-card">
-        <div class="card-image-wrap">
-          <img :src="resolveImageUrl(dest.imageUrl)" :alt="dest.names?.en" class="card-image" @error="handleImageError" />
-          <div class="badges-container">
-            <div v-if="dest.isFeatured" class="featured-badge">Featured</div>
-            <div v-if="dest.toursCount !== undefined" class="tour-count-badge">
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1"><path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.2-1.1.6L3 8l5 4-3 3-3-1-1 1 3 4 4 3 1-1-1-3 3-3 4 5l1.2-.7c.4-.2.7-.6.6-1.1z"></path></svg>
-              {{ dest.toursCount }} {{ dest.toursCount === 1 ? 'Tour' : 'Tours' }}
-            </div>
-          </div>
-          <div class="card-actions">
-            <button @click="openEditModal(dest)" class="btn-action" title="Edit" :disabled="actionLoading">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-            </button>
-            <button @click="deleteDestination(dest.id)" class="btn-action btn-delete" title="Delete" :disabled="actionLoading">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-            </button>
-          </div>
-        </div>
-        <div class="card-content">
-          <div class="card-title-row">
-            <span class="flag-emoji">{{ dest.flagEmoji || dest.flag || '📍' }}</span>
-            <h3 class="card-title">{{ dest.names?.en || 'Untitled' }}</h3>
-          </div>
-          <p class="card-desc">{{ dest.descriptions?.en || 'No description provided.' }}</p>
-          <div v-if="dest.highlights?.en" class="highlights-container">
-            <span v-for="(highlight, idx) in dest.highlights.en.split(',').slice(0, 3)" :key="idx" class="highlight-pill">
-              {{ highlight.trim() }}
-            </span>
-            <span v-if="dest.highlights.en.split(',').length > 3" class="highlight-pill more-pill">+{{ dest.highlights.en.split(',').length - 3 }}</span>
-          </div>
-        </div>
-      </div>
+      <button v-if="!searchQuery" @click="openCreateModal" class="btn-action-secondary mx-auto mt-4">Add your first destination</button>
     </div>
 
     <!-- Table View -->
@@ -229,12 +199,14 @@ onMounted(fetchDestinations)
             <th width="80">Image</th>
             <th>Name (EN)</th>
             <th>Description (EN)</th>
+            <th>Highlights & Tags</th>
+            <th>Linked Tours</th>
             <th>Featured</th>
             <th align="right">Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="dest in filteredDestinations" :key="dest.id">
+          <tr v-for="dest in paginatedDestinations" :key="dest.id">
             <td>
               <div class="thumb-wrapper">
                 <img :src="resolveImageUrl(dest.imageUrl)" class="thumb-image" @error="handleImageError" />
@@ -244,22 +216,52 @@ onMounted(fetchDestinations)
             <td class="name-cell">{{ dest.names?.en || 'Untitled' }}</td>
             <td class="desc-cell">{{ dest.descriptions?.en || '—' }}</td>
             <td>
-              <span v-if="dest.isFeatured" class="badge-success">Yes</span>
-              <span v-else class="text-muted">—</span>
+              <div v-if="dest.highlights?.en" class="flex flex-wrap gap-1 max-w-[220px]">
+                <span 
+                  v-for="(tag, idx) in dest.highlights.en.split(',').slice(0, 3)" 
+                  :key="idx"
+                  class="px-2 py-0.5 rounded-md text-[10px] font-medium bg-slate-100 text-slate-700 border border-slate-200"
+                >
+                  {{ tag.trim() }}
+                </span>
+                <span 
+                  v-if="dest.highlights.en.split(',').length > 3"
+                  class="px-1.5 py-0.5 rounded-md text-[10px] font-bold bg-slate-200 text-slate-600"
+                >
+                  +{{ dest.highlights.en.split(',').length - 3 }}
+                </span>
+              </div>
+              <span v-else class="text-slate-400 text-xs">—</span>
             </td>
             <td>
-              <div class="actions">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-800 border border-slate-200">
+                <span>✦</span> {{ dest.toursCount || 0 }} {{ (dest.toursCount === 1) ? 'Tour' : 'Tours' }}
+              </span>
+            </td>
+            <td>
+              <span v-if="dest.isFeatured" class="badge-success">Yes</span>
+              <span v-else class="text-slate-400">—</span>
+            </td>
+            <td>
+              <div class="actions justify-end">
                 <button @click="openEditModal(dest)" class="btn-action" title="Edit" :disabled="actionLoading">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                  ✏️
                 </button>
                 <button @click="deleteDestination(dest.id)" class="btn-action btn-delete" title="Delete" :disabled="actionLoading">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                  🗑️
                 </button>
               </div>
             </td>
           </tr>
         </tbody>
       </table>
+
+      <LuxuryPagination
+        v-if="filteredDestinations.length > 0"
+        v-model:currentPage="currentPage"
+        v-model:pageSize="pageSize"
+        :totalItems="filteredDestinations.length"
+      />
     </div>
 
     <!-- Modal Form -->
@@ -270,159 +272,305 @@ onMounted(fetchDestinations)
       :actionLoading="actionLoading"
       @save="saveDestination"
     />
+
+    <!-- Excel & PDF Tools Modal -->
+    <ExcelImportExportModal
+      :is-open="isExcelModalOpen"
+      entity="destinations"
+      entity-title="Destinations"
+      @close="isExcelModalOpen = false"
+      @import-complete="fetchDestinations"
+    />
   </div>
 </template>
 
 <style scoped>
-.destinations-page { color: #e0e0e0; animation: fadeIn 0.4s ease; }
-@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-
-.page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
-.page-header h2 { font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 4px; letter-spacing: -0.02em; }
-.page-header p { color: #8eafc2; font-size: 14px; margin: 0; }
-.header-actions { display: flex; align-items: center; gap: 16px; }
-
-.search-bar { display: flex; align-items: center; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 0 12px; transition: all 0.2s; }
-.search-bar:focus-within { border-color: #1a8bc4; background: rgba(0,0,0,0.3); box-shadow: 0 0 0 2px rgba(26,139,196,0.2); }
-.search-icon { color: #5c7585; margin-right: 8px; }
-.search-bar input { background: transparent; border: none; color: #fff; padding: 10px 0; outline: none; width: 220px; font-size: 14px; }
-.search-bar input::placeholder { color: #5c7585; }
-
-.view-toggle { display: flex; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); overflow: hidden; }
-.view-toggle button {
-  background: transparent; border: none; padding: 8px 12px; color: #5c7585; cursor: pointer; transition: all 0.2s;
-  display: flex; align-items: center; justify-content: center;
+.destinations-page {
+  animation: fadeIn 0.3s ease;
+  color: #1e293b;
 }
-.view-toggle button:hover { color: #8eafc2; background: rgba(255,255,255,0.05); }
-.view-toggle button.active { color: #fff; background: rgba(255,255,255,0.1); }
 
-.btn-create { 
-  padding: 10px 20px; 
-  background: linear-gradient(135deg, #e8820a, #f5a435); 
-  border: none; 
-  border-radius: 8px; 
-  color: #fff; 
-  font-weight: 600; 
-  cursor: pointer; 
-  font-size: 14px; 
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); 
-  box-shadow: 0 4px 12px rgba(232, 130, 10, 0.2);
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
-.btn-create:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(232, 130, 10, 0.3); }
-.btn-create:active { transform: translateY(0) scale(0.97); }
 
-/* Grid View */
-.destinations-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 24px;
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  gap: 16px;
 }
-.destination-card {
-  background: rgba(10,25,41,0.6);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 12px;
-  overflow: hidden;
-  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+
+.page-header h2 {
+  font-size: 24px;
+  font-weight: 700;
+  color: #0f172a;
+  margin-bottom: 4px;
 }
-.destination-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 32px rgba(0,0,0,0.2);
-  border-color: rgba(255,255,255,0.1);
+
+.page-header p {
+  color: #64748b;
+  font-size: 14px;
+  margin: 0;
 }
-.card-image-wrap {
-  position: relative;
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.filter-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+  padding: 14px 16px;
+  background: #f4f6e8;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+}
+
+.search-bar {
+  display: flex;
+  align-items: center;
+  background: #fdfff5;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 0 16px;
+  height: 44px;
+  transition: all 0.2s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  flex-grow: 1;
+  max-width: 520px;
+}
+
+.search-bar:focus-within {
+  border-color: #0f172a;
+  box-shadow: 0 0 0 3px rgba(15, 23, 42, 0.12);
+}
+
+.search-icon {
+  color: #64748b;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.search-bar input {
+  background: transparent;
+  border: none;
+  color: #0f172a;
+  padding: 0;
+  outline: none;
   width: 100%;
-  height: 180px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.search-bar input::placeholder {
+  color: #94a3b8;
+  font-weight: 400;
+}
+
+.btn-action-secondary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  background: #fdfff5;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  color: #334155;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.btn-action-secondary:hover {
+  background: #f4f6e8;
+  border-color: #94a3b8;
+}
+
+.btn-create {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 20px;
+  background: #0f172a;
+  border: none;
+  border-radius: 8px;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+  position: relative;
   overflow: hidden;
 }
-.card-image {
+
+.btn-create::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.6), transparent);
+}
+
+.btn-create:hover {
+  background: #1e293b;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.3);
+}
+
+.table-container {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.data-table td {
+  padding: 16px;
+  font-size: 14px;
+  color: #334155;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.data-table tr:hover {
+  background: #f8fafc;
+}
+
+.thumb-wrapper {
+  position: relative;
+  width: 64px;
+  height: 48px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+}
+
+.thumb-image {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: transform 0.5s ease;
 }
-.destination-card:hover .card-image { transform: scale(1.05); }
-.featured-badge {
+
+.thumb-flag {
   position: absolute;
-  top: 12px;
-  left: 12px;
-  background: rgba(26,139,196,0.9);
-  color: #fff;
-  font-size: 11px;
+  bottom: 2px;
+  right: 2px;
+  font-size: 14px;
+  background: #ffffff;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.name-cell {
   font-weight: 600;
+  color: #0f172a;
+}
+
+.desc-cell {
+  max-width: 250px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: #64748b;
+}
+
+.badge-success {
+  background: #dcfce7;
+  color: #166534;
   padding: 4px 8px;
   border-radius: 4px;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  backdrop-filter: blur(4px);
+  font-size: 12px;
+  font-weight: 600;
 }
-.card-actions {
-  position: absolute;
-  top: 12px;
-  right: 12px;
+
+.actions {
   display: flex;
   gap: 8px;
-  opacity: 0;
-  transform: translateY(-10px);
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.destination-card:hover .card-actions { opacity: 1; transform: translateY(0); }
-.card-content { padding: 20px; }
-.card-title-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
-.flag-emoji { font-size: 20px; }
-.card-title { font-size: 18px; font-weight: 600; color: #fff; margin: 0; }
-.card-desc { color: #8eafc2; font-size: 14px; margin: 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; line-height: 1.5; }
-.highlights-container { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 12px; }
-.highlight-pill { background: rgba(26,139,196,0.15); color: #82c0e3; font-size: 11px; font-weight: 500; padding: 4px 8px; border-radius: 12px; border: 1px solid rgba(26,139,196,0.3); }
-.more-pill { background: rgba(255,255,255,0.1); color: #fff; border-color: rgba(255,255,255,0.2); }
 
-/* Table View */
-.table-container { 
-  background: rgba(10,25,41,0.6); 
-  border: 1px solid rgba(255,255,255,0.06); 
-  border-radius: 12px; 
-  overflow: hidden; 
-  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+.btn-action {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
 }
-.data-table { width: 100%; border-collapse: collapse; }
-.data-table th { 
-  padding: 16px 20px; text-align: left; font-size: 12px; letter-spacing: 0.1em; 
-  text-transform: uppercase; color: #8eafc2; background: rgba(0,0,0,0.2); 
-  border-bottom: 1px solid rgba(255,255,255,0.06); font-weight: 600;
+
+.btn-action:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+  border-color: #cbd5e1;
 }
-.data-table th[align="right"] { text-align: right; }
-.data-table td { padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.03); font-size: 14px; vertical-align: middle; }
-.data-table tr:hover { background: rgba(255,255,255,0.03); }
 
-.thumb-wrapper {
-  position: relative; width: 64px; height: 48px; border-radius: 6px; overflow: hidden; background: rgba(0,0,0,0.2);
+.btn-delete:hover {
+  background: #fef2f2;
+  color: #ef4444;
+  border-color: #fca5a5;
 }
-.thumb-image { width: 100%; height: 100%; object-fit: cover; }
-.thumb-flag { position: absolute; bottom: -4px; right: 2px; font-size: 16px; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); }
-.name-cell { font-weight: 600; color: #fff; font-size: 15px; }
-.desc-cell { max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #8eafc2; }
 
-.badge-success { background: rgba(16,185,129,0.1); color: #10b981; padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: 600; }
-.text-muted { color: #8eafc2; }
-
-.actions { display: flex; gap: 8px; justify-content: flex-end; }
-.btn-action { 
-  background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: #e0e0e0; cursor: pointer; 
-  display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; border-radius: 6px; transition: all 0.2s; 
+.loading, .empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #64748b;
 }
-.btn-action:hover { background: rgba(26,139,196,0.2); border-color: rgba(26,139,196,0.4); color: #fff; }
-.btn-delete:hover { background: rgba(220,53,69,0.2); border-color: rgba(220,53,69,0.4); color: #ff6b6b; }
 
-.loading { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 100px 0; color: #8eafc2; }
-.spinner { width: 40px; height: 40px; border: 3px solid rgba(26,139,196,0.2); border-top-color: #1a8bc4; border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
-@keyframes spin { to { transform: rotate(360deg); } }
-
-.empty-state { text-align: center; padding: 64px 20px; color: #8eafc2; }
-.empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.5; }
-.empty-state p { margin-bottom: 24px; font-size: 16px; }
-.btn-ghost {
-  background: transparent; border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 8px 16px; border-radius: 6px; cursor: pointer; transition: all 0.2s;
+.spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #0f172a;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 16px;
 }
-.btn-ghost:hover { background: rgba(255,255,255,0.05); }
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+}
 </style>

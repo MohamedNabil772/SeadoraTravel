@@ -4,22 +4,40 @@ import { RouterLink, RouterView, useRouter } from 'vue-router'
 import { useAuthStore } from '@/features/auth/store/auth'
 import { useNotificationStore } from '@/features/notifications/store/notificationStore'
 import NotificationDropdown from '@/features/notifications/components/NotificationDropdown.vue'
-import { Toaster } from 'vue-sonner'
+import ProfileDropdown from '@/shared/components/ProfileDropdown.vue'
+import SidebarAccordion from '@/shared/components/SidebarAccordion.vue'
+import GlobalSearchModal from '@/shared/components/GlobalSearchModal.vue'
+import ProfileSettingsModal from '@/shared/components/ProfileSettingsModal.vue'
 import { Search, Menu } from 'lucide-vue-next'
 
 const auth = useAuthStore()
 const notificationStore = useNotificationStore()
 const router = useRouter()
 
+const isSidebarOpen = ref(false)
+const isSearchOpen = ref(false)
+const showProfileModal = ref(false)
+
+function handleGlobalKey(e: KeyboardEvent) {
+  if (((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') || e.key === '/') {
+    // Only prevent default if we're not inside an input, unless it's cmd+k
+    if (e.key === '/' && (e.target as HTMLElement).tagName.match(/INPUT|TEXTAREA/)) {
+      return
+    }
+    e.preventDefault()
+    isSearchOpen.value = true
+  }
+}
+
 onMounted(() => {
   notificationStore.startPolling(15000) // Poll every 15s
+  window.addEventListener('keydown', handleGlobalKey)
 })
 
 onUnmounted(() => {
   notificationStore.stopPolling()
+  window.removeEventListener('keydown', handleGlobalKey)
 })
-
-const isSidebarOpen = ref(false)
 
 function toggleSidebar() {
   isSidebarOpen.value = !isSidebarOpen.value
@@ -33,6 +51,16 @@ function handleLogout() {
 
 <template>
   <div class="flex h-screen bg-surface-sunken overflow-hidden font-sans text-text-main selection:bg-secondary/30">
+    <GlobalSearchModal 
+      :is-open="isSearchOpen" 
+      @close="isSearchOpen = false" 
+      @open-profile="showProfileModal = true"
+      @logout="handleLogout"
+    />
+
+    <!-- Profile Settings Modal -->
+    <ProfileSettingsModal :is-open="showProfileModal" @close="showProfileModal = false" />
+
     <!-- Sidebar Overlay for Mobile -->
     <div 
       v-if="isSidebarOpen" 
@@ -58,127 +86,120 @@ function handleLogout() {
       <!-- Navigation Links -->
       <nav class="mt-4 flex-1 px-4 space-y-6 overflow-y-auto no-scrollbar pb-6">
         
-        <!-- CORE -->
-        <div>
-          <div class="px-4 mb-2 text-[10px] font-bold text-white/40 uppercase tracking-widest">Core</div>
-          <div class="space-y-1">
-            <RouterLink 
-              to="/dashboard" 
-              class="group relative flex items-center gap-3 rounded-md py-2 px-4 font-medium text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white"
-              active-class="bg-white/10 text-white shadow-sm ring-1 ring-white/10"
-              exact
-            >
-              <span class="opacity-70 group-hover:opacity-100 transition-opacity">📊</span>
-              <span>Dashboard</span>
-            </RouterLink>
-          </div>
-        </div>
+        <!-- CORE OPERATIONS -->
+        <SidebarAccordion title="Core Operations" :default-open="true">
+          <RouterLink 
+            to="/dashboard" 
+            class="group relative flex items-center gap-3 rounded-md py-2 px-4 font-medium text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white"
+            active-class="bg-white/10 text-white shadow-sm ring-1 ring-white/10"
+            exact
+          >
+            <span class="opacity-70 group-hover:opacity-100 transition-opacity">📊</span>
+            <span>Dashboard</span>
+          </RouterLink>
+        </SidebarAccordion>
 
-        <!-- COMMERCE -->
-        <div>
-          <div class="px-4 mb-2 text-[10px] font-bold text-white/40 uppercase tracking-widest">Commerce</div>
-          <div class="space-y-1">
-            <RouterLink 
-              to="/tours" 
-              class="group relative flex items-center gap-3 rounded-md py-2 px-4 font-medium text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white"
-              active-class="bg-white/10 text-white shadow-sm ring-1 ring-white/10"
-            >
-              <span class="opacity-70 group-hover:opacity-100 transition-opacity">⛵</span>
-              <span>Tours</span>
-            </RouterLink>
-            <RouterLink 
-              to="/bookings" 
-              class="group relative flex items-center gap-3 rounded-md py-2 px-4 font-medium text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white"
-              active-class="bg-white/10 text-white shadow-sm ring-1 ring-white/10"
-            >
-              <span class="opacity-70 group-hover:opacity-100 transition-opacity">📅</span>
-              <span>Bookings</span>
-            </RouterLink>
-            <RouterLink 
-              to="/inquiries" 
-              class="group relative flex items-center gap-3 rounded-md py-2 px-4 font-medium text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white"
-              active-class="bg-white/10 text-white shadow-sm ring-1 ring-white/10"
-            >
-              <span class="opacity-70 group-hover:opacity-100 transition-opacity">✉️</span>
-              <span class="flex-1">VIP Inquiries</span>
-              <span v-if="notificationStore.unreadInquiriesCount > 0" class="bg-amber-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{{ notificationStore.unreadInquiriesCount }}</span>
-            </RouterLink>
-          </div>
-        </div>
+        <!-- EXPERIENCE MANAGEMENT -->
+        <SidebarAccordion title="Experience Management" v-if="auth.user?.roles?.includes('Admin') || auth.user?.roles?.includes('BookingManager')" :default-open="true">
+          <RouterLink 
+            to="/tours" 
+            class="group relative flex items-center gap-3 rounded-md py-2 px-4 font-medium text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white"
+            active-class="bg-white/10 text-white shadow-sm ring-1 ring-white/10"
+          >
+            <span class="opacity-70 group-hover:opacity-100 transition-opacity">⛵</span>
+            <span>Tours</span>
+          </RouterLink>
+          <RouterLink 
+            to="/destinations" 
+            class="group relative flex items-center gap-3 rounded-md py-2 px-4 font-medium text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white"
+            active-class="bg-white/10 text-white shadow-sm ring-1 ring-white/10"
+          >
+            <span class="opacity-70 group-hover:opacity-100 transition-opacity">🗺️</span>
+            <span>Destinations</span>
+          </RouterLink>
+          <RouterLink 
+            to="/categories" 
+            class="group relative flex items-center gap-3 rounded-md py-2 px-4 font-medium text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white"
+            active-class="bg-white/10 text-white shadow-sm ring-1 ring-white/10"
+          >
+            <span class="opacity-70 group-hover:opacity-100 transition-opacity">🏷️</span>
+            <span>Categories</span>
+          </RouterLink>
+          <RouterLink 
+            to="/tour-types" 
+            class="group relative flex items-center gap-3 rounded-md py-2 px-4 font-medium text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white"
+            active-class="bg-white/10 text-white shadow-sm ring-1 ring-white/10"
+          >
+            <span class="opacity-70 group-hover:opacity-100 transition-opacity">✨</span>
+            <span>Tour & Trip Types</span>
+          </RouterLink>
+        </SidebarAccordion>
 
-        <!-- TAXONOMY -->
-        <div>
-          <div class="px-4 mb-2 text-[10px] font-bold text-white/40 uppercase tracking-widest">Taxonomy</div>
-          <div class="space-y-1">
-            <RouterLink 
-              to="/destinations" 
-              class="group relative flex items-center gap-3 rounded-md py-2 px-4 font-medium text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white"
-              active-class="bg-white/10 text-white shadow-sm ring-1 ring-white/10"
-            >
-              <span class="opacity-70 group-hover:opacity-100 transition-opacity">🗺️</span>
-              <span>Destinations</span>
-            </RouterLink>
-            <RouterLink 
-              to="/categories" 
-              class="group relative flex items-center gap-3 rounded-md py-2 px-4 font-medium text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white"
-              active-class="bg-white/10 text-white shadow-sm ring-1 ring-white/10"
-            >
-              <span class="opacity-70 group-hover:opacity-100 transition-opacity">🏷️</span>
-              <span>Categories</span>
-            </RouterLink>
-          </div>
-        </div>
+        <!-- CUSTOMER CARE & INQUIRIES -->
+        <SidebarAccordion title="Customer Care & Inquiries" :default-open="true">
+          <RouterLink 
+            to="/bookings" 
+            class="group relative flex items-center gap-3 rounded-md py-2 px-4 font-medium text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white"
+            active-class="bg-white/10 text-white shadow-sm ring-1 ring-white/10"
+          >
+            <span class="opacity-70 group-hover:opacity-100 transition-opacity">📅</span>
+            <span>Bookings</span>
+          </RouterLink>
+          <RouterLink 
+            to="/inquiries" 
+            class="group relative flex items-center gap-3 rounded-md py-2 px-4 font-medium text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white"
+            active-class="bg-white/10 text-white shadow-sm ring-1 ring-white/10"
+          >
+            <span class="opacity-70 group-hover:opacity-100 transition-opacity">✉️</span>
+            <span class="flex-1">VIP Inquiries</span>
+            <span v-if="notificationStore.unreadInquiriesCount > 0" class="bg-amber-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{{ notificationStore.unreadInquiriesCount }}</span>
+          </RouterLink>
+        </SidebarAccordion>
 
-        <!-- SETTINGS & SYSTEM -->
-        <div>
-          <div class="px-4 mb-2 text-[10px] font-bold text-white/40 uppercase tracking-widest">System</div>
-          <div class="space-y-1">
-            <RouterLink 
-              to="/settings/languages" 
-              class="group relative flex items-center gap-3 rounded-md py-2 px-4 font-medium text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white"
-              active-class="bg-white/10 text-white shadow-sm ring-1 ring-white/10"
-            >
-              <span class="opacity-70 group-hover:opacity-100 transition-opacity">🌍</span>
-              <span>Languages</span>
-            </RouterLink>
-            <RouterLink 
-              to="/settings/currencies" 
-              class="group relative flex items-center gap-3 rounded-md py-2 px-4 font-medium text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white"
-              active-class="bg-white/10 text-white shadow-sm ring-1 ring-white/10"
-            >
-              <span class="opacity-70 group-hover:opacity-100 transition-opacity">💰</span>
-              <span>Currencies</span>
-            </RouterLink>
-            <RouterLink 
-              to="/settings/nationalities" 
-              class="group relative flex items-center gap-3 rounded-md py-2 px-4 font-medium text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white"
-              active-class="bg-white/10 text-white shadow-sm ring-1 ring-white/10"
-            >
-              <span class="opacity-70 group-hover:opacity-100 transition-opacity">🏳️</span>
-              <span>Nationalities</span>
-            </RouterLink>
-            <RouterLink 
-              to="/users" 
-              class="group relative flex items-center gap-3 rounded-md py-2 px-4 font-medium text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white"
-              active-class="bg-white/10 text-white shadow-sm ring-1 ring-white/10"
-            >
-              <span class="opacity-70 group-hover:opacity-100 transition-opacity">👥</span>
-              <span>Users</span>
-            </RouterLink>
-          </div>
-        </div>
+        <!-- ADMINISTRATION & SECURITY -->
+        <SidebarAccordion title="Administration & Security" v-if="auth.user?.roles?.includes('Admin')" :default-open="false">
+          <RouterLink 
+            to="/settings/languages" 
+            class="group relative flex items-center gap-3 rounded-md py-2 px-4 font-medium text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white"
+            active-class="bg-white/10 text-white shadow-sm ring-1 ring-white/10"
+          >
+            <span class="opacity-70 group-hover:opacity-100 transition-opacity">🌍</span>
+            <span>Languages</span>
+          </RouterLink>
+          <RouterLink 
+            to="/settings/currencies" 
+            class="group relative flex items-center gap-3 rounded-md py-2 px-4 font-medium text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white"
+            active-class="bg-white/10 text-white shadow-sm ring-1 ring-white/10"
+          >
+            <span class="opacity-70 group-hover:opacity-100 transition-opacity">💰</span>
+            <span>Currencies</span>
+          </RouterLink>
+          <RouterLink 
+            to="/settings/nationalities" 
+            class="group relative flex items-center gap-3 rounded-md py-2 px-4 font-medium text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white"
+            active-class="bg-white/10 text-white shadow-sm ring-1 ring-white/10"
+          >
+            <span class="opacity-70 group-hover:opacity-100 transition-opacity">🏳️</span>
+            <span>Nationalities</span>
+          </RouterLink>
+          <RouterLink 
+            to="/users" 
+            class="group relative flex items-center gap-3 rounded-md py-2 px-4 font-medium text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white"
+            active-class="bg-white/10 text-white shadow-sm ring-1 ring-white/10"
+          >
+            <span class="opacity-70 group-hover:opacity-100 transition-opacity">👥</span>
+            <span>Users</span>
+          </RouterLink>
+          <RouterLink 
+            to="/roles" 
+            class="group relative flex items-center gap-3 rounded-md py-2 px-4 font-medium text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white"
+            active-class="bg-white/10 text-white shadow-sm ring-1 ring-white/10"
+          >
+            <span class="opacity-70 group-hover:opacity-100 transition-opacity">🛡️</span>
+            <span>Roles & RBAC</span>
+          </RouterLink>
+        </SidebarAccordion>
       </nav>
-
-      <!-- Sidebar Footer / Logout -->
-      <div class="p-4 border-t border-white/5">
-        <button 
-          @click="handleLogout" 
-          class="w-full group relative flex items-center gap-3 rounded-md py-2 px-4 font-medium text-white/70 transition-all duration-300 hover:bg-red-500/10 hover:text-red-400 text-left cursor-pointer"
-        >
-          <span class="opacity-70 group-hover:opacity-100">🚪</span>
-          <span>Logout</span>
-        </button>
-      </div>
     </aside>
 
     <!-- Main Shell -->
@@ -196,26 +217,22 @@ function handleLogout() {
         
         <div class="flex items-center gap-4 md:gap-6">
           
-          <div class="relative hidden md:block">
-            <Search class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-            <input 
-              type="text" 
-              placeholder="Search..." 
-              class="pl-9 pr-4 py-1.5 text-sm bg-surface-sunken border border-border/60 rounded-full focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all w-48 lg:w-64" 
-            />
-          </div>
+          <button 
+            @click="isSearchOpen = true"
+            class="relative hidden md:flex items-center text-text-muted hover:text-text-main transition-colors w-48 lg:w-64 h-9 bg-surface-sunken border border-border/60 rounded-full px-3 text-sm group"
+          >
+            <Search class="w-4 h-4 mr-2" />
+            <span class="flex-1 text-left">Search...</span>
+            <kbd class="hidden sm:inline-block px-1.5 py-0.5 text-[10px] font-mono bg-black/5 rounded text-text-muted group-hover:bg-black/10 transition-colors border border-black/10">⌘K</kbd>
+          </button>
+          
+          <button @click="isSearchOpen = true" class="md:hidden p-2 text-text-muted hover:text-text-main hover:bg-black/5 rounded-md transition-colors">
+            <Search class="w-5 h-5" />
+          </button>
 
           <NotificationDropdown />
 
-          <div class="flex items-center gap-3 pl-2 md:pl-4 border-l border-border/60">
-            <div class="text-right hidden sm:block">
-              <span class="block text-sm font-semibold text-text-main leading-tight">Administrator</span>
-              <span class="block text-[11px] text-text-muted font-sans mt-0.5">{{ auth.user?.email || 'admin@seadora.com' }}</span>
-            </div>
-            <div class="w-9 h-9 rounded-full bg-gradient-to-tr from-secondary/20 to-secondary/5 border border-secondary/20 flex items-center justify-center text-secondary-dark font-bold text-sm ring-2 ring-white shadow-sm cursor-pointer transition-transform hover:scale-105">
-              AD
-            </div>
-          </div>
+          <ProfileDropdown @logout="handleLogout" />
         </div>
       </header>
 
@@ -246,8 +263,6 @@ function handleLogout() {
         </footer>
       </main>
     </div>
-    <!-- Sonner Toaster for global elegant toasts -->
-    <Toaster position="top-right" richColors />
   </div>
 </template>
 

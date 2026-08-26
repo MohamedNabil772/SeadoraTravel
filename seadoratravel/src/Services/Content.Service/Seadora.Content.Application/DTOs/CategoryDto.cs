@@ -12,4 +12,5 @@ public class CategoryDto
     public string? CustomIconUrl { get; set; }
     public int Order { get; set; }
     public string CoverImageUrl { get; set; } = string.Empty;
+    public int TourCount { get; set; }
 }

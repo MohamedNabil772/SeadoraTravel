@@ -14,6 +14,7 @@ public class ContentDbContext : DbContext, IContentDbContext
     public DbSet<Supplier> Suppliers => Set<Supplier>();
     public DbSet<PaymentAgreement> PaymentAgreements => Set<PaymentAgreement>();
     public DbSet<Language> Languages => Set<Language>();
+    public DbSet<TourType> TourTypes => Set<TourType>();
     public DbSet<Currency> Currencies => Set<Currency>();
     public DbSet<Nationality> Nationalities => Set<Nationality>();
     public DbSet<Seadora.Content.Domain.Entities.Translation> Translations => Set<Seadora.Content.Domain.Entities.Translation>();
@@ -107,5 +108,28 @@ public class ContentDbContext : DbContext, IContentDbContext
             .WithMany()
             .HasForeignKey(t => t.SupplierId)
             .OnDelete(DeleteBehavior.SetNull);
+
+        // TourType configurations
+        modelBuilder.Entity<TourType>().Property(tt => tt.Names).HasColumnType("jsonb");
+        modelBuilder.Entity<TourType>().Property(tt => tt.Descriptions).HasColumnType("jsonb");
+        modelBuilder.Entity<TourType>().HasIndex(tt => tt.Code).IsUnique();
+
+        modelBuilder.Entity<Tour>()
+            .HasOne(t => t.TourType)
+            .WithMany(tt => tt.Tours)
+            .HasForeignKey(t => t.TourTypeId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<Tour>()
+            .HasOne(t => t.Category)
+            .WithMany(c => c.Tours)
+            .HasForeignKey(t => t.CategoryId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<Tour>()
+            .HasOne(t => t.Destination)
+            .WithMany(d => d.Tours)
+            .HasForeignKey(t => t.DestinationId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

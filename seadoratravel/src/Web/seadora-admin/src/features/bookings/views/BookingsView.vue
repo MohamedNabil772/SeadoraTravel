@@ -1,7 +1,14 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import api from '@/services/api'
 import { useToast } from '@/composables/useToast'
+import LuxuryPagination from '@/shared/components/LuxuryPagination.vue'
+import CreateBookingModal from '../components/CreateBookingModal.vue'
+import { Plus } from 'lucide-vue-next'
+
+const router = useRouter()
+const isCreateModalOpen = ref(false)
 
 interface Booking {
   id: string
@@ -15,6 +22,7 @@ interface Booking {
   roomNumber?: string
   passportFileName?: string
   tripType?: string
+  missingIdentification?: boolean
   guestsList?: { fullName: string, passportFileName?: string }[]
   selectedAddons?: { addonId: string, title: string, unitPrice: number, quantity: number }[]
 }
@@ -28,6 +36,14 @@ const bookings = ref<Booking[]>([])
 const tours = ref<Tour[]>([])
 const loading = ref(true)
 const actionLoading = ref(false)
+
+const currentPage = ref(1)
+const pageSize = ref(10)
+
+const paginatedBookings = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  return bookings.value.slice(start, start + pageSize.value)
+})
 
 
 
@@ -102,15 +118,28 @@ async function updateStatus(bookingId: string, status: string) {
 
 
 
+function goToCreateBooking() {
+  router.push('/bookings/create')
+}
+
 onMounted(loadData)
 </script>
 
 <template>
   <div class="bookings-page">
-    <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-      <div class="page-header">
+    <div class="page-header">
+      <div>
         <h2>Bookings Management</h2>
-        <p>Review customer reservations and update booking status.</p>
+        <p>Review customer reservations, capacity allocations, and create manual VIP bookings.</p>
+      </div>
+      <div class="header-actions">
+        <button
+          @click="goToCreateBooking"
+          class="btn-create"
+        >
+          <Plus class="w-4 h-4" />
+          <span>Create VIP Booking</span>
+        </button>
       </div>
     </div>
 
@@ -134,7 +163,7 @@ onMounted(loadData)
           </tr>
         </thead>
         <tbody>
-          <tr v-for="b in bookings" :key="b.id">
+          <tr v-for="b in paginatedBookings" :key="b.id">
             <td class="font-mono text-xs text-body">{{ formatDate(b.bookingDate) }}</td>
             <td class="font-bold text-xs tracking-wider uppercase text-primary">
               {{ b.tripType || 'Group' }}
@@ -161,6 +190,20 @@ onMounted(loadData)
               <div class="flex flex-wrap gap-1.5 items-center">
                 <span :class="['status-badge', b.status.toLowerCase()]">
                   {{ b.status }}
+                </span>
+                <span 
+                  v-if="b.missingIdentification" 
+                  class="status-badge !bg-amber-100 !text-amber-900 border border-amber-300"
+                  title="Missing passenger passport identification or ID number"
+                >
+                  ⚠️ Missing Passports
+                </span>
+                <span 
+                  v-else-if="b.guestsList && b.guestsList.length > 0" 
+                  class="status-badge !bg-emerald-50 !text-emerald-800 border border-emerald-300"
+                  title="Passenger identification on file"
+                >
+                  🛡️ ID Verified
                 </span>
                 <span 
                   v-if="getBookedCount(b.tourId, b.bookingDate) >= getMaxAllocations(b.tourId)" 
@@ -209,13 +252,25 @@ onMounted(loadData)
             </td>
           </tr>
           <tr v-if="bookings.length === 0">
-            <td colspan="6" class="empty-state">No bookings found</td>
+            <td colspan="6" class="text-center py-8 text-body">No bookings found.</td>
           </tr>
         </tbody>
       </table>
+
+      <LuxuryPagination
+        v-if="bookings.length > 0"
+        v-model:currentPage="currentPage"
+        v-model:pageSize="pageSize"
+        :totalItems="bookings.length"
+      />
     </div>
 
-
+    <!-- Create VIP Booking Modal -->
+    <CreateBookingModal 
+      :is-open="isCreateModalOpen" 
+      @close="isCreateModalOpen = false" 
+      @booking-created="loadData" 
+    />
   </div>
 </template>
 

@@ -5,9 +5,9 @@
         <h1 class="text-3xl font-semibold tracking-tight text-gray-900">Localization</h1>
         <p class="text-gray-500 mt-1.5 text-sm">Manage supported languages and update translations.</p>
       </div>
-      <button @click="openAddModal" class="inline-flex items-center justify-center rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-800 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2 w-full sm:w-auto">
-        <svg class="mr-2 h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
-        Add Language
+      <button @click="openAddModal" class="btn-create w-full sm:w-auto">
+        <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+        <span>Add Language</span>
       </button>
     </div>
 

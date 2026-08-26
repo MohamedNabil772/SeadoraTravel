@@ -11,6 +11,7 @@ public interface IContentDbContext
     DbSet<Supplier> Suppliers { get; }
     DbSet<PaymentAgreement> PaymentAgreements { get; }
     DbSet<Language> Languages { get; }
+    DbSet<TourType> TourTypes { get; }
     DbSet<Currency> Currencies { get; }
     DbSet<Nationality> Nationalities { get; }
     DbSet<Translation> Translations { get; }

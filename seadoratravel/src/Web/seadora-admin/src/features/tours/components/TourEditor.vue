@@ -52,6 +52,10 @@
           <input v-model="form.startTime" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="e.g. 09:00 AM" />
         </div>
         <div class="space-y-2">
+          <label class="block text-sm font-medium text-gray-700">Capacity / Max Allocations</label>
+          <input v-model.number="form.maxAllocations" type="number" min="1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-bold text-gray-900" placeholder="e.g. 20 Guests" />
+        </div>
+        <div class="space-y-2">
           <label class="block text-sm font-medium text-gray-700">Rating (0-5)</label>
           <input v-model.number="form.rating" type="number" step="0.1" max="5" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" />
         </div>
@@ -114,6 +118,84 @@
         <div class="space-y-2">
           <label class="block text-sm font-medium text-gray-700">Promo Badge</label>
           <input v-model="form.badge" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Tour Classification & Trip Type -->
+    <div class="bg-white p-6 rounded-xl border border-gray-200 space-y-6">
+      <div class="flex items-center justify-between border-b pb-3">
+        <div>
+          <h3 class="text-lg font-bold text-gray-900">Trip Format & Classification</h3>
+          <p class="text-xs text-gray-500 mt-0.5">Specify whether this is a group excursion, private tour, yacht charter, or VIP concierge journey.</p>
+        </div>
+      </div>
+
+      <!-- Tour Type Visual Selection Cards -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div
+          v-for="tt in tourTypes"
+          :key="tt.id"
+          @click="form.tourTypeId = tt.id"
+          class="cursor-pointer p-3.5 rounded-xl border transition-all duration-200 flex flex-col items-center text-center gap-2 group relative"
+          :class="form.tourTypeId === tt.id 
+            ? 'bg-secondary/10 border-secondary ring-2 ring-secondary/30 shadow-sm' 
+            : 'bg-gray-50/60 border-gray-200/80 hover:bg-white hover:border-gray-300 hover:shadow-sm'"
+        >
+          <div class="w-10 h-10 rounded-xl bg-white border border-gray-200/70 shadow-sm flex items-center justify-center text-xl transition-transform group-hover:scale-110">
+            {{ tt.icon || '⛵' }}
+          </div>
+          <div>
+            <div class="text-xs font-bold text-gray-900 leading-snug">{{ tt.names?.en || tt.code }}</div>
+            <div class="text-[10px] font-mono text-gray-400 mt-0.5">{{ tt.code }}</div>
+          </div>
+          <div v-if="form.tourTypeId === tt.id" class="absolute top-2 right-2 w-2 h-2 rounded-full bg-secondary"></div>
+        </div>
+      </div>
+
+      <!-- Capacity & Booking Allocation Controls -->
+      <div class="p-5 rounded-2xl bg-gradient-to-r from-slate-50 to-secondary/5 border border-slate-200/80 space-y-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2 text-xs font-bold text-navy-950 uppercase tracking-wider">
+            <span>👥</span>
+            <span>Capacity & Allocation Limits</span>
+          </div>
+          <span class="text-[11px] text-slate-500 font-medium hidden sm:inline">Controls capacity constraints and overbooking thresholds</span>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div class="space-y-1.5">
+            <label class="block text-xs font-bold text-gray-700">Minimum Group / Party Size</label>
+            <input 
+              v-model.number="form.groupMinCapacity" 
+              type="number" 
+              min="1" 
+              class="w-full px-3.5 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary/40 focus:border-secondary font-medium" 
+              placeholder="e.g. 1 Guest" 
+            />
+            <p class="text-[11px] text-gray-400">Min guests required to operate departure</p>
+          </div>
+          <div class="space-y-1.5">
+            <label class="block text-xs font-bold text-gray-700">Maximum Group / Party Size</label>
+            <input 
+              v-model.number="form.groupMaxCapacity" 
+              type="number" 
+              min="1" 
+              class="w-full px-3.5 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary/40 focus:border-secondary font-medium" 
+              placeholder="e.g. 20 Guests" 
+            />
+            <p class="text-[11px] text-gray-400">Total physical capacity per departure</p>
+          </div>
+          <div class="space-y-1.5">
+            <label class="block text-xs font-bold text-gray-700">Max Booking Allocations</label>
+            <input 
+              v-model.number="form.maxAllocations" 
+              type="number" 
+              min="1" 
+              class="w-full px-3.5 py-2 text-sm bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-secondary/40 focus:border-secondary font-bold text-gray-900" 
+              placeholder="e.g. 20 Slots" 
+            />
+            <p class="text-[11px] text-gray-400">Threshold before "All Places Booked"</p>
+          </div>
         </div>
       </div>
     </div>
@@ -190,6 +272,7 @@ import api from '@/services/api'
 const currentLocale = ref('en')
 const form = inject<any>('tourForm')
 
+const tourTypes = ref<any[]>([])
 const destinations = ref<any[]>([])
 const categories = ref<any[]>([])
 const suppliers = ref<any[]>([])
@@ -206,15 +289,35 @@ onMounted(async () => {
   highlightsInput.value = form.value.highlights[currentLocale.value]?.join(', ') || ''
   
   try {
-    const [d, c, s] = await Promise.all([
+    const [d, c, s, tt] = await Promise.all([
       api.get('/api/content/api/destinations'),
       api.get('/api/content/api/categories'),
-      api.get('/api/content/api/suppliers')
+      api.get('/api/content/api/suppliers'),
+      api.get('/api/content/api/tour-types')
     ])
     destinations.value = Array.isArray(d.data) ? d.data : d.data?.items || []
     categories.value = Array.isArray(c.data) ? c.data : c.data?.items || []
     suppliers.value = Array.isArray(s.data) ? s.data : s.data?.items || []
-  } catch(e) {}
+    tourTypes.value = Array.isArray(tt.data) ? tt.data : []
+    
+    // Set default tour type if none selected
+    if (!form.value.tourTypeId && tourTypes.value.length > 0) {
+      form.value.tourTypeId = tourTypes.value[0].id
+    }
+  } catch(e) {
+    // Fallback default tour types if offline or loading
+    tourTypes.value = [
+      { id: '11111111-1111-1111-1111-111111111111', code: 'GROUP', icon: '⛵', names: { en: 'Group Tour' } },
+      { id: '22222222-2222-2222-2222-222222222222', code: 'PRIVATE', icon: '👑', names: { en: 'Private Tour' } },
+      { id: '33333333-3333-3333-3333-333333333333', code: 'VIP', icon: '✨', names: { en: 'VIP Luxury' } },
+      { id: '44444444-4444-4444-4444-444444444444', code: 'YACHT', icon: '🛥️', names: { en: 'Yacht Charter' } },
+      { id: '55555555-5555-5555-5555-555555555555', code: 'SHORE_EXCURSION', icon: '⚓', names: { en: 'Shore Excursion' } },
+      { id: '66666666-6666-6666-6666-666666666666', code: 'MULTI_DAY', icon: '🏔️', names: { en: 'Multi-Day' } }
+    ]
+    if (!form.value.tourTypeId && tourTypes.value.length > 0) {
+      form.value.tourTypeId = tourTypes.value[0].id
+    }
+  }
 })
 
 const updateHighlights = () => {

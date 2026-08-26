@@ -24,6 +24,7 @@ public class BookingDto
     public string Attendance { get; set; } = "Pending";
     public bool HotelPickup { get; set; }
     public Guid? PackageId { get; set; }
+    public bool MissingIdentification { get; set; }
     public List<Seadora.Booking.Domain.Entities.BookingAddonSnapshot> SelectedAddons { get; set; } = new();
     public List<GuestDetailDto> GuestsList { get; set; } = new();
 }

@@ -12,43 +12,48 @@ using Seadora.Content.Application.Tours.Models;
 namespace Seadora.Content.Application.Tours.Commands;
 
 public record CreateTourCommand(
-    Dictionary<string, string> Names,
-    Dictionary<string, string> Descriptions,
-    Dictionary<string, string> Highlights,
-    decimal Price,
-    string Currency,
-    decimal? OriginalPrice,
-    decimal? DiscountPercentage,
-    string Duration,
-    string StartTime,
-    decimal Rating,
-    int ReviewCount,
-    string ImageUrl,
-    string Emoji,
-    string BgGradient,
-    string Badge,
-    Guid DestinationId,
-    Guid CategoryId,
-    Guid? SupplierId,
-    decimal SupplierPercentage,
-    int MaxAllocations,
-    bool IsTopRated,
-    bool IsBestseller,
-    bool IsInHighDemand,
-    bool ReserveAndPayLater,
-    bool HotelPickup,
-    bool FreeCancellation,
-    bool IsPrivateOption,
-    List<AdminTourPackageDto> Packages,
-    string PickupTimeType,
-    List<string> AvailablePickupTimes,
-    List<AdminItineraryDto> Itinerary,
-    List<AdminInclusionDto> Inclusions,
-    List<AdminInclusionDto> Exclusions,
-    AdminImportantInfoDto ImportantInfo,
-    List<AdminFaqDto> Faqs,
-    List<AdminAddonDto> Addons,
-    List<AdminMediaDto> Media
+    Dictionary<string, string>? Names = null,
+    Dictionary<string, string>? Descriptions = null,
+    Dictionary<string, string>? Highlights = null,
+    decimal Price = 0,
+    string? Currency = null,
+    decimal? OriginalPrice = null,
+    decimal? DiscountPercentage = null,
+    string? Duration = null,
+    string? StartTime = null,
+    decimal Rating = 0,
+    int ReviewCount = 0,
+    string? ImageUrl = null,
+    string? Emoji = null,
+    string? BgGradient = null,
+    string? Badge = null,
+    Guid DestinationId = default,
+    Guid CategoryId = default,
+    Guid? TourTypeId = null,
+    Guid? SupplierId = null,
+    decimal SupplierPercentage = 0,
+    int MaxAllocations = 20,
+    int? GroupMinCapacity = null,
+    int? GroupMaxCapacity = null,
+    bool IsTopRated = false,
+    bool IsBestseller = false,
+    bool IsInHighDemand = false,
+    bool ReserveAndPayLater = false,
+    bool HotelPickup = false,
+    bool FreeCancellation = false,
+    bool IsPrivateOption = false,
+    List<AdminTourPackageDto>? Packages = null,
+    string? PickupTimeType = null,
+    List<string>? AvailablePickupTimes = null,
+    List<AdminItineraryDto>? Itinerary = null,
+    List<AdminInclusionDto>? Inclusions = null,
+    List<AdminInclusionDto>? Exclusions = null,
+    AdminImportantInfoDto? ImportantInfo = null,
+    List<AdminFaqDto>? Faqs = null,
+    List<AdminAddonDto>? Addons = null,
+    List<AdminMediaDto>? Media = null,
+    List<string>? MediaUrls = null,
+    List<string>? Includes = null
 ) : IRequest<Guid>;
 
 public class CreateTourCommandHandler : IRequestHandler<CreateTourCommand, Guid>
@@ -64,6 +69,20 @@ public class CreateTourCommandHandler : IRequestHandler<CreateTourCommand, Guid>
     {
         if (request.Names == null || request.Names.Count == 0)
             throw new ArgumentException("Tour name is required.");
+
+        var destId = request.DestinationId;
+        if (destId == Guid.Empty)
+        {
+            var firstDest = await _context.Destinations.FirstOrDefaultAsync(cancellationToken);
+            if (firstDest != null) destId = firstDest.Id;
+        }
+
+        var catId = request.CategoryId;
+        if (catId == Guid.Empty)
+        {
+            var firstCat = await _context.Categories.FirstOrDefaultAsync(cancellationToken);
+            if (firstCat != null) catId = firstCat.Id;
+        }
 
         var tour = new Tour
         {
@@ -83,11 +102,14 @@ public class CreateTourCommandHandler : IRequestHandler<CreateTourCommand, Guid>
             Emoji = request.Emoji ?? string.Empty,
             BgGradient = request.BgGradient ?? string.Empty,
             Badge = request.Badge ?? string.Empty,
-            DestinationId = request.DestinationId,
-            CategoryId = request.CategoryId,
+            DestinationId = destId,
+            CategoryId = catId,
+            TourTypeId = request.TourTypeId,
             SupplierId = request.SupplierId,
             SupplierPercentage = request.SupplierPercentage,
             MaxAllocations = request.MaxAllocations <= 0 ? 20 : request.MaxAllocations,
+            GroupMinCapacity = request.GroupMinCapacity ?? 1,
+            GroupMaxCapacity = request.GroupMaxCapacity ?? 20,
             IsTopRated = request.IsTopRated,
             IsBestseller = request.IsBestseller,
             IsInHighDemand = request.IsInHighDemand,
@@ -97,7 +119,8 @@ public class CreateTourCommandHandler : IRequestHandler<CreateTourCommand, Guid>
             IsPrivateOption = request.IsPrivateOption,
             PickupTimeType = request.PickupTimeType ?? "FixedSlots",
             AvailablePickupTimes = request.AvailablePickupTimes ?? new List<string>(),
-            MediaUrls = request.Media?.Select(m => m.Url).ToList() ?? new List<string>(),
+            Includes = request.Includes ?? new List<string>(),
+            MediaUrls = request.MediaUrls ?? request.Media?.Select(m => m.Url).ToList() ?? new List<string>(),
             
             Packages = request.Packages?.Select(p => new TourPackage {
                 Id = p.Id != Guid.Empty ? p.Id : Guid.NewGuid(),

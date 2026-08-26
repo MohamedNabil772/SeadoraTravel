@@ -87,7 +87,15 @@ public class GetToursQueryHandler : IRequestHandler<GetToursQuery, List<TourSumm
             Images = t.MediaUrls ?? new List<string>(),
             MainImage = t.MediaUrls?.FirstOrDefault() ?? string.Empty,
             Duration = t.Duration,
-            Includes = t.Includes ?? new List<string>()
+            Includes = t.Includes ?? new List<string>(),
+            MaxAllocations = t.MaxAllocations > 0 ? t.MaxAllocations : (t.GroupMaxCapacity ?? 20),
+            GroupMinCapacity = t.GroupMinCapacity,
+            GroupMaxCapacity = t.GroupMaxCapacity,
+            TourTypeId = t.TourTypeId,
+            SupplierId = t.SupplierId,
+            SupplierPercentage = t.SupplierPercentage,
+            OriginalPrice = t.OriginalPrice,
+            DiscountPercentage = t.DiscountPercentage
         }).ToList();
 
         return dtos;

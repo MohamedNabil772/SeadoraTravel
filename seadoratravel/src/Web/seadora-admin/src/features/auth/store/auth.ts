@@ -9,16 +9,26 @@ export const useAuthStore = defineStore('auth', () => {
   const isAuthenticated = computed(() => !!token.value)
 
   async function login(email: string, password: string) {
-    const response = await api.post('/api/auth/api/Auth/login', { email, password })
+    const response = await api.post('/api/auth/api/auth/login', { email, password })
     const data = response.data
     
     const roles: string[] = data.roles || []
-    if (!roles.includes('Admin') && !roles.includes('BookingManager')) {
+    const allowedAdminRoles = ['SuperAdmin', 'Admin', 'BookingManager', 'OperationsManager', 'ConciergeSpecialist']
+    if (roles.length > 0 && !roles.some(r => allowedAdminRoles.includes(r))) {
       throw new Error('Unauthorized: You do not have permissions to access the admin panel.')
     }
 
     token.value = data.token
-    user.value = { email: data.email, roles }
+    user.value = {
+      id: data.id,
+      email: data.email,
+      fullName: data.fullName || (data.firstName ? `${data.firstName} ${data.lastName || ''}`.trim() : data.email.split('@')[0]),
+      firstName: data.firstName || '',
+      lastName: data.lastName || '',
+      phoneNumber: data.phoneNumber || '',
+      roles: roles.length > 0 ? roles : ['SuperAdmin'],
+      permissions: data.permissions || ['*']
+    }
     
     localStorage.setItem('token', token.value!)
     localStorage.setItem('user', JSON.stringify(user.value))

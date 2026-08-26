@@ -3,6 +3,7 @@ import { ref, onMounted } from 'vue'
 import api from '@/services/api'
 import { useConfirm } from '@/composables/useConfirm'
 import { useToast } from '@/composables/useToast'
+import { Plus } from 'lucide-vue-next'
 
 interface PaymentAgreement {
   id: string
@@ -175,7 +176,8 @@ async function deleteAgreement(id: string) {
           ⚙️ Manage Agreements
         </button>
         <button @click="openAddSupplier" class="btn-action-primary">
-          ➕ Add Supplier
+          <Plus class="w-4 h-4" />
+          <span>Add Supplier</span>
         </button>
       </div>
     </div>

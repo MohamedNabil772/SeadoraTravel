@@ -1,7 +1,7 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useCurrencyStore } from '../store/currencyStore'
-import { CheckCircle2, Search, ArrowRightLeft, RefreshCw, Sparkles, RotateCcw } from 'lucide-vue-next'
+import { CheckCircle2, Search, ArrowRightLeft, RefreshCw, Sparkles, RotateCcw, Plus } from 'lucide-vue-next'
 
 const store = useCurrencyStore()
 const searchQuery = ref('')
@@ -67,8 +67,9 @@ const handleRateChange = (code: string, event: Event) => {
           <span>{{ store.isSyncing ? 'Syncing...' : 'Sync Live Rates' }}</span>
         </button>
 
-        <button @click="showAddModal = true" class="inline-flex items-center justify-center rounded-xl bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2">
-          Add Currency
+        <button @click="showAddModal = true" class="btn-create">
+          <Plus class="w-4 h-4" />
+          <span>Add Currency</span>
         </button>
       </div>
     </div>

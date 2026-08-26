@@ -19,7 +19,7 @@ public class Booking
     public bool IsPaid { get; set; } = false;
     public string Attendance { get; set; } = "Pending";
     
-    // New fields for direct bookings
+    // Direct bookings & guest configuration
     public DateTime? TourDate { get; set; }
     public string? PickupTime { get; set; }
     public int Guests { get; set; } = 1;
@@ -27,6 +27,7 @@ public class Booking
     public Guid? PackageId { get; set; }
     public decimal TotalPrice { get; set; }
     public string Language { get; set; } = "en";
+    public bool MissingIdentification { get; set; }
     public List<BookingAddonSnapshot> SelectedAddons { get; set; } = new();
     public List<GuestDetail> GuestsList { get; set; } = new();
 }

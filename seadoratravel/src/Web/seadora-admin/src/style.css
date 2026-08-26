@@ -32,10 +32,10 @@ body {
 
 /* TailAdmin Global Style Overrides */
 .table-container {
-  background: #FFFFFF !important;
+  background: #fdfff5 !important;
   border: 1px solid #E2E8F0 !important;
-  border-radius: 4px !important;
-  box-shadow: 0px 8px 13px -3px rgba(0, 0, 0, 0.07) !important;
+  border-radius: 12px !important;
+  box-shadow: 0px 8px 13px -3px rgba(0, 0, 0, 0.04) !important;
   overflow: hidden !important;
   margin-top: 24px !important;
 }
@@ -53,7 +53,7 @@ body {
   letter-spacing: 0.05em !important;
   text-transform: uppercase !important;
   color: #64748B !important;
-  background: #F7F9FC !important;
+  background: #f4f6e8 !important;
   border-bottom: 1px solid #E2E8F0 !important;
 }
 
@@ -62,10 +62,11 @@ body {
   border-bottom: 1px solid #E2E8F0 !important;
   font-size: 14px !important;
   color: #24303F !important;
+  background: #fdfff5 !important;
 }
 
-.data-table tr:hover {
-  background: #F9FAFB !important;
+.data-table tr:hover td {
+  background: #f7f9eb !important;
 }
 
 .page-header {
@@ -88,43 +89,62 @@ body {
 }
 
 .btn-create, .btn-action-primary {
-  padding: 10px 22px !important;
-  background: #3C50E0 !important;
-  border: none !important;
-  border-radius: 4px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  padding: 10px 18px !important;
+  background: linear-gradient(135deg, #0B1B3D 0%, #17326B 100%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  border-radius: 12px !important;
   color: #fff !important;
   font-weight: 600 !important;
-  cursor: pointer !important;
   font-size: 14px !important;
-  transition: all 0.3s !important;
-  box-shadow: none !important;
+  cursor: pointer !important;
+  box-shadow: 0 2px 5px rgba(11, 27, 61, 0.2) !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
 }
 .btn-create:hover, .btn-action-primary:hover {
-  background: #2B3CA6 !important;
+  background: linear-gradient(135deg, #17326B 0%, #0B1B3D 100%) !important;
+  box-shadow: 0 4px 14px rgba(11, 27, 61, 0.3) !important;
+  transform: translateY(-1px) !important;
+  opacity: 0.98 !important;
+}
+.btn-create:active, .btn-action-primary:active {
+  transform: scale(0.98) !important;
+  box-shadow: 0 1px 2px rgba(11, 27, 61, 0.15) !important;
 }
 
 .btn-action-secondary {
-  padding: 10px 22px !important;
-  background: #fff !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+  padding: 10px 18px !important;
+  background: #fdfff5 !important;
   border: 1px solid #E2E8F0 !important;
-  border-radius: 4px !important;
-  color: #64748B !important;
+  border-radius: 12px !important;
+  color: #475569 !important;
   font-weight: 600 !important;
   cursor: pointer !important;
   font-size: 14px !important;
-  transition: all 0.2s !important;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
   box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.05) !important;
 }
 .btn-action-secondary:hover {
-  background: #F7F9FC !important;
-  color: #1C2434 !important;
+  background: #f4f6e8 !important;
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+  transform: translateY(-1px) !important;
+}
+.btn-action-secondary:active {
+  transform: scale(0.98) !important;
 }
 
 .modal-card {
-  background: #FFFFFF !important;
+  background: #fdfff5 !important;
   border: 1px solid #E2E8F0 !important;
-  border-radius: 4px !important;
-  box-shadow: 0px 8px 13px -3px rgba(0, 0, 0, 0.07) !important;
+  border-radius: 16px !important;
+  box-shadow: 0px 20px 40px -4px rgba(0, 0, 0, 0.08) !important;
   color: #24303F !important;
 }
 
@@ -141,21 +161,21 @@ body {
 
 .form-group input, .form-group select, .form-group textarea {
   padding: 12px 14px !important;
-  background: #FFFFFF !important;
+  background: #fdfff5 !important;
   border: 1.5px solid #E2E8F0 !important;
-  border-radius: 4px !important;
+  border-radius: 8px !important;
   color: #24303F !important;
   transition: border-color 0.2s !important;
 }
 .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-  border-color: #3C50E0 !important;
+  border-color: #0B1B3D !important;
 }
 
 .btn-cancel {
   padding: 10px 22px !important;
-  background: #fff !important;
+  background: #fdfff5 !important;
   border: 1px solid #E2E8F0 !important;
-  border-radius: 4px !important;
+  border-radius: 8px !important;
   color: #64748B !important;
   cursor: pointer !important;
   font-weight: 600 !important;

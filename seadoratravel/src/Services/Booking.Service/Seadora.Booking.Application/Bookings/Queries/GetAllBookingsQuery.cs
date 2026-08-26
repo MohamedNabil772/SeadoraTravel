@@ -18,6 +18,7 @@ using Seadora.Booking.Application.Common.Models;
 public record GetAllBookingsQuery(
     Guid? TourId, 
     BookingStatus? Status,
+    string? SearchTerm,
     string? SortColumn,
     string? SortOrder,
     int PageNumber = 1,
@@ -44,6 +45,13 @@ public class GetAllBookingsQueryHandler : IRequestHandler<GetAllBookingsQuery, P
         if (request.Status.HasValue)
         {
             query = query.Where(b => b.Status == request.Status.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.SearchTerm))
+        {
+            var searchTerm = request.SearchTerm.ToLower();
+            query = query.Where(b => 
+                b.CustomerName != null && b.CustomerName.ToLower().Contains(searchTerm));
         }
 
         var totalCount = await query.CountAsync(cancellationToken);

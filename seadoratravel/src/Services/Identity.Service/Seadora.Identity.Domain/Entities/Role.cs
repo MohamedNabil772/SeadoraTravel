@@ -10,4 +10,5 @@ public class Role : IdentityRole<string>
     }
     
     public List<User> Users { get; set; } = new();
+    public ICollection<RolePermission> RolePermissions { get; set; } = new List<RolePermission>();
 }
