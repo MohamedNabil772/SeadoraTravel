@@ -482,10 +482,11 @@ onMounted(() => {
 
             <!-- Tour Picker -->
             <div class="space-y-2">
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
+              <label for="cbv-tour-id" class="block text-xs font-bold text-slate-700 uppercase tracking-wider">
                 Select Tour Package <span class="text-rose-500">*</span>
               </label>
               <select
+                id="cbv-tour-id"
                 v-model="selectedTourId"
                 class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:border-secondary transition-all"
               >
@@ -502,12 +503,14 @@ onMounted(() => {
                 Select Package Tier
               </label>
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div
+                <button
                   v-for="pkg in availablePackages"
                   :key="pkg.id"
+                  type="button"
                   @click="selectedPackageId = pkg.id"
+                  :aria-pressed="selectedPackageId === pkg.id"
                   :class="[
-                    'p-4 rounded-2xl border-2 cursor-pointer transition-all flex flex-col justify-between',
+                    'p-4 rounded-2xl border-2 cursor-pointer transition-all flex flex-col justify-between text-left w-full',
                     selectedPackageId === pkg.id 
                       ? 'border-secondary bg-secondary/5 shadow-sm' 
                       : 'border-slate-200 bg-white hover:border-slate-300'
@@ -520,19 +523,20 @@ onMounted(() => {
                   <div class="mt-3 text-lg font-bold text-slate-900">
                     €{{ pkg.price }} <span class="text-xs font-normal text-slate-500">/ person</span>
                   </div>
-                </div>
+                </button>
               </div>
             </div>
 
             <!-- Date, Time & Headcount Grid -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
               <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                <label for="cbv-tour-date" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
                   Tour Departure Date <span class="text-rose-500">*</span>
                 </label>
                 <div class="relative">
                   <Calendar class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
+                    id="cbv-tour-date"
                     v-model="tourDate"
                     type="date"
                     class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:border-secondary transition-all"
@@ -541,12 +545,13 @@ onMounted(() => {
               </div>
 
               <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                <label for="cbv-pickup-time" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
                   Pickup / Departure Time
                 </label>
                 <div class="relative">
                   <Clock class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <select
+                    id="cbv-pickup-time"
                     v-model="pickupTime"
                     class="w-full pl-10 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:border-secondary transition-all"
                   >
@@ -556,10 +561,11 @@ onMounted(() => {
               </div>
 
               <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                <label for="cbv-total-guests" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
                   Total Guests (Headcount) <span class="text-rose-500">*</span>
                 </label>
                 <input
+                  id="cbv-total-guests"
                   v-model.number="totalGuests"
                   type="number"
                   min="1"
@@ -586,12 +592,14 @@ onMounted(() => {
                 <input
                   v-model="hotelName"
                   type="text"
+                  aria-label="Hotel or resort name"
                   placeholder="Hotel / Resort Name (e.g. Oberoi Sahl Hasheesh)"
                   class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:border-secondary transition-all"
                 />
                 <input
                   v-model="roomNumber"
                   type="text"
+                  aria-label="Room or suite number"
                   placeholder="Room / Suite Number (Optional)"
                   class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:border-secondary transition-all"
                 />
@@ -673,10 +681,11 @@ onMounted(() => {
             <!-- Conditional Corporate / Group Inputs -->
             <div v-if="bookingProfile === 'CORPORATE'" class="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
               <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                <label for="cbv-company-name" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
                   Company / Organization Name <span class="text-rose-500">*</span>
                 </label>
                 <input
+                  id="cbv-company-name"
                   v-model="companyName"
                   type="text"
                   placeholder="e.g. McKinsey & Company / Siemens AG"
@@ -684,10 +693,11 @@ onMounted(() => {
                 />
               </div>
               <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+                <label for="cbv-billing-tax-id" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
                   Corporate Billing / Tax ID (VAT)
                 </label>
                 <input
+                  id="cbv-billing-tax-id"
                   v-model="billingTaxId"
                   type="text"
                   placeholder="e.g. DE123456789 (Optional)"
@@ -697,10 +707,11 @@ onMounted(() => {
             </div>
 
             <div v-if="bookingProfile === 'GROUP'" class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
-              <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
+              <label for="cbv-group-name" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">
                 Group / Event / Delegation Name <span class="text-rose-500">*</span>
               </label>
               <input
+                id="cbv-group-name"
                 v-model="groupName"
                 type="text"
                 placeholder="e.g. Zurich Yacht Club Red Sea Expedition 2026"
@@ -710,12 +721,13 @@ onMounted(() => {
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                <label for="cbv-customer-name" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
                   Lead Customer Full Name <span class="text-rose-500">*</span>
                 </label>
                 <div class="relative">
                   <User class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
+                    id="cbv-customer-name"
                     v-model="customerName"
                     type="text"
                     placeholder="e.g. Lord Arthur Wellesley"
@@ -725,12 +737,13 @@ onMounted(() => {
               </div>
 
               <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                <label for="cbv-customer-email" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
                   Email Address <span class="text-rose-500">*</span>
                 </label>
                 <div class="relative">
                   <Mail class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
+                    id="cbv-customer-email"
                     v-model="customerEmail"
                     type="email"
                     placeholder="vip.guest@example.com"
@@ -740,12 +753,13 @@ onMounted(() => {
               </div>
 
               <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                <label for="cbv-whatsapp" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
                   WhatsApp Number (with country code)
                 </label>
                 <div class="relative">
                   <Phone class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
+                    id="cbv-whatsapp"
                     v-model="whatsApp"
                     type="text"
                     placeholder="+44 7700 900123"
@@ -755,10 +769,11 @@ onMounted(() => {
               </div>
 
               <div>
-                <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                <label for="cbv-language" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
                   Preferred Language
                 </label>
                 <select
+                  id="cbv-language"
                   v-model="language"
                   class="w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:border-secondary transition-all"
                 >
@@ -849,10 +864,11 @@ onMounted(() => {
               <div v-if="guests[activeGuestTab]" class="space-y-4 bg-slate-50/70 p-5 rounded-2xl border border-slate-200/60">
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    <label for="cbv-guest-full-name" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                       Guest Full Name <span class="text-rose-500">*</span>
                     </label>
                     <input
+                      id="cbv-guest-full-name"
                       v-model="guests[activeGuestTab].fullName"
                       type="text"
                       placeholder="Passenger full legal name"
@@ -861,10 +877,11 @@ onMounted(() => {
                   </div>
 
                   <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    <label for="cbv-guest-nationality" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                       Nationality / Country
                     </label>
                     <input
+                      id="cbv-guest-nationality"
                       v-model="guests[activeGuestTab].nationality"
                       list="nationalities-list"
                       placeholder="e.g. Germany, UK, Italy"
@@ -873,10 +890,11 @@ onMounted(() => {
                   </div>
 
                   <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    <label for="cbv-guest-age-category" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                       Age Category
                     </label>
                     <select
+                      id="cbv-guest-age-category"
                       v-model="guests[activeGuestTab].ageCategory"
                       class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-sm font-medium focus:outline-none focus:ring-2 focus:ring-secondary/40 focus:border-secondary transition-all"
                     >
@@ -887,10 +905,11 @@ onMounted(() => {
                   </div>
 
                   <div>
-                    <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                    <label for="cbv-guest-passport" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                       Passport or National ID Number
                     </label>
                     <input
+                      id="cbv-guest-passport"
                       v-model="guests[activeGuestTab].passportNumber"
                       type="text"
                       placeholder="e.g. C12345678"
@@ -900,10 +919,11 @@ onMounted(() => {
                 </div>
 
                 <div>
-                  <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
+                  <label for="cbv-guest-special-requests" class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1.5">
                     Special Dietary / Concierge Requests
                   </label>
                   <input
+                    id="cbv-guest-special-requests"
                     v-model="guests[activeGuestTab].specialRequests"
                     type="text"
                     placeholder="Vegetarian meal, anniversary celebration, wheelchair assistance..."
@@ -937,7 +957,7 @@ onMounted(() => {
                 <div v-if="isAddSectionOpen" class="bg-navy-950 text-white p-6 rounded-2xl shadow-md border border-navy-900 space-y-4">
                   <div class="flex items-center justify-between border-b border-white/10 pb-3">
                     <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                      <User class="w-4 h-4 text-secondary" />
+                      <User class="w-4 h-4 text-secondary-text" />
                       <span>{{ editingGuestIndex !== null ? 'Edit Passenger Profile' : 'Input New Passenger' }}</span>
                     </h3>
                     <span class="text-xs text-white/60">Saves and appends to manifest below</span>
@@ -945,10 +965,11 @@ onMounted(() => {
 
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                      <label class="block text-[11px] font-bold text-white/80 uppercase tracking-wider mb-1">
+                      <label for="cbv-inline-full-name" class="block text-[11px] font-bold text-white/80 uppercase tracking-wider mb-1">
                         Full Legal Name <span class="text-rose-400">*</span>
                       </label>
                       <input
+                        id="cbv-inline-full-name"
                         v-model="inlineGuestForm.fullName"
                         type="text"
                         placeholder="Passenger name"
@@ -957,10 +978,11 @@ onMounted(() => {
                     </div>
 
                     <div>
-                      <label class="block text-[11px] font-bold text-white/80 uppercase tracking-wider mb-1">
+                      <label for="cbv-inline-nationality" class="block text-[11px] font-bold text-white/80 uppercase tracking-wider mb-1">
                         Nationality
                       </label>
                       <input
+                        id="cbv-inline-nationality"
                         v-model="inlineGuestForm.nationality"
                         list="nationalities-list"
                         placeholder="e.g. Germany"
@@ -969,10 +991,11 @@ onMounted(() => {
                     </div>
 
                     <div>
-                      <label class="block text-[11px] font-bold text-white/80 uppercase tracking-wider mb-1">
+                      <label for="cbv-inline-age-category" class="block text-[11px] font-bold text-white/80 uppercase tracking-wider mb-1">
                         Age Category
                       </label>
                       <select
+                        id="cbv-inline-age-category"
                         v-model="inlineGuestForm.ageCategory"
                         class="w-full px-3.5 py-2 bg-slate-900 border border-white/20 rounded-xl text-sm text-white focus:outline-none focus:ring-2 focus:ring-secondary/50"
                       >
@@ -983,10 +1006,11 @@ onMounted(() => {
                     </div>
 
                     <div>
-                      <label class="block text-[11px] font-bold text-white/80 uppercase tracking-wider mb-1">
+                      <label for="cbv-inline-passport" class="block text-[11px] font-bold text-white/80 uppercase tracking-wider mb-1">
                         Passport or National ID #
                       </label>
                       <input
+                        id="cbv-inline-passport"
                         v-model="inlineGuestForm.passportNumber"
                         type="text"
                         placeholder="Passport / ID number"
@@ -1033,7 +1057,7 @@ onMounted(() => {
                       <td class="py-3 px-4 font-bold text-slate-500">{{ idx + 1 }}</td>
                       <td class="py-3 px-4 font-bold text-slate-900">
                         {{ g.fullName || 'Unnamed Passenger' }}
-                        <span v-if="idx === 0" class="ml-1 text-[10px] font-semibold text-secondary-dark bg-secondary/15 px-2 py-0.5 rounded-full">Lead</span>
+                        <span v-if="idx === 0" class="ml-1 text-[10px] font-semibold text-secondary-text bg-secondary/15 px-2 py-0.5 rounded-full">Lead</span>
                       </td>
                       <td class="py-3 px-4 text-slate-600">{{ g.nationality || '—' }}</td>
                       <td class="py-3 px-4 text-slate-600">{{ g.ageCategory }}</td>
@@ -1105,7 +1129,7 @@ onMounted(() => {
           <!-- Sticky Summary Card -->
           <div class="sticky top-28 bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-md space-y-6">
             <div class="pb-4 border-b border-slate-100">
-              <span class="text-[10px] font-bold tracking-widest uppercase text-secondary-dark">Seadora Concierge</span>
+              <span class="text-[10px] font-bold tracking-widest uppercase text-secondary-text">Seadora Concierge</span>
               <h3 class="text-lg font-serif font-bold text-slate-900">VIP Booking Summary</h3>
             </div>
 
@@ -1129,7 +1153,7 @@ onMounted(() => {
               </div>
               <div v-if="currentPackage" class="flex justify-between text-slate-600">
                 <span>Selected Tier</span>
-                <span class="font-bold text-secondary-dark">{{ currentPackage.name }}</span>
+                <span class="font-bold text-secondary-text">{{ currentPackage.name }}</span>
               </div>
               <div class="flex justify-between text-slate-600">
                 <span>Total Passengers</span>
@@ -1166,10 +1190,10 @@ onMounted(() => {
     <Teleport to="body">
       <div v-if="isBulkModalOpen" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
         <div class="fixed inset-0 bg-navy-950/60 backdrop-blur-sm" @click="isBulkModalOpen = false"></div>
-        <div class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl p-6 sm:p-8 space-y-4 border border-slate-100">
+        <div class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl p-6 sm:p-8 space-y-4 border border-slate-100" role="dialog" aria-modal="true" aria-labelledby="bulk-paste-title" v-dialog="() => isBulkModalOpen = false">
           <div class="flex justify-between items-center border-b pb-3">
-            <h3 class="text-lg font-bold text-slate-900">📋 Bulk Paste Passenger Manifest</h3>
-            <button @click="isBulkModalOpen = false" class="text-slate-400 hover:text-slate-600">✕</button>
+            <h3 id="bulk-paste-title" class="text-lg font-bold text-slate-900">📋 Bulk Paste Passenger Manifest</h3>
+            <button type="button" @click="isBulkModalOpen = false" aria-label="Close" class="text-slate-400 hover:text-slate-600">✕</button>
           </div>
           <p class="text-xs text-slate-500">
             Paste one guest per line. Formats supported:<br/>
@@ -1178,12 +1202,13 @@ onMounted(() => {
           <textarea
             v-model="bulkText"
             rows="7"
+            aria-label="Passenger manifest to paste"
             placeholder="John Doe, Germany, C12345678&#10;Jane Doe, Germany, C87654321&#10;Arthur Smith, UK"
             class="w-full p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono focus:bg-white focus:outline-none focus:ring-2 focus:ring-secondary/40"
           ></textarea>
           <div class="flex justify-end gap-3 pt-2">
-            <button @click="isBulkModalOpen = false" class="px-4 py-2 text-xs font-medium text-slate-600">Cancel</button>
-            <button @click="processBulkPaste" class="px-6 py-2.5 bg-primary text-white text-xs font-bold rounded-xl shadow">
+            <button type="button" @click="isBulkModalOpen = false" class="px-4 py-2 text-xs font-medium text-slate-600">Cancel</button>
+            <button type="button" @click="processBulkPaste" class="px-6 py-2.5 bg-primary text-white text-xs font-bold rounded-xl shadow">
               Import Passengers
             </button>
           </div>

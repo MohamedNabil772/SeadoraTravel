@@ -387,11 +387,13 @@ function formatDate(dateStr: string) {
             <input 
               v-model="ledgerSearch" 
               type="text" 
+              aria-label="Search ledger"
               placeholder="Search ledger..." 
               class="px-3 py-1.5 border border-stroke rounded text-xs bg-white text-dark outline-none focus:border-primary w-48"
             />
             <select 
               v-model="ledgerStatusFilter" 
+              aria-label="Filter by booking status"
               class="px-3 py-1.5 border border-stroke rounded text-xs bg-white text-dark outline-none cursor-pointer"
             >
               <option value="all">All Statuses</option>
@@ -475,8 +477,8 @@ function formatDate(dateStr: string) {
           <p>Configure duration below to filter payouts based on trip date ranges.</p>
         </div>
         <div class="flex-filter">
-          <label>Duration:</label>
-          <select v-model="supplierDuration" class="filter-select">
+          <label for="reports-supplier-duration">Duration:</label>
+          <select id="reports-supplier-duration" v-model="supplierDuration" class="filter-select">
             <option value="all">All-Time Bookings</option>
             <option value="day">Last 24 Hours</option>
             <option value="week">Last 7 Days</option>

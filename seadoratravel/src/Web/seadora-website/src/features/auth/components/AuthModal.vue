@@ -1,5 +1,14 @@
 <template>
-  <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+  <div
+    v-if="isOpen"
+    :ref="setDialogEl"
+    tabindex="-1"
+    role="dialog"
+    aria-modal="true"
+    :aria-label="$t('auth.welcomeTitle')"    class="fixed inset-0 z-50 flex items-center justify-center p-4 outline-none"
+    @keydown.esc.stop="closeModal"
+    @keydown.tab="trapTab"
+  >
     <!-- Frosted backdrop blur -->
     <div class="fixed inset-0 backdrop-blur-xl bg-[#062d4d]/60 transition-opacity" @click="closeModal"></div>
 
@@ -8,7 +17,7 @@
       <!-- Modal Header -->
       <div class="px-8 pt-8 pb-6 text-center">
         <!-- Close Button -->
-        <button @click="closeModal" class="absolute top-4 right-4 text-white/60 hover:text-white transition-colors">
+        <button type="button" aria-label="Close" @click="closeModal" class="absolute top-4 right-4 text-white/60 hover:text-white transition-colors">
           <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -124,7 +133,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, toRef } from 'vue';
+import { useModalA11y } from '@/shared/utils/modalA11y';
 
 const props = defineProps<{
   isOpen: boolean;
@@ -136,6 +146,7 @@ const emit = defineEmits<{
 
 const activeTab = ref<'phone' | 'email'>('phone');
 const isAppleDevice = ref(false);
+const { setDialogEl, trapTab } = useModalA11y(toRef(props, 'isOpen'));
 
 const closeModal = () => {
   emit('close');

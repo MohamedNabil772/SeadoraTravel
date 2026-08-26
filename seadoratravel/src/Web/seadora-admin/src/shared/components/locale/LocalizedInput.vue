@@ -38,6 +38,7 @@ const dynamicPlaceholder = computed(() => {
         :placeholder="dynamicPlaceholder"
         class="localized-input"
         :class="{ 'has-error': error, 'is-rtl': isRTL }"
+        :aria-label="label || undefined"
       />
     </div>
     

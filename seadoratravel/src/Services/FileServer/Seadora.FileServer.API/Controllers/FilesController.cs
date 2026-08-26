@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Seadora.Common.Storage;
 
@@ -35,6 +36,7 @@ public class FilesController : ControllerBase
     }
 
     [HttpGet("{fileId}")]
+    [AllowAnonymous]
     public async Task<IActionResult> Download(string fileId)
     {
         try

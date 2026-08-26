@@ -134,7 +134,13 @@ async function handleSubmit() {
       <div v-if="isOpen" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
         <div class="fixed inset-0 bg-navy-950/60 backdrop-blur-sm transition-opacity" @click="emit('close')"></div>
 
-        <div class="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col my-8 border border-gray-100 animate-modal">
+        <div
+          class="relative w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col my-8 border border-gray-100 animate-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="create-booking-title"
+          v-dialog="() => emit('close')"
+        >
           <!-- Header -->
           <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-navy-950 to-navy-900 text-white">
             <div class="flex items-center gap-3">
@@ -142,14 +148,14 @@ async function handleSubmit() {
                 📅
               </div>
               <div>
-                <h2 class="text-xl font-serif font-bold text-white tracking-wide flex items-center gap-2">
+                <h2 id="create-booking-title" class="text-xl font-serif font-bold text-white tracking-wide flex items-center gap-2">
                   <span>Create VIP Booking</span>
                   <span class="text-[10px] font-sans font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-secondary text-navy-950">Concierge Desk</span>
                 </h2>
                 <p class="text-xs text-white/70 mt-0.5">Direct manual booking entry for guests, travel agents, and VIP clients.</p>
               </div>
             </div>
-            <button @click="emit('close')" class="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-colors">
+            <button type="button" @click="emit('close')" aria-label="Close create booking dialog" class="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-colors">
               <X class="w-5 h-5" />
             </button>
           </div>
@@ -158,11 +164,12 @@ async function handleSubmit() {
           <form @submit.prevent="handleSubmit" class="p-6 sm:p-8 space-y-6 max-h-[75vh] overflow-y-auto">
             <!-- Experience & Tour Selection -->
             <div class="space-y-3">
-              <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-2">
-                <Compass class="w-4 h-4 text-secondary" />
+              <label for="modal-tour-id" class="block text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-2">
+                <Compass class="w-4 h-4 text-secondary-text" />
                 <span>Select Tour & Experience *</span>
               </label>
               <select
+                id="modal-tour-id"
                 v-model="form.tourId"
                 class="w-full px-4 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-secondary/40 focus:border-secondary transition-all font-medium text-gray-900"
               >
@@ -174,11 +181,12 @@ async function handleSubmit() {
 
             <!-- Package Options (If Available) -->
             <div v-if="availablePackages.length > 0" class="space-y-3">
-              <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-2">
-                <Sparkles class="w-4 h-4 text-secondary" />
+              <label for="modal-package-id" class="block text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center gap-2">
+                <Sparkles class="w-4 h-4 text-secondary-text" />
                 <span>Select Package Tier</span>
               </label>
               <select
+                id="modal-package-id"
                 v-model="form.packageId"
                 class="w-full px-4 py-2.5 text-sm bg-gray-50 border border-gray-200 rounded-xl focus:bg-white focus:ring-2 focus:ring-secondary/40 focus:border-secondary"
               >
@@ -192,10 +200,11 @@ async function handleSubmit() {
             <!-- Schedule & Capacity -->
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div class="space-y-1.5">
-                <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
+                <label for="modal-tour-date" class="block text-xs font-semibold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
                   <Calendar class="w-3.5 h-3.5 text-gray-400" /> Tour Date *
                 </label>
                 <input
+                  id="modal-tour-date"
                   v-model="form.tourDate"
                   type="date"
                   required
@@ -204,10 +213,11 @@ async function handleSubmit() {
               </div>
 
               <div class="space-y-1.5">
-                <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
+                <label for="modal-pickup-time" class="block text-xs font-semibold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
                   <Clock class="w-3.5 h-3.5 text-gray-400" /> Pickup Slot
                 </label>
                 <input
+                  id="modal-pickup-time"
                   v-model="form.pickupTime"
                   type="text"
                   placeholder="e.g. 08:30 AM"
@@ -216,10 +226,11 @@ async function handleSubmit() {
               </div>
 
               <div class="space-y-1.5">
-                <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
+                <label for="modal-guests-count" class="block text-xs font-semibold text-gray-700 uppercase tracking-wider flex items-center gap-1.5">
                   <User class="w-3.5 h-3.5 text-gray-400" /> Guests Count
                 </label>
                 <input
+                  id="modal-guests-count"
                   v-model.number="form.guests"
                   type="number"
                   min="1"
@@ -237,8 +248,9 @@ async function handleSubmit() {
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-xs font-medium text-gray-600 mb-1">Lead Guest Full Name *</label>
+                  <label for="modal-customer-name" class="block text-xs font-medium text-gray-600 mb-1">Lead Guest Full Name *</label>
                   <input
+                    id="modal-customer-name"
                     v-model="form.customerName"
                     type="text"
                     required
@@ -248,8 +260,9 @@ async function handleSubmit() {
                 </div>
 
                 <div>
-                  <label class="block text-xs font-medium text-gray-600 mb-1">Guest Email Address *</label>
+                  <label for="modal-customer-email" class="block text-xs font-medium text-gray-600 mb-1">Guest Email Address *</label>
                   <input
+                    id="modal-customer-email"
                     v-model="form.customerEmail"
                     type="email"
                     required
@@ -259,8 +272,9 @@ async function handleSubmit() {
                 </div>
 
                 <div>
-                  <label class="block text-xs font-medium text-gray-600 mb-1">WhatsApp / Phone</label>
+                  <label for="modal-whatsapp" class="block text-xs font-medium text-gray-600 mb-1">WhatsApp / Phone</label>
                   <input
+                    id="modal-whatsapp"
                     v-model="form.whatsApp"
                     type="text"
                     placeholder="+44 7700 900077"
@@ -269,8 +283,9 @@ async function handleSubmit() {
                 </div>
 
                 <div>
-                  <label class="block text-xs font-medium text-gray-600 mb-1">Hotel / Resort Name</label>
+                  <label for="modal-hotel-name" class="block text-xs font-medium text-gray-600 mb-1">Hotel / Resort Name</label>
                   <input
+                    id="modal-hotel-name"
                     v-model="form.hotelName"
                     type="text"
                     placeholder="e.g. The Oberoi Sahl Hasheesh"
@@ -280,8 +295,9 @@ async function handleSubmit() {
               </div>
 
               <div>
-                <label class="block text-xs font-medium text-gray-600 mb-1">Room Number / Special Notes</label>
+                <label for="modal-room-number" class="block text-xs font-medium text-gray-600 mb-1">Room Number / Special Notes</label>
                 <input
+                  id="modal-room-number"
                   v-model="form.roomNumber"
                   type="text"
                   placeholder="e.g. Suite 402 • Vegetarian dining"
@@ -294,7 +310,7 @@ async function handleSubmit() {
             <div class="flex items-center justify-between p-4 rounded-2xl bg-gradient-to-r from-navy-900 to-navy-950 text-white border border-secondary/20 shadow-md">
               <div>
                 <div class="text-[11px] text-white/70 uppercase tracking-wider">Estimated Total Value</div>
-                <div class="text-2xl font-bold font-serif text-secondary mt-0.5">
+                <div class="text-2xl font-bold font-serif text-secondary-text mt-0.5">
                   ${{ form.totalPrice.toFixed(2) }}
                 </div>
               </div>

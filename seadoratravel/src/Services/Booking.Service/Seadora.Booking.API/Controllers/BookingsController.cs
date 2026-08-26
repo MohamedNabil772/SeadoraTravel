@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Seadora.Booking.Application.Bookings.Commands.CreateBooking;
 using Seadora.Booking.Application.Bookings.Commands.UpdateBookingStatus;
@@ -22,6 +23,7 @@ public class BookingsController : ControllerBase
     }
 
     [HttpPost]
+    [AllowAnonymous]
     public async Task<IActionResult> Create([FromBody] CreateBookingCommand command)
     {
         try
@@ -64,6 +66,7 @@ public class BookingsController : ControllerBase
     }
 
     [HttpGet("{tourId:guid}/availability")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetTourAvailability(Guid tourId, [FromQuery] DateTime date)
     {
         var bookedGuests = await _mediator.Send(new GetTourAvailabilityQuery(tourId, date));

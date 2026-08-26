@@ -79,12 +79,13 @@ async function handleLogin() {
           <form @submit.prevent="handleLogin" class="space-y-5">
             <!-- Email Field -->
             <div class="space-y-1.5">
-              <label class="block text-xs font-semibold text-white/80 uppercase tracking-wider">
+              <label for="login-email" class="block text-xs font-semibold text-white/80 uppercase tracking-wider">
                 Email Address
               </label>
               <div class="relative">
                 <Mail class="w-4 h-4 text-white/40 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input 
+                  id="login-email"
                   v-model="email" 
                   type="email" 
                   placeholder="admin@seadoratravel.com" 
@@ -98,7 +99,7 @@ async function handleLogin() {
             <!-- Password Field -->
             <div class="space-y-1.5">
               <div class="flex items-center justify-between">
-                <label class="block text-xs font-semibold text-white/80 uppercase tracking-wider">
+                <label for="login-password" class="block text-xs font-semibold text-white/80 uppercase tracking-wider">
                   Password
                 </label>
                 <span class="text-[11px] text-secondary/80 hover:underline cursor-pointer font-normal">
@@ -108,6 +109,7 @@ async function handleLogin() {
               <div class="relative">
                 <Lock class="w-4 h-4 text-white/40 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input 
+                  id="login-password"
                   v-model="password" 
                   :type="showPassword ? 'text' : 'password'" 
                   placeholder="••••••••••••" 

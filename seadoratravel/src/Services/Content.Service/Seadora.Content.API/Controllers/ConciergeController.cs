@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Seadora.Content.Application.DTOs;
 using Seadora.Content.Application.Concierge.Queries.ProcessChat;
@@ -18,6 +19,7 @@ namespace Seadora.Content.API.Controllers
         }
 
         [HttpPost("chat")]
+        [AllowAnonymous]
         public async Task<ActionResult<ConciergeChatResponseDto>> ProcessChat([FromBody] ConciergeChatRequestDto request)
         {
             var response = await _mediator.Send(new ProcessConciergeChatQuery(request));

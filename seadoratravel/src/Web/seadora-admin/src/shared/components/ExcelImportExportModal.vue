@@ -90,7 +90,13 @@ async function handleImport() {
       <div v-if="isOpen" class="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
         <div class="fixed inset-0 bg-navy-950/60 backdrop-blur-sm transition-opacity" @click="emit('close')"></div>
 
-        <div class="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col my-8 border border-gray-100 animate-modal">
+        <div
+          class="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col my-8 border border-gray-100 animate-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="excel-tools-title"
+          v-dialog="() => emit('close')"
+        >
           <!-- Header -->
           <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gradient-to-r from-navy-950 to-navy-900 text-white">
             <div class="flex items-center gap-3">
@@ -98,13 +104,13 @@ async function handleImport() {
                 📊
               </div>
               <div>
-                <h2 class="text-xl font-serif font-bold text-white tracking-wide">
+                <h2 id="excel-tools-title" class="text-xl font-serif font-bold text-white tracking-wide">
                   Excel & PDF Tools
                 </h2>
                 <p class="text-xs text-white/70 mt-0.5">Bulk manage {{ entityTitle }} with spreadsheets and luxury PDF catalogs.</p>
               </div>
             </div>
-            <button @click="emit('close')" class="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-colors">
+            <button type="button" @click="emit('close')" aria-label="Close Excel and PDF tools" class="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded-full transition-colors">
               <X class="w-5 h-5" />
             </button>
           </div>
@@ -162,7 +168,7 @@ async function handleImport() {
             <!-- Upload / Import Section -->
             <div class="border-t border-gray-100 pt-5 space-y-4">
               <div class="text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center gap-2">
-                <UploadCloud class="w-4 h-4 text-secondary" />
+                <UploadCloud class="w-4 h-4 text-secondary-text" />
                 <span>Upload & Import Spreadsheet</span>
               </div>
 
@@ -171,6 +177,7 @@ async function handleImport() {
                   type="file"
                   accept=".xlsx"
                   @change="handleFileChange"
+                  aria-label="Upload Excel spreadsheet"
                   class="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
                 />
                 <div class="flex flex-col items-center justify-center gap-2">

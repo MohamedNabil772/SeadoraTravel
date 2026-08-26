@@ -38,7 +38,7 @@ public static class BookingDbContextSeed
                 ""DestinationInterest"" text,
                 ""DateOrGuests"" text,
                 ""Message"" text NOT NULL,
-                ""Status"" integer NOT NULL DEFAULT 0,
+                ""Status"" text NOT NULL DEFAULT 'Pending',
                 ""AdminNotes"" text,
                 ""ReplyMessage"" text,
                 ""RepliedAt"" timestamp with time zone,
@@ -52,6 +52,23 @@ public static class BookingDbContextSeed
             ALTER TABLE ""ContactInquiries"" ADD COLUMN IF NOT EXISTS ""DestinationInterest"" text;
             ALTER TABLE ""ContactInquiries"" ADD COLUMN IF NOT EXISTS ""DateOrGuests"" text;
 
+            -- Repair: ContactInquiries.Status is mapped as string (HasConversion<string>) but older
+            -- deployments created the column as integer, which breaks every insert. Convert in place.
+            DO $$
+            BEGIN
+                IF EXISTS (SELECT 1 FROM information_schema.columns
+                           WHERE table_name = 'ContactInquiries' AND column_name = 'Status'
+                           AND data_type = 'integer') THEN
+                    ALTER TABLE ""ContactInquiries"" ALTER COLUMN ""Status"" DROP DEFAULT;
+                    ALTER TABLE ""ContactInquiries"" ALTER COLUMN ""Status"" TYPE text USING (
+                        CASE ""Status""
+                            WHEN 0 THEN 'Pending' WHEN 1 THEN 'Replied'
+                            WHEN 2 THEN 'Resolved' WHEN 3 THEN 'Archived'
+                            ELSE 'Pending' END);
+                    ALTER TABLE ""ContactInquiries"" ALTER COLUMN ""Status"" SET DEFAULT 'Pending';
+                END IF;
+            END $$;
+
             ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""CustomerName"" text DEFAULT '';
             ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""CustomerEmail"" text DEFAULT '';
             ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""WhatsApp"" text NULL;
@@ -60,7 +77,7 @@ public static class BookingDbContextSeed
             ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""PassportFileName"" text NULL;
             ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""TripType"" text NULL;
             ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""BookingDate"" timestamp with time zone DEFAULT now();
-            ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""Status"" integer DEFAULT 0;
+            ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""Status"" text DEFAULT 'Pending';
             ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""IsPaid"" boolean DEFAULT false;
             ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""Attendance"" text DEFAULT 'Pending';
             ALTER TABLE ""Bookings"" ADD COLUMN IF NOT EXISTS ""TourDate"" timestamp with time zone NULL;

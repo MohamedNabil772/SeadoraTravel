@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Fluent;
@@ -25,6 +26,7 @@ public class PdfCatalogController : ControllerBase
     }
 
     [HttpGet("catalog")]
+    [AllowAnonymous]
     public async Task<IActionResult> GenerateCatalogPdf([FromQuery] string language = "en")
     {
         var tours = await _context.Tours

@@ -234,6 +234,7 @@ onMounted(() => {
           v-model="searchQuery" 
           type="text" 
           placeholder="Search by name, email or phone..." 
+          aria-label="Search users"
           class="w-full px-4 py-2.5 bg-white border border-[#E2E8F0] rounded focus:outline-none focus:border-[#3C50E0]"
         />
       </div>
@@ -319,37 +320,38 @@ onMounted(() => {
 
     <!-- Edit/Create Modal Overlay -->
     <div v-if="showModal" class="modal-overlay">
-      <div class="modal-card">
+      <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="user-modal-title" v-dialog="() => showModal = false">
         <div class="modal-header">
-          <h3>{{ isEdit ? 'Edit User Profile' : 'Create New User Account' }}</h3>
-          <button @click="showModal = false" class="btn-close">✕</button>
+          <h3 id="user-modal-title">{{ isEdit ? 'Edit User Profile' : 'Create New User Account' }}</h3>
+          <button type="button" @click="showModal = false" class="btn-close" aria-label="Close">✕</button>
         </div>
 
         <form @submit.prevent="saveUser" class="modal-form">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div class="form-group">
-              <label>First Name</label>
-              <input v-model="form.firstName" type="text" placeholder="e.g. John" required />
+              <label for="user-first-name">First Name</label>
+              <input id="user-first-name" v-model="form.firstName" type="text" placeholder="e.g. John" required />
             </div>
             <div class="form-group">
-              <label>Last Name</label>
-              <input v-model="form.lastName" type="text" placeholder="e.g. Doe" required />
+              <label for="user-last-name">Last Name</label>
+              <input id="user-last-name" v-model="form.lastName" type="text" placeholder="e.g. Doe" required />
             </div>
           </div>
 
           <div class="form-group">
-            <label>Email Address</label>
-            <input v-model="form.email" type="email" placeholder="john.doe@seadoratravel.com" required />
+            <label for="user-email">Email Address</label>
+            <input id="user-email" v-model="form.email" type="email" placeholder="john.doe@seadoratravel.com" required />
           </div>
 
           <div class="form-group">
-            <label>Phone Number</label>
-            <input v-model="form.phoneNumber" type="tel" placeholder="e.g. +201068940967" />
+            <label for="user-phone">Phone Number</label>
+            <input id="user-phone" v-model="form.phoneNumber" type="tel" placeholder="e.g. +201068940967" />
           </div>
 
           <div class="form-group">
-            <label>{{ isEdit ? 'New Password (leave blank to keep current)' : 'Password' }}</label>
+            <label for="user-password">{{ isEdit ? 'New Password (leave blank to keep current)' : 'Password' }}</label>
             <input 
+              id="user-password"
               v-model="form.password" 
               type="password" 
               placeholder="••••••••" 
@@ -358,7 +360,7 @@ onMounted(() => {
           </div>
 
           <div class="form-group border-t border-[#E2E8F0] pt-4 mt-2">
-            <label class="mb-2 block">Assigned Roles</label>
+            <span class="mb-2 block form-group-caption">Assigned Roles</span>
             <div class="flex flex-col sm:flex-row gap-4 mt-2">
               <label v-for="role in roles" :key="role" class="flex items-center gap-2 cursor-pointer text-sm normal-case font-normal text-slate-700">
                 <input 
@@ -543,6 +545,14 @@ onMounted(() => {
 }
 
 .form-group label {
+  color: #64748B;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.form-group .form-group-caption {
   color: #64748B;
   font-size: 11px;
   font-weight: 600;

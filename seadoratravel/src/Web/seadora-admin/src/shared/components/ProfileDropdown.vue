@@ -53,24 +53,28 @@ const roleBadge = computed(() => {
 
 <template>
   <div class="relative" ref="dropdownRef">
-    <div 
+    <button 
+      type="button"
       @click="toggle"
+      :aria-expanded="isOpen"
+      aria-haspopup="menu"
+      aria-label="Open account menu"
       class="flex items-center gap-3 pl-2 md:pl-4 border-l border-border/60 cursor-pointer group"
     >
       <div class="text-right hidden sm:block group-hover:opacity-80 transition-opacity">
         <span class="block text-sm font-semibold text-text-main leading-tight">{{ auth.user?.fullName || 'Administrator' }}</span>
         <div class="flex items-center justify-end gap-1.5 mt-0.5">
-          <span class="inline-flex items-center rounded-full bg-secondary/10 px-1.5 py-0.5 text-[9px] font-bold text-secondary-dark ring-1 ring-inset ring-secondary/20">
+          <span class="inline-flex items-center rounded-full bg-secondary/10 px-1.5 py-0.5 text-[9px] font-bold text-secondary-text ring-1 ring-inset ring-secondary/20">
             {{ roleBadge }}
           </span>
         </div>
       </div>
       <div 
-        class="w-9 h-9 rounded-full bg-gradient-to-tr from-secondary/20 to-secondary/5 border border-secondary/20 flex items-center justify-center text-secondary-dark font-bold text-sm ring-2 ring-white shadow-sm transition-transform duration-300 group-hover:scale-105"
+        class="w-9 h-9 rounded-full bg-gradient-to-tr from-secondary/20 to-secondary/5 border border-secondary/20 flex items-center justify-center text-secondary-text font-bold text-sm ring-2 ring-white shadow-sm transition-transform duration-300 group-hover:scale-105"
       >
         {{ userInitials }}
       </div>
-    </div>
+    </button>
 
     <!-- Dropdown Menu -->
     <Transition name="staggered-dropdown">

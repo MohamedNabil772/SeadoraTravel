@@ -230,31 +230,31 @@ async function deleteAgreement(id: string) {
 
     <!-- Supplier Form Modal (TailAdmin Modal Styled) -->
     <div v-if="showSupplierModal" class="modal-overlay" @click="showSupplierModal = false">
-      <div class="modal-card" @click.stop>
+      <div class="modal-card" @click.stop role="dialog" aria-modal="true" aria-labelledby="supplier-modal-title" v-dialog="() => showSupplierModal = false">
         <div class="modal-header">
-          <h3>{{ isEditingSupplier ? 'Edit Supplier' : 'Add New Supplier' }}</h3>
-          <button @click="showSupplierModal = false" class="btn-close">✕</button>
+          <h3 id="supplier-modal-title">{{ isEditingSupplier ? 'Edit Supplier' : 'Add New Supplier' }}</h3>
+          <button type="button" @click="showSupplierModal = false" class="btn-close" aria-label="Close">✕</button>
         </div>
         <form @submit.prevent="saveSupplier" class="modal-form">
           <div class="form-group">
-            <label>Arabic Name (Required)</label>
-            <input v-model="supplierForm.nameAr" type="text" required placeholder="مثال: شركة ترافل" class="rtl text-right">
+            <label for="supplier-name-ar">Arabic Name (Required)</label>
+            <input id="supplier-name-ar" v-model="supplierForm.nameAr" type="text" required placeholder="مثال: شركة ترافل" class="rtl text-right">
           </div>
           <div class="form-group">
-            <label>English Name (Optional)</label>
-            <input v-model="supplierForm.nameEn" type="text" placeholder="e.g. Travel Supplier Ltd.">
+            <label for="supplier-name-en">English Name (Optional)</label>
+            <input id="supplier-name-en" v-model="supplierForm.nameEn" type="text" placeholder="e.g. Travel Supplier Ltd.">
           </div>
           <div class="form-group">
-            <label>Payment Cycle Agreement</label>
-            <select v-model="supplierForm.paymentAgreementId" required>
+            <label for="supplier-agreement">Payment Cycle Agreement</label>
+            <select id="supplier-agreement" v-model="supplierForm.paymentAgreementId" required>
               <option v-for="agr in agreements" :key="agr.id" :value="agr.id">
                 {{ agr.name }}
               </option>
             </select>
           </div>
           <div class="form-group">
-            <label>Bank Account Information</label>
-            <textarea v-model="supplierForm.bankAccountInfo" required rows="3" placeholder="IBAN: EG...&#10;Bank Name: ...&#10;Swift Code: ..."></textarea>
+            <label for="supplier-bank">Bank Account Information</label>
+            <textarea id="supplier-bank" v-model="supplierForm.bankAccountInfo" required rows="3" placeholder="IBAN: EG...&#10;Bank Name: ...&#10;Swift Code: ..."></textarea>
           </div>
           <div class="modal-actions">
             <button type="button" @click="showSupplierModal = false" class="btn-cancel">Cancel</button>
@@ -266,15 +266,15 @@ async function deleteAgreement(id: string) {
 
     <!-- Agreements Manage Modal (TailAdmin Modal Styled) -->
     <div v-if="showAgreementModal" class="modal-overlay" @click="showAgreementModal = false">
-      <div class="modal-card" @click.stop>
+      <div class="modal-card" @click.stop role="dialog" aria-modal="true" aria-labelledby="agreements-modal-title" v-dialog="() => showAgreementModal = false">
         <div class="modal-header">
-          <h3>Configure Cycles</h3>
-          <button @click="showAgreementModal = false" class="btn-close">✕</button>
+          <h3 id="agreements-modal-title">Configure Cycles</h3>
+          <button type="button" @click="showAgreementModal = false" class="btn-close" aria-label="Close">✕</button>
         </div>
         <div class="modal-form">
           <!-- Add form -->
           <form @submit.prevent="saveAgreement" class="flex gap-2">
-            <input v-model="agreementForm.name" type="text" placeholder="e.g. Semi-Monthly" required class="flex-1">
+            <input v-model="agreementForm.name" type="text" aria-label="New payment cycle name" placeholder="e.g. Semi-Monthly" required class="flex-1">
             <button type="submit" class="btn-save !mt-0">Add</button>
           </form>
 
@@ -282,7 +282,7 @@ async function deleteAgreement(id: string) {
           <div class="space-y-2 mt-4 max-h-60 overflow-y-auto">
             <div v-for="agr in agreements" :key="agr.id" class="agreement-item">
               <span class="font-semibold text-black">{{ agr.name }}</span>
-              <button @click="deleteAgreement(agr.id)" class="text-rose-500 hover:text-rose-600 text-xs font-bold cursor-pointer">
+              <button type="button" @click="deleteAgreement(agr.id)" :aria-label="`Delete ${agr.name}`" class="text-rose-500 hover:text-rose-600 text-xs font-bold cursor-pointer">
                 Delete
               </button>
             </div>

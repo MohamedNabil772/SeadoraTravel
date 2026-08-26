@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Seadora.Content.Application.Tours.Queries.GetTours;
 using Seadora.Content.Application.Tours.Queries.GetTourById;
@@ -18,6 +19,7 @@ public class ToursController : ControllerBase
     public ToursController(ISender mediator) => _mediator = mediator;
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<ActionResult<List<TourSummaryDto>>> Get(
         [FromQuery] string? search, 
         [FromQuery] DateTime? startDate, 
@@ -31,6 +33,7 @@ public class ToursController : ControllerBase
         Ok(await _mediator.Send(new GetToursQuery(search, startDate, endDate, destination, category, minPrice, maxPrice, language)));
 
     [HttpGet("{id:guid}")]
+    [AllowAnonymous]
     public async Task<ActionResult<TourDto>> GetById(Guid id) 
     {
         var result = await _mediator.Send(new GetTourByIdQuery(id));

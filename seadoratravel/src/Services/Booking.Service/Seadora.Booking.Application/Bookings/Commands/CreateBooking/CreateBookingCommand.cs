@@ -71,6 +71,11 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
             throw new ArgumentException("CustomerEmail is not in a valid format.", nameof(request.CustomerEmail));
         }
 
+        if (request.TotalPrice < 0)
+        {
+            throw new InvalidOperationException("TotalPrice cannot be negative.");
+        }
+
         var guestsListDomain = new List<GuestDetail>();
         bool hasMissingId = false;
 
@@ -125,7 +130,8 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
             PassportFileName = request.PassportFileName,
             TripType = request.TripType,
             TourDate = request.TourDate,
-            Guests = request.Guests > 0 ? request.Guests : (guestsListDomain.Count > 0 ? guestsListDomain.Count : 1),
+            // Detailed guest records are authoritative: the stored count must match them.
+            Guests = guestsListDomain.Count > 0 ? guestsListDomain.Count : (request.Guests > 0 ? request.Guests : 1),
             HotelPickup = request.HotelPickup,
             PackageId = request.PackageId,
             TotalPrice = request.TotalPrice,
@@ -137,6 +143,9 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
             Status = Seadora.Booking.Domain.Enums.BookingStatus.Pending
         };
 
+        // CROSS-SERVICE BOUNDARY: TotalPrice is client-supplied and tour capacity is unknown here.
+        // Server-side price recomputation and overbooking checks need the Content service's package/addon
+        // pricing and per-tour capacity; only local sanity validation is enforced above.
         _context.Bookings.Add(booking);
         
         var notification = Seadora.Booking.Domain.Entities.Notification.Create(

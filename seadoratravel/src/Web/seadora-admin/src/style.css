@@ -7,6 +7,10 @@
   line-height: 1.5;
   font-weight: 400;
 
+  /* ponytail: brand gold (#D4AF37) is only ~1.9:1 on white. Brand token stays as-is;
+     this darker variant is for gold TEXT/ICONS on light backgrounds (AA >= 4.5:1). */
+  --gold-text: #6B5310;
+
   color-scheme: light;
   color: #24303F;
   background-color: #F1F5F9;
@@ -267,4 +271,31 @@ body {
 .spinner {
   border: 3px solid rgba(60, 80, 224, 0.1) !important;
   border-top-color: #3C50E0 !important;
+}
+
+/* ponytail: one global guard instead of a media query per component. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Keep purely-indicative spinners readable, just slow enough not to flash. */
+  .spinner,
+  .animate-spin {
+    animation-duration: 1.5s !important;
+    animation-iteration-count: infinite !important;
+  }
+
+  /* Hover/press lifts read as motion too. */
+  .btn-create:hover, .btn-action-primary:hover,
+  .btn-action-secondary:hover,
+  .btn-create:active, .btn-action-primary:active,
+  .btn-action-secondary:active {
+    transform: none !important;
+  }
 }

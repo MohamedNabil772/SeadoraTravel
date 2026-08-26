@@ -222,6 +222,7 @@ onMounted(loadData)
               <input 
                 v-model="searchQuery" 
                 type="text" 
+                aria-label="Search guests by name or hotel"
                 placeholder="🔍 Search guests by name/hotel..." 
                 class="px-4 py-2 border border-stroke rounded-lg text-sm bg-white text-dark outline-none focus:border-primary w-full md:w-72 shadow-sm"
               />

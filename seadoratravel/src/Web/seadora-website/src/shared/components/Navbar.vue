@@ -4,12 +4,14 @@ import { useI18n } from 'vue-i18n'
 import { useCurrencyStore } from '@/store/currency'
 import { useAuthStore } from '@/features/auth/store/auth'
 import LuxuryIcons from '@/shared/components/LuxuryIcons.vue'
+import { useModalA11y } from '@/shared/utils/modalA11y'
 
 const { locale, t } = useI18n()
 const currencyStore = useCurrencyStore()
 const authStore = useAuthStore()
 
 const showLoginModal = ref(false)
+const { setDialogEl, trapTab } = useModalA11y(showLoginModal)
 const showProfileDropdown = ref(false)
 const showLangDropdown = ref(false)
 const showCurrencyDropdown = ref(false)
@@ -323,9 +325,20 @@ onUnmounted(() => {
 
   <!-- Login Modal -->
   <Transition name="fade">
-    <div v-if="showLoginModal" class="login-modal-overlay" @click="showLoginModal = false">
+    <div
+      v-if="showLoginModal"
+      :ref="setDialogEl"
+      tabindex="-1"
+      role="dialog"
+      aria-modal="true"
+      aria-label="VIP Guest Access"
+      class="login-modal-overlay"
+      @click="showLoginModal = false"
+      @keydown.esc.stop="showLoginModal = false"
+      @keydown.tab="trapTab"
+    >
       <div class="login-modal-card" @click.stop>
-        <button @click="showLoginModal = false" class="modal-close-btn">&times;</button>
+        <button type="button" aria-label="Close" @click="showLoginModal = false" class="modal-close-btn">&times;</button>
         <h3 class="modal-title">VIP Guest Access</h3>
         <p class="modal-subtitle">Log in to save favorites and unlock personalized concierge services.</p>
         

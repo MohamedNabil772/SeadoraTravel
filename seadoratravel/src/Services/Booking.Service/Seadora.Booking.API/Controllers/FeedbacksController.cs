@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Seadora.Booking.Application.Feedbacks.Commands.CreateFeedback;
 using Seadora.Booking.Application.Feedbacks.Commands.UpdateFeedbackVisibility;
@@ -20,6 +21,7 @@ public class FeedbacksController : ControllerBase
     }
 
     [HttpPost]
+    [AllowAnonymous]
     public async Task<IActionResult> Create([FromBody] CreateFeedbackCommand command)
     {
         try
@@ -34,6 +36,7 @@ public class FeedbacksController : ControllerBase
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> Get([FromQuery] Guid? tourId, [FromQuery] bool includeHidden = false)
     {
         var query = new GetFeedbacksQuery(tourId, includeHidden);

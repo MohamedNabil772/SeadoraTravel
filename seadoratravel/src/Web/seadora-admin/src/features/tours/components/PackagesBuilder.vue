@@ -102,10 +102,11 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
           <!-- Package Title -->
           <div class="space-y-1.5 md:col-span-2">
-            <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wide">
+            <label :for="`pkg-${index}-title`" class="block text-xs font-semibold text-gray-700 uppercase tracking-wide">
               Package Title ({{ currentLocale.toUpperCase() }}) <span class="text-red-500">*</span>
             </label>
             <input 
+              :id="`pkg-${index}-title`"
               v-model="ensureField(pkg, 'titles')[currentLocale]"
               type="text" 
               class="w-full px-3.5 py-2 text-sm border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all" 
@@ -115,7 +116,7 @@
 
           <!-- Price -->
           <div class="space-y-1.5">
-            <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wide">
+            <label :for="`pkg-${index}-price`" class="block text-xs font-semibold text-gray-700 uppercase tracking-wide">
               Price (USD / EUR) <span class="text-red-500">*</span>
             </label>
             <div class="relative rounded-xl shadow-sm">
@@ -123,6 +124,7 @@
                 $
               </div>
               <input 
+                :id="`pkg-${index}-price`"
                 v-model.number="pkg.price" 
                 type="number" 
                 min="0"
@@ -135,10 +137,11 @@
 
           <!-- Package Tier -->
           <div class="space-y-1.5">
-            <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wide">
+            <label :for="`pkg-${index}-tier`" class="block text-xs font-semibold text-gray-700 uppercase tracking-wide">
               Package Tier
             </label>
             <select 
+              :id="`pkg-${index}-tier`"
               v-model="pkg.tier" 
               class="w-full px-3.5 py-2 text-sm border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 bg-white"
             >
@@ -152,10 +155,11 @@
 
           <!-- Badge / Tag -->
           <div class="space-y-1.5">
-            <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wide">
+            <label :for="`pkg-${index}-badge`" class="block text-xs font-semibold text-gray-700 uppercase tracking-wide">
               Badge Label (e.g. Most Popular)
             </label>
             <input 
+              :id="`pkg-${index}-badge`"
               v-model="pkg.badge" 
               type="text" 
               class="w-full px-3.5 py-2 text-sm border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" 
@@ -165,10 +169,11 @@
 
           <!-- Description -->
           <div class="space-y-1.5 md:col-span-2">
-            <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wide">
+            <label :for="`pkg-${index}-description`" class="block text-xs font-semibold text-gray-700 uppercase tracking-wide">
               Description ({{ currentLocale.toUpperCase() }})
             </label>
             <textarea 
+              :id="`pkg-${index}-description`"
               v-model="ensureField(pkg, 'descriptions')[currentLocale]" 
               rows="2" 
               class="w-full px-3.5 py-2 text-sm border border-gray-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 resize-none" 
@@ -179,13 +184,14 @@
           <!-- Features (Bullet points / tags) -->
           <div class="space-y-2 md:col-span-3">
             <div class="flex items-center justify-between">
-              <label class="block text-xs font-semibold text-gray-700 uppercase tracking-wide">
+              <label :for="`pkg-${index}-features`" class="block text-xs font-semibold text-gray-700 uppercase tracking-wide">
                 Key Inclusions & Features ({{ currentLocale.toUpperCase() }})
               </label>
               <span class="text-[11px] text-gray-400">Separate multiple features with commas</span>
             </div>
             
             <input 
+              :id="`pkg-${index}-features`"
               :value="getFeaturesString(pkg, currentLocale)"
               @input="updateFeatures($event, pkg, currentLocale)"
               type="text" 

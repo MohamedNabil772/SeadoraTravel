@@ -132,10 +132,10 @@ async function uploadFile(event: Event, targetField: 'coverImageUrl' | 'customIc
 <template>
   <Transition name="modal">
     <div v-if="modelValue" class="modal-overlay" @click.self="close">
-      <div class="modal">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="category-modal-title" v-dialog="close">
         <div class="modal-header">
-          <h3>{{ isEdit ? 'Edit Category' : 'New Category' }}</h3>
-          <button @click="close" class="btn-close" :disabled="actionLoading">
+          <h3 id="category-modal-title">{{ isEdit ? 'Edit Category' : 'New Category' }}</h3>
+          <button type="button" @click="close" class="btn-close" aria-label="Close" :disabled="actionLoading">
             <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
         </div>
@@ -148,9 +148,9 @@ async function uploadFile(event: Event, targetField: 'coverImageUrl' | 'customIc
             </div>
             
             <div class="form-group">
-              <label>Custom Icon URL</label>
+              <label for="category-custom-icon-url">Custom Icon URL</label>
               <div class="flex gap-2 mb-2">
-                <input type="text" v-model="form.customIconUrl" class="text-input flex-1" placeholder="https://..." :disabled="isUploadingCustomIcon" />
+                <input type="text" id="category-custom-icon-url" v-model="form.customIconUrl" class="text-input flex-1" placeholder="https://..." :disabled="isUploadingCustomIcon" />
                 <button type="button" class="btn-upload" @click="customIconInput?.click()" :disabled="isUploadingCustomIcon">
                   <span v-if="isUploadingCustomIcon" class="loading-spinner-small"></span>
                   <span v-else>Browse</span>
@@ -161,9 +161,9 @@ async function uploadFile(event: Event, targetField: 'coverImageUrl' | 'customIc
           </div>
           
           <div class="form-group">
-            <label>Cover Image URL</label>
+            <label for="category-cover-image-url">Cover Image URL</label>
             <div class="flex gap-2 mb-2">
-              <input type="text" v-model="form.coverImageUrl" class="text-input flex-1" placeholder="https://..." :disabled="isUploadingCover" />
+              <input type="text" id="category-cover-image-url" v-model="form.coverImageUrl" class="text-input flex-1" placeholder="https://..." :disabled="isUploadingCover" />
               <button type="button" class="btn-upload" @click="coverInput?.click()" :disabled="isUploadingCover">
                 <span v-if="isUploadingCover" class="loading-spinner-small"></span>
                 <span v-else>Browse</span>
@@ -179,8 +179,8 @@ async function uploadFile(event: Event, targetField: 'coverImageUrl' | 'customIc
           </div>
           
           <div class="form-group">
-            <label>Display Order</label>
-            <input type="number" v-model.number="form.order" class="text-input" placeholder="0" style="max-width: 150px" />
+            <label for="category-order">Display Order</label>
+            <input type="number" id="category-order" v-model.number="form.order" class="text-input" placeholder="0" style="max-width: 150px" />
           </div>
 
           <div class="locale-section">

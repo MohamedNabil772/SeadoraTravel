@@ -53,6 +53,7 @@ const handleRateChange = (code: string, event: Event) => {
             v-model="searchQuery"
             type="text"
             placeholder="Search currencies..."
+            aria-label="Search currencies"
             class="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200"
           />
         </div>
@@ -113,6 +114,7 @@ const handleRateChange = (code: string, event: Event) => {
                     step="0.0001"
                     :value="currency.exchangeRate"
                     @change="handleRateChange(currency.code, $event)"
+                    :aria-label="`Exchange rate for ${currency.code}`"
                     class="w-28 px-3 py-1.5 text-sm bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all shadow-sm font-mono"
                   />
                   <span v-else class="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-blue-50 text-blue-700 text-xs font-semibold tracking-wide uppercase">
@@ -178,34 +180,34 @@ const handleRateChange = (code: string, event: Event) => {
     <!-- Add Currency Modal -->
     <div v-if="showAddModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
       <div class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity" @click="showAddModal = false"></div>
-      <div class="relative transform overflow-hidden rounded-2xl bg-white p-6 text-left shadow-2xl transition-all sm:w-full sm:max-w-md border border-gray-200 animate-in fade-in zoom-in-95 duration-200 ease-out">
+      <div class="relative transform overflow-hidden rounded-2xl bg-white p-6 text-left shadow-2xl transition-all sm:w-full sm:max-w-md border border-gray-200 animate-in fade-in zoom-in-95 duration-200 ease-out" role="dialog" aria-modal="true" aria-labelledby="add-currency-title" v-dialog="() => showAddModal = false">
         <div class="flex items-center justify-between mb-5">
-          <h3 class="text-lg font-semibold text-gray-900">Add New Currency</h3>
-          <button @click="showAddModal = false" class="text-gray-400 hover:text-gray-500 transition-colors">
+          <h3 id="add-currency-title" class="text-lg font-semibold text-gray-900">Add New Currency</h3>
+          <button type="button" @click="showAddModal = false" aria-label="Close" class="text-gray-400 hover:text-gray-500 transition-colors">
             <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
         </div>
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1.5">Currency Name</label>
-            <input v-model="newCurrency.name" type="text" class="block w-full rounded-lg border-gray-300 border px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:text-sm transition-all" placeholder="e.g. Japanese Yen" />
+            <label for="currency-name" class="block text-sm font-medium text-gray-700 mb-1.5">Currency Name</label>
+            <input id="currency-name" v-model="newCurrency.name" type="text" class="block w-full rounded-lg border-gray-300 border px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:text-sm transition-all" placeholder="e.g. Japanese Yen" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1.5">Code (ISO)</label>
-            <input v-model="newCurrency.code" type="text" class="block w-full rounded-lg border-gray-300 border px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:text-sm transition-all" placeholder="e.g. JPY" />
+            <label for="currency-code" class="block text-sm font-medium text-gray-700 mb-1.5">Code (ISO)</label>
+            <input id="currency-code" v-model="newCurrency.code" type="text" class="block w-full rounded-lg border-gray-300 border px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:text-sm transition-all" placeholder="e.g. JPY" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1.5">Symbol</label>
-            <input v-model="newCurrency.symbol" type="text" class="block w-full rounded-lg border-gray-300 border px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:text-sm transition-all" placeholder="e.g. ¥" />
+            <label for="currency-symbol" class="block text-sm font-medium text-gray-700 mb-1.5">Symbol</label>
+            <input id="currency-symbol" v-model="newCurrency.symbol" type="text" class="block w-full rounded-lg border-gray-300 border px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:text-sm transition-all" placeholder="e.g. ¥" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1.5">Exchange Rate (to Base)</label>
-            <input v-model.number="newCurrency.exchangeRate" type="number" step="0.0001" class="block w-full rounded-lg border-gray-300 border px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:text-sm transition-all" />
+            <label for="currency-rate" class="block text-sm font-medium text-gray-700 mb-1.5">Exchange Rate (to Base)</label>
+            <input id="currency-rate" v-model.number="newCurrency.exchangeRate" type="number" step="0.0001" class="block w-full rounded-lg border-gray-300 border px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:text-sm transition-all" />
           </div>
         </div>
         <div class="mt-6 flex justify-end gap-3 pt-4 border-t border-gray-100">
-          <button @click="showAddModal = false" class="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-200">Cancel</button>
-          <button @click="handleAdd" :disabled="!newCurrency.code || !newCurrency.name" class="rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2">Add Currency</button>
+          <button type="button" @click="showAddModal = false" class="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-200">Cancel</button>
+          <button type="button" @click="handleAdd" :disabled="!newCurrency.code || !newCurrency.name" class="rounded-lg bg-gray-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-gray-900 focus:ring-offset-2">Add Currency</button>
         </div>
       </div>
     </div>

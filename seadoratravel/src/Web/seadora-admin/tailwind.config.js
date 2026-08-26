@@ -17,6 +17,9 @@ export default {
           DEFAULT: '#D4AF37', // Refined Gold
           light: '#F4D03F',
           dark: '#997A00',
+          // ponytail: text/icon-safe gold. Brand token above is unchanged; this one is
+          // only for gold text or icons on white/light surfaces (7.1:1 on white).
+          text: '#6B5310',
         },
         surface: {
           DEFAULT: '#fdfff5',

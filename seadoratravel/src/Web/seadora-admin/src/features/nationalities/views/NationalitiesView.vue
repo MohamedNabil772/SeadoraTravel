@@ -147,6 +147,7 @@ const getFlagUrl = (code?: string) => {
           <input
             v-model="searchQuery"
             type="text"
+            aria-label="Search nationalities"
             placeholder="Search nationalities..."
             class="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-200 shadow-sm"
           />
@@ -167,8 +168,13 @@ const getFlagUrl = (code?: string) => {
       <div
         v-for="nat in filteredNationalities"
         :key="nat.id"
-        class="bg-white p-4 rounded-2xl border border-gray-100 shadow-[0_1px_3px_0_rgb(0,0,0,0.02)] hover:shadow-[0_4px_14px_0_rgb(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-300 cursor-pointer group flex flex-col justify-between"
+        class="bg-white p-4 rounded-2xl border border-gray-100 shadow-[0_1px_3px_0_rgb(0,0,0,0.02)] hover:shadow-[0_4px_14px_0_rgb(0,0,0,0.06)] hover:-translate-y-0.5 transition-all duration-300 cursor-pointer group flex flex-col justify-between focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500/50"
+        role="button"
+        tabindex="0"
+        :aria-label="`Edit ${nat.nationalityName}`"
         @click="openDrawer(nat)"
+        @keydown.enter.prevent="openDrawer(nat)"
+        @keydown.space.prevent="openDrawer(nat)"
       >
         <div>
           <div class="flex justify-between items-start mb-3">
@@ -225,11 +231,18 @@ const getFlagUrl = (code?: string) => {
     <div
       class="fixed inset-y-0 right-0 z-50 w-full max-w-md bg-white shadow-2xl transform transition-transform duration-500 ease-[cubic-bezier(0.32,0.72,0,1)] flex flex-col pointer-events-auto"
       :class="isDrawerOpen ? 'translate-x-0' : 'translate-x-full'"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="nationality-drawer-title"
+      :inert="!isDrawerOpen"
+      v-dialog="{ open: isDrawerOpen, close: closeDrawer }"
     >
       <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100">
-        <h2 class="text-lg font-semibold text-gray-900">{{ editingNationality ? 'Edit Nationality' : 'Add Nationality' }}</h2>
+        <h2 id="nationality-drawer-title" class="text-lg font-semibold text-gray-900">{{ editingNationality ? 'Edit Nationality' : 'Add Nationality' }}</h2>
         <button
+          type="button"
           @click="closeDrawer"
+          aria-label="Close"
           class="p-2 -mr-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-gray-200"
         >
           <X class="w-5 h-5" />
@@ -238,8 +251,9 @@ const getFlagUrl = (code?: string) => {
       
       <div class="flex-1 overflow-y-auto p-6 space-y-6">
         <div class="space-y-2">
-          <label class="text-sm font-medium text-gray-700">Country Name</label>
+          <label for="nat-country-name" class="text-sm font-medium text-gray-700">Country Name</label>
           <input
+            id="nat-country-name"
             v-model="formData.countryName"
             type="text"
             class="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all"
@@ -247,8 +261,9 @@ const getFlagUrl = (code?: string) => {
           />
         </div>
         <div class="space-y-2">
-          <label class="text-sm font-medium text-gray-700">Nationality Name</label>
+          <label for="nat-nationality-name" class="text-sm font-medium text-gray-700">Nationality Name</label>
           <input
+            id="nat-nationality-name"
             v-model="formData.nationalityName"
             type="text"
             class="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all"
@@ -256,11 +271,12 @@ const getFlagUrl = (code?: string) => {
           />
         </div>
         <div class="space-y-2">
-          <label class="text-sm font-medium text-gray-700 flex items-center justify-between">
+          <label for="nat-flag-code" class="text-sm font-medium text-gray-700 flex items-center justify-between">
             <span>ISO Country Code</span>
             <span class="text-xs text-gray-400 font-normal">2 letters (e.g. US)</span>
           </label>
           <input
+            id="nat-flag-code"
             v-model="formData.flagCode"
             type="text"
             maxlength="2"
@@ -269,8 +285,9 @@ const getFlagUrl = (code?: string) => {
           />
         </div>
         <div class="space-y-2">
-          <label class="text-sm font-medium text-gray-700">Flag Emoji</label>
+          <label for="nat-flag-emoji" class="text-sm font-medium text-gray-700">Flag Emoji</label>
           <input
+            id="nat-flag-emoji"
             v-model="formData.flagEmoji"
             type="text"
             class="w-full px-4 py-2.5 bg-gray-50/50 border border-gray-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 focus:bg-white transition-all"
@@ -285,12 +302,14 @@ const getFlagUrl = (code?: string) => {
 
       <div class="p-6 border-t border-gray-100 bg-gray-50/50 flex justify-end gap-3">
         <button
+          type="button"
           @click="closeDrawer"
           class="px-5 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-gray-200 transition-all"
         >
           Cancel
         </button>
         <button
+          type="button"
           @click="save"
           class="px-5 py-2.5 text-sm font-medium text-white bg-gray-900 rounded-xl hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gray-900/20 transition-all active:scale-95 shadow-sm"
         >

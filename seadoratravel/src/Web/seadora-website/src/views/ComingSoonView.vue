@@ -555,6 +555,7 @@ onUnmounted(() => {
     transparent
   );
   transform: skewX(-20deg);
+}
 
 @keyframes sunburstPulse {
   0% { opacity: 0.6; transform: scale(0.95); }

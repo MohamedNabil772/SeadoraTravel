@@ -5,9 +5,9 @@
       <div class="flex items-center gap-4 flex-wrap">
         <div class="relative">
           <svg class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-          <input v-model="searchQuery" type="text" class="h-9 w-72 rounded-lg border-gray-200 border bg-white pl-9 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm" placeholder="Search keys or translations..." />
+          <input v-model="searchQuery" type="text" aria-label="Search translation keys" class="h-9 w-72 rounded-lg border-gray-200 border bg-white pl-9 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 transition-all shadow-sm" placeholder="Search keys or translations..." />
         </div>
-        <select v-model="selectedNamespace" class="h-9 rounded-lg border-gray-200 border bg-white px-3 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 shadow-sm transition-all cursor-pointer">
+        <select v-model="selectedNamespace" aria-label="Filter by namespace" class="h-9 rounded-lg border-gray-200 border bg-white px-3 text-sm text-gray-900 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 shadow-sm transition-all cursor-pointer">
           <option value="all">All Namespaces</option>
           <option v-for="ns in namespaces" :key="ns" :value="ns">{{ ns }}</option>
         </select>
@@ -38,10 +38,11 @@
           
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             <div v-for="lang in store.activeLanguages" :key="lang.code" class="relative group">
-              <label class="mb-1.5 block text-xs font-medium text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
+              <label :for="`trans-${item.namespace}-${item.key}-${lang.code}`.replace(/[^a-z0-9-]/gi, '-')" class="mb-1.5 block text-xs font-medium text-gray-500 uppercase tracking-wider flex items-center gap-1.5">
                 <span class="text-sm">{{ lang.flag }}</span> {{ lang.name }}
               </label>
               <textarea 
+                :id="`trans-${item.namespace}-${item.key}-${lang.code}`.replace(/[^a-z0-9-]/gi, '-')"
                 :value="item.values[lang.code]"
                 @input="handleInput(item.key, item.namespace, lang.code, $event)"
                 rows="2"
@@ -67,29 +68,29 @@
     <!-- Add Key Modal -->
     <div v-if="showAddKeyModal" class="fixed inset-0 z-[60] flex items-center justify-center p-4 sm:p-0">
       <div class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity" @click="showAddKeyModal = false"></div>
-      <div class="relative transform overflow-hidden rounded-2xl bg-white p-6 text-left shadow-2xl transition-all sm:w-full sm:max-w-md border border-gray-200 animate-in fade-in zoom-in-95 duration-200 ease-out">
+      <div class="relative transform overflow-hidden rounded-2xl bg-white p-6 text-left shadow-2xl transition-all sm:w-full sm:max-w-md border border-gray-200 animate-in fade-in zoom-in-95 duration-200 ease-out" role="dialog" aria-modal="true" aria-labelledby="add-key-title" v-dialog="() => showAddKeyModal = false">
         <div class="flex items-center justify-between mb-5">
-          <h3 class="text-lg font-semibold text-gray-900">Add Translation Key</h3>
-          <button @click="showAddKeyModal = false" class="text-gray-400 hover:text-gray-500 transition-colors">
+          <h3 id="add-key-title" class="text-lg font-semibold text-gray-900">Add Translation Key</h3>
+          <button type="button" @click="showAddKeyModal = false" aria-label="Close" class="text-gray-400 hover:text-gray-500 transition-colors">
             <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
         </div>
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1.5">Namespace</label>
-            <input v-model="newKeyNamespace" type="text" list="namespaces-list" class="block w-full rounded-lg border-gray-300 border px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:text-sm transition-all" placeholder="e.g. common, nav..." />
+            <label for="new-key-namespace" class="block text-sm font-medium text-gray-700 mb-1.5">Namespace</label>
+            <input id="new-key-namespace" v-model="newKeyNamespace" type="text" list="namespaces-list" class="block w-full rounded-lg border-gray-300 border px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:text-sm transition-all" placeholder="e.g. common, nav..." />
             <datalist id="namespaces-list">
               <option v-for="ns in namespaces" :key="ns" :value="ns">{{ ns }}</option>
             </datalist>
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1.5">Key</label>
-            <input v-model="newKey" type="text" class="block w-full rounded-lg border-gray-300 border px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:text-sm transition-all" placeholder="e.g. welcome_message" />
+            <label for="new-key-name" class="block text-sm font-medium text-gray-700 mb-1.5">Key</label>
+            <input id="new-key-name" v-model="newKey" type="text" class="block w-full rounded-lg border-gray-300 border px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:text-sm transition-all" placeholder="e.g. welcome_message" />
           </div>
         </div>
         <div class="mt-6 flex justify-end gap-3 pt-4 border-t border-gray-100">
-          <button @click="showAddKeyModal = false" class="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-200">Cancel</button>
-          <button @click="handleAddKey" :disabled="!newKey || !newKeyNamespace" class="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">Add Key</button>
+          <button type="button" @click="showAddKeyModal = false" class="rounded-lg px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-200">Cancel</button>
+          <button type="button" @click="handleAddKey" :disabled="!newKey || !newKeyNamespace" class="rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2">Add Key</button>
         </div>
       </div>
     </div>

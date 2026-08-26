@@ -175,8 +175,13 @@ const getTagForType = (type: string) => {
             <div 
               v-for="item in filteredNotifications" 
               :key="item.id"
+              role="button"
+              tabindex="0"
+              :aria-label="`${item.title}. ${item.message}`"
               @click="handleNotificationClick(item)"
-              class="group relative flex gap-3 p-3 rounded-xl hover:bg-black/[0.03] transition-colors cursor-pointer select-none"
+              @keydown.enter.prevent="handleNotificationClick(item)"
+              @keydown.space.prevent="handleNotificationClick(item)"
+              class="group relative flex gap-3 p-3 rounded-xl hover:bg-black/[0.03] transition-colors cursor-pointer select-none focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
               :class="{ 'bg-blue-50/30': !item.isRead }"
             >
               <!-- Unread Indicator -->
@@ -215,8 +220,10 @@ const getTagForType = (type: string) => {
 
               <!-- Delete Action -->
               <button 
+                type="button"
                 @click.stop="store.deleteNotification(item.id)"
-                class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-text-muted/0 group-hover:text-red-400 hover:bg-red-50 rounded-md transition-all duration-200"
+                :aria-label="`Delete notification: ${item.title}`"
+                class="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 text-text-muted/0 group-hover:text-red-400 focus-visible:text-red-400 hover:bg-red-50 rounded-md transition-all duration-200"
               >
                 <Trash2 class="w-4 h-4" />
               </button>

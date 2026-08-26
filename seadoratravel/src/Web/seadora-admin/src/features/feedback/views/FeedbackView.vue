@@ -107,8 +107,9 @@ onMounted(loadData)
     <!-- Filters -->
     <div class="filters flex flex-col md:flex-row gap-4 mb-6 bg-white border border-stroke p-5 rounded-lg shadow-sm">
       <div class="flex-1">
-        <label class="block text-xs font-semibold text-dark mb-1.5">Search Customer Name</label>
+        <label for="feedback-filter-name" class="block text-xs font-semibold text-dark mb-1.5">Search Customer Name</label>
         <input
+          id="feedback-filter-name"
           v-model="filterName"
           type="text"
           placeholder="Enter customer name..."
@@ -117,8 +118,8 @@ onMounted(loadData)
       </div>
 
       <div class="w-full md:w-48">
-        <label class="block text-xs font-semibold text-dark mb-1.5">Filter by Rating</label>
-        <select v-model="filterStars" class="w-full px-4 py-2 border border-stroke rounded-md outline-none focus:border-primary text-sm text-dark bg-white cursor-pointer">
+        <label for="feedback-filter-stars" class="block text-xs font-semibold text-dark mb-1.5">Filter by Rating</label>
+        <select id="feedback-filter-stars" v-model="filterStars" class="w-full px-4 py-2 border border-stroke rounded-md outline-none focus:border-primary text-sm text-dark bg-white cursor-pointer">
           <option value="all">All Stars</option>
           <option value="5">⭐⭐⭐⭐⭐ (5 Stars)</option>
           <option value="4">⭐⭐⭐⭐ (4 Stars)</option>
@@ -129,8 +130,8 @@ onMounted(loadData)
       </div>
 
       <div class="w-full md:w-64">
-        <label class="block text-xs font-semibold text-dark mb-1.5">Filter by Excursion Tour</label>
-        <select v-model="filterTour" class="w-full px-4 py-2 border border-stroke rounded-md outline-none focus:border-primary text-sm text-dark bg-white cursor-pointer">
+        <label for="feedback-filter-tour" class="block text-xs font-semibold text-dark mb-1.5">Filter by Excursion Tour</label>
+        <select id="feedback-filter-tour" v-model="filterTour" class="w-full px-4 py-2 border border-stroke rounded-md outline-none focus:border-primary text-sm text-dark bg-white cursor-pointer">
           <option value="all">All Tours</option>
           <option v-for="t in tours" :key="t.id" :value="t.id">
             {{ t.names?.en || 'Untitled Tour' }}

@@ -83,25 +83,25 @@
     <!-- Add Modal -->
     <div v-if="showAddModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-0">
       <div class="fixed inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity" @click="showAddModal = false"></div>
-      <div class="relative transform overflow-hidden rounded-2xl bg-white p-6 text-left shadow-2xl transition-all sm:w-full sm:max-w-md border border-gray-200 animate-in fade-in zoom-in-95 duration-200 ease-out">
+      <div class="relative transform overflow-hidden rounded-2xl bg-white p-6 text-left shadow-2xl transition-all sm:w-full sm:max-w-md border border-gray-200 animate-in fade-in zoom-in-95 duration-200 ease-out" role="dialog" aria-modal="true" aria-labelledby="language-modal-title" v-dialog="closeModal">
         <div class="flex items-center justify-between mb-5">
-          <h3 class="text-lg font-semibold text-gray-900">{{ isEditing ? 'Edit Language' : 'Add New Language' }}</h3>
-          <button @click="closeModal" class="text-gray-400 hover:text-gray-500 transition-colors">
+          <h3 id="language-modal-title" class="text-lg font-semibold text-gray-900">{{ isEditing ? 'Edit Language' : 'Add New Language' }}</h3>
+          <button type="button" @click="closeModal" aria-label="Close" class="text-gray-400 hover:text-gray-500 transition-colors">
             <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
           </button>
         </div>
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1.5">Language Name</label>
-            <input v-model="newLang.name" type="text" class="block w-full rounded-lg border-gray-300 border px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:text-sm transition-all" placeholder="e.g. French" />
+            <label for="language-name" class="block text-sm font-medium text-gray-700 mb-1.5">Language Name</label>
+            <input id="language-name" v-model="newLang.name" type="text" class="block w-full rounded-lg border-gray-300 border px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:text-sm transition-all" placeholder="e.g. French" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1.5">Code (ISO)</label>
-            <input v-model="newLang.code" type="text" :disabled="isEditing" class="block w-full rounded-lg border-gray-300 border px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:text-sm transition-all disabled:opacity-50 disabled:bg-gray-50" placeholder="e.g. fr" />
+            <label for="language-code" class="block text-sm font-medium text-gray-700 mb-1.5">Code (ISO)</label>
+            <input id="language-code" v-model="newLang.code" type="text" :disabled="isEditing" class="block w-full rounded-lg border-gray-300 border px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:text-sm transition-all disabled:opacity-50 disabled:bg-gray-50" placeholder="e.g. fr" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1.5">Flag Emoji</label>
-            <input v-model="newLang.flag" type="text" class="block w-full rounded-lg border-gray-300 border px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:text-sm transition-all" placeholder="e.g. 🇫🇷" />
+            <label for="language-flag" class="block text-sm font-medium text-gray-700 mb-1.5">Flag Emoji</label>
+            <input id="language-flag" v-model="newLang.flag" type="text" class="block w-full rounded-lg border-gray-300 border px-3 py-2 text-gray-900 placeholder-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20 sm:text-sm transition-all" placeholder="e.g. 🇫🇷" />
           </div>
           <div class="grid grid-cols-2 gap-3 mt-4">
             <label class="flex items-center gap-2 bg-gray-50 p-3 rounded-lg border border-gray-100 cursor-pointer hover:bg-gray-100 transition-colors">

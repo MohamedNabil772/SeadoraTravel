@@ -1,6 +1,7 @@
 using System;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Seadora.Booking.Application.Inquiries.Commands.CreateContactInquiry;
 using Seadora.Booking.Application.Inquiries.Commands.UpdateContactInquiryStatus;
@@ -22,6 +23,7 @@ public class InquiriesController : ControllerBase
     }
 
     [HttpPost]
+    [AllowAnonymous]
     public async Task<IActionResult> Create([FromBody] CreateContactInquiryCommand command)
     {
         try

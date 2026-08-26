@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { RouterView } from 'vue-router'
+import { MotionConfig } from 'motion-v'
 import SeadoraConcierge from '@/components/chat/SeadoraConcierge.vue'
 import AppLoader from '@/shared/components/AppLoader.vue'
 import AuthModal from '@/features/auth/components/AuthModal.vue'
@@ -9,14 +10,16 @@ const authStore = useAuthStore()
 </script>
 
 <template>
-  <AppLoader />
-  <router-view v-slot="{ Component }">
-    <transition name="page-fade" mode="out-in">
-      <component :is="Component" />
-    </transition>
-  </router-view>
-  <SeadoraConcierge v-if="false" />
-  <AuthModal :isOpen="authStore.isAuthModalOpen" @close="authStore.closeAuthModal()" />
+  <MotionConfig :reducedMotion="'user'">
+    <AppLoader />
+    <router-view v-slot="{ Component }">
+      <transition name="page-fade" mode="out-in">
+        <component :is="Component" />
+      </transition>
+    </router-view>
+    <SeadoraConcierge v-if="false" />
+    <AuthModal :isOpen="authStore.isAuthModalOpen" @close="authStore.closeAuthModal()" />
+  </MotionConfig>
 </template>
 
 <style>

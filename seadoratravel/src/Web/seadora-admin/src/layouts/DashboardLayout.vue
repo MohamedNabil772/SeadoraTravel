@@ -257,7 +257,7 @@ function handleLogout() {
           <div class="flex items-center gap-2">
             <span class="text-text-muted text-[11px]">System Architecture & Development by</span>
             <span class="inline-flex items-center gap-1 font-bold text-primary tracking-wide text-xs">
-              <span class="text-secondary font-serif text-sm">✦</span> TIM SOLUTIONS<sup class="text-[9px] text-secondary font-bold">®</sup>
+              <span class="text-secondary-text font-serif text-sm">✦</span> TIM SOLUTIONS<sup class="text-[9px] text-secondary font-bold">®</sup>
             </span>
           </div>
         </footer>

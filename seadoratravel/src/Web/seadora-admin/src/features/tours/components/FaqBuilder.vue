@@ -7,12 +7,12 @@
       </button>
       <div class="space-y-4">
         <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">Question ({{ currentLocale.toUpperCase() }})</label>
-          <input v-model="faq.questions[currentLocale]" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g. What should I bring?" />
+          <label :for="`faq-${index}-question`" class="block text-sm font-medium text-gray-700">Question ({{ currentLocale.toUpperCase() }})</label>
+          <input :id="`faq-${index}-question`" v-model="faq.questions[currentLocale]" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g. What should I bring?" />
         </div>
         <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">Answer ({{ currentLocale.toUpperCase() }})</label>
-          <textarea v-model="faq.answers[currentLocale]" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Provide a helpful answer"></textarea>
+          <label :for="`faq-${index}-answer`" class="block text-sm font-medium text-gray-700">Answer ({{ currentLocale.toUpperCase() }})</label>
+          <textarea :id="`faq-${index}-answer`" v-model="faq.answers[currentLocale]" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Provide a helpful answer"></textarea>
         </div>
       </div>
     </div>

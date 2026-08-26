@@ -1,9 +1,9 @@
 <template>
   <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/50 backdrop-blur-sm animate-fade-in" v-if="isOpen">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden animate-scale-in">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden animate-scale-in" role="dialog" aria-modal="true" aria-labelledby="import-tours-title" v-dialog="close">
       <div class="p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
-        <h3 class="text-lg font-semibold text-gray-900">Import Tours (Excel)</h3>
-        <button @click="close" class="text-gray-400 hover:text-gray-600 transition-colors">
+        <h3 id="import-tours-title" class="text-lg font-semibold text-gray-900">Import Tours (Excel)</h3>
+        <button type="button" @click="close" aria-label="Close import dialog" class="text-gray-400 hover:text-gray-600 transition-colors">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
           </svg>

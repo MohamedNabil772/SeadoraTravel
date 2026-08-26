@@ -6,16 +6,16 @@
       <h3 class="text-lg font-bold text-gray-900 border-b pb-2">Localized Information</h3>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">Tour Title ({{ currentLocale.toUpperCase() }})</label>
-          <input v-model="form.names[currentLocale]" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="Enter tour title" />
+          <label for="tour-editor-name" class="block text-sm font-medium text-gray-700">Tour Title ({{ currentLocale.toUpperCase() }})</label>
+          <input id="tour-editor-name" v-model="form.names[currentLocale]" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="Enter tour title" />
         </div>
         <div class="space-y-2 md:col-span-2">
-          <label class="block text-sm font-medium text-gray-700">Description ({{ currentLocale.toUpperCase() }})</label>
-          <textarea v-model="form.descriptions[currentLocale]" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="Enter full tour description"></textarea>
+          <label for="tour-editor-description" class="block text-sm font-medium text-gray-700">Description ({{ currentLocale.toUpperCase() }})</label>
+          <textarea id="tour-editor-description" v-model="form.descriptions[currentLocale]" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="Enter full tour description"></textarea>
         </div>
         <div class="space-y-2 md:col-span-2">
-          <label class="block text-sm font-medium text-gray-700">Highlights ({{ currentLocale.toUpperCase() }}) - Comma separated</label>
-          <input v-model="highlightsInput" @change="updateHighlights" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="e.g. Stunning views, Expert Guide, Free drinks" />
+          <label for="tour-editor-highlights" class="block text-sm font-medium text-gray-700">Highlights ({{ currentLocale.toUpperCase() }}) - Comma separated</label>
+          <input id="tour-editor-highlights" v-model="highlightsInput" @change="updateHighlights" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="e.g. Stunning views, Expert Guide, Free drinks" />
         </div>
       </div>
     </div>
@@ -24,44 +24,44 @@
       <h3 class="text-lg font-bold text-gray-900 border-b pb-2">Pricing & Logistics</h3>
       <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">Base Price</label>
-          <input v-model.number="form.price" type="number" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" />
+          <label for="tour-editor-price" class="block text-sm font-medium text-gray-700">Base Price</label>
+          <input id="tour-editor-price" v-model.number="form.price" type="number" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" />
         </div>
         <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">Currency</label>
-          <select v-model="form.currency" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+          <label for="tour-editor-currency" class="block text-sm font-medium text-gray-700">Currency</label>
+          <select id="tour-editor-currency" v-model="form.currency" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
             <option value="EUR">EUR</option>
             <option value="USD">USD</option>
             <option value="EGP">EGP</option>
           </select>
         </div>
         <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">Original Price</label>
-          <input v-model.number="form.originalPrice" type="number" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" />
+          <label for="tour-editor-original-price" class="block text-sm font-medium text-gray-700">Original Price</label>
+          <input id="tour-editor-original-price" v-model.number="form.originalPrice" type="number" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" />
         </div>
         <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">Discount %</label>
-          <input v-model.number="form.discountPercentage" type="number" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" />
+          <label for="tour-editor-discount" class="block text-sm font-medium text-gray-700">Discount %</label>
+          <input id="tour-editor-discount" v-model.number="form.discountPercentage" type="number" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" />
         </div>
         <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">Duration</label>
-          <input v-model="form.duration" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="e.g. 7 Days" />
+          <label for="tour-editor-duration" class="block text-sm font-medium text-gray-700">Duration</label>
+          <input id="tour-editor-duration" v-model="form.duration" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="e.g. 7 Days" />
         </div>
         <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">Start Time</label>
-          <input v-model="form.startTime" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="e.g. 09:00 AM" />
+          <label for="tour-editor-start-time" class="block text-sm font-medium text-gray-700">Start Time</label>
+          <input id="tour-editor-start-time" v-model="form.startTime" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="e.g. 09:00 AM" />
         </div>
         <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">Capacity / Max Allocations</label>
-          <input v-model.number="form.maxAllocations" type="number" min="1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-bold text-gray-900" placeholder="e.g. 20 Guests" />
+          <label for="tour-editor-max-allocations" class="block text-sm font-medium text-gray-700">Capacity / Max Allocations</label>
+          <input id="tour-editor-max-allocations" v-model.number="form.maxAllocations" type="number" min="1" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-bold text-gray-900" placeholder="e.g. 20 Guests" />
         </div>
         <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">Rating (0-5)</label>
-          <input v-model.number="form.rating" type="number" step="0.1" max="5" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" />
+          <label for="tour-editor-rating" class="block text-sm font-medium text-gray-700">Rating (0-5)</label>
+          <input id="tour-editor-rating" v-model.number="form.rating" type="number" step="0.1" max="5" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" />
         </div>
         <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">Review Count</label>
-          <input v-model.number="form.reviewCount" type="number" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" />
+          <label for="tour-editor-review-count" class="block text-sm font-medium text-gray-700">Review Count</label>
+          <input id="tour-editor-review-count" v-model.number="form.reviewCount" type="number" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" />
         </div>
       </div>
     </div>
@@ -74,7 +74,12 @@
           
           <div v-if="!form.imageUrl && !isUploadingCover" 
                class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer" 
-               @click="coverInput?.click()">
+               role="button"
+               tabindex="0"
+               aria-label="Upload cover image"
+               @click="coverInput?.click()"
+               @keydown.enter.prevent="coverInput?.click()"
+               @keydown.space.prevent="coverInput?.click()">
             <div class="flex flex-col items-center justify-center">
               <svg class="w-10 h-10 text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -108,16 +113,16 @@
         </div>
         
         <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">Background Gradient</label>
-          <input v-model="form.bgGradient" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="linear-gradient(...)" />
+          <label for="tour-editor-bg-gradient" class="block text-sm font-medium text-gray-700">Background Gradient</label>
+          <input id="tour-editor-bg-gradient" v-model="form.bgGradient" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="linear-gradient(...)" />
         </div>
         <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">Emoji</label>
-          <input v-model="form.emoji" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" />
+          <label for="tour-editor-emoji" class="block text-sm font-medium text-gray-700">Emoji</label>
+          <input id="tour-editor-emoji" v-model="form.emoji" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" />
         </div>
         <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">Promo Badge</label>
-          <input v-model="form.badge" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" />
+          <label for="tour-editor-badge" class="block text-sm font-medium text-gray-700">Promo Badge</label>
+          <input id="tour-editor-badge" v-model="form.badge" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" />
         </div>
       </div>
     </div>
@@ -133,10 +138,12 @@
 
       <!-- Tour Type Visual Selection Cards -->
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-        <div
+        <button
           v-for="tt in tourTypes"
           :key="tt.id"
+          type="button"
           @click="form.tourTypeId = tt.id"
+          :aria-pressed="form.tourTypeId === tt.id"
           class="cursor-pointer p-3.5 rounded-xl border transition-all duration-200 flex flex-col items-center text-center gap-2 group relative"
           :class="form.tourTypeId === tt.id 
             ? 'bg-secondary/10 border-secondary ring-2 ring-secondary/30 shadow-sm' 
@@ -150,7 +157,7 @@
             <div class="text-[10px] font-mono text-gray-400 mt-0.5">{{ tt.code }}</div>
           </div>
           <div v-if="form.tourTypeId === tt.id" class="absolute top-2 right-2 w-2 h-2 rounded-full bg-secondary"></div>
-        </div>
+        </button>
       </div>
 
       <!-- Capacity & Booking Allocation Controls -->
@@ -164,8 +171,9 @@
         </div>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div class="space-y-1.5">
-            <label class="block text-xs font-bold text-gray-700">Minimum Group / Party Size</label>
+            <label for="tour-editor-group-min" class="block text-xs font-bold text-gray-700">Minimum Group / Party Size</label>
             <input 
+              id="tour-editor-group-min"
               v-model.number="form.groupMinCapacity" 
               type="number" 
               min="1" 
@@ -175,8 +183,9 @@
             <p class="text-[11px] text-gray-400">Min guests required to operate departure</p>
           </div>
           <div class="space-y-1.5">
-            <label class="block text-xs font-bold text-gray-700">Maximum Group / Party Size</label>
+            <label for="tour-editor-group-max" class="block text-xs font-bold text-gray-700">Maximum Group / Party Size</label>
             <input 
+              id="tour-editor-group-max"
               v-model.number="form.groupMaxCapacity" 
               type="number" 
               min="1" 
@@ -186,8 +195,9 @@
             <p class="text-[11px] text-gray-400">Total physical capacity per departure</p>
           </div>
           <div class="space-y-1.5">
-            <label class="block text-xs font-bold text-gray-700">Max Booking Allocations</label>
+            <label for="tour-editor-max-alloc" class="block text-xs font-bold text-gray-700">Max Booking Allocations</label>
             <input 
+              id="tour-editor-max-alloc"
               v-model.number="form.maxAllocations" 
               type="number" 
               min="1" 
@@ -204,20 +214,20 @@
       <h3 class="text-lg font-bold text-gray-900 border-b pb-2">Relationships</h3>
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">Destination</label>
-          <select v-model="form.destinationId" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+          <label for="tour-editor-destination" class="block text-sm font-medium text-gray-700">Destination</label>
+          <select id="tour-editor-destination" v-model="form.destinationId" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
             <option v-for="d in destinations" :key="d.id" :value="d.id">{{ d.names?.en }}</option>
           </select>
         </div>
         <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">Category</label>
-          <select v-model="form.categoryId" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+          <label for="tour-editor-category" class="block text-sm font-medium text-gray-700">Category</label>
+          <select id="tour-editor-category" v-model="form.categoryId" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
             <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.names?.en }}</option>
           </select>
         </div>
         <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">Supplier</label>
-          <select v-model="form.supplierId" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+          <label for="tour-editor-supplier" class="block text-sm font-medium text-gray-700">Supplier</label>
+          <select id="tour-editor-supplier" v-model="form.supplierId" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
             <option value="">No Supplier</option>
             <option v-for="s in suppliers" :key="s.id" :value="s.id">{{ s.nameEn || s.nameAr }}</option>
           </select>
@@ -247,9 +257,9 @@
           <label class="flex items-center gap-2"><input type="radio" value="DriverAssigned" v-model="form.pickupTimeType" class="w-4 h-4 text-indigo-600" /> Driver Assigned</label>
         </div>
         <div v-if="form.pickupTimeType === 'FixedSlots'" class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">Available Pickup Times</label>
+          <label for="tour-editor-new-slot" class="block text-sm font-medium text-gray-700">Available Pickup Times</label>
           <div class="flex gap-2 mb-2">
-            <input v-model="newSlot" type="text" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="e.g. 10:00 - 10:30 (Morning)" @keyup.enter="addSlot" />
+            <input id="tour-editor-new-slot" v-model="newSlot" type="text" class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500" placeholder="e.g. 10:00 - 10:30 (Morning)" @keyup.enter="addSlot" />
             <button type="button" @click="addSlot" class="px-4 py-2 bg-indigo-600 text-white rounded-lg">Add</button>
           </div>
           <div class="flex flex-wrap gap-2">

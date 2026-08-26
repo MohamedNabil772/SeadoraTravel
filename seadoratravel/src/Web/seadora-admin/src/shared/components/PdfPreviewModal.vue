@@ -84,21 +84,23 @@ onUnmounted(() => {
       @click="handleBackdropClick"
       role="dialog"
       aria-modal="true"
+      aria-labelledby="pdf-preview-title"
+      v-dialog="closeModal"
     >
       <div 
         class="modal-container"
         :class="{ 'is-closing': isClosing }"
       >
         <div class="modal-header">
-          <h3 class="modal-title">{{ title || 'PDF Preview' }}</h3>
+          <h3 id="pdf-preview-title" class="modal-title">{{ title || 'PDF Preview' }}</h3>
           <div class="modal-actions">
-            <button @click="downloadPdf" class="action-btn" title="Download" :disabled="!pdfUrl">
+            <button type="button" @click="downloadPdf" class="action-btn" title="Download" aria-label="Download PDF" :disabled="!pdfUrl">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
             </button>
-            <button @click="printPdf" class="action-btn" title="Print" :disabled="!pdfUrl">
+            <button type="button" @click="printPdf" class="action-btn" title="Print" aria-label="Print PDF" :disabled="!pdfUrl">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
             </button>
-            <button @click="closeModal" class="action-btn close-btn" title="Close">
+            <button type="button" @click="closeModal" class="action-btn close-btn" title="Close" aria-label="Close PDF preview">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
             </button>
           </div>

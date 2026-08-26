@@ -138,6 +138,8 @@ const bookingErrors = ref({
   guests: ''
 })
 
+const bookingSubmitError = ref('')
+
 const fetchToursFromBackend = async (searchTxt?: string) => {
   try {
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
@@ -766,6 +768,7 @@ const openBookingModal = (tour: Tour) => {
     guests: ''
   }
   
+  bookingSubmitError.value = ''
   bookingSuccess.value = false
   showBookingModal.value = true
 }
@@ -860,6 +863,7 @@ const submitBooking = async () => {
   }
   
   bookingLoading.value = true
+  bookingSubmitError.value = ''
   try {
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
     const response = await fetch(`${API_URL}/api/booking/api/bookings`, {
@@ -882,11 +886,11 @@ const submitBooking = async () => {
       bookingSuccess.value = true
     } else {
       const errText = await response.text()
-      alert("Booking failed. " + (errText || "Please check details and try again."))
+      bookingSubmitError.value = "Booking failed. " + (errText || "Please check details and try again.")
     }
   } catch (error) {
     console.error("Booking error:", error)
-    alert("Connection error. Please try again.")
+    bookingSubmitError.value = "Connection error. Please try again."
   } finally {
     bookingLoading.value = false
   }
@@ -1490,9 +1494,9 @@ onUnmounted(() => {
             <div class="text-lg sm:text-xl text-slate-900 font-extrabold font-serif">
               {{ sortedTours.length }} {{ localizedLabels.results }}
             </div>
-            <div class="px-3.5 py-1.5 rounded-full bg-slate-100 text-slate-700 text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-sm border border-slate-200/60 cursor-pointer hover:bg-slate-200 transition-colors" @click="selectedDestinationId = ''">
-              <span>📍</span> {{ selectedDestinationId ? getLocalized(destinations.find(d => d.id === selectedDestinationId)?.names || {}, 'Destination') : (searchQuery || localizedLabels.allDestinations) }}
-              <button v-if="selectedDestinationId || searchQuery" @click.stop="selectedDestinationId = ''; searchQuery = ''" class="ml-1 w-4 h-4 rounded-full bg-slate-300 hover:bg-slate-400 flex items-center justify-center transition-colors text-slate-700 font-bold text-xs">×</button>
+            <div class="px-3.5 py-1.5 rounded-full bg-slate-100 text-slate-700 text-xs sm:text-sm font-semibold flex items-center gap-2 shadow-sm border border-slate-200/60">
+              <span aria-hidden="true">📍</span> {{ selectedDestinationId ? getLocalized(destinations.find(d => d.id === selectedDestinationId)?.names || {}, 'Destination') : (searchQuery || localizedLabels.allDestinations) }}
+              <button v-if="selectedDestinationId || searchQuery" type="button" aria-label="Clear destination filter" @click.stop="selectedDestinationId = ''; searchQuery = ''" class="ml-1 w-4 h-4 rounded-full bg-slate-300 hover:bg-slate-400 flex items-center justify-center transition-colors text-slate-700 font-bold text-xs">×</button>
             </div>
           </div>
           
@@ -1769,7 +1773,7 @@ onUnmounted(() => {
       <div v-if="showBookingModal" class="fixed inset-0 z-[2000] flex items-center justify-center p-4 bg-[#0d1f2d]/85 backdrop-blur-md" @click="showBookingModal = false">
         
         <!-- SUCCESS CUE WINDOW (Luxury Boarding Pass Ticket & Invoice Receipt) -->
-        <div v-if="bookingSuccess" class="relative w-full max-w-4xl overflow-hidden rounded-2xl bg-[#faf7f2] border border-[#c9a84c]/30 shadow-2xl flex flex-col md:flex-row transition-all transform duration-500 font-sans" @click.stop>
+        <div v-if="bookingSuccess" role="dialog" aria-modal="true" aria-label="Booking confirmed" class="relative w-full max-w-4xl overflow-hidden rounded-2xl bg-[#faf7f2] border border-[#c9a84c]/30 shadow-2xl flex flex-col md:flex-row transition-all transform duration-500 font-sans" @click.stop>
           
           <!-- Close button -->
           <button type="button" @click="showBookingModal = false" aria-label="Close success modal" class="absolute top-4 right-4 z-50 p-2 text-[#6b8a9a] hover:text-[#063a5c] hover:bg-black/5 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-[#c9a84c] cursor-pointer">
@@ -1968,7 +1972,7 @@ onUnmounted(() => {
         </div>
 
         <!-- TWO COLUMN RESERVATION FORM -->
-        <div v-else class="relative w-full max-w-4xl overflow-hidden rounded-2xl bg-[#faf7f2] border border-[#c9a84c]/30 shadow-2xl flex flex-col md:flex-row transition-all transform duration-300" @click.stop>
+        <div v-else role="dialog" aria-modal="true" aria-label="Reservation request" class="relative w-full max-w-4xl overflow-hidden rounded-2xl bg-[#faf7f2] border border-[#c9a84c]/30 shadow-2xl flex flex-col md:flex-row transition-all transform duration-300" @click.stop>
           
           <!-- Close button -->
           <button type="button" @click="showBookingModal = false" aria-label="Close booking modal" class="absolute top-4 right-4 z-10 p-2 text-[#6b8a9a] hover:text-[#063a5c] hover:bg-black/5 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-[#c9a84c]">
@@ -2111,6 +2115,9 @@ onUnmounted(() => {
             </div>
 
             <!-- Footer Action -->
+            <p v-if="bookingSubmitError" role="status" aria-live="polite" class="mt-8 -mb-2 text-sm text-rose-700 bg-rose-50 border border-rose-200 rounded-lg px-4 py-3 font-sans">
+              {{ bookingSubmitError }}
+            </p>
             <div class="mt-10 pt-6 border-t border-gold/15 flex justify-between items-center bg-cream/30 p-6 rounded-xl border border-gold/10">
               <div class="text-left font-jost">
                 <div class="text-[9px] text-muted tracking-widest uppercase font-bold">{{ $t('booking.modal.totalValue') }}</div>

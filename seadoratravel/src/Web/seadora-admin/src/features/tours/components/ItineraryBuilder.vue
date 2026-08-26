@@ -27,19 +27,19 @@
 
       <div class="flex items-center gap-4 mb-4">
         <div class="flex-1 max-w-xs">
-          <label class="block text-sm font-medium text-gray-700">{{ form.itineraryType === 'Day-based' ? 'Day Number/Label' : 'Time' }}</label>
-          <input v-model="step.label" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" :placeholder="form.itineraryType === 'Day-based' ? 'e.g. Day 1' : 'e.g. 08:00 AM'" />
+          <label :for="`step-${index}-label`" class="block text-sm font-medium text-gray-700">{{ form.itineraryType === 'Day-based' ? 'Day Number/Label' : 'Time' }}</label>
+          <input :id="`step-${index}-label`" v-model="step.label" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" :placeholder="form.itineraryType === 'Day-based' ? 'e.g. Day 1' : 'e.g. 08:00 AM'" />
         </div>
       </div>
 
       <div class="space-y-4">
         <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">Title ({{ currentLocale.toUpperCase() }})</label>
-          <input v-model="step.titles[currentLocale]" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Step Title" />
+          <label :for="`step-${index}-title`" class="block text-sm font-medium text-gray-700">Title ({{ currentLocale.toUpperCase() }})</label>
+          <input :id="`step-${index}-title`" v-model="step.titles[currentLocale]" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Step Title" />
         </div>
         <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">Description ({{ currentLocale.toUpperCase() }})</label>
-          <textarea v-model="step.descriptions[currentLocale]" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Step Description"></textarea>
+          <label :for="`step-${index}-description`" class="block text-sm font-medium text-gray-700">Description ({{ currentLocale.toUpperCase() }})</label>
+          <textarea :id="`step-${index}-description`" v-model="step.descriptions[currentLocale]" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Step Description"></textarea>
         </div>
       </div>
     </div>

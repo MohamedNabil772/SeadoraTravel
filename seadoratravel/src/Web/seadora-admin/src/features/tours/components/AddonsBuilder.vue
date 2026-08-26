@@ -8,20 +8,20 @@
       <div class="space-y-4">
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div class="space-y-2">
-            <label class="block text-sm font-medium text-gray-700">Addon Name ({{ currentLocale.toUpperCase() }})</label>
-            <input v-model="addon.names[currentLocale]" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g. Extra Luggage" />
+            <label :for="`addon-${index}-name`" class="block text-sm font-medium text-gray-700">Addon Name ({{ currentLocale.toUpperCase() }})</label>
+            <input :id="`addon-${index}-name`" v-model="addon.names[currentLocale]" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g. Extra Luggage" />
           </div>
           <div class="space-y-2">
-            <label class="block text-sm font-medium text-gray-700">Price (EUR)</label>
-            <input v-model.number="addon.priceEur" type="number" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="0.00" />
+            <label :for="`addon-${index}-price`" class="block text-sm font-medium text-gray-700">Price (EUR)</label>
+            <input :id="`addon-${index}-price`" v-model.number="addon.priceEur" type="number" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="0.00" />
           </div>
           <div class="space-y-2">
-            <label class="block text-sm font-medium text-gray-700">Icon Emoji</label>
-            <input v-model="addon.icon" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g. 🧳" />
+            <label :for="`addon-${index}-icon`" class="block text-sm font-medium text-gray-700">Icon Emoji</label>
+            <input :id="`addon-${index}-icon`" v-model="addon.icon" type="text" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g. 🧳" />
           </div>
           <div class="space-y-2">
-            <label class="block text-sm font-medium text-gray-700">Category</label>
-            <select v-model="addon.category" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+            <label :for="`addon-${index}-category`" class="block text-sm font-medium text-gray-700">Category</label>
+            <select :id="`addon-${index}-category`" v-model="addon.category" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
               <option value="equipment">Equipment</option>
               <option value="food">Food & Drink</option>
               <option value="transfer">Transfer</option>
@@ -30,12 +30,12 @@
           </div>
         </div>
         <div class="flex items-center gap-2">
-          <input type="checkbox" v-model="addon.isPerPerson" class="w-4 h-4 text-indigo-600 rounded" />
-          <label class="text-sm font-medium text-gray-700">Price is Per Person</label>
+          <input :id="`addon-${index}-per-person`" type="checkbox" v-model="addon.isPerPerson" class="w-4 h-4 text-indigo-600 rounded" />
+          <label :for="`addon-${index}-per-person`" class="text-sm font-medium text-gray-700">Price is Per Person</label>
         </div>
         <div class="space-y-2">
-          <label class="block text-sm font-medium text-gray-700">Description ({{ currentLocale.toUpperCase() }})</label>
-          <textarea v-model="addon.descriptions[currentLocale]" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Describe the addon..."></textarea>
+          <label :for="`addon-${index}-description`" class="block text-sm font-medium text-gray-700">Description ({{ currentLocale.toUpperCase() }})</label>
+          <textarea :id="`addon-${index}-description`" v-model="addon.descriptions[currentLocale]" rows="2" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500" placeholder="Describe the addon..."></textarea>
         </div>
       </div>
     </div>

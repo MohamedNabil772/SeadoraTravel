@@ -16,7 +16,13 @@ public class CancellationPolicyService : ICancellationPolicyService
 {
     public decimal CalculateRefundAmount(Entities.Booking booking, decimal totalCost, DateTime cancellationRequestTime)
     {
-        var hoursUntilTour = (booking.BookingDate - cancellationRequestTime).TotalHours;
+        // Proximity is measured against the tour date, not BookingDate (the record-creation stamp).
+        if (booking.TourDate is null)
+        {
+            return totalCost; // no tour date on record -> nothing to penalise against
+        }
+
+        var hoursUntilTour = (booking.TourDate.Value - cancellationRequestTime).TotalHours;
 
         if (hoursUntilTour >= 72)
         {
@@ -42,7 +48,13 @@ public class CancellationPolicyService : ICancellationPolicyService
     {
         // If the booking is marked as "Cash" and is still "Pending", 
         // it becomes invalid (should be cancelled) if we are within 48 hours of the tour.
-        var hoursUntilTour = (booking.BookingDate - currentTime).TotalHours;
+        // Proximity is measured against the tour date, not BookingDate (the record-creation stamp).
+        if (booking.TourDate is null)
+        {
+            return true; // no tour date on record -> never auto-cancel
+        }
+
+        var hoursUntilTour = (booking.TourDate.Value - currentTime).TotalHours;
         
         if (booking.Status == Seadora.Booking.Domain.Enums.BookingStatus.Pending && hoursUntilTour <= 48)
         {

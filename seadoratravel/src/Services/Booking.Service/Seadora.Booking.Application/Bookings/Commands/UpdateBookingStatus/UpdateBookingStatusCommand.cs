@@ -37,19 +37,7 @@ public class UpdateBookingStatusCommandHandler : IRequestHandler<UpdateBookingSt
             throw new KeyNotFoundException("Booking not found.");
         }
 
-        if (request.Status == BookingStatus.Confirmed)
-        {
-            // Validation Rule: Booking cannot be confirmed until full payment is made and all customer identification/passports are provided
-            if (!booking.IsPaid)
-            {
-                throw new InvalidOperationException("Cannot confirm booking: Full payment is required before confirmation.");
-            }
-
-            if (booking.MissingIdentification)
-            {
-                throw new InvalidOperationException("Cannot confirm booking: Passenger identification or passport records are missing.");
-            }
-        }
+        ValidateTransition(booking, request.Status);
 
         booking.Status = request.Status;
         await _context.SaveChangesAsync(cancellationToken);
@@ -116,5 +104,39 @@ public class UpdateBookingStatusCommandHandler : IRequestHandler<UpdateBookingSt
         }
 
         return Unit.Value;
+    }
+
+    private static void ValidateTransition(Domain.Entities.Booking booking, BookingStatus target)
+    {
+        if (booking.Status == target)
+        {
+            return;
+        }
+
+        // Cancelled and Completed are terminal: nothing moves out of them.
+        if (booking.Status is BookingStatus.Cancelled or BookingStatus.Completed)
+        {
+            throw new InvalidOperationException($"Cannot change status: booking is already {booking.Status} (terminal state).");
+        }
+
+        if (target is BookingStatus.Confirmed or BookingStatus.Completed)
+        {
+            // Validation Rule: Booking cannot be confirmed/completed until full payment is made and all customer identification/passports are provided
+            if (!booking.IsPaid)
+            {
+                throw new InvalidOperationException($"Cannot set booking to {target}: Full payment is required.");
+            }
+
+            if (booking.MissingIdentification)
+            {
+                throw new InvalidOperationException($"Cannot set booking to {target}: Passenger identification or passport records are missing.");
+            }
+        }
+
+        // You complete a confirmed booking, never a pending one.
+        if (target == BookingStatus.Completed && booking.Status != BookingStatus.Confirmed)
+        {
+            throw new InvalidOperationException("Cannot complete booking: it must be Confirmed first.");
+        }
     }
 }

@@ -2,7 +2,12 @@
   <div class="space-y-6">
     <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center transition-colors cursor-pointer"
          :class="isUploading ? 'bg-indigo-50 border-indigo-300' : 'bg-gray-50 hover:bg-gray-100'"
-         @click="!isUploading && triggerFileInput()">
+         role="button"
+         tabindex="0"
+         aria-label="Upload gallery images"
+         @click="!isUploading && triggerFileInput()"
+         @keydown.enter.prevent="!isUploading && triggerFileInput()"
+         @keydown.space.prevent="!isUploading && triggerFileInput()">
       <div v-if="isUploading" class="flex flex-col items-center justify-center">
         <svg class="animate-spin h-10 w-10 text-indigo-600 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
           <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -35,7 +40,7 @@
           </div>
         </div>
         <div class="p-4 flex-1">
-          <input v-model="item.caption" type="text" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm" placeholder="Enter caption for alt tag" />
+          <input v-model="item.caption" type="text" :aria-label="`Image caption ${Number(index) + 1}`" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm" placeholder="Enter caption for alt tag" />
         </div>
       </div>
     </div>

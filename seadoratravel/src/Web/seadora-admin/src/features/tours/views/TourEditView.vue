@@ -344,8 +344,9 @@ onMounted(loadData)
           <!-- Content fields for active language -->
           <div class="space-y-4">
             <div class="form-group">
-              <label class="block text-xs font-semibold text-dark mb-1">Tour Title ({{ activeLang.toUpperCase() }})</label>
+              <label for="teview-tour-title" class="block text-xs font-semibold text-dark mb-1">Tour Title ({{ activeLang.toUpperCase() }})</label>
               <input 
+                id="teview-tour-title"
                 v-model="form.names[activeLang]" 
                 type="text" 
                 :placeholder="`Enter Tour Title in ${languages.find(l => l.code === activeLang)?.label}`" 
@@ -353,8 +354,9 @@ onMounted(loadData)
               />
             </div>
             <div class="form-group">
-              <label class="block text-xs font-semibold text-dark mb-1">Detailed Description ({{ activeLang.toUpperCase() }})</label>
+              <label for="teview-tour-description" class="block text-xs font-semibold text-dark mb-1">Detailed Description ({{ activeLang.toUpperCase() }})</label>
               <textarea 
+                id="teview-tour-description"
                 v-model="form.descriptions[activeLang]" 
                 rows="6" 
                 :placeholder="`Enter Tour Description in ${languages.find(l => l.code === activeLang)?.label}`" 
@@ -373,12 +375,14 @@ onMounted(loadData)
               <label class="block text-xs font-semibold text-dark mb-1">Base Price & Currency</label>
               <div class="flex gap-2">
                 <input 
+                  id="teview-price"
                   :value="form.price" 
                   type="text" 
                   required 
                   class="!py-3 !px-4 text-base font-semibold text-dark" 
                   style="flex: 1; min-width: 0;"
                   placeholder="0.00"
+                  aria-label="Base price"
                   @input="handlePriceInput" 
                 />
                 <select 
@@ -386,6 +390,7 @@ onMounted(loadData)
                   required 
                   class="!py-3 !px-4 font-semibold" 
                   style="width: 130px; min-width: 130px; flex-shrink: 0;"
+                  aria-label="Currency"
                 >
                   <option value="EUR">€ EUR</option>
                   <option value="USD">$ USD</option>
@@ -395,8 +400,8 @@ onMounted(loadData)
             </div>
 
             <div class="form-group">
-              <label class="block text-xs font-semibold text-dark mb-1">Duration Cycle</label>
-              <select v-model="form.duration" required class="!py-3 !px-4">
+              <label for="teview-duration" class="block text-xs font-semibold text-dark mb-1">Duration Cycle</label>
+              <select id="teview-duration" v-model="form.duration" required class="!py-3 !px-4">
                 <option v-for="d in durations" :key="d.value" :value="d.value">
                   {{ d.label }}
                 </option>
@@ -404,8 +409,9 @@ onMounted(loadData)
             </div>
 
             <div class="form-group">
-              <label class="block text-xs font-semibold text-dark mb-1">Maximum Allocations (Excursion Capacity)</label>
+              <label for="teview-max-allocations" class="block text-xs font-semibold text-dark mb-1">Maximum Allocations (Excursion Capacity)</label>
               <input 
+                id="teview-max-allocations"
                 v-model.number="form.maxAllocations" 
                 type="number" 
                 min="1" 
@@ -415,8 +421,9 @@ onMounted(loadData)
           </div>
 
           <div class="form-group">
-            <label class="block text-xs font-semibold text-dark mb-1">Includes (Comma separated list)</label>
+            <label for="teview-includes" class="block text-xs font-semibold text-dark mb-1">Includes (Comma separated list)</label>
             <input 
+              id="teview-includes"
               v-model="form.includesInput" 
               type="text" 
               placeholder="e.g. 🚌 Transfer, 🥗 Lunch, 🤿 Equipment, 🧭 Guide" 
@@ -446,7 +453,7 @@ onMounted(loadData)
 
             <!-- Fixed Slots Editor -->
             <div v-if="form.pickupTimeType === 'FixedSlots'" class="p-4 bg-[#F8FAFC] rounded-lg border border-stroke space-y-3">
-              <label class="block text-xs font-semibold text-dark">Available Departure / Pickup Slots</label>
+              <label for="teview-new-slot-input" class="block text-xs font-semibold text-dark">Available Departure / Pickup Slots</label>
               
               <div class="flex flex-wrap gap-2">
                 <span 
@@ -461,6 +468,7 @@ onMounted(loadData)
 
               <div class="flex gap-2">
                 <input 
+                  id="teview-new-slot-input"
                   type="text" 
                   v-model="form.newSlotInput" 
                   placeholder="e.g. 15:00 - 15:30 (Sunset) or 08:30 (Morning)" 
@@ -567,8 +575,8 @@ onMounted(loadData)
           <h3 class="card-title">Categorization & Destination</h3>
           
           <div class="form-group">
-            <label class="block text-xs font-semibold text-dark mb-1">Destination Location</label>
-            <select v-model="form.destinationId" required>
+            <label for="teview-destination" class="block text-xs font-semibold text-dark mb-1">Destination Location</label>
+            <select id="teview-destination" v-model="form.destinationId" required>
               <option v-for="d in destinations" :key="d.id" :value="d.id">
                 {{ d.flag }} {{ d.names?.en || 'Unknown' }}
               </option>
@@ -576,8 +584,8 @@ onMounted(loadData)
           </div>
 
           <div class="form-group">
-            <label class="block text-xs font-semibold text-dark mb-1">Tour Category</label>
-            <select v-model="form.categoryId" required>
+            <label for="teview-category" class="block text-xs font-semibold text-dark mb-1">Tour Category</label>
+            <select id="teview-category" v-model="form.categoryId" required>
               <option v-for="c in categories" :key="c.id" :value="c.id">
                 {{ c.icon }} {{ c.names?.en || 'Unknown' }}
               </option>
@@ -590,8 +598,8 @@ onMounted(loadData)
           <h3 class="card-title">Supplier Partnership</h3>
 
           <div class="form-group">
-            <label class="block text-xs font-semibold text-dark mb-1">Supplier Operator</label>
-            <select v-model="form.supplierId">
+            <label for="teview-supplier" class="block text-xs font-semibold text-dark mb-1">Supplier Operator</label>
+            <select id="teview-supplier" v-model="form.supplierId">
               <option value="">No Supplier (Direct)</option>
               <option v-for="s in suppliers" :key="s.id" :value="s.id">
                 {{ s.nameEn || s.nameAr }}
@@ -600,8 +608,9 @@ onMounted(loadData)
           </div>
 
           <div class="form-group">
-            <label class="block text-xs font-semibold text-dark mb-1">Supplier Earnings share (%)</label>
+            <label for="teview-supplier-percentage" class="block text-xs font-semibold text-dark mb-1">Supplier Earnings share (%)</label>
             <input 
+              id="teview-supplier-percentage"
               v-model.number="form.supplierPercentage" 
               type="number" 
               min="0" 
@@ -643,13 +652,13 @@ onMounted(loadData)
 
           <div class="grid grid-cols-2 gap-4">
             <div class="form-group">
-              <label class="block text-xs font-semibold text-dark mb-1">Card Emoji</label>
-              <input v-model="form.emoji" type="text" placeholder="e.g. ⛵" required />
+              <label for="teview-emoji" class="block text-xs font-semibold text-dark mb-1">Card Emoji</label>
+              <input id="teview-emoji" v-model="form.emoji" type="text" placeholder="e.g. ⛵" required />
             </div>
 
             <div class="form-group">
-              <label class="block text-xs font-semibold text-dark mb-1">Promo Badge</label>
-              <input v-model="form.badge" type="text" placeholder="e.g. BEST SELLER" />
+              <label for="teview-badge" class="block text-xs font-semibold text-dark mb-1">Promo Badge</label>
+              <input id="teview-badge" v-model="form.badge" type="text" placeholder="e.g. BEST SELLER" />
             </div>
           </div>
 
@@ -658,11 +667,11 @@ onMounted(loadData)
             <div class="grid grid-cols-2 gap-2 mb-2">
               <div>
                 <span class="text-[10px] text-body block mb-1">Start Color</span>
-                <input type="color" v-model="gradientStart" @input="updateGradient" class="w-full h-10 p-0 border border-stroke rounded cursor-pointer bg-white" />
+                <input type="color" v-model="gradientStart" @input="updateGradient" aria-label="Gradient start color" class="w-full h-10 p-0 border border-stroke rounded cursor-pointer bg-white" />
               </div>
               <div>
                 <span class="text-[10px] text-body block mb-1">End Color</span>
-                <input type="color" v-model="gradientEnd" @input="updateGradient" class="w-full h-10 p-0 border border-stroke rounded cursor-pointer bg-white" />
+                <input type="color" v-model="gradientEnd" @input="updateGradient" aria-label="Gradient end color" class="w-full h-10 p-0 border border-stroke rounded cursor-pointer bg-white" />
               </div>
             </div>
             <div 

@@ -284,6 +284,7 @@ const getStatusColor = (status: string) => {
         <input 
           v-model="searchQuery"
           type="text" 
+          aria-label="Search inquiries by name, email, phone, or destination"
           placeholder="Search name, email, phone, destination..." 
           class="w-full pl-9 pr-4 py-2 text-sm bg-surface-sunken border border-border/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
         >
@@ -293,6 +294,7 @@ const getStatusColor = (status: string) => {
         <Filter class="w-4 h-4 text-text-muted hidden sm:block" />
         <select 
           v-model="statusFilter"
+          aria-label="Filter by status"
           class="w-full sm:w-auto pl-3 pr-8 py-2 text-sm bg-surface-sunken border border-border/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-all"
         >
           <option v-for="status in statuses" :key="status" :value="status">{{ status }}</option>
@@ -392,14 +394,14 @@ const getStatusColor = (status: string) => {
     <div v-if="isDrawerOpen" class="fixed inset-0 z-50 overflow-hidden" aria-labelledby="slide-over-title" role="dialog" aria-modal="true">
       <div class="absolute inset-0 bg-primary/20 backdrop-blur-sm transition-opacity" @click="closeDrawer"></div>
       <div class="fixed inset-y-0 right-0 pl-10 max-w-full flex">
-        <div class="w-screen max-w-md transform transition-transform duration-300 ease-in-out bg-white shadow-2xl flex flex-col h-full border-l border-border/60">
+        <div class="w-screen max-w-md transform transition-transform duration-300 ease-in-out bg-white shadow-2xl flex flex-col h-full border-l border-border/60" v-dialog="closeDrawer">
           <!-- Drawer Header -->
           <div class="px-6 py-5 border-b border-border/60 bg-surface-sunken flex items-center justify-between">
             <div>
               <h2 class="text-lg font-serif font-medium text-text-main" id="slide-over-title">Inquiry Details</h2>
               <p class="text-sm text-text-muted mt-1">{{ selectedInquiry?.id }}</p>
             </div>
-            <button @click="closeDrawer" class="rounded-full p-2 text-text-muted hover:bg-black/5 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20">
+            <button type="button" @click="closeDrawer" class="rounded-full p-2 text-text-muted hover:bg-black/5 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20">
               <span class="sr-only">Close panel</span>
               <X class="w-5 h-5" />
             </button>
@@ -412,7 +414,7 @@ const getStatusColor = (status: string) => {
               <h3 class="text-xs font-bold text-text-muted uppercase tracking-wider mb-3">Guest Information</h3>
               <div class="space-y-3">
                 <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-full bg-secondary/10 text-secondary-dark flex items-center justify-center font-bold font-serif border border-secondary/20">
+                  <div class="w-10 h-10 rounded-full bg-secondary/10 text-secondary-text flex items-center justify-center font-bold font-serif border border-secondary/20">
                     {{ selectedInquiry?.guestName.charAt(0) }}
                   </div>
                   <div>
@@ -435,21 +437,21 @@ const getStatusColor = (status: string) => {
               <h3 class="text-xs font-bold text-text-muted uppercase tracking-wider mb-3">Request Details</h3>
               <div class="space-y-4">
                 <div class="flex items-start gap-3">
-                  <MapPin class="w-4 h-4 text-secondary mt-0.5" />
+                  <MapPin class="w-4 h-4 text-secondary-text mt-0.5" />
                   <div>
                     <div class="text-xs text-text-muted">Destination / Experience</div>
                     <div class="font-medium text-text-main">{{ selectedInquiry?.destination }}</div>
                   </div>
                 </div>
                 <div class="flex items-start gap-3">
-                  <Calendar class="w-4 h-4 text-secondary mt-0.5" />
+                  <Calendar class="w-4 h-4 text-secondary-text mt-0.5" />
                   <div>
                     <div class="text-xs text-text-muted">Requested Date</div>
                     <div class="font-medium text-text-main">{{ formatDate(selectedInquiry?.date) }}</div>
                   </div>
                 </div>
                 <div class="flex items-start gap-3">
-                  <Users class="w-4 h-4 text-secondary mt-0.5" />
+                  <Users class="w-4 h-4 text-secondary-text mt-0.5" />
                   <div>
                     <div class="text-xs text-text-muted">Guests</div>
                     <div class="font-medium text-text-main">{{ selectedInquiry?.guests }} People</div>
@@ -476,6 +478,7 @@ const getStatusColor = (status: string) => {
                 <textarea 
                   v-model="replyMessage"
                   rows="4"
+                  aria-label="Reply message to guest"
                   placeholder="Type your reply here. This will be sent as an email to the guest..."
                   class="w-full px-3 py-2 text-sm bg-white border border-border/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 resize-none"
                 ></textarea>
@@ -499,8 +502,9 @@ const getStatusColor = (status: string) => {
               
               <div class="space-y-4">
                 <div>
-                  <label class="block text-sm font-medium text-text-main mb-1">Status</label>
+                  <label for="inquiry-status" class="block text-sm font-medium text-text-main mb-1">Status</label>
                   <select 
+                    id="inquiry-status"
                     v-model="newStatus"
                     class="w-full pl-3 pr-8 py-2 text-sm bg-white border border-border/60 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30"
                   >
@@ -511,8 +515,9 @@ const getStatusColor = (status: string) => {
                 </div>
 
                 <div>
-                  <label class="block text-sm font-medium text-text-main mb-1">Internal Notes</label>
+                  <label for="inquiry-admin-notes" class="block text-sm font-medium text-text-main mb-1">Internal Notes</label>
                   <textarea 
+                    id="inquiry-admin-notes"
                     v-model="adminNotes"
                     rows="3"
                     placeholder="Add private notes..."

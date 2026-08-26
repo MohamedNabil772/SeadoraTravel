@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Seadora.Content.Application.Common.Interfaces;
 
@@ -15,6 +16,7 @@ public class TourDocumentsController : ControllerBase
     }
 
     [HttpGet("brochure")]
+    [AllowAnonymous]
     public async Task<IActionResult> DownloadBrochure(Guid tourId, CancellationToken cancellationToken)
     {
         var fileBytes = await _pdfService.GenerateTourBrochureAsync(tourId, cancellationToken);

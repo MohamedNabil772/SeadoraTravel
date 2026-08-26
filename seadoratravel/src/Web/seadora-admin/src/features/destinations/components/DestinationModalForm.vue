@@ -218,10 +218,10 @@ function selectFlag(flag: string) {
 <template>
   <Transition name="modal-fade">
     <div v-if="modelValue" class="modal-overlay" @click.self="close">
-      <div class="modal-container">
+      <div class="modal-container" role="dialog" aria-modal="true" aria-labelledby="destination-modal-title" v-dialog="close">
         <div class="modal-header">
-          <h3>{{ isEdit ? 'Edit Destination' : 'New Destination' }}</h3>
-          <button @click="close" class="btn-close" :disabled="actionLoading">✕</button>
+          <h3 id="destination-modal-title">{{ isEdit ? 'Edit Destination' : 'New Destination' }}</h3>
+          <button type="button" @click="close" class="btn-close" aria-label="Close" :disabled="actionLoading">✕</button>
         </div>
         
         <div class="modal-content" @click="showFlagSelector = false">
@@ -231,10 +231,15 @@ function selectFlag(flag: string) {
             <div 
               class="image-dropzone" 
               :class="{ 'is-dragging': isDragging, 'has-image': !!form.imageUrl, 'is-uploading': isUploading }"
+              role="button"
+              tabindex="0"
+              aria-label="Upload cover image"
               @dragover="onDragOver"
               @dragleave="onDragLeave"
               @drop="onDrop"
               @click="!isUploading && !form.imageUrl && triggerFileInput()"
+              @keydown.enter.prevent="!isUploading && !form.imageUrl && triggerFileInput()"
+              @keydown.space.prevent="!isUploading && !form.imageUrl && triggerFileInput()"
             >
               <input 
                 ref="fileInput" 
@@ -265,7 +270,7 @@ function selectFlag(flag: string) {
             </div>
             <div v-if="uploadError" class="text-xs text-red-500 mt-1">{{ uploadError }}</div>
             <div class="url-input mt-2">
-              <input v-model="form.imageUrl" type="text" placeholder="Or paste image URL..." class="form-input" :disabled="isUploading" />
+              <input v-model="form.imageUrl" type="text" placeholder="Or paste image URL..." aria-label="Paste image URL" class="form-input" :disabled="isUploading" />
             </div>
           </div>
 
@@ -281,7 +286,7 @@ function selectFlag(flag: string) {
                 <Transition name="pop-in">
                   <div v-if="showFlagSelector" class="flag-dropdown glass-panel" @click.stop>
                     <div class="flag-search">
-                      <input v-model="flagSearch" type="text" placeholder="Search countries..." class="form-input text-sm" />
+                      <input v-model="flagSearch" type="text" placeholder="Search countries..." aria-label="Search countries" class="form-input text-sm" />
                     </div>
                     <div class="flag-grid">
                       <button 

@@ -55,14 +55,20 @@ const togglePassword = () => {
     <div v-if="isOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
       <div class="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity" @click="emit('close')"></div>
       
-      <div class="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-full">
+      <div
+        class="relative w-full max-w-xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-full"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="profile-settings-title"
+        v-dialog="() => emit('close')"
+      >
         <!-- Header -->
         <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
           <div>
-            <h2 class="text-xl font-serif font-bold text-gray-900 tracking-wide">Profile Settings</h2>
+            <h2 id="profile-settings-title" class="text-xl font-serif font-bold text-gray-900 tracking-wide">Profile Settings</h2>
             <p class="text-sm text-gray-500 mt-0.5 font-sans">Manage your personal information and security</p>
           </div>
-          <button @click="emit('close')" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
+          <button type="button" @click="emit('close')" aria-label="Close profile settings" class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
             <X class="w-5 h-5" />
           </button>
         </div>
@@ -90,9 +96,10 @@ const togglePassword = () => {
           <div class="space-y-5">
             <!-- Email Read-Only -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1.5">Email Address</label>
+              <label for="profile-email" class="block text-sm font-medium text-gray-700 mb-1.5">Email Address</label>
               <div class="relative">
                 <input 
+                  id="profile-email"
                   type="email" 
                   :value="email" 
                   readonly 
@@ -107,8 +114,9 @@ const togglePassword = () => {
 
             <!-- Full Name -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1.5">Full Name</label>
+              <label for="profile-fullname" class="block text-sm font-medium text-gray-700 mb-1.5">Full Name</label>
               <input 
+                id="profile-fullname"
                 v-model="fullName" 
                 type="text" 
                 class="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
@@ -118,8 +126,9 @@ const togglePassword = () => {
 
             <!-- Phone Number -->
             <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1.5">Phone Number</label>
+              <label for="profile-phone" class="block text-sm font-medium text-gray-700 mb-1.5">Phone Number</label>
               <input 
+                id="profile-phone"
                 v-model="phoneNumber" 
                 type="tel" 
                 class="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
@@ -132,9 +141,10 @@ const togglePassword = () => {
               
               <!-- Current Password -->
               <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">Current Password</label>
+                <label for="profile-current-password" class="block text-sm font-medium text-gray-700 mb-1.5">Current Password</label>
                 <div class="relative">
                   <input 
+                    id="profile-current-password"
                     :type="showPassword ? 'text' : 'password'" 
                     v-model="currentPassword" 
                     class="w-full pl-3 pr-10 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"
@@ -149,8 +159,9 @@ const togglePassword = () => {
 
               <!-- New Password -->
               <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1.5">New Password</label>
+                <label for="profile-new-password" class="block text-sm font-medium text-gray-700 mb-1.5">New Password</label>
                 <input 
+                  id="profile-new-password"
                   :type="showPassword ? 'text' : 'password'" 
                   v-model="newPassword" 
                   class="w-full px-3 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all shadow-sm"

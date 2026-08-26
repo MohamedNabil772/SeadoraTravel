@@ -93,7 +93,12 @@ async function processFile(file: File) {
     <div 
       class="dropzone" 
       :class="{ 'is-uploading': isUploading }"
+      role="button"
+      tabindex="0"
+      aria-label="Upload a custom icon (SVG or PNG)"
       @click="triggerUpload"
+      @keydown.enter.prevent="triggerUpload"
+      @keydown.space.prevent="triggerUpload"
       @dragover.prevent
       @drop.prevent="onDrop"
     >

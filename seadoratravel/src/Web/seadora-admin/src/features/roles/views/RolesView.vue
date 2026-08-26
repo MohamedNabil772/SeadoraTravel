@@ -220,7 +220,7 @@ function toggleAllInColumn(action: keyof Omit<RolePermissionDto, 'module' | 'lab
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
       <div>
         <h1 class="text-2xl font-serif font-bold text-text-main flex items-center gap-2">
-          <Shield class="w-6 h-6 text-secondary" />
+          <Shield class="w-6 h-6 text-secondary-text" />
           Roles & Permissions Matrix (RBAC)
         </h1>
         <p class="text-sm text-text-muted mt-1">
@@ -245,6 +245,7 @@ function toggleAllInColumn(action: keyof Omit<RolePermissionDto, 'module' | 'lab
           v-model="searchQuery"
           type="text"
           placeholder="Search roles by title or description..."
+          aria-label="Search roles"
           class="w-full pl-10 pr-4 py-2 text-sm bg-surface-sunken border border-border/70 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary/30 focus:border-secondary/40 transition-colors"
         />
       </div>
@@ -296,7 +297,7 @@ function toggleAllInColumn(action: keyof Omit<RolePermissionDto, 'module' | 'lab
               </td>
               <td class="py-4 px-6 text-center">
                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-surface-sunken text-xs font-semibold text-text-main border border-border/60">
-                  <Users class="w-3.5 h-3.5 text-secondary" />
+                  <Users class="w-3.5 h-3.5 text-secondary-text" />
                   {{ role.userCount }}
                 </span>
               </td>
@@ -305,7 +306,7 @@ function toggleAllInColumn(action: keyof Omit<RolePermissionDto, 'module' | 'lab
                   @click="openPermissionsMatrix(role)"
                   class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary/5 hover:bg-primary/10 text-primary text-xs font-bold transition-colors cursor-pointer border border-primary/15"
                 >
-                  <KeyRound class="w-3.5 h-3.5 text-secondary" />
+                  <KeyRound class="w-3.5 h-3.5 text-secondary-text" />
                   <span>Configure Matrix</span>
                 </button>
               </td>
@@ -344,21 +345,22 @@ function toggleAllInColumn(action: keyof Omit<RolePermissionDto, 'module' | 'lab
       v-if="showRoleModal"
       class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
     >
-      <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-border/80 space-y-5 animate-fade-in">
+      <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-border/80 space-y-5 animate-fade-in" role="dialog" aria-modal="true" aria-labelledby="role-modal-title" v-dialog="() => showRoleModal = false">
         <div class="flex items-center justify-between border-b border-border/60 pb-4">
-          <h3 class="text-lg font-serif font-bold text-text-main flex items-center gap-2">
-            <Shield class="w-5 h-5 text-secondary" />
+          <h3 id="role-modal-title" class="text-lg font-serif font-bold text-text-main flex items-center gap-2">
+            <Shield class="w-5 h-5 text-secondary-dark" />
             {{ isEditing ? 'Edit Role Details' : 'Create New Role' }}
           </h3>
-          <button @click="showRoleModal = false" class="p-1 text-text-muted hover:text-text-main rounded-md">
+          <button type="button" @click="showRoleModal = false" aria-label="Close" class="p-1 text-text-muted hover:text-text-main rounded-md">
             <X class="w-5 h-5" />
           </button>
         </div>
 
         <div class="space-y-4">
           <div>
-            <label class="block text-xs font-bold uppercase text-text-muted mb-1.5">Role Name</label>
+            <label for="role-name" class="block text-xs font-bold uppercase text-text-muted mb-1.5">Role Name</label>
             <input
+              id="role-name"
               v-model="roleForm.name"
               type="text"
               placeholder="e.g. ConciergeManager"
@@ -367,8 +369,9 @@ function toggleAllInColumn(action: keyof Omit<RolePermissionDto, 'module' | 'lab
           </div>
 
           <div>
-            <label class="block text-xs font-bold uppercase text-text-muted mb-1.5">Description</label>
+            <label for="role-description" class="block text-xs font-bold uppercase text-text-muted mb-1.5">Description</label>
             <textarea
+              id="role-description"
               v-model="roleForm.description"
               rows="3"
               placeholder="Brief summary of duties and responsibilities..."
@@ -379,12 +382,14 @@ function toggleAllInColumn(action: keyof Omit<RolePermissionDto, 'module' | 'lab
 
         <div class="flex items-center justify-end gap-3 pt-3 border-t border-border/60">
           <button
+            type="button"
             @click="showRoleModal = false"
             class="px-4 py-2 text-sm font-semibold text-text-muted hover:text-text-main rounded-lg"
           >
             Cancel
           </button>
           <button
+            type="button"
             @click="saveRole"
             class="px-5 py-2 text-sm font-bold bg-secondary text-primary rounded-lg shadow-sm hover:brightness-105"
           >
@@ -399,17 +404,17 @@ function toggleAllInColumn(action: keyof Omit<RolePermissionDto, 'module' | 'lab
       v-if="showPermissionsModal"
       class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4"
     >
-      <div class="bg-white rounded-2xl max-w-4xl w-full p-6 shadow-2xl border border-border/80 space-y-5 max-h-[90vh] flex flex-col">
+      <div class="bg-white rounded-2xl max-w-4xl w-full p-6 shadow-2xl border border-border/80 space-y-5 max-h-[90vh] flex flex-col" role="dialog" aria-modal="true" aria-labelledby="permissions-modal-title" v-dialog="() => showPermissionsModal = false">
         <!-- Header -->
         <div class="flex items-center justify-between border-b border-border/60 pb-4">
           <div>
-            <h3 class="text-lg font-serif font-bold text-text-main flex items-center gap-2">
-              <KeyRound class="w-5 h-5 text-secondary" />
-              Module Permissions Matrix — <span class="text-secondary-dark">{{ activeRole?.name }}</span>
+            <h3 id="permissions-modal-title" class="text-lg font-serif font-bold text-text-main flex items-center gap-2">
+              <KeyRound class="w-5 h-5 text-secondary-dark" />
+              Module Permissions Matrix — <span class="text-secondary-text">{{ activeRole?.name }}</span>
             </h3>
             <p class="text-xs text-text-muted mt-0.5">Toggle granular CRUD and administrative capabilities per module.</p>
           </div>
-          <button @click="showPermissionsModal = false" class="p-1 text-text-muted hover:text-text-main rounded-md">
+          <button type="button" @click="showPermissionsModal = false" aria-label="Close" class="p-1 text-text-muted hover:text-text-main rounded-md">
             <X class="w-5 h-5" />
           </button>
         </div>
@@ -423,31 +428,31 @@ function toggleAllInColumn(action: keyof Omit<RolePermissionDto, 'module' | 'lab
                 <th class="py-3 px-3 text-center">
                   <div class="flex flex-col items-center">
                     <span>View</span>
-                    <button @click="toggleAllInColumn('canView', true)" class="text-[9px] text-secondary hover:underline cursor-pointer">All</button>
+                    <button @click="toggleAllInColumn('canView', true)" class="text-[9px] text-secondary-text hover:underline cursor-pointer">All</button>
                   </div>
                 </th>
                 <th class="py-3 px-3 text-center">
                   <div class="flex flex-col items-center">
                     <span>Create</span>
-                    <button @click="toggleAllInColumn('canCreate', true)" class="text-[9px] text-secondary hover:underline cursor-pointer">All</button>
+                    <button @click="toggleAllInColumn('canCreate', true)" class="text-[9px] text-secondary-text hover:underline cursor-pointer">All</button>
                   </div>
                 </th>
                 <th class="py-3 px-3 text-center">
                   <div class="flex flex-col items-center">
                     <span>Edit</span>
-                    <button @click="toggleAllInColumn('canEdit', true)" class="text-[9px] text-secondary hover:underline cursor-pointer">All</button>
+                    <button @click="toggleAllInColumn('canEdit', true)" class="text-[9px] text-secondary-text hover:underline cursor-pointer">All</button>
                   </div>
                 </th>
                 <th class="py-3 px-3 text-center">
                   <div class="flex flex-col items-center">
                     <span>Delete</span>
-                    <button @click="toggleAllInColumn('canDelete', true)" class="text-[9px] text-secondary hover:underline cursor-pointer">All</button>
+                    <button @click="toggleAllInColumn('canDelete', true)" class="text-[9px] text-secondary-text hover:underline cursor-pointer">All</button>
                   </div>
                 </th>
                 <th class="py-3 px-3 text-center">
                   <div class="flex flex-col items-center">
                     <span>Full Admin</span>
-                    <button @click="toggleAllInColumn('canManageAccess', true)" class="text-[9px] text-secondary hover:underline cursor-pointer">All</button>
+                    <button @click="toggleAllInColumn('canManageAccess', true)" class="text-[9px] text-secondary-text hover:underline cursor-pointer">All</button>
                   </div>
                 </th>
                 <th class="py-3 px-3 text-right">Row Quick</th>
@@ -467,6 +472,7 @@ function toggleAllInColumn(action: keyof Omit<RolePermissionDto, 'module' | 'lab
                   <input
                     type="checkbox"
                     v-model="perm.canView"
+                    :aria-label="`${perm.label} - View`"
                     class="w-4 h-4 rounded text-secondary focus:ring-secondary/40 cursor-pointer"
                   />
                 </td>
@@ -474,6 +480,7 @@ function toggleAllInColumn(action: keyof Omit<RolePermissionDto, 'module' | 'lab
                   <input
                     type="checkbox"
                     v-model="perm.canCreate"
+                    :aria-label="`${perm.label} - Create`"
                     class="w-4 h-4 rounded text-secondary focus:ring-secondary/40 cursor-pointer"
                   />
                 </td>
@@ -481,6 +488,7 @@ function toggleAllInColumn(action: keyof Omit<RolePermissionDto, 'module' | 'lab
                   <input
                     type="checkbox"
                     v-model="perm.canEdit"
+                    :aria-label="`${perm.label} - Edit`"
                     class="w-4 h-4 rounded text-secondary focus:ring-secondary/40 cursor-pointer"
                   />
                 </td>
@@ -488,6 +496,7 @@ function toggleAllInColumn(action: keyof Omit<RolePermissionDto, 'module' | 'lab
                   <input
                     type="checkbox"
                     v-model="perm.canDelete"
+                    :aria-label="`${perm.label} - Delete`"
                     class="w-4 h-4 rounded text-secondary focus:ring-secondary/40 cursor-pointer"
                   />
                 </td>
@@ -495,13 +504,14 @@ function toggleAllInColumn(action: keyof Omit<RolePermissionDto, 'module' | 'lab
                   <input
                     type="checkbox"
                     v-model="perm.canManageAccess"
+                    :aria-label="`${perm.label} - Full Admin`"
                     class="w-4 h-4 rounded text-secondary focus:ring-secondary/40 cursor-pointer"
                   />
                 </td>
                 <td class="py-3.5 px-3 text-right space-x-1">
                   <button
                     @click="toggleAllInRow(perm, true)"
-                    class="px-2 py-0.5 text-[10px] bg-secondary/15 text-secondary-dark rounded font-bold hover:bg-secondary/25"
+                    class="px-2 py-0.5 text-[10px] bg-secondary/15 text-secondary-text rounded font-bold hover:bg-secondary/25"
                   >
                     Grant
                   </button>
@@ -539,3 +549,4 @@ function toggleAllInColumn(action: keyof Omit<RolePermissionDto, 'module' | 'lab
     </div>
   </div>
 </template>
+

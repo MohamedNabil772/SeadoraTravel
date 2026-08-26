@@ -236,21 +236,33 @@ onUnmounted(() => {
         <div 
           class="relative w-full max-w-2xl bg-white rounded-2xl shadow-[0_25px_70px_rgba(0,0,0,0.35)] border border-gray-100 overflow-hidden flex flex-col z-10 animate-spotlight"
           @click.stop
+          role="dialog"
+          aria-modal="true"
+          aria-label="Global search"
+          v-dialog="() => emit('close')"
         >
           <!-- Search Header Input -->
           <div class="flex items-center px-4 py-3.5 border-b border-gray-100 bg-white">
-            <Search class="w-5 h-5 text-gray-400 mr-3 flex-shrink-0" />
+            <Search class="w-5 h-5 text-gray-400 mr-3 flex-shrink-0" aria-hidden="true" />
             <input
               ref="searchInput"
               v-model="query"
               type="text"
+              data-autofocus
+              role="combobox"
+              aria-controls="global-search-results"
+              aria-expanded="true"
+              :aria-activedescendant="flatResults.length ? `global-search-option-${selectedIndex}` : undefined"
+              aria-label="Search tours, bookings, categories and settings"
               placeholder="Search tours, bookings, categories, settings, or jump to page..."
               class="w-full text-base bg-transparent border-none text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-0 font-sans"
             />
             <div v-if="loading" class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin mr-2"></div>
             <button 
               v-if="query" 
+              type="button"
               @click="query = ''" 
+              aria-label="Clear search"
               class="p-1 text-gray-400 hover:text-gray-600 rounded-md hover:bg-gray-100 transition-colors"
             >
               <X class="w-4 h-4" />
@@ -261,7 +273,7 @@ onUnmounted(() => {
           </div>
 
           <!-- Results & Navigation Area -->
-          <div class="max-h-[60vh] overflow-y-auto p-3 space-y-4 no-scrollbar divide-y divide-gray-100/60">
+          <div id="global-search-results" role="listbox" aria-label="Search results" class="max-h-[60vh] overflow-y-auto p-3 space-y-4 no-scrollbar divide-y divide-gray-100/60">
             <!-- Recent Searches Pill list (when input empty) -->
             <div v-if="!query && recentSearches.length > 0" class="pb-2">
               <div class="flex items-center justify-between px-2 mb-2">
@@ -269,6 +281,7 @@ onUnmounted(() => {
                   <Clock class="w-3 h-3" /> Recent Searches
                 </span>
                 <button 
+                  type="button"
                   @click="clearRecentSearches" 
                   class="text-[11px] text-gray-400 hover:text-red-500 transition-colors"
                 >
@@ -279,6 +292,7 @@ onUnmounted(() => {
                 <button
                   v-for="s in recentSearches"
                   :key="s"
+                  type="button"
                   @click="selectRecent(s)"
                   class="px-2.5 py-1 text-xs bg-gray-50 hover:bg-gray-100 text-gray-600 rounded-lg border border-gray-200/80 transition-colors"
                 >
@@ -294,14 +308,17 @@ onUnmounted(() => {
               class="pt-3 first:pt-0"
             >
               <div class="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-                <component :is="group.icon" class="w-3.5 h-3.5 text-secondary" />
+                <component :is="group.icon" class="w-3.5 h-3.5 text-secondary-text" />
                 <span>{{ group.name }}</span>
               </div>
 
-              <div class="mt-1 space-y-1">
+              <div class="mt-1 space-y-1" role="group" :aria-label="group.name">
                 <div
                   v-for="item in group.items"
                   :key="item.id"
+                  :id="`global-search-option-${flatResults.indexOf(item)}`"
+                  role="option"
+                  :aria-selected="flatResults.indexOf(item) === selectedIndex"
                   @click="navigateTo(item)"
                   @mouseenter="selectedIndex = flatResults.indexOf(item)"
                   class="flex items-center justify-between px-3.5 py-2.5 rounded-xl cursor-pointer transition-all duration-150 group"
@@ -329,7 +346,7 @@ onUnmounted(() => {
                         <span 
                           v-if="item.badge" 
                           class="px-2 py-0.5 text-[10px] font-bold rounded-full uppercase"
-                          :class="flatResults.indexOf(item) === selectedIndex ? 'bg-secondary text-navy-950' : 'bg-secondary/15 text-secondary-dark border border-secondary/20'"
+                          :class="flatResults.indexOf(item) === selectedIndex ? 'bg-secondary text-navy-950' : 'bg-secondary/15 text-secondary-text border border-secondary/20'"
                         >
                           {{ item.badge }}
                         </span>
@@ -345,7 +362,7 @@ onUnmounted(() => {
 
                   <div 
                     class="flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity pl-2"
-                    :class="{ '!opacity-100 text-secondary': flatResults.indexOf(item) === selectedIndex }"
+                    :class="{ '!opacity-100 text-secondary-text': flatResults.indexOf(item) === selectedIndex }"
                   >
                     <span class="text-[11px] font-medium hidden sm:inline">Open</span>
                     <CornerDownLeft class="w-3.5 h-3.5" />
@@ -375,7 +392,7 @@ onUnmounted(() => {
                 <kbd class="px-1.5 py-0.5 bg-white border border-gray-200 rounded font-mono text-[10px] shadow-2xs">ESC</kbd> Close
               </span>
             </div>
-            <div class="font-serif italic text-secondary text-xs">
+            <div class="font-serif italic text-secondary-text text-xs">
               ✦ Seadora Luxury Search
             </div>
           </div>
