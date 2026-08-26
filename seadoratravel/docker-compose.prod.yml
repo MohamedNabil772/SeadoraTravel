@@ -63,10 +63,12 @@ services:
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Booking;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
       - Smtp__Host=${SMTP_HOST:-smtp.hostinger.com}
       - Smtp__Port=${SMTP_PORT:-587}
-      - Smtp__UseSsl=${SMTP_USESSL:-true}
-      - Smtp__Username=${SMTP_USERNAME:-}
+      - Smtp__EnableSsl=${SMTP_ENABLESSL:-true}
+      - Smtp__UseSsl=${SMTP_ENABLESSL:-true}
+      - Smtp__Username=${SMTP_USERNAME:-info@seadoratravel.com}
       - Smtp__Password=${SMTP_PASSWORD:-}
-      - Smtp__FromAddress=${SMTP_FROM:-noreply@seadoratravel.com}
+      - Smtp__FromEmail=${SMTP_FROM:-info@seadoratravel.com}
+      - Smtp__FromAddress=${SMTP_FROM:-info@seadoratravel.com}
       - Smtp__FromName=${SMTP_FROMNAME:-Seadora Travel}
       - Smtp__LogoUrl=${SMTP_LOGO_URL:-https://seadoratravel.com/logo.png}
     depends_on:
