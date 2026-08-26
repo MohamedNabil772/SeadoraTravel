@@ -1,9 +1,12 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Seadora.Common.Messaging.Outbox;
+using Seadora.Common.Tenancy;
 using Seadora.Content.Application.Common.Interfaces;
 using Seadora.Content.Domain.Entities;
 using Seadora.Contracts.Enums;
+using Seadora.Contracts.Events;
 
 namespace Seadora.Content.API.Controllers;
 
@@ -13,10 +16,14 @@ namespace Seadora.Content.API.Controllers;
 public class TourTypesController : ControllerBase
 {
     private readonly IContentDbContext _context;
+    private readonly IOutboxWriter _outbox;
+    private readonly ICurrentBranch _currentBranch;
 
-    public TourTypesController(IContentDbContext context)
+    public TourTypesController(IContentDbContext context, IOutboxWriter outbox, ICurrentBranch currentBranch)
     {
         _context = context;
+        _outbox = outbox;
+        _currentBranch = currentBranch;
     }
 
     [HttpGet]
@@ -86,6 +93,7 @@ public class TourTypesController : ControllerBase
         }
 
         _context.TourTypes.Add(entity);
+        EnqueuePolicyChanged(entity);
         await _context.SaveChangesAsync(HttpContext.RequestAborted);
         return CreatedAtAction(nameof(GetById), new { id = entity.Id }, entity);
     }
@@ -118,6 +126,7 @@ public class TourTypesController : ControllerBase
 
         ApplyPolicy(entity, request);
 
+        EnqueuePolicyChanged(entity);
         await _context.SaveChangesAsync(HttpContext.RequestAborted);
         return Ok(entity);
     }
@@ -135,6 +144,22 @@ public class TourTypesController : ControllerBase
 
     private static bool InvalidCapacityRange(int? min, int? max) =>
         min.HasValue && max.HasValue && max.Value < min.Value;
+
+    // ponytail: always enqueue on create/update instead of diffing changed fields -- the consumer
+    // upserts idempotently, so a redundant event is cheaper than change tracking.
+    private void EnqueuePolicyChanged(TourType entity) =>
+        _outbox.Enqueue(new TourTypePolicyChanged
+        {
+            TourTypeId = entity.Id,
+            Code = entity.Code,
+            AllocationModel = entity.AllocationModel,
+            DefaultMinCapacity = entity.DefaultMinCapacity,
+            DefaultMaxCapacity = entity.DefaultMaxCapacity,
+            RequiresGuestDetails = entity.RequiresGuestDetails,
+            RequiresPassport = entity.RequiresPassport,
+            PayLaterAllowed = entity.PayLaterAllowed,
+            BranchId = _currentBranch.BranchId
+        });
 
     // ponytail: nulls mean "leave as-is" so partial updates never wipe policy values.
     private static void ApplyPolicy(TourType entity, TourTypePolicyFields p)

@@ -1,10 +1,14 @@
+using System.Text.Json;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Seadora.Common.Messaging.Outbox;
+using Seadora.Common.Tenancy;
 using Seadora.Content.API.Controllers;
 using Seadora.Content.Domain.Entities;
 using Seadora.Content.Infrastructure.Persistence;
 using Seadora.Contracts.Enums;
+using Seadora.Contracts.Events;
 
 namespace Seadora.UnitTests;
 
@@ -48,8 +52,15 @@ public class TourTypePolicyTests
         return new InMemoryContentDbContext(options);
     }
 
+    private static readonly Guid TestBranchId = Guid.Parse("11111111-2222-3333-4444-555555555555");
+
+    private sealed class StubCurrentBranch : ICurrentBranch
+    {
+        public Guid BranchId => TestBranchId;
+    }
+
     private static TourTypesController NewController(ContentDbContext context) =>
-        new(context)
+        new(context, new OutboxWriter(context), new StubCurrentBranch())
         {
             ControllerContext = new ControllerContext { HttpContext = new DefaultHttpContext() }
         };
@@ -106,5 +117,31 @@ public class TourTypePolicyTests
         var saved = await context.TourTypes.AsNoTracking().SingleAsync(t => t.Id == entity.Id);
         Assert.Null(saved.DefaultMinCapacity);
         Assert.Null(saved.DefaultMaxCapacity);
+    }
+
+    [Fact]
+    public async Task Update_enqueues_one_policy_changed_outbox_message()
+    {
+        using var context = NewContext();
+        var entity = await SeedAsync(context);
+
+        var result = await NewController(context).Update(entity.Id, new UpdateTourTypeRequest
+        {
+            Code = "group",
+            AllocationModel = AllocationModel.WholeUnit,
+            DefaultMinCapacity = 2,
+            DefaultMaxCapacity = 12
+        });
+
+        Assert.IsType<OkObjectResult>(result);
+
+        var message = await context.OutboxMessages.AsNoTracking().SingleAsync();
+        Assert.Contains(nameof(TourTypePolicyChanged), message.Type);
+
+        var payload = JsonSerializer.Deserialize<TourTypePolicyChanged>(message.Payload)!;
+        Assert.Equal("GROUP", payload.Code);
+        Assert.Equal(AllocationModel.WholeUnit, payload.AllocationModel);
+        Assert.Equal(TestBranchId, payload.BranchId);
+        Assert.Equal(entity.Id, payload.TourTypeId);
     }
 }

@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
+using Seadora.Common.Messaging.Outbox;
 using Seadora.Content.Application.Common.Interfaces;
 using Seadora.Content.Domain.Entities;
 
 namespace Seadora.Content.Infrastructure.Persistence;
 
-public class ContentDbContext : DbContext, IContentDbContext
+public class ContentDbContext : DbContext, IContentDbContext, IOutboxDbContext
 {
     public ContentDbContext(DbContextOptions<ContentDbContext> options) : base(options) { }
 
@@ -19,9 +20,14 @@ public class ContentDbContext : DbContext, IContentDbContext
     public DbSet<Nationality> Nationalities => Set<Nationality>();
     public DbSet<Seadora.Content.Domain.Entities.Translation> Translations => Set<Seadora.Content.Domain.Entities.Translation>();
 
+    // ponytail: Content only publishes, so no ProcessedMessage/inbox mapping here.
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<OutboxMessage>();
 
         // Configure JSON conversion for dictionaries/collections
         modelBuilder.Entity<Seadora.Content.Domain.Entities.Translation>().Property(t => t.Values).HasColumnType("jsonb");

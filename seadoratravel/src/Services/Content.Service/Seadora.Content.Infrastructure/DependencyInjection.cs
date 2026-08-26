@@ -2,6 +2,9 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
+using Seadora.Common.Messaging;
+using Seadora.Common.Messaging.Outbox;
+using Seadora.Common.Tenancy;
 using Seadora.Content.Application.Common.Interfaces;
 using Seadora.Content.Infrastructure.Persistence;
 
@@ -26,6 +29,11 @@ public static class DependencyInjection
             
         services.AddScoped<IContentDbContext>(provider => provider.GetRequiredService<ContentDbContext>());
         
+        services.AddSeadoraMessaging(configuration);
+        services.AddSeadoraOutbox<ContentDbContext>();
+        services.AddHttpContextAccessor();
+        services.AddSeadoraTenancy();
+
         services.AddScoped<IExcelLocalizationService, Seadora.Content.Infrastructure.Services.ExcelLocalizationService>();
         services.AddScoped<IQuestPdfGeneratorService, Seadora.Content.Infrastructure.Services.QuestPdfGeneratorService>();
         
