@@ -7,17 +7,19 @@ namespace Seadora.Booking.Application.Common.Email;
 
 public static class BookingEmail
 {
-    private const string BrandNavy = "#062D4D";
-    private const string BrandOcean = "#0A456C";
-    private const string BrandAzure = "#0D5485";
-    private const string GoldPrimary = "#D4AF37";
-    private const string GoldLight = "#F5D77F";
-    private const string GoldBright = "#FFF3CC";
-    private const string BackgroundWarm = "#F8F6F0";
-    private const string TextCharcoal = "#1E293B";
-    private const string TextMuted = "#64748B";
-    private const string CardBorder = "#E2D9C8";
-    private const string GreenEmerald = "#059669";
+    // High-Luminance 24K Gold & Radiant Luxury Palette (Armored against Gmail iOS Dark Mode Dimming)
+    private const string GoldRadiant = "#FFD768";
+    private const string GoldBright = "#FFE58F";
+    private const string GoldAmber = "#FFAE19";
+    private const string NavyDarkest = "#050B12";
+    private const string NavyMain = "#07172B";
+    private const string NavyCard = "#0B1E34";
+    private const string NavyTicket = "#0F2844";
+    private const string TextRadiantWhite = "#FFFFFF";
+    private const string TextIceWhite = "#E6F0FA";
+    private const string TextMutedAzure = "#ADC5DB";
+    private const string GreenEmerald = "#10B981";
+    private const string GreenBright = "#34D399";
     private const string LogoUrl = "https://seadoratravel.com/logo-emblem.png";
     private const string WhatsAppUrl = ContactChannels.WhatsAppUrl;
     private const string WebsiteUrl = ContactChannels.WebsiteUrl;
@@ -70,7 +72,7 @@ public static class BookingEmail
             StatusReceived = "Reservation Request Received",
             TitleReceived = "Booking Received — Seadora Travel",
             Greeting = "Dear",
-            ReceivedIntro = "Thank you for selecting <strong>Seadora Luxury Travel</strong>. We have received your reservation request and our VIP operations team in Hurghada is currently reviewing your schedule to ensure every detail meets our five-star standards.",
+            ReceivedIntro = "Thank you for selecting <strong>Seadora Luxury Travel</strong>. We have received your reservation request and our VIP operations team in Hurghada is reviewing your schedule to ensure every detail meets our five-star standards.",
             PreheaderConfirmed = "Your VIP Booking is CONFIRMED! View your official travel voucher inside.",
             StatusConfirmed = "Officially Confirmed",
             TitleConfirmed = "Booking Confirmed — Seadora Travel",
@@ -265,11 +267,8 @@ public static class BookingEmail
     private static string GetEmailHeader(EmailStrings s, string preheader, string statusPill, string title, bool isConfirmed = false)
     {
         var badgeBg = isConfirmed 
-            ? "linear-gradient(135deg, #166534 0%, #15803d 100%)" 
-            : "linear-gradient(135deg, rgba(212,175,55,0.3) 0%, rgba(245,215,127,0.15) 100%)";
-        var badgeBorder = isConfirmed ? "#4ADE80" : GoldPrimary;
-        var badgeColor = isConfirmed ? "#FFFFFF" : GoldBright;
-        var badgeShadow = isConfirmed ? "0 4px 14px rgba(22,101,52,0.4)" : "0 4px 14px rgba(212,175,55,0.25)";
+            ? "background-color: #064E3B; background-image: linear-gradient(135deg, #059669 0%, #047857 100%); border: 1.5px solid #34D399; color: #FFFFFF;"
+            : "background-color: #3D2800; background-image: linear-gradient(135deg, #B45309 0%, #78350F 100%); border: 1.5px solid #FFD768; color: #FFF4CC;";
 
         return $@"
         <!DOCTYPE html>
@@ -290,37 +289,36 @@ public static class BookingEmail
                 body {{
                     margin: 0;
                     padding: 0;
-                    background-color: {BackgroundWarm};
+                    background-color: {NavyDarkest};
                     font-family: 'Jost', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
                     -webkit-font-smoothing: antialiased;
-                    color: {TextCharcoal};
+                    color: {TextIceWhite};
                 }}
                 table {{ border-collapse: separate; }}
                 a {{ text-decoration: none; }}
                 
-                /* --- DARK MODE EXPLICIT OVERRIDES --- */
+                /* Dark Mode & Client Armor */
                 @media (prefers-color-scheme: dark) {{
-                    /* Backgrounds */
-                    body, .body-bg, .email-bg {{ background-color: #0b0f19 !important; }}
-                    .email-container, .card-bg {{ background-color: #111827 !important; border-color: #1f2937 !important; }}
-                    .header-bg {{ background-color: #06152B !important; }} /* Maintain luxury navy */
-                    .voucher-card {{ background-color: #111827 !important; border-color: {GoldPrimary} !important; }}
-                    .footer-bg {{ background-color: #06152B !important; border-top-color: rgba(212,175,55,0.3) !important; }}
-                    .info-box {{ background-color: #1f2937 !important; border-color: #374151 !important; }}
-                    
-                    /* Typography Contrast */
-                    body, p, span, td, .dark-text {{ color: #e5e7eb !important; }}
-                    h1, h2, h3, h4, .dark-heading {{ color: #F5D77F !important; }}
-                    .dark-muted {{ color: #9ca3af !important; }}
-                    .dark-brand {{ color: #D4AF37 !important; }}
+                    body, .email-bg {{ background-color: {NavyDarkest} !important; }}
+                    .radiant-gold {{ color: {GoldRadiant} !important; -webkit-text-fill-color: {GoldRadiant} !important; }}
+                    .radiant-white {{ color: {TextRadiantWhite} !important; -webkit-text-fill-color: {TextRadiantWhite} !important; }}
+                    .radiant-body {{ color: {TextIceWhite} !important; -webkit-text-fill-color: {TextIceWhite} !important; }}
+                    .radiant-muted {{ color: {TextMutedAzure} !important; -webkit-text-fill-color: {TextMutedAzure} !important; }}
                 }}
                 
-                /* Outlook.com / OWA specific selectors */
-                [data-ogsb] .body-bg, [data-ogsb] .email-bg {{ background-color: #0b0f19 !important; }}
-                [data-ogsb] .email-container, [data-ogsb] .card-bg {{ background-color: #111827 !important; border-color: #1f2937 !important; }}
-                [data-ogsc] .dark-text, [data-ogsc] p, [data-ogsc] span {{ color: #e5e7eb !important; }}
-                [data-ogsc] .dark-heading {{ color: #F5D77F !important; }}
-                [data-ogsc] .dark-muted {{ color: #9ca3af !important; }}
+                /* Outlook OWA */
+                [data-ogsc] .radiant-gold {{ color: {GoldRadiant} !important; }}
+                [data-ogsc] .radiant-white {{ color: {TextRadiantWhite} !important; }}
+                [data-ogsc] .radiant-body {{ color: {TextIceWhite} !important; }}
+                [data-ogsc] .radiant-muted {{ color: {TextMutedAzure} !important; }}
+                [data-ogsb] .email-bg {{ background-color: {NavyDarkest} !important; }}
+
+                /* iPhone Gmail App Armor (u + .body) */
+                u + .body .email-bg {{ background-color: {NavyDarkest} !important; }}
+                u + .body .radiant-gold {{ color: {GoldRadiant} !important; -webkit-text-fill-color: {GoldRadiant} !important; }}
+                u + .body .radiant-white {{ color: {TextRadiantWhite} !important; -webkit-text-fill-color: {TextRadiantWhite} !important; }}
+                u + .body .radiant-body {{ color: {TextIceWhite} !important; -webkit-text-fill-color: {TextIceWhite} !important; }}
+                u + .body .radiant-muted {{ color: {TextMutedAzure} !important; -webkit-text-fill-color: {TextMutedAzure} !important; }}
 
                 @media only screen and (max-width: 620px) {{
                     .email-container {{ width: 100% !important; border-radius: 0 !important; }}
@@ -329,41 +327,41 @@ public static class BookingEmail
                 }}
             </style>
         </head>
-        <body style='margin: 0; padding: 0; background-color: {BackgroundWarm};'>
+        <body class='body' style='margin: 0; padding: 0; background-color: {NavyDarkest}; -webkit-text-size-adjust: 100%;'>
             <!-- Hidden Preheader for Mail Inboxes -->
             <div style='display: none; font-size: 1px; color: #fff; line-height: 1px; max-height: 0px; max-width: 0px; opacity: 0; overflow: hidden;'>
                 {preheader}
             </div>
 
-            <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' style='background-color: {BackgroundWarm}; width: 100%; padding: 32px 0;'>
+            <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' class='email-bg' style='background-color: {NavyDarkest}; background-image: linear-gradient({NavyDarkest}, {NavyDarkest}); width: 100%; padding: 32px 0;'>
                 <tr>
                     <td align='center'>
-                        <!-- Main Luxury Card Container -->
-                        <table role='presentation' class='email-container' width='600' cellspacing='0' cellpadding='0' border='0' style='width: 600px; max-width: 600px; background-color: #ffffff; border-radius: 24px; overflow: hidden; border: 1px solid {CardBorder}; box-shadow: 0 16px 48px rgba(6,45,77,0.12);'>
+                        <!-- Main Luxury Card Container with Radiant Gold Border -->
+                        <table role='presentation' class='email-container' width='600' cellspacing='0' cellpadding='0' border='0' style='width: 600px; max-width: 600px; background-color: {NavyMain}; background-image: linear-gradient(180deg, #0A1E36 0%, #061324 100%); border-radius: 20px; overflow: hidden; border: 1.5px solid {GoldRadiant}; box-shadow: 0 16px 48px rgba(0,0,0,0.5);'>
                             
-                            <!-- Luxury Deep Navy Header -->
+                            <!-- Luxury Header with Glowing Gold Typography -->
                             <tr>
-                                <td style='background: linear-gradient(135deg, #06152B 0%, #0D2342 100%); background-color: #06152B; padding: 42px 30px; text-align: center; border-bottom: 3px solid {GoldPrimary};'>
+                                <td style='background-color: {NavyDarkest}; background-image: linear-gradient(135deg, #06152B 0%, #0D2342 100%); padding: 38px 28px; text-align: center; border-bottom: 2.5px solid {GoldRadiant};'>
                                     <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0'>
                                         <tr>
                                             <td align='center'>
                                                 <!-- Emblem -->
-                                                <img src='{LogoUrl}' alt='Seadora Emblem' width='56' height='56' style='display: block; margin: 0 auto 16px auto; width: 56px; height: 56px; filter: drop-shadow(0 4px 16px rgba(212,175,55,0.55));' />
+                                                <img src='{LogoUrl}' alt='Seadora Emblem' width='58' height='58' style='display: block; margin: 0 auto 16px auto; width: 58px; height: 58px; filter: drop-shadow(0 4px 16px rgba(255,215,104,0.6));' />
 
-                                                <!-- Bright Radiant Gold Brand Title -->
-                                                <h1 style='margin: 0; font-family: ""Playfair Display"", Georgia, serif; font-size: 26px; font-weight: 800; color: #FFDF73; letter-spacing: 4px; text-transform: uppercase; text-shadow: 0 0 20px rgba(245,215,127,0.5), 0 2px 6px rgba(0,0,0,0.8);'>
-                                                    SEADORA TRAVEL
+                                                <!-- 24K Radiant Gold Brand Title (Never Dims) -->
+                                                <h1 class='radiant-gold' style='margin: 0; font-family: ""Playfair Display"", Georgia, serif; font-size: 27px; font-weight: 800; color: {GoldRadiant} !important; -webkit-text-fill-color: {GoldRadiant} !important; letter-spacing: 4px; text-transform: uppercase; text-shadow: 0 0 20px rgba(255,215,104,0.6);'>
+                                                    <span style='color: {GoldRadiant} !important; -webkit-text-fill-color: {GoldRadiant} !important;'>SEADORA TRAVEL</span>
                                                 </h1>
-                                                <div style='margin: 6px auto 8px auto; color: #D4AF37; font-size: 10px; letter-spacing: 5px;'>
+                                                <div class='radiant-gold' style='margin: 6px auto 8px auto; color: {GoldRadiant} !important; font-size: 10px; letter-spacing: 6px;'>
                                                     ✦ • ✦
                                                 </div>
-                                                <p style='margin: 0; font-size: 11px; font-weight: 500; color: #F5D77F; letter-spacing: 2px; text-transform: uppercase;'>
-                                                    {s.HeaderSubtitle}
+                                                <p class='radiant-gold' style='margin: 0; font-size: 11px; font-weight: 700; color: {GoldBright} !important; -webkit-text-fill-color: {GoldBright} !important; letter-spacing: 2px; text-transform: uppercase;'>
+                                                    <span style='color: {GoldBright} !important; -webkit-text-fill-color: {GoldBright} !important;'>{s.HeaderSubtitle}</span>
                                                 </p>
 
                                                 <!-- Status Badge Pill -->
-                                                <div style='margin-top: 22px;'>
-                                                    <span style='display: inline-block; padding: 7px 22px; background: {badgeBg}; border: 1.5px solid {badgeBorder}; border-radius: 30px; font-size: 11px; font-weight: 700; color: {badgeColor}; letter-spacing: 1.5px; text-transform: uppercase; box-shadow: {badgeShadow};'>
+                                                <div style='margin-top: 20px;'>
+                                                    <span style='display: inline-block; padding: 7px 24px; {badgeBg} border-radius: 30px; font-size: 11px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; box-shadow: 0 4px 14px rgba(0,0,0,0.4);'>
                                                         {statusPill}
                                                     </span>
                                                 </div>
@@ -379,21 +377,21 @@ public static class BookingEmail
         return $@"
                             <!-- Concierge Direct Action Bar -->
                             <tr>
-                                <td style='background-color: #FDFBF7; padding: 30px 34px; border-top: 1px solid {CardBorder}; text-align: center;'>
+                                <td style='background-color: {NavyCard}; background-image: linear-gradient(180deg, #0E2540 0%, #0A1C30 100%); padding: 30px 34px; border-top: 1.5px solid {GoldRadiant}; text-align: center;'>
                                     <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0'>
                                         <tr>
                                             <td align='center'>
-                                                <p style='margin: 0 0 8px 0; font-size: 13px; font-weight: 700; color: {BrandNavy}; text-transform: uppercase; letter-spacing: 1px;'>
-                                                    {s.ConciergeTitle}
+                                                <p class='radiant-gold' style='margin: 0 0 8px 0; font-size: 13px; font-weight: 800; color: {GoldRadiant} !important; -webkit-text-fill-color: {GoldRadiant} !important; text-transform: uppercase; letter-spacing: 1.5px;'>
+                                                    <span style='color: {GoldRadiant} !important; -webkit-text-fill-color: {GoldRadiant} !important;'>{s.ConciergeTitle}</span>
                                                 </p>
-                                                <p style='margin: 0 0 18px 0; font-size: 13px; color: {TextMuted}; line-height: 1.5;'>
-                                                    {s.ConciergeDesc}
+                                                <p class='radiant-body' style='margin: 0 0 18px 0; font-size: 13px; color: {TextIceWhite} !important; -webkit-text-fill-color: {TextIceWhite} !important; line-height: 1.5;'>
+                                                    <span style='color: {TextIceWhite} !important; -webkit-text-fill-color: {TextIceWhite} !important;'>{s.ConciergeDesc}</span>
                                                 </p>
                                                 <table role='presentation' cellspacing='0' cellpadding='0' border='0' align='center'>
                                                     <tr>
-                                                        <td style='border-radius: 12px; background: linear-gradient(135deg, #25D366 0%, #128C7E 100%); background-color: #25D366; text-align: center; box-shadow: 0 6px 20px rgba(37,211,102,0.3);'>
-                                                            <a href='{WhatsAppUrl}' target='_blank' style='display: inline-block; padding: 13px 28px; font-size: 13px; font-weight: 700; color: #ffffff; letter-spacing: 0.5px;'>
-                                                                {s.WhatsAppCta}
+                                                        <td style='border-radius: 12px; background-color: #25D366; background-image: linear-gradient(135deg, #25D366 0%, #128C7E 100%); text-align: center; box-shadow: 0 6px 20px rgba(37,211,102,0.35);'>
+                                                            <a href='{WhatsAppUrl}' target='_blank' style='display: inline-block; padding: 14px 30px; font-size: 13px; font-weight: 800; color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; letter-spacing: 0.5px;'>
+                                                                <span style='color: #ffffff !important; -webkit-text-fill-color: #ffffff !important;'>{s.WhatsAppCta}</span>
                                                             </a>
                                                         </td>
                                                     </tr>
@@ -406,17 +404,17 @@ public static class BookingEmail
 
                             <!-- Elevated Brand Dark Footer -->
                             <tr>
-                                <td style='background: linear-gradient(145deg, #0A4368 0%, #062D4D 100%); background-color: {BrandNavy}; padding: 34px 24px; text-align: center; color: rgba(255,255,255,0.7); font-size: 12px; line-height: 1.6; border-top: 1px solid rgba(212,175,55,0.3);'>
-                                    <p style='margin: 0 0 6px 0; font-family: ""Playfair Display"", Georgia, serif; font-size: 15px; font-weight: 700; color: #FFFFFF; letter-spacing: 2px;'>
-                                        SEADORA LUXURY TRAVEL
+                                <td style='background-color: {NavyDarkest}; background-image: linear-gradient(180deg, #061324 0%, #03080E 100%); padding: 32px 24px; text-align: center; color: {TextMutedAzure}; font-size: 12px; line-height: 1.6; border-top: 1px solid rgba(255,215,104,0.3);'>
+                                    <p class='radiant-white' style='margin: 0 0 6px 0; font-family: ""Playfair Display"", Georgia, serif; font-size: 15px; font-weight: 700; color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF !important; letter-spacing: 2px;'>
+                                        <span style='color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF !important;'>SEADORA LUXURY TRAVEL</span>
                                     </p>
-                                    <p style='margin: 0 0 10px 0; font-size: 11px; color: rgba(255,255,255,0.8);'>
-                                        {s.FooterMarina} • Tel: {ContactChannels.WhatsAppNumber}
+                                    <p class='radiant-muted' style='margin: 0 0 10px 0; font-size: 11px; color: {TextMutedAzure} !important; -webkit-text-fill-color: {TextMutedAzure} !important;'>
+                                        <span style='color: {TextMutedAzure} !important;'>{s.FooterMarina} • Tel: {ContactChannels.WhatsAppNumber}</span>
                                     </p>
-                                    <p style='margin: 0 0 16px 0; color: rgba(255,255,255,0.5); font-size: 11px;'>
-                                        Inquiries: <a href='mailto:{ContactChannels.InfoEmail}' style='color: {GoldLight}; font-weight: 600;'>{ContactChannels.InfoEmail}</a> • Website: <a href='{WebsiteUrl}' style='color: {GoldLight}; font-weight: 600;'>{WebsiteUrl}</a>
+                                    <p style='margin: 0 0 16px 0; color: {TextMutedAzure}; font-size: 11px;'>
+                                        Inquiries: <a href='mailto:{ContactChannels.InfoEmail}' style='color: {GoldRadiant}; font-weight: 700;'><span style='color: {GoldRadiant};'>{ContactChannels.InfoEmail}</span></a> • Website: <a href='{WebsiteUrl}' style='color: {GoldRadiant}; font-weight: 700;'><span style='color: {GoldRadiant};'>{WebsiteUrl}</span></a>
                                     </p>
-                                    <div style='border-top: 1px solid rgba(255,255,255,0.12); padding-top: 16px; font-size: 11px; color: rgba(255,255,255,0.4);'>
+                                    <div style='border-top: 1px solid rgba(255,255,255,0.1); padding-top: 16px; font-size: 11px; color: rgba(255,255,255,0.4);'>
                                         &copy; {DateTime.UtcNow.Year} Seadora Travel. {s.FooterRights}
                                     </div>
                                 </td>
@@ -451,33 +449,33 @@ public static class BookingEmail
         <!-- Body Content -->
         <tr>
             <td class='mobile-p-20' style='padding: 38px 36px 28px 36px;'>
-                <p style='margin: 0 0 6px 0; font-size: 12px; font-weight: 700; color: {GoldPrimary}; text-transform: uppercase; letter-spacing: 1.5px;'>
-                    ★ VIP Hospitality
+                <p class='radiant-gold' style='margin: 0 0 6px 0; font-size: 12px; font-weight: 800; color: {GoldRadiant} !important; -webkit-text-fill-color: {GoldRadiant} !important; text-transform: uppercase; letter-spacing: 1.5px;'>
+                    <span style='color: {GoldRadiant} !important; -webkit-text-fill-color: {GoldRadiant} !important;'>★ VIP Hospitality</span>
                 </p>
-                <h2 style='margin: 0 0 16px 0; font-family: ""Playfair Display"", Georgia, serif; font-size: 23px; font-weight: 700; color: {BrandNavy}; line-height: 1.3;'>
-                    {s.Greeting} {booking.CustomerName},
+                <h2 class='radiant-white' style='margin: 0 0 16px 0; font-family: ""Playfair Display"", Georgia, serif; font-size: 24px; font-weight: 800; color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF !important; line-height: 1.3;'>
+                    <span style='color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF !important;'>{s.Greeting} {booking.CustomerName},</span>
                 </h2>
-                <p style='margin: 0 0 26px 0; font-size: 14px; color: {TextCharcoal}; line-height: 1.7;'>
-                    {s.ReceivedIntro}
+                <p class='radiant-body' style='margin: 0 0 28px 0; font-size: 14.5px; color: {TextIceWhite} !important; -webkit-text-fill-color: {TextIceWhite} !important; line-height: 1.75;'>
+                    <span style='color: {TextIceWhite} !important; -webkit-text-fill-color: {TextIceWhite} !important;'>{s.ReceivedIntro}</span>
                 </p>
 
-                <!-- Boarding Pass Style Ticket Card -->
-                <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' style='background-color: #FDFBF7; border: 1.5px solid {CardBorder}; border-radius: 18px; overflow: hidden; margin-bottom: 28px; box-shadow: 0 8px 24px rgba(6,45,77,0.06);'>
+                <!-- Boarding Pass Style Ticket Card (Armored Gradient) -->
+                <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' style='background-color: {NavyTicket}; background-image: linear-gradient(180deg, #112C4C 0%, #0A1C30 100%); border: 1.5px solid {GoldRadiant}; border-radius: 16px; overflow: hidden; margin-bottom: 28px; box-shadow: 0 8px 24px rgba(0,0,0,0.4);'>
                     <tr>
-                        <td style='background: linear-gradient(145deg, #0A456C 0%, #062D4D 100%); padding: 16px 22px; border-bottom: 2px solid {GoldPrimary};'>
+                        <td style='background-color: #06152B; background-image: linear-gradient(145deg, #0D2644 0%, #06152B 100%); padding: 18px 22px; border-bottom: 1.5px solid {GoldRadiant};'>
                             <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0'>
                                 <tr>
                                     <td>
-                                        <span style='font-size: 10px; font-weight: 700; color: {GoldLight}; text-transform: uppercase; letter-spacing: 1.5px;'>
-                                            {s.VoucherRef}
+                                        <span class='radiant-gold' style='font-size: 10px; font-weight: 800; color: {GoldRadiant} !important; -webkit-text-fill-color: {GoldRadiant} !important; text-transform: uppercase; letter-spacing: 1.5px;'>
+                                            <span style='color: {GoldRadiant} !important;'>{s.VoucherRef}</span>
                                         </span>
-                                        <div style='font-family: ""Playfair Display"", serif; font-size: 20px; font-weight: 800; color: #FFFFFF; letter-spacing: 2px;'>
-                                            #{refCode}
+                                        <div class='radiant-white' style='font-family: ""Playfair Display"", serif; font-size: 21px; font-weight: 800; color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF !important; letter-spacing: 2px;'>
+                                            <span style='color: #FFFFFF !important;'>#{refCode}</span>
                                         </div>
                                     </td>
                                     <td align='right'>
-                                        <span style='display: inline-block; padding: 5px 14px; background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2); border-radius: 20px; font-size: 11px; font-weight: 600; color: #ffffff;'>
-                                            {(booking.TripType ?? s.DefaultExperience)}
+                                        <span style='display: inline-block; padding: 6px 16px; background-color: rgba(255,215,104,0.15); border: 1px solid {GoldRadiant}; border-radius: 20px; font-size: 11px; font-weight: 700; color: {GoldBright};'>
+                                            <span style='color: {GoldBright};'>{(booking.TripType ?? s.DefaultExperience)}</span>
                                         </span>
                                     </td>
                                 </tr>
@@ -485,34 +483,34 @@ public static class BookingEmail
                         </td>
                     </tr>
                     <tr>
-                        <td style='padding: 22px 20px;'>
+                        <td style='padding: 24px 22px;'>
                             <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0'>
                                 <tr>
                                     <td class='mobile-col' width='50%' valign='top' style='padding-bottom: 18px;'>
-                                        <div style='font-size: 11px; font-weight: 600; color: {TextMuted}; text-transform: uppercase; letter-spacing: 0.5px;'>{s.TourDate}</div>
-                                        <div style='font-size: 15px; font-weight: 700; color: {BrandNavy}; margin-top: 4px;'>{tourDateFormatted}</div>
+                                        <div class='radiant-muted' style='font-size: 11px; font-weight: 700; color: {TextMutedAzure} !important; text-transform: uppercase; letter-spacing: 0.5px;'><span style='color: {TextMutedAzure};'>{s.TourDate}</span></div>
+                                        <div class='radiant-white' style='font-size: 15px; font-weight: 800; color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF !important; margin-top: 4px;'><span style='color: #FFFFFF;'>{tourDateFormatted}</span></div>
                                     </td>
                                     <td class='mobile-col' width='50%' valign='top' style='padding-bottom: 18px;'>
-                                        <div style='font-size: 11px; font-weight: 600; color: {TextMuted}; text-transform: uppercase; letter-spacing: 0.5px;'>{s.PickupWindow}</div>
-                                        <div style='font-size: 15px; font-weight: 700; color: {BrandNavy}; margin-top: 4px;'>{pickupInfo}</div>
+                                        <div class='radiant-muted' style='font-size: 11px; font-weight: 700; color: {TextMutedAzure} !important; text-transform: uppercase; letter-spacing: 0.5px;'><span style='color: {TextMutedAzure};'>{s.PickupWindow}</span></div>
+                                        <div class='radiant-white' style='font-size: 15px; font-weight: 800; color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF !important; margin-top: 4px;'><span style='color: #FFFFFF;'>{pickupInfo}</span></div>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td class='mobile-col' width='50%' valign='top'>
-                                        <div style='font-size: 11px; font-weight: 600; color: {TextMuted}; text-transform: uppercase; letter-spacing: 0.5px;'>{s.Guests}</div>
-                                        <div style='font-size: 14px; font-weight: 700; color: {BrandNavy}; margin-top: 4px;'>{booking.Guests}</div>
+                                        <div class='radiant-muted' style='font-size: 11px; font-weight: 700; color: {TextMutedAzure} !important; text-transform: uppercase; letter-spacing: 0.5px;'><span style='color: {TextMutedAzure};'>{s.Guests}</span></div>
+                                        <div class='radiant-white' style='font-size: 15px; font-weight: 800; color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF !important; margin-top: 4px;'><span style='color: #FFFFFF;'>{booking.Guests}</span></div>
                                     </td>
                                     <td class='mobile-col' width='50%' valign='top'>
-                                        <div style='font-size: 11px; font-weight: 600; color: {TextMuted}; text-transform: uppercase; letter-spacing: 0.5px;'>{s.TotalAmount}</div>
-                                        <div style='font-size: 18px; font-weight: 800; color: #D97706; margin-top: 4px;'>${booking.TotalPrice:N2}</div>
+                                        <div class='radiant-muted' style='font-size: 11px; font-weight: 700; color: {TextMutedAzure} !important; text-transform: uppercase; letter-spacing: 0.5px;'><span style='color: {TextMutedAzure};'>{s.TotalAmount}</span></div>
+                                        <div class='radiant-gold' style='font-size: 20px; font-weight: 800; color: {GoldRadiant} !important; -webkit-text-fill-color: {GoldRadiant} !important; margin-top: 4px;'><span style='color: {GoldRadiant};'>${booking.TotalPrice:N2}</span></div>
                                     </td>
                                 </tr>
                             </table>
                         </td>
                     </tr>
                     <tr>
-                        <td style='background-color: #F5EFE6; padding: 14px 20px; border-top: 1px dashed {CardBorder}; font-size: 12px; color: {TextCharcoal};'>
-                            <strong>📍 {s.PickupLocation}:</strong> {hotelInfo}
+                        <td style='background-color: #081626; padding: 14px 22px; border-top: 1px dashed rgba(255,215,104,0.3); font-size: 13px; color: {TextIceWhite};'>
+                            <strong style='color: {GoldRadiant};'>📍 {s.PickupLocation}:</strong> <span style='color: {TextIceWhite};'>{hotelInfo}</span>
                         </td>
                     </tr>
                 </table>");
@@ -521,26 +519,26 @@ public static class BookingEmail
         if (booking.SelectedAddons != null && booking.SelectedAddons.Count > 0)
         {
             sb.Append($@"
-                <div style='margin-bottom: 26px; padding: 16px 20px; background-color: #FDFBF7; border-radius: 14px; border: 1px solid {CardBorder};'>
-                    <div style='font-size: 11px; font-weight: 700; color: {BrandNavy}; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;'>
-                        {s.SelectedAddonsLabel}
+                <div style='margin-bottom: 26px; padding: 18px 22px; background-color: {NavyTicket}; background-image: linear-gradient(#112C4C, #112C4C); border-radius: 14px; border: 1px solid {GoldRadiant};'>
+                    <div class='radiant-gold' style='font-size: 11px; font-weight: 800; color: {GoldRadiant} !important; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;'>
+                        <span style='color: {GoldRadiant};'>{s.SelectedAddonsLabel}</span>
                     </div>
-                    <ul style='margin: 0; padding-left: 18px; font-size: 13px; color: {TextCharcoal}; line-height: 1.6;'>");
+                    <ul class='radiant-body' style='margin: 0; padding-left: 18px; font-size: 13.5px; color: {TextIceWhite} !important; line-height: 1.6;'>");
             foreach (var addon in booking.SelectedAddons)
             {
-                sb.Append($"<li style='margin-bottom: 4px;'>{addon.Title} — <strong>${addon.TotalPrice:N2}</strong></li>");
+                sb.Append($"<li style='margin-bottom: 4px;'><span style='color: {TextIceWhite};'>{addon.Title} — <strong style='color: {GoldRadiant};'>${addon.TotalPrice:N2}</strong></span></li>");
             }
             sb.Append("</ul></div>");
         }
 
         sb.Append($@"
                 <!-- Next Steps Info Box -->
-                <div style='background-color: #FDFBF7; border-left: 4px solid {GoldPrimary}; padding: 18px 20px; border-radius: 10px; margin-bottom: 24px;'>
-                    <h4 style='margin: 0 0 6px 0; font-size: 13px; font-weight: 700; color: {BrandNavy}; text-transform: uppercase; letter-spacing: 0.5px;'>
-                        {s.WhatNextTitle}
+                <div style='background-color: {NavyTicket}; background-image: linear-gradient(#10263F, #0A1C30); border-left: 4px solid {GoldRadiant}; padding: 20px 22px; border-radius: 8px; margin-bottom: 24px;'>
+                    <h4 class='radiant-gold' style='margin: 0 0 6px 0; font-size: 13px; font-weight: 800; color: {GoldRadiant} !important; -webkit-text-fill-color: {GoldRadiant} !important; text-transform: uppercase; letter-spacing: 0.5px;'>
+                        <span style='color: {GoldRadiant};'>{s.WhatNextTitle}</span>
                     </h4>
-                    <p style='margin: 0; font-size: 13px; color: {TextCharcoal}; line-height: 1.6;'>
-                        {s.WhatNextDesc}
+                    <p class='radiant-body' style='margin: 0; font-size: 13.5px; color: {TextIceWhite} !important; -webkit-text-fill-color: {TextIceWhite} !important; line-height: 1.6;'>
+                        <span style='color: {TextIceWhite};'>{s.WhatNextDesc}</span>
                     </p>
                 </div>
             </td>
@@ -571,33 +569,33 @@ public static class BookingEmail
         <!-- Body Content -->
         <tr>
             <td class='mobile-p-20' style='padding: 38px 36px 28px 36px;'>
-                <p style='margin: 0 0 6px 0; font-size: 12px; font-weight: 700; color: #166534; text-transform: uppercase; letter-spacing: 1.5px;'>
-                    ✓ {s.StatusConfirmed}
+                <p style='margin: 0 0 6px 0; font-size: 12px; font-weight: 800; color: {GreenBright} !important; -webkit-text-fill-color: {GreenBright} !important; text-transform: uppercase; letter-spacing: 1.5px;'>
+                    <span style='color: {GreenBright} !important;'>✓ {s.StatusConfirmed}</span>
                 </p>
-                <h2 style='margin: 0 0 16px 0; font-family: ""Playfair Display"", Georgia, serif; font-size: 23px; font-weight: 700; color: {BrandNavy}; line-height: 1.3;'>
-                    {s.Greeting} {booking.CustomerName},
+                <h2 class='radiant-white' style='margin: 0 0 16px 0; font-family: ""Playfair Display"", Georgia, serif; font-size: 24px; font-weight: 800; color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF !important; line-height: 1.3;'>
+                    <span style='color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF !important;'>{s.Greeting} {booking.CustomerName},</span>
                 </h2>
-                <p style='margin: 0 0 26px 0; font-size: 14px; color: {TextCharcoal}; line-height: 1.7;'>
-                    {s.ConfirmedIntro}
+                <p class='radiant-body' style='margin: 0 0 28px 0; font-size: 14.5px; color: {TextIceWhite} !important; -webkit-text-fill-color: {TextIceWhite} !important; line-height: 1.75;'>
+                    <span style='color: {TextIceWhite} !important; -webkit-text-fill-color: {TextIceWhite} !important;'>{s.ConfirmedIntro}</span>
                 </p>
 
                 <!-- Boarding Pass Style Voucher Card -->
-                <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' style='background-color: #FDFBF7; border: 2px solid {GoldPrimary}; border-radius: 18px; overflow: hidden; margin-bottom: 28px; box-shadow: 0 10px 30px rgba(212,175,55,0.18);'>
+                <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' style='background-color: {NavyTicket}; background-image: linear-gradient(180deg, #112C4C 0%, #0A1C30 100%); border: 2px solid {GoldRadiant}; border-radius: 16px; overflow: hidden; margin-bottom: 28px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);'>
                     <tr>
-                        <td style='background: linear-gradient(145deg, #0A456C 0%, #062D4D 100%); padding: 18px 22px; border-bottom: 2px solid {GoldPrimary};'>
+                        <td style='background-color: #06152B; background-image: linear-gradient(145deg, #0D2644 0%, #06152B 100%); padding: 18px 22px; border-bottom: 2px solid {GoldRadiant};'>
                             <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0'>
                                 <tr>
                                     <td>
-                                        <span style='font-size: 10px; font-weight: 700; color: {GoldLight}; text-transform: uppercase; letter-spacing: 1.5px;'>
-                                            {s.OfficialVoucher}
+                                        <span class='radiant-gold' style='font-size: 10px; font-weight: 800; color: {GoldRadiant} !important; -webkit-text-fill-color: {GoldRadiant} !important; text-transform: uppercase; letter-spacing: 1.5px;'>
+                                            <span style='color: {GoldRadiant} !important;'>{s.OfficialVoucher}</span>
                                         </span>
-                                        <div style='font-family: ""Playfair Display"", serif; font-size: 21px; font-weight: 800; color: #FFFFFF; letter-spacing: 2px;'>
-                                            #{refCode}
+                                        <div class='radiant-white' style='font-family: ""Playfair Display"", serif; font-size: 22px; font-weight: 800; color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF !important; letter-spacing: 2px;'>
+                                            <span style='color: #FFFFFF !important;'>#{refCode}</span>
                                         </div>
                                     </td>
                                     <td align='right'>
-                                        <div style='display: inline-block; padding: 6px 16px; background: linear-gradient(135deg, #166534 0%, #15803d 100%); border: 1px solid #4ADE80; border-radius: 20px; font-size: 11px; font-weight: 700; color: #ffffff; letter-spacing: 1px; text-transform: uppercase;'>
-                                            {s.StatusConfirmed}
+                                        <div style='display: inline-block; padding: 6px 18px; background-color: #059669; background-image: linear-gradient(135deg, #10B981 0%, #059669 100%); border: 1.5px solid #34D399; border-radius: 20px; font-size: 11px; font-weight: 800; color: #ffffff !important; -webkit-text-fill-color: #ffffff !important; letter-spacing: 1px; text-transform: uppercase;'>
+                                            <span style='color: #ffffff !important;'>{s.StatusConfirmed}</span>
                                         </div>
                                     </td>
                                 </tr>
@@ -605,64 +603,64 @@ public static class BookingEmail
                         </td>
                     </tr>
                     <tr>
-                        <td style='padding: 24px 20px;'>
+                        <td style='padding: 24px 22px;'>
                             <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0'>
                                 <tr>
                                     <td class='mobile-col' width='50%' valign='top' style='padding-bottom: 18px;'>
-                                        <div style='font-size: 11px; font-weight: 600; color: {TextMuted}; text-transform: uppercase; letter-spacing: 0.5px;'>{s.TourDate}</div>
-                                        <div style='font-size: 15px; font-weight: 700; color: {BrandNavy}; margin-top: 4px;'>{tourDateFormatted}</div>
+                                        <div class='radiant-muted' style='font-size: 11px; font-weight: 700; color: {TextMutedAzure} !important; text-transform: uppercase; letter-spacing: 0.5px;'><span style='color: {TextMutedAzure};'>{s.TourDate}</span></div>
+                                        <div class='radiant-white' style='font-size: 15px; font-weight: 800; color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF !important; margin-top: 4px;'><span style='color: #FFFFFF;'>{tourDateFormatted}</span></div>
                                     </td>
                                     <td class='mobile-col' width='50%' valign='top' style='padding-bottom: 18px;'>
-                                        <div style='font-size: 11px; font-weight: 600; color: {TextMuted}; text-transform: uppercase; letter-spacing: 0.5px;'>{s.PickupWindow}</div>
-                                        <div style='font-size: 15px; font-weight: 700; color: {BrandNavy}; margin-top: 4px;'>{pickupInfo}</div>
+                                        <div class='radiant-muted' style='font-size: 11px; font-weight: 700; color: {TextMutedAzure} !important; text-transform: uppercase; letter-spacing: 0.5px;'><span style='color: {TextMutedAzure};'>{s.PickupWindow}</span></div>
+                                        <div class='radiant-white' style='font-size: 15px; font-weight: 800; color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF !important; margin-top: 4px;'><span style='color: #FFFFFF;'>{pickupInfo}</span></div>
                                     </td>
                                 </tr>
                                 <tr>
                                     <td class='mobile-col' width='50%' valign='top'>
-                                        <div style='font-size: 11px; font-weight: 600; color: {TextMuted}; text-transform: uppercase; letter-spacing: 0.5px;'>{s.Guests}</div>
-                                        <div style='font-size: 14px; font-weight: 700; color: {BrandNavy}; margin-top: 4px;'>{booking.Guests}</div>
+                                        <div class='radiant-muted' style='font-size: 11px; font-weight: 700; color: {TextMutedAzure} !important; text-transform: uppercase; letter-spacing: 0.5px;'><span style='color: {TextMutedAzure};'>{s.Guests}</span></div>
+                                        <div class='radiant-white' style='font-size: 15px; font-weight: 800; color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF !important; margin-top: 4px;'><span style='color: #FFFFFF;'>{booking.Guests}</span></div>
                                     </td>
                                     <td class='mobile-col' width='50%' valign='top'>
-                                        <div style='font-size: 11px; font-weight: 600; color: {TextMuted}; text-transform: uppercase; letter-spacing: 0.5px;'>{s.TotalAmount}</div>
-                                        <div style='font-size: 19px; font-weight: 800; color: #D97706; margin-top: 4px;'>${booking.TotalPrice:N2}</div>
+                                        <div class='radiant-muted' style='font-size: 11px; font-weight: 700; color: {TextMutedAzure} !important; text-transform: uppercase; letter-spacing: 0.5px;'><span style='color: {TextMutedAzure};'>{s.TotalAmount}</span></div>
+                                        <div class='radiant-gold' style='font-size: 21px; font-weight: 800; color: {GoldRadiant} !important; -webkit-text-fill-color: {GoldRadiant} !important; margin-top: 4px;'><span style='color: {GoldRadiant};'>${booking.TotalPrice:N2}</span></div>
                                     </td>
                                 </tr>
                             </table>
                         </td>
                     </tr>
                     <tr>
-                        <td style='background-color: #F5EFE6; padding: 14px 20px; border-top: 1px dashed {CardBorder}; font-size: 12px; color: {BrandNavy};'>
-                            📍 <strong>{s.PickupLocation}:</strong> {hotelInfo}
+                        <td style='background-color: #081626; padding: 14px 22px; border-top: 1px dashed rgba(255,215,104,0.3); font-size: 13px; color: {TextIceWhite};'>
+                            📍 <strong style='color: {GoldRadiant};'>{s.PickupLocation}:</strong> <span style='color: {TextIceWhite};'>{hotelInfo}</span>
                         </td>
                     </tr>
                 </table>
 
                 <!-- Registered Guests list if present -->
                 {(booking.GuestsList != null && booking.GuestsList.Count > 0 ? $@"
-                <div style='margin-bottom: 26px; padding: 16px 20px; background-color: #FDFBF7; border-radius: 14px; border: 1px solid {CardBorder};'>
-                    <div style='font-size: 11px; font-weight: 700; color: {BrandNavy}; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;'>
-                        {s.GuestsBreakdownLabel}
+                <div style='margin-bottom: 26px; padding: 18px 22px; background-color: {NavyTicket}; background-image: linear-gradient(#112C4C, #112C4C); border-radius: 14px; border: 1px solid {GoldRadiant};'>
+                    <div class='radiant-gold' style='font-size: 11px; font-weight: 800; color: {GoldRadiant} !important; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;'>
+                        <span style='color: {GoldRadiant};'>{s.GuestsBreakdownLabel}</span>
                     </div>
-                    <ul style='margin: 0; padding-left: 18px; font-size: 13px; color: {TextCharcoal}; line-height: 1.6;'>
-                        {string.Join("", booking.GuestsList.ConvertAll(g => $"<li style='margin-bottom: 4px;'>{g.FullName} ({g.Nationality ?? "VIP"})</li>"))}
+                    <ul class='radiant-body' style='margin: 0; padding-left: 18px; font-size: 13.5px; color: {TextIceWhite} !important; line-height: 1.6;'>
+                        {string.Join("", booking.GuestsList.ConvertAll(g => $"<li style='margin-bottom: 4px;'><span style='color: {TextIceWhite};'>{g.FullName} ({g.Nationality ?? "VIP"})</span></li>"))}
                     </ul>
                 </div>" : "")}
 
                 <!-- VIP Travel Guidelines Box -->
-                <div style='background-color: #FDFBF7; border-left: 4px solid {BrandNavy}; padding: 18px 20px; border-radius: 10px; margin-bottom: 24px;'>
-                    <h4 style='margin: 0 0 8px 0; font-size: 13px; font-weight: 700; color: {BrandNavy}; text-transform: uppercase; letter-spacing: 0.5px;'>
-                        {s.RemindersTitle}
+                <div style='background-color: {NavyTicket}; background-image: linear-gradient(#10263F, #0A1C30); border-left: 4px solid {GoldRadiant}; padding: 20px 22px; border-radius: 8px; margin-bottom: 24px;'>
+                    <h4 class='radiant-gold' style='margin: 0 0 8px 0; font-size: 13px; font-weight: 800; color: {GoldRadiant} !important; -webkit-text-fill-color: {GoldRadiant} !important; text-transform: uppercase; letter-spacing: 0.5px;'>
+                        <span style='color: {GoldRadiant};'>{s.RemindersTitle}</span>
                     </h4>
-                    <ul style='margin: 0; padding-left: 18px; font-size: 13px; color: {TextCharcoal}; line-height: 1.6;'>
-                        <li style='margin-bottom: 6px;'>{s.Reminder1}</li>
-                        <li style='margin-bottom: 6px;'>{s.Reminder2}</li>
-                        <li>{s.Reminder3}</li>
+                    <ul class='radiant-body' style='margin: 0; padding-left: 18px; font-size: 13.5px; color: {TextIceWhite} !important; line-height: 1.65;'>
+                        <li style='margin-bottom: 6px;'><span style='color: {TextIceWhite};'>{s.Reminder1}</span></li>
+                        <li style='margin-bottom: 6px;'><span style='color: {TextIceWhite};'>{s.Reminder2}</span></li>
+                        <li><span style='color: {TextIceWhite};'>{s.Reminder3}</span></li>
                     </ul>
                 </div>
 
                 <!-- Cancellation Guarantee -->
-                <div style='background-color: #FEF3C7; border: 1px solid #F59E0B; padding: 15px 18px; border-radius: 10px; font-size: 12px; color: #92400E; line-height: 1.5;'>
-                    <strong>{s.FlexibilityTitle}:</strong> {s.FlexibilityDesc}
+                <div style='background-color: #261B05; background-image: linear-gradient(135deg, #3D2B05 0%, #261B05 100%); border: 1.5px solid {GoldAmber}; padding: 16px 20px; border-radius: 10px; font-size: 12.5px; color: {GoldBright}; line-height: 1.55;'>
+                    <strong style='color: {GoldRadiant};'>{s.FlexibilityTitle}:</strong> <span style='color: {GoldBright};'>{s.FlexibilityDesc}</span>
                 </div>
             </td>
         </tr>");
@@ -689,31 +687,31 @@ public static class BookingEmail
         <!-- Body Content -->
         <tr>
             <td class='mobile-p-20' style='padding: 38px 36px 28px 36px;'>
-                <p style='margin: 0 0 6px 0; font-size: 12px; font-weight: 700; color: {GoldPrimary}; text-transform: uppercase; letter-spacing: 1.5px;'>
-                    Inquiry Acknowledgment
+                <p class='radiant-gold' style='margin: 0 0 6px 0; font-size: 12px; font-weight: 800; color: {GoldRadiant} !important; text-transform: uppercase; letter-spacing: 1.5px;'>
+                    <span style='color: {GoldRadiant};'>Inquiry Acknowledgment</span>
                 </p>
-                <h2 style='margin: 0 0 16px 0; font-family: ""Playfair Display"", Georgia, serif; font-size: 23px; font-weight: 700; color: {BrandNavy}; line-height: 1.3;'>
-                    Dear {inquiry.FullName},
+                <h2 class='radiant-white' style='margin: 0 0 16px 0; font-family: ""Playfair Display"", Georgia, serif; font-size: 24px; font-weight: 800; color: #FFFFFF !important; line-height: 1.3;'>
+                    <span style='color: #FFFFFF;'>Dear {inquiry.FullName},</span>
                 </h2>
-                <p style='margin: 0 0 20px 0; font-size: 14px; color: {TextCharcoal}; line-height: 1.7;'>
-                    Thank you for reaching out to <strong>Seadora Luxury Travel</strong>. We have received your inquiry regarding <strong>{destination}</strong>.
+                <p class='radiant-body' style='margin: 0 0 20px 0; font-size: 14.5px; color: {TextIceWhite} !important; line-height: 1.75;'>
+                    <span style='color: {TextIceWhite};'>Thank you for reaching out to <strong>Seadora Luxury Travel</strong>. We have received your inquiry regarding <strong>{destination}</strong>.</span>
                 </p>
 
                 <!-- Inquiry Summary Box -->
-                <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' style='background-color: #FDFBF7; border: 1px solid {CardBorder}; border-radius: 14px; padding: 18px; margin-bottom: 24px;'>
+                <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0' style='background-color: {NavyTicket}; background-image: linear-gradient(#112C4C, #112C4C); border: 1.5px solid {GoldRadiant}; border-radius: 14px; padding: 20px; margin-bottom: 24px;'>
                     <tr>
                         <td>
-                            <div style='font-size: 11px; font-weight: 700; color: {BrandNavy}; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;'>Your Message / Request:</div>
-                            <div style='font-size: 13px; color: {TextCharcoal}; font-style: italic; line-height: 1.6;'>
-                                ""{inquiry.Message}""
+                            <div class='radiant-gold' style='font-size: 11px; font-weight: 800; color: {GoldRadiant} !important; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;'><span style='color: {GoldRadiant};'>Your Message / Request:</span></div>
+                            <div class='radiant-body' style='font-size: 13.5px; color: {TextIceWhite} !important; font-style: italic; line-height: 1.6;'>
+                                <span style='color: {TextIceWhite};'>""{inquiry.Message}""</span>
                             </div>
-                            {(string.IsNullOrWhiteSpace(inquiry.DateOrGuests) ? "" : $"<div style='margin-top: 10px; font-size: 12px; color: {TextMuted};'><strong>Preferred Timing / Group:</strong> {inquiry.DateOrGuests}</div>")}
+                            {(string.IsNullOrWhiteSpace(inquiry.DateOrGuests) ? "" : $"<div class='radiant-muted' style='margin-top: 10px; font-size: 12.5px; color: {TextMutedAzure};'><strong style='color: {GoldRadiant};'>Preferred Timing / Group:</strong> {inquiry.DateOrGuests}</div>")}
                         </td>
                     </tr>
                 </table>
 
-                <p style='margin: 0 0 20px 0; font-size: 14px; color: {TextCharcoal}; line-height: 1.7;'>
-                    One of our senior destination designers is preparing a personalized recommendation tailored to your schedule. We typically reply within 2 to 4 business hours.
+                <p class='radiant-body' style='margin: 0 0 20px 0; font-size: 14.5px; color: {TextIceWhite} !important; line-height: 1.75;'>
+                    <span style='color: {TextIceWhite};'>One of our senior destination designers is preparing a personalized recommendation tailored to your schedule. We typically reply within 2 to 4 business hours.</span>
                 </p>
             </td>
         </tr>");
@@ -738,21 +736,21 @@ public static class BookingEmail
         <!-- Body Content -->
         <tr>
             <td class='mobile-p-20' style='padding: 38px 36px 28px 36px;'>
-                <p style='margin: 0 0 6px 0; font-size: 12px; font-weight: 700; color: {GoldPrimary}; text-transform: uppercase; letter-spacing: 1.5px;'>
-                    Seadora Concierge Team
+                <p class='radiant-gold' style='margin: 0 0 6px 0; font-size: 12px; font-weight: 800; color: {GoldRadiant} !important; text-transform: uppercase; letter-spacing: 1.5px;'>
+                    <span style='color: {GoldRadiant};'>Seadora Concierge Team</span>
                 </p>
-                <h2 style='margin: 0 0 16px 0; font-family: ""Playfair Display"", Georgia, serif; font-size: 23px; font-weight: 700; color: {BrandNavy}; line-height: 1.3;'>
-                    Dear {inquiry.FullName},
+                <h2 class='radiant-white' style='margin: 0 0 16px 0; font-family: ""Playfair Display"", Georgia, serif; font-size: 24px; font-weight: 800; color: #FFFFFF !important; line-height: 1.3;'>
+                    <span style='color: #FFFFFF;'>Dear {inquiry.FullName},</span>
                 </h2>
-                <div style='margin: 0 0 24px 0; font-size: 14px; color: {TextCharcoal}; line-height: 1.7; background-color: #FDFBF7; border-left: 4px solid {GoldPrimary}; padding: 20px; border-radius: 10px;'>
-                    {replyMessage.Replace("\n", "<br/>")}
+                <div class='radiant-body' style='margin: 0 0 24px 0; font-size: 14.5px; color: {TextIceWhite} !important; line-height: 1.75; background-color: {NavyTicket}; background-image: linear-gradient(#112C4C, #112C4C); border-left: 4px solid {GoldRadiant}; padding: 22px; border-radius: 10px;'>
+                    <span style='color: {TextIceWhite};'>{replyMessage.Replace("\n", "<br/>")}</span>
                 </div>
 
                 <!-- Original Inquiry Reference -->
-                <div style='border-top: 1px solid {CardBorder}; padding-top: 18px; margin-bottom: 20px;'>
-                    <span style='font-size: 11px; font-weight: 600; color: {TextMuted}; text-transform: uppercase; letter-spacing: 0.5px;'>Regarding your original message:</span>
-                    <p style='margin: 6px 0 0 0; font-size: 12px; color: {TextMuted}; font-style: italic;'>
-                        ""{inquiry.Message}""
+                <div style='border-top: 1px solid rgba(255,215,104,0.3); padding-top: 18px; margin-bottom: 20px;'>
+                    <span class='radiant-muted' style='font-size: 11px; font-weight: 700; color: {TextMutedAzure} !important; text-transform: uppercase; letter-spacing: 0.5px;'><span style='color: {TextMutedAzure};'>Regarding your original message:</span></span>
+                    <p class='radiant-muted' style='margin: 6px 0 0 0; font-size: 12.5px; color: {TextMutedAzure} !important; font-style: italic;'>
+                        <span style='color: {TextMutedAzure};'>""{inquiry.Message}""</span>
                     </p>
                 </div>
             </td>
