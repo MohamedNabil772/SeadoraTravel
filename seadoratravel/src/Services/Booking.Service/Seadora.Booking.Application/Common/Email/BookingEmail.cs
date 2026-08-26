@@ -309,25 +309,23 @@ public static class BookingEmail
                         <!-- Main Luxury Card Container -->
                         <table role='presentation' class='email-container' width='600' cellspacing='0' cellpadding='0' border='0' style='width: 600px; max-width: 600px; background-color: #ffffff; border-radius: 24px; overflow: hidden; border: 1px solid {CardBorder}; box-shadow: 0 16px 48px rgba(6,45,77,0.12);'>
                             
-                            <!-- Luminous Sea Horizon Header -->
+                            <!-- Luxury Deep Navy Header -->
                             <tr>
-                                <td style='background: linear-gradient(145deg, #0A4368 0%, #062D4D 50%, #08385C 100%); background-color: {BrandNavy}; padding: 42px 30px; text-align: center; border-bottom: 3px solid {GoldPrimary}; position: relative;'>
+                                <td style='background: linear-gradient(135deg, #06152B 0%, #0D2342 100%); background-color: #06152B; padding: 42px 30px; text-align: center; border-bottom: 3px solid {GoldPrimary};'>
                                     <table role='presentation' width='100%' cellspacing='0' cellpadding='0' border='0'>
                                         <tr>
                                             <td align='center'>
-                                                <!-- Glowing Gold Emblem Crest Ring -->
-                                                <div style='width: 66px; height: 66px; border: 1.5px solid {GoldPrimary}; border-radius: 50%; background: radial-gradient(circle, rgba(212,175,55,0.22) 0%, rgba(6,45,77,0.6) 80%); margin: 0 auto 16px auto; padding: 7px; box-shadow: 0 4px 20px rgba(212,175,55,0.35); text-align: center;'>
-                                                    <img src='{LogoUrl}' alt='Seadora Emblem' width='50' height='50' style='display: block; margin: 0 auto; width: 50px; height: 50px; filter: drop-shadow(0 2px 8px rgba(0,0,0,0.35));' />
-                                                </div>
+                                                <!-- Emblem -->
+                                                <img src='{LogoUrl}' alt='Seadora Emblem' width='56' height='56' style='display: block; margin: 0 auto 16px auto; width: 56px; height: 56px; filter: drop-shadow(0 4px 16px rgba(212,175,55,0.55));' />
 
-                                                <!-- Luxury Brand Typography -->
-                                                <h1 style='margin: 0; font-family: ""Playfair Display"", Georgia, serif; font-size: 26px; font-weight: 800; color: #FFFFFF; letter-spacing: 4px; text-transform: uppercase; text-shadow: 0 2px 12px rgba(0,0,0,0.4);'>
+                                                <!-- Bright Radiant Gold Brand Title -->
+                                                <h1 style='margin: 0; font-family: ""Playfair Display"", Georgia, serif; font-size: 26px; font-weight: 800; color: #FFDF73; letter-spacing: 4px; text-transform: uppercase; text-shadow: 0 0 20px rgba(245,215,127,0.5), 0 2px 6px rgba(0,0,0,0.8);'>
                                                     SEADORA TRAVEL
                                                 </h1>
-                                                <div style='margin: 6px auto 8px auto; color: {GoldPrimary}; font-size: 10px; letter-spacing: 5px;'>
+                                                <div style='margin: 6px auto 8px auto; color: #D4AF37; font-size: 10px; letter-spacing: 5px;'>
                                                     ✦ • ✦
                                                 </div>
-                                                <p style='margin: 0; font-size: 11px; font-weight: 600; color: {GoldLight}; letter-spacing: 2px; text-transform: uppercase;'>
+                                                <p style='margin: 0; font-size: 11px; font-weight: 500; color: #F5D77F; letter-spacing: 2px; text-transform: uppercase;'>
                                                     {s.HeaderSubtitle}
                                                 </p>
 
