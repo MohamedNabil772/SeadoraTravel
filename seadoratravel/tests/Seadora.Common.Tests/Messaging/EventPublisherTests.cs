@@ -3,6 +3,7 @@ using MassTransit;
 using MassTransit.Testing;
 using Microsoft.Extensions.DependencyInjection;
 using Seadora.Common.Messaging;
+using Seadora.Contracts.Messaging;
 
 namespace Seadora.Common.Tests.Messaging;
 

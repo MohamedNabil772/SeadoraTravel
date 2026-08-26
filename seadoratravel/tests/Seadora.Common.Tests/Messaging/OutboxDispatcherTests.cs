@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Seadora.Common.Messaging;
 using Seadora.Common.Messaging.Outbox;
+using Seadora.Contracts.Messaging;
 
 namespace Seadora.Common.Tests.Messaging;
 

@@ -1,4 +1,4 @@
-namespace Seadora.Common.Messaging;
+namespace Seadora.Contracts.Messaging;
 
 public interface IIntegrationEvent
 {

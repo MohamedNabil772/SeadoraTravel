@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Seadora.Contracts.Messaging;
 
 namespace Seadora.Common.Messaging.Outbox;
 

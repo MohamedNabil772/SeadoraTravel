@@ -1,3 +1,5 @@
+using Seadora.Contracts.Messaging;
+
 namespace Seadora.Common.Messaging;
 
 public interface IEventPublisher

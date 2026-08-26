@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Seadora.Contracts.Messaging;
 
 namespace Seadora.Common.Messaging.Outbox;
 
