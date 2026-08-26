@@ -42,13 +42,32 @@ public class UpdateBookingStatusCommandHandler : IRequestHandler<UpdateBookingSt
 
         if (request.Status == BookingStatus.Completed)
         {
-            // Simulate sending feedback invitation via Email and WhatsApp
-            Console.WriteLine($"[NOTIFICATION - EMAIL SENT] To: {booking.CustomerEmail} | Subject: Seadora Travel - Rate your Experience | Body: Dear {booking.CustomerName}, please rate your tour at http://localhost:3000/feedback?tourId={booking.TourId}");
+            var feedbackUrl = $"https://seadoratravel.com/feedback?tourId={booking.TourId}";
+            try
+            {
+                var html = $@"
+                <div style='font-family: Arial, sans-serif; color: #2A3F4F; max-width: 600px; margin: 0 auto; padding: 24px; background: #FFFFFF; border: 1px solid #EAE3D6; border-radius: 16px;'>
+                    <h2 style='color: #06152B; font-family: Georgia, serif;'>Shukran for Travelling with Seadora!</h2>
+                    <p>Dear {booking.CustomerName},</p>
+                    <p>We hope you had a magical experience on your journey with us.</p>
+                    <p>We would be deeply honored if you could share your feedback to help us continually elevate our services.</p>
+                    <div style='margin: 24px 0; text-align: center;'>
+                        <a href='{feedbackUrl}' style='display: inline-block; background: #D4AF37; color: #06152B; font-weight: bold; padding: 12px 28px; border-radius: 8px; text-decoration: none;'>Rate Your Experience</a>
+                    </div>
+                    <p style='font-size: 12px; color: #6B8A9A;'>Seadora Luxury Travel • Red Sea, Egypt</p>
+                </div>";
+                await _emailSender.SendAsync(booking.CustomerEmail, "How was your experience? — Seadora Travel", html, cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to send email feedback invitation for booking {BookingId}", booking.Id);
+            }
+
             if (!string.IsNullOrWhiteSpace(booking.WhatsApp))
             {
                 try
                 {
-                    string msg = $"Shukran {booking.CustomerName}! Hope you enjoyed your tour. Please rate us: http://localhost:3000/feedback?tourId={booking.TourId}";
+                    string msg = $"Shukran {booking.CustomerName}! Hope you enjoyed your tour with Seadora Travel. Please share your feedback: {feedbackUrl}";
                     await _whatsAppService.SendCustomMessageAsync(booking.WhatsApp, msg, cancellationToken);
                 }
                 catch (Exception ex)

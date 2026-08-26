@@ -17,10 +17,12 @@ public record CreateContactInquiryCommand(
 public class CreateContactInquiryCommandHandler : IRequestHandler<CreateContactInquiryCommand, Guid>
 {
     private readonly IBookingDbContext _context;
+    private readonly IEmailSender _emailSender;
 
-    public CreateContactInquiryCommandHandler(IBookingDbContext context)
+    public CreateContactInquiryCommandHandler(IBookingDbContext context, IEmailSender emailSender)
     {
         _context = context;
+        _emailSender = emailSender;
     }
 
     public async Task<Guid> Handle(CreateContactInquiryCommand request, CancellationToken cancellationToken)
@@ -53,6 +55,16 @@ public class CreateContactInquiryCommandHandler : IRequestHandler<CreateContactI
         _context.Notifications.Add(notification);
 
         await _context.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            var html = Seadora.Booking.Application.Common.Email.BookingEmail.BuildInquiryAutoReplyHtml(inquiry);
+            await _emailSender.SendAsync(inquiry.Email, "We Have Received Your Inquiry — Seadora Travel", html, cancellationToken);
+        }
+        catch
+        {
+            // Suppress non-blocking email failure
+        }
 
         return inquiry.Id;
     }
