@@ -2,9 +2,13 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Seadora.Booking.Application.Common.Interfaces;
+using Seadora.Booking.Application.Integration;
 using Seadora.Booking.Infrastructure.Configuration;
 using Seadora.Booking.Infrastructure.Persistence;
 using Seadora.Booking.Infrastructure.Services;
+using Seadora.Common.Messaging;
+using Seadora.Common.Messaging.Idempotency;
+using Seadora.Common.Tenancy;
 
 namespace Seadora.Booking.Infrastructure;
 
@@ -26,6 +30,15 @@ public static class DependencyInjection
         });
             
         services.AddScoped<IBookingDbContext>(provider => provider.GetRequiredService<BookingDbContext>());
+
+        services.AddHttpContextAccessor();
+        services.AddSeadoraTenancy();
+        services.AddSeadoraIdempotency<BookingDbContext>();
+        services.AddSeadoraMessaging(configuration, x =>
+        {
+            x.AddConsumer<TourProjectionConsumers>();
+        });
+
         services.AddHostedService<Seadora.Booking.Infrastructure.BackgroundServices.CashReservationCleanupWorker>();
         
         services.Configure<TwilioSettings>(configuration.GetSection(TwilioSettings.SectionName));

@@ -8,6 +8,10 @@ using Microsoft.EntityFrameworkCore;
 using Seadora.Content.Application.Common.Interfaces;
 using Seadora.Content.Domain.Entities;
 using Seadora.Content.Application.Tours.Models;
+using Seadora.Common.Messaging.Outbox;
+using Seadora.Common.Tenancy;
+using Seadora.Contracts.Enums;
+using Seadora.Contracts.Events;
 
 namespace Seadora.Content.Application.Tours.Commands;
 
@@ -60,10 +64,14 @@ public record UpdateTourCommand(
 public class UpdateTourCommandHandler : IRequestHandler<UpdateTourCommand, Unit>
 {
     private readonly IContentDbContext _context;
+    private readonly IOutboxWriter _outbox;
+    private readonly ICurrentBranch _currentBranch;
 
-    public UpdateTourCommandHandler(IContentDbContext context)
+    public UpdateTourCommandHandler(IContentDbContext context, IOutboxWriter outbox, ICurrentBranch currentBranch)
     {
         _context = context;
+        _outbox = outbox;
+        _currentBranch = currentBranch;
     }
 
     public async Task<Unit> Handle(UpdateTourCommand request, CancellationToken cancellationToken)
@@ -188,6 +196,26 @@ public class UpdateTourCommandHandler : IRequestHandler<UpdateTourCommand, Unit>
             };
         }
 
+        var tourType = tour.TourTypeId.HasValue
+            ? await _context.TourTypes.FirstOrDefaultAsync(t => t.Id == tour.TourTypeId, cancellationToken)
+            : null;
+
+        _outbox.Enqueue(new TourUpdated
+        {
+            TourId = tour.Id,
+            BranchId = _currentBranch.BranchId,
+            TourTypeCode = tourType?.Code,
+            AllocationModel = tourType?.AllocationModel ?? AllocationModel.Shared,
+            MinCapacity = tour.GroupMinCapacity ?? 1,
+            MaxCapacity = tour.GroupMaxCapacity ?? tour.MaxAllocations,
+            RequiresGuestDetails = tourType?.RequiresGuestDetails ?? false,
+            RequiresPassport = tourType?.RequiresPassport ?? false,
+            PayLaterAllowed = tourType?.PayLaterAllowed ?? false,
+            PriceFrom = tour.Price,
+            Currency = tour.Currency
+        });
+
+        // enqueue above shares this single SaveChanges => outbox row + tour commit atomically
         await _context.SaveChangesAsync(cancellationToken);
         return Unit.Value;
     }

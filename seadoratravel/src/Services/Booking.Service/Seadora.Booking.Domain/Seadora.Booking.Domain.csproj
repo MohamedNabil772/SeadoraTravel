@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Common\Seadora.Common\Seadora.Common.csproj" />
+    <ProjectReference Include="..\..\Common\Seadora.Contracts\Seadora.Contracts.csproj" />
   </ItemGroup>
 
   <PropertyGroup>

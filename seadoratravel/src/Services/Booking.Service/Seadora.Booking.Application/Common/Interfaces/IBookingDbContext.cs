@@ -8,5 +8,6 @@ public interface IBookingDbContext
     DbSet<Seadora.Booking.Domain.Entities.Feedback> Feedbacks { get; }
     DbSet<Seadora.Booking.Domain.Entities.Notification> Notifications { get; }
     DbSet<Seadora.Booking.Domain.Entities.ContactInquiry> ContactInquiries { get; }
+    DbSet<Seadora.Booking.Domain.Entities.TourProjection> TourProjections { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }

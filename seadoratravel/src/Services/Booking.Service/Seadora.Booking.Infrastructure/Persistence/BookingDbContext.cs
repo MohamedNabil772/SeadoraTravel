@@ -1,11 +1,16 @@
 using Microsoft.EntityFrameworkCore;
 using Seadora.Booking.Application.Common.Interfaces;
+using Seadora.Booking.Domain.Entities;
+using Seadora.Common.Messaging.Idempotency;
 
 namespace Seadora.Booking.Infrastructure.Persistence;
 
-public class BookingDbContext : DbContext, IBookingDbContext
+public class BookingDbContext : DbContext, IBookingDbContext, IProcessedMessageDbContext
 {
     public BookingDbContext(DbContextOptions<BookingDbContext> options) : base(options) { }
+
+    public DbSet<ProcessedMessage> ProcessedMessages => Set<ProcessedMessage>();
+    public DbSet<TourProjection> TourProjections => Set<TourProjection>();
 
     public DbSet<Seadora.Booking.Domain.Entities.Booking> Bookings => Set<Seadora.Booking.Domain.Entities.Booking>();
     public DbSet<Seadora.Booking.Domain.Entities.Feedback> Feedbacks => Set<Seadora.Booking.Domain.Entities.Feedback>();
@@ -33,5 +38,11 @@ public class BookingDbContext : DbContext, IBookingDbContext
         modelBuilder.Entity<Seadora.Booking.Domain.Entities.ContactInquiry>()
             .Property(c => c.Status)
             .HasConversion<string>();
+
+        // ponytail: Booking is consumer-only here, so no OutboxMessage mapping (YAGNI until it publishes)
+        modelBuilder.Entity<ProcessedMessage>().HasKey(p => new { p.MessageId, p.ConsumerName });
+
+        modelBuilder.Entity<TourProjection>().HasKey(p => p.TourId);
+        modelBuilder.Entity<TourProjection>().Property(p => p.AllocationModel).HasConversion<string>();
     }
 }
