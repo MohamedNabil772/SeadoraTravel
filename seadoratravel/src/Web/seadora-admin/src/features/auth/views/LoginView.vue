@@ -41,11 +41,6 @@ async function handleLogin() {
         <img src="/logo-emblem.png" alt="Seadora Emblem" class="w-9 h-9 object-contain drop-shadow-md" />
         <span class="text-lg font-serif font-bold tracking-widest text-secondary">SEADORA <span class="text-xs text-white/60 font-sans tracking-widest font-normal uppercase">PORTAL</span></span>
       </div>
-      <div class="flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-[11px] font-medium text-white/70">
-        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-        <span class="w-2 h-2 rounded-full bg-emerald-400 -ml-4"></span>
-        <span>Gateway Active</span>
-      </div>
     </header>
 
     <!-- Main Content / Login Card -->
