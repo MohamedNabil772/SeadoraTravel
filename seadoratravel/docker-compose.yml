@@ -14,6 +14,22 @@ services:
       timeout: 5s
       retries: 5
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-seadora}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS:-seadora}
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - seadora-rabbitmq:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   api-gateway:
     build:
       context: .
@@ -33,6 +49,10 @@ services:
     restart: on-failure
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      # ponytail: no depends_on rabbitmq; restart:on-failure already handles the startup race
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Username=${RABBITMQ_USER:-seadora}
+      - RabbitMq__Password=${RABBITMQ_PASS:-seadora}
       - JwtSettings__Secret=YourSuperSecretKeyHereYourSuperSecretKeyHere
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Identity;Username=postgres;Password=postgres
     depends_on:
@@ -46,6 +66,9 @@ services:
     restart: on-failure
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Username=${RABBITMQ_USER:-seadora}
+      - RabbitMq__Password=${RABBITMQ_PASS:-seadora}
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Content;Username=postgres;Password=postgres
     depends_on:
       postgres:
@@ -58,6 +81,9 @@ services:
     restart: on-failure
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Username=${RABBITMQ_USER:-seadora}
+      - RabbitMq__Password=${RABBITMQ_PASS:-seadora}
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Booking;Username=postgres;Password=postgres
       # SMTP relay (send-only). Set these to your Hostinger mailbox / relay creds.
       - Smtp__Host=${SMTP_HOST:-}
@@ -117,3 +143,4 @@ volumes:
   seadora-uploads:
   seadora-db-data:
   seadora-backups:
+  seadora-rabbitmq:
