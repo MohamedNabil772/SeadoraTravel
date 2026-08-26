@@ -44,7 +44,7 @@ public class UpdateBookingStatusCommandHandler : IRequestHandler<UpdateBookingSt
 
         if (request.Status == BookingStatus.Completed)
         {
-            var feedbackUrl = $"https://seadoratravel.com/feedback?tourId={booking.TourId}";
+            var feedbackUrl = $"{Seadora.Booking.Application.Common.Email.ContactChannels.FeedbackBaseUrl}?tourId={booking.TourId}";
             try
             {
                 var html = $@"

@@ -27,9 +27,6 @@ public static class BookingEmail
     private const string AmberBg = "#FEF3C7";
     private const string AmberBorder = "#F59E0B";
     private const string AmberText = "#92400E";
-    private const string LogoUrl = "https://seadoratravel.com/logo-emblem.png";
-    private const string WhatsAppUrl = ContactChannels.WhatsAppUrl;
-    private const string WebsiteUrl = ContactChannels.WebsiteUrl;
 
     private class EmailStrings
     {
@@ -358,7 +355,7 @@ public static class BookingEmail
                                         <tr>
                                             <td align='center'>
                                                 <!-- Emblem -->
-                                                <img src='{LogoUrl}' alt='Seadora Emblem' width='62' height='62' style='display: block; margin: 0 auto 16px auto; width: 62px; height: 62px;' />
+                                                <img src='{ContactChannels.LogoUrl}' alt='Seadora Emblem' width='62' height='62' style='display: block; margin: 0 auto 16px auto; width: 62px; height: 62px;' />
 
                                                 <!-- Luxury Brand Typography -->
                                                 <h1 class='brand-title' style='margin: 0; font-family: ""Playfair Display"", Georgia, serif; font-size: 28px; font-weight: 800; color: {BrandNavy}; letter-spacing: 4.5px; text-transform: uppercase;'>
@@ -402,7 +399,7 @@ public static class BookingEmail
                                                 <table role='presentation' cellspacing='0' cellpadding='0' border='0' align='center'>
                                                     <tr>
                                                         <td style='border-radius: 12px; background-color: #16A34A; text-align: center; box-shadow: 0 6px 18px rgba(22,163,74,0.3);'>
-                                                            <a href='{WhatsAppUrl}' target='_blank' style='display: inline-block; padding: 14px 32px; font-size: 13.5px; font-weight: 800; color: #ffffff !important; letter-spacing: 0.5px;'>
+                                                            <a href='{ContactChannels.WhatsAppUrl}' target='_blank' style='display: inline-block; padding: 14px 32px; font-size: 13.5px; font-weight: 800; color: #ffffff !important; letter-spacing: 0.5px;'>
                                                                 <span style='color: #ffffff !important;'>{s.WhatsAppCta}</span>
                                                             </a>
                                                         </td>
@@ -424,7 +421,7 @@ public static class BookingEmail
                                         {s.FooterMarina} • Tel: {ContactChannels.WhatsAppNumber}
                                     </p>
                                     <p class='label-dark' style='margin: 0 0 16px 0; font-size: 12px; color: {TextLabel};'>
-                                        Inquiries: <a href='mailto:{ContactChannels.InfoEmail}' style='color: {BrandNavy}; font-weight: 800; text-decoration: underline;'>{ContactChannels.InfoEmail}</a> • Website: <a href='{WebsiteUrl}' style='color: {BrandNavy}; font-weight: 800; text-decoration: underline;'>{WebsiteUrl}</a>
+                                        Inquiries: <a href='mailto:{ContactChannels.InfoEmail}' style='color: {BrandNavy}; font-weight: 800; text-decoration: underline;'>{ContactChannels.InfoEmail}</a> • Website: <a href='{ContactChannels.WebsiteUrl}' style='color: {BrandNavy}; font-weight: 800; text-decoration: underline;'>{ContactChannels.WebsiteUrl}</a>
                                     </p>
                                     <div style='border-top: 1px solid {BorderStrong}; padding-top: 16px; font-size: 11.5px; color: {TextLabel}; font-weight: 600;'>
                                         &copy; {DateTime.UtcNow.Year} Seadora Travel. {s.FooterRights}

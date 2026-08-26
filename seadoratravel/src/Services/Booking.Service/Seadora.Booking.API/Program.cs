@@ -9,6 +9,13 @@ using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Apply per-deployment brand identity (emails, WhatsApp, website, logo, feedback URL).
+// Blank/missing "Branding" values fall back to the built-in Seadora defaults.
+Seadora.Booking.Application.Common.Email.ContactChannels.Configure(
+    builder.Configuration
+        .GetSection(Seadora.Booking.Application.Common.Email.BrandingOptions.SectionName)
+        .Get<Seadora.Booking.Application.Common.Email.BrandingOptions>());
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
