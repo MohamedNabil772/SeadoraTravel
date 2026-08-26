@@ -1,24 +1,21 @@
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted } from 'vue'
-import logoEmblem from '@/assets/logo-emblem.png'
-import logoHorizontal from '@/assets/logo-horizontal.png'
-import logoFull from '@/assets/logo-full.png'
+import { ref, onMounted, onUnmounted, computed } from 'vue'
 
+const isMounted = ref(false)
+
+// Smooth mouse tracking for flare and parallax
 const mouseX = ref(0)
 const mouseY = ref(0)
 const targetX = ref(0)
 const targetY = ref(0)
-const isMounted = ref(false)
-const timeString = ref('')
 let animationFrameId = 0
-let timeInterval: ReturnType<typeof setInterval>
 
-// Smooth momentum spring spotlight for sunshine flare
-const animateSpotlight = () => {
-  const ease = 0.08
+const animate = () => {
+  // Smooth spring interpolation
+  const ease = 0.06
   mouseX.value += (targetX.value - mouseX.value) * ease
   mouseY.value += (targetY.value - mouseY.value) * ease
-  animationFrameId = requestAnimationFrame(animateSpotlight)
+  animationFrameId = requestAnimationFrame(animate)
 }
 
 const handleMouseMove = (e: MouseEvent) => {
@@ -26,719 +23,538 @@ const handleMouseMove = (e: MouseEvent) => {
   targetY.value = e.clientY
 }
 
-// Update Egypt Local Time (Africa/Cairo)
-const updateEgyptTime = () => {
-  const now = new Date()
-  timeString.value = now.toLocaleTimeString('en-US', {
-    timeZone: 'Africa/Cairo',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-    hour12: true
-  })
+// Countdown logic
+const targetDate = new Date()
+targetDate.setDate(targetDate.getDate() + 42)
+
+const days = ref('00')
+const hours = ref('00')
+const minutes = ref('00')
+const seconds = ref('00')
+let timerInterval: ReturnType<typeof setInterval>
+
+const updateCountdown = () => {
+  const now = new Date().getTime()
+  const distance = targetDate.getTime() - now
+
+  if (distance < 0) {
+    clearInterval(timerInterval)
+    return
+  }
+
+  const d = Math.floor(distance / (1000 * 60 * 60 * 24))
+  const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
+  const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60))
+  const s = Math.floor((distance % (1000 * 60)) / 1000)
+
+  days.value = d.toString().padStart(2, '0')
+  hours.value = h.toString().padStart(2, '0')
+  minutes.value = m.toString().padStart(2, '0')
+  seconds.value = s.toString().padStart(2, '0')
 }
 
-// Interactive floating tourism experiences
-const travelExperiences = [
-  { icon: '⛵', title: 'Ultra-Luxury Yacht Charters', subtitle: 'Private Red Sea Cruising & VIP Crew', tag: 'VIP Fleet' },
-  { icon: '🤿', title: 'Pristine Coral Reef Expeditions', subtitle: 'Guided Diving & Marine Safaris', tag: 'Exclusive' },
-  { icon: '🏝️', title: 'VIP Island & Coastal Escapes', subtitle: 'Giftun, Utopia & Orange Bay', tag: 'Paradise' },
-  { icon: '✨', title: 'Bespoke 24/7 Red Sea Concierge', subtitle: 'Tailored Luxury Itineraries', tag: 'Ultra-Luxe' }
+// Particles
+const getParticleStyle = () => {
+  const size = Math.random() * 4 + 2
+  const left = Math.random() * 100
+  const duration = Math.random() * 5 + 4 // 4s to 9s
+  const delay = Math.random() * 5
+  return {
+    width: `${size}px`,
+    height: `${size}px`,
+    left: `${left}%`,
+    animationDuration: `${duration}s`,
+    animationDelay: `${delay}s`
+  }
+}
+
+// Floating pills
+const pills = [
+  { text: 'Maldives', duration: '3s', parallaxFactor: 0.02 },
+  { text: 'Santorini', duration: '4.2s', parallaxFactor: -0.03 },
+  { text: 'Bora Bora', duration: '5.5s', parallaxFactor: 0.04 },
+  { text: 'Amalfi Coast', duration: '6s', parallaxFactor: -0.02 }
 ]
 
-const activeCardIndex = ref<number | null>(null)
+// Note: mouseX/Y is already interpolated for smooth parallax
+const normalizedMouseX = computed(() => {
+  if (typeof window === 'undefined') return 0;
+  return (mouseX.value / window.innerWidth) * 2 - 1
+})
+const normalizedMouseY = computed(() => {
+  if (typeof window === 'undefined') return 0;
+  return (mouseY.value / window.innerHeight) * 2 - 1
+})
+
+const getParallaxTransform = (factor: number) => {
+  return `translate(${normalizedMouseX.value * factor * 100}px, ${normalizedMouseY.value * factor * 100}px)`
+}
+
+// CTA Magnetic Hover Effect
+const ctaRef = ref<HTMLElement | null>(null)
+const ctaTransform = ref('')
+const handleCtaMouseMove = (e: MouseEvent) => {
+  if (!ctaRef.value) return
+  const rect = ctaRef.value.getBoundingClientRect()
+  const x = e.clientX - rect.left - rect.width / 2
+  const y = e.clientY - rect.top - rect.height / 2
+  ctaTransform.value = `translate(${x * 0.2}px, ${y * 0.2}px) scale(1.02)`
+}
+const handleCtaMouseLeave = () => {
+  ctaTransform.value = 'translate(0px, 0px) scale(1)'
+}
 
 onMounted(() => {
-  window.addEventListener('mousemove', handleMouseMove)
   targetX.value = window.innerWidth / 2
   targetY.value = window.innerHeight / 2
   mouseX.value = targetX.value
   mouseY.value = targetY.value
 
-  animationFrameId = requestAnimationFrame(animateSpotlight)
+  window.addEventListener('mousemove', handleMouseMove)
+  animationFrameId = requestAnimationFrame(animate)
 
   setTimeout(() => {
     isMounted.value = true
-  }, 80)
+  }, 100)
 
-  updateEgyptTime()
-  timeInterval = setInterval(updateEgyptTime, 1000)
+  updateCountdown()
+  timerInterval = setInterval(updateCountdown, 1000)
 })
 
 onUnmounted(() => {
   window.removeEventListener('mousemove', handleMouseMove)
   cancelAnimationFrame(animationFrameId)
-  clearInterval(timeInterval)
+  clearInterval(timerInterval)
 })
 </script>
 
 <template>
-  <div 
-    class="coming-soon-root"
-    :style="{ '--mouse-x': mouseX + 'px', '--mouse-y': mouseY + 'px' }"
-  >
-    <!-- Dynamic Sunshine / Seafoam Flare Following Cursor -->
-    <div class="sun-flare"></div>
+  <div class="coming-soon-wrapper">
+    <!-- Background Elements -->
+    <div class="background-gradient"></div>
+    <div class="water-caustics"></div>
+    <div class="light-rays"></div>
 
-    <!-- Radiant Tropical Ocean Background with Caustics Wave -->
-    <div class="ocean-caustics"></div>
-    <div class="sunburst-beams"></div>
+    <!-- Giant Background Watermark -->
+    <div class="giant-watermark">SEADORA</div>
 
-    <!-- Giant Glowing Watermark Logo in Background -->
-    <div class="watermark-logo-container" aria-hidden="true">
-      <img :src="logoEmblem" alt="" class="watermark-emblem" />
-      <div class="watermark-halo"></div>
+    <!-- Sparkling Sunlight Particles -->
+    <div class="particles">
+      <div v-for="i in 25" :key="i" class="particle" :style="getParticleStyle()"></div>
     </div>
 
-    <!-- Floating Shimmering Marine Sparkles -->
-    <div class="sparkles-container" aria-hidden="true">
-      <span class="sparkle s1"></span>
-      <span class="sparkle s2"></span>
-      <span class="sparkle s3"></span>
-      <span class="sparkle s4"></span>
-      <span class="sparkle s5"></span>
-      <span class="sparkle s6"></span>
+    <!-- Floating Travel Pills (Background parallax layer) -->
+    <div class="floating-pills-container">
+      <div 
+        v-for="(pill, index) in pills" 
+        :key="index"
+        class="pill-parallax-wrapper"
+        :class="`pill-pos-${index + 1}`"
+        :style="{ transform: getParallaxTransform(pill.parallaxFactor) }"
+      >
+        <div class="floating-pill" :style="{ animationDuration: pill.duration }">
+          {{ pill.text }}
+        </div>
+      </div>
     </div>
 
-    <!-- Main Content Presentation -->
-    <main class="main-wrapper" :class="{ 'is-visible': isMounted }">
+    <!-- Interactive Light Trail / Sunshine Flare -->
+    <div class="sunshine-flare" :style="{ transform: `translate(${mouseX}px, ${mouseY}px)` }"></div>
+
+    <!-- Main Content -->
+    <div class="content-container" :class="{ 'is-mounted': isMounted }">
+      <div class="logo animate-in stagger-1">
+        Seadora Travel
+      </div>
       
-      <!-- Top Navigation & Location Indicator -->
-      <header class="top-bar animate-node stagger-1">
-        <div class="brand-badge">
-          <img :src="logoHorizontal || logoFull" alt="Seadora Travel" class="brand-logo-img" />
-        </div>
-
-        <div class="location-pill">
-          <span class="live-dot"></span>
-          <span class="location-text">Hurghada & Red Sea (27.2579° N, 33.8116° E)</span>
-          <span class="time-separator">•</span>
-          <span class="time-text">{{ timeString || 'Egypt Local Time' }}</span>
-        </div>
-      </header>
-
-      <!-- Center Hero Presentation -->
-      <section class="hero-section">
-        
-        <!-- Glowing Floating Emblem -->
-        <div class="emblem-centerpiece animate-node stagger-2">
-          <div class="emblem-glow-ring"></div>
-          <img :src="logoEmblem" alt="Seadora Emblem" class="hero-emblem-img" />
-          <div class="emblem-shimmer"></div>
-        </div>
-
-        <!-- Super Luxury Typography -->
-        <div class="headline-container animate-node stagger-3">
-          <div class="pre-badge">
-            <span class="golden-star">★</span>
-            <span>EXQUISITE MARINE TRAVEL & EXPEDITIONS</span>
-            <span class="golden-star">★</span>
+      <h1 class="tagline animate-in stagger-2">
+        Redefining Luxury<br />Marine Journeys
+      </h1>
+      
+      <div class="countdown-blocks animate-in stagger-3">
+        <div class="time-block">
+          <div class="value-wrapper">
+            <Transition name="flip" mode="out-in">
+              <span class="value" :key="days">{{ days }}</span>
+            </Transition>
           </div>
-
-          <h1 class="main-title">
-            A NEW WAVE OF <br />
-            <span class="gradient-text-gold">LUXURY IS DAWNING</span>
-          </h1>
-
-          <p class="subtitle">
-            Crafting private superyacht charters, secluded coral reef adventures, and 
-            unmatched VIP concierge experiences across Egypt’s most breathtaking crystal waters.
-          </p>
+          <span class="label">Days</span>
         </div>
-
-        <!-- Interactive Floating Tourism Cards -->
-        <div class="tourism-grid animate-node stagger-4">
-          <div 
-            v-for="(item, idx) in travelExperiences" 
-            :key="idx"
-            class="luxury-card"
-            :class="[`float-delay-${idx + 1}`, { 'is-active': activeCardIndex === idx }]"
-            @mouseenter="activeCardIndex = idx"
-            @mouseleave="activeCardIndex = null"
-          >
-            <div class="card-inner">
-              <div class="card-top">
-                <span class="card-icon">{{ item.icon }}</span>
-                <span class="card-tag">{{ item.tag }}</span>
-              </div>
-              <h3 class="card-title">{{ item.title }}</h3>
-              <p class="card-desc">{{ item.subtitle }}</p>
-              <div class="card-glint"></div>
-            </div>
+        <div class="time-block">
+          <div class="value-wrapper">
+            <Transition name="flip" mode="out-in">
+              <span class="value" :key="hours">{{ hours }}</span>
+            </Transition>
           </div>
+          <span class="label">Hours</span>
         </div>
-
-        <!-- Luxury Status & Exploration Invitation -->
-        <div class="status-banner animate-node stagger-5">
-          <div class="status-content">
-            <div class="status-pulse">
-              <span class="pulse-ring"></span>
-              <span class="pulse-core"></span>
-            </div>
-            <div class="status-text">
-              <span class="status-label">Grand Portal Launch</span>
-              <span class="status-desc">Summer 2026 • Curating the Finest Coastal Sanctuaries</span>
-            </div>
+        <div class="time-block">
+          <div class="value-wrapper">
+            <Transition name="flip" mode="out-in">
+              <span class="value" :key="minutes">{{ minutes }}</span>
+            </Transition>
           </div>
+          <span class="label">Minutes</span>
         </div>
-
-      </section>
-
-      <!-- Footer Elements -->
-      <footer class="footer-bar animate-node stagger-6">
-        <p class="copyright-text">
-          © 2026 Seadora Travel Luxury Marine Group. All rights reserved.
-        </p>
-        <div class="social-tags">
-          <span class="tag-link">#SeadoraLuxury</span>
-          <span class="tag-link">#RedSeaYachts</span>
-          <span class="tag-link">#VIPExpeditions</span>
+        <div class="time-block">
+          <div class="value-wrapper">
+            <Transition name="flip" mode="out-in">
+              <span class="value" :key="seconds">{{ seconds }}</span>
+            </Transition>
+          </div>
+          <span class="label">Seconds</span>
         </div>
-      </footer>
+      </div>
+      
+      <div class="action-area animate-in stagger-4">
+        <button 
+          ref="ctaRef"
+          class="luxury-cta" 
+          :style="{ transform: ctaTransform }"
+          @mousemove="handleCtaMouseMove"
+          @mouseleave="handleCtaMouseLeave"
+        >
+          Discover Our World
+        </button>
+      </div>
 
-    </main>
+      <div class="teaser-cards animate-in stagger-5">
+        <div class="card">Exclusive Yachts</div>
+        <div class="card">Tailored Itineraries</div>
+      </div>
+    </div>
   </div>
 </template>
 
 <style scoped>
-/* ==========================================================================
-   CSS Variables & Foundations (Bright, Vibrant Luxury Tourism Palette)
-   ========================================================================== */
-.coming-soon-root {
-  --primary-azure: #0066FF;
-  --tropical-cyan: #00D2FF;
-  --crystal-turquoise: #00F2FE;
-  --royal-navy: #031B33;
-  --deep-ocean: #011224;
-  --gold-glow: #F3C64F;
-  --gold-rich: #D4AF37;
-  --sunshine-light: rgba(255, 248, 220, 0.85);
-  --glass-bg: rgba(255, 255, 255, 0.18);
-  --glass-border: rgba(255, 255, 255, 0.45);
-  --glass-shadow: 0 16px 48px -8px rgba(0, 70, 140, 0.25);
-  --easing-natural: cubic-bezier(0.23, 1, 0.32, 1);
-  --easing-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+:global(:root) {
+  --easing-snappy: cubic-bezier(0.23, 1, 0.32, 1);
+  --easing-smooth: cubic-bezier(0.16, 1, 0.3, 1);
+}
 
+.coming-soon-wrapper {
   position: relative;
   min-height: 100vh;
-  width: 100%;
-  overflow-x: hidden;
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  color: #FFFFFF;
-  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
-  background: radial-gradient(120% 100% at 50% 10%, #00C6FF 0%, #0072FF 50%, #031D38 100%);
-  user-select: none;
+  overflow: hidden;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* ==========================================================================
-   Animated Background Layers (Ocean Caustics, Sunbeams & Watermark)
-   ========================================================================== */
-.ocean-caustics {
+/* 1. Bright turquoise gradient */
+.background-gradient {
   position: absolute;
   inset: 0;
-  background: 
-    radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255, 255, 255, 0.45) 0%, transparent 70%),
-    linear-gradient(135deg, rgba(0, 242, 254, 0.25) 0%, rgba(0, 102, 255, 0.3) 100%);
+  background: linear-gradient(135deg, #00d2ff 0%, #0277bd 100%);
+  z-index: -4;
+}
+
+/* 1. Water caustics / shimmering */
+.water-caustics {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.4) 0%, transparent 60%);
   mix-blend-mode: overlay;
-  pointer-events: none;
-  animation: causticsWave 16s ease-in-out infinite alternate;
+  z-index: -3;
+  animation: caustics-shimmer 8s infinite alternate ease-in-out;
 }
 
-.sunburst-beams {
-  position: absolute;
-  top: -20%;
-  left: 10%;
-  right: 10%;
-  height: 80%;
-  background: radial-gradient(circle at 50% 0%, rgba(255, 250, 220, 0.35) 0%, rgba(0, 210, 255, 0.1) 45%, transparent 70%);
-  filter: blur(40px);
-  pointer-events: none;
-  animation: sunburstPulse 10s ease-in-out infinite alternate;
+@keyframes caustics-shimmer {
+  0% { transform: scale(1); opacity: 0.5; }
+  100% { transform: scale(1.15); opacity: 0.8; }
 }
 
-/* Interactive Cursor Sunshine Flare */
-.sun-flare {
+/* 1. Radiant light beam rays */
+.light-rays {
   position: absolute;
-  width: 600px;
-  height: 600px;
-  left: calc(var(--mouse-x) - 300px);
-  top: calc(var(--mouse-y) - 300px);
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 245, 180, 0.35) 0%, rgba(0, 242, 254, 0.15) 40%, transparent 70%);
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 15px,
+    rgba(255, 255, 255, 0.05) 15px,
+    rgba(255, 255, 255, 0.05) 30px
+  );
+  animation: rays-rotate 90s linear infinite;
+  z-index: -2;
   pointer-events: none;
-  filter: blur(35px);
-  z-index: 1;
-  transition: opacity 0.4s ease;
+  mix-blend-mode: soft-light;
 }
 
-/* Giant Background Watermark Logo */
-.watermark-logo-container {
+@keyframes rays-rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* 2. Giant background watermark */
+.giant-watermark {
   position: absolute;
-  top: 48%;
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: min(85vw, 720px);
-  height: min(85vw, 720px);
+  font-size: clamp(8rem, 20vw, 25rem);
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.06);
+  white-space: nowrap;
   pointer-events: none;
-  z-index: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0.12;
-  animation: watermarkBreathe 12s ease-in-out infinite alternate;
+  z-index: -1;
+  animation: breathing-watermark 12s ease-in-out infinite;
+  letter-spacing: -0.05em;
 }
 
-.watermark-emblem {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  filter: brightness(2) drop-shadow(0 0 80px rgba(0, 242, 254, 0.8));
+@keyframes breathing-watermark {
+  0%, 100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+  50% { transform: translate(-50%, -50%) scale(1.06) rotate(1deg); }
 }
 
-.watermark-halo {
-  position: absolute;
-  inset: -15%;
-  border-radius: 50%;
-  background: conic-gradient(from 0deg, rgba(255, 215, 0, 0.3), rgba(0, 242, 254, 0.5), rgba(255, 255, 255, 0.4), rgba(255, 215, 0, 0.3));
-  filter: blur(70px);
-  animation: rotateHalo 35s linear infinite;
-}
-
-/* Floating Sparkle Particles */
-.sparkles-container {
+/* 3. Floating travel pills */
+.floating-pills-container {
   position: absolute;
   inset: 0;
   pointer-events: none;
   z-index: 1;
 }
 
-.sparkle {
+.pill-parallax-wrapper {
   position: absolute;
-  width: 6px;
-  height: 6px;
-  background: #FFFFFF;
-  border-radius: 50%;
-  box-shadow: 0 0 12px 3px rgba(255, 255, 255, 0.9), 0 0 24px 6px rgba(0, 242, 254, 0.8);
-  opacity: 0;
-  animation: floatSparkle 7s ease-in-out infinite;
+  will-change: transform;
 }
 
-.sparkle.s1 { top: 20%; left: 15%; animation-delay: 0s; }
-.sparkle.s2 { top: 35%; right: 18%; animation-delay: 1.8s; }
-.sparkle.s3 { top: 65%; left: 22%; animation-delay: 3.2s; }
-.sparkle.s4 { top: 75%; right: 28%; animation-delay: 4.5s; }
-.sparkle.s5 { top: 15%; right: 35%; animation-delay: 2.2s; }
-.sparkle.s6 { top: 80%; left: 45%; animation-delay: 5.5s; }
+.pill-pos-1 { top: 20%; left: 15%; }
+.pill-pos-2 { top: 30%; right: 15%; }
+.pill-pos-3 { bottom: 25%; left: 20%; }
+.pill-pos-4 { bottom: 20%; right: 20%; }
 
-/* ==========================================================================
-   Main Content Layout & Staggered Animations
-   ========================================================================== */
-.main-wrapper {
-  position: relative;
-  z-index: 2;
-  width: 100%;
-  max-width: 1240px;
-  padding: 2.5rem 1.5rem;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  min-height: 100vh;
-}
-
-/* Emil Kowalski Stagger Entrance System */
-.animate-node {
-  opacity: 0;
-  transform: translateY(14px) scale(0.97);
-  transition: opacity 0.75s var(--easing-natural), transform 0.75s var(--easing-natural);
-}
-
-.main-wrapper.is-visible .animate-node {
-  opacity: 1;
-  transform: translateY(0) scale(1);
-}
-
-.stagger-1 { transition-delay: 0.05s; }
-.stagger-2 { transition-delay: 0.12s; }
-.stagger-3 { transition-delay: 0.20s; }
-.stagger-4 { transition-delay: 0.28s; }
-.stagger-5 { transition-delay: 0.36s; }
-.stagger-6 { transition-delay: 0.44s; }
-
-/* ==========================================================================
-   Header & Location Pill
-   ========================================================================== */
-.top-bar {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
-  flex-wrap: wrap;
-}
-
-.brand-badge {
-  display: flex;
-  align-items: center;
+.floating-pill {
   background: rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(16px);
-  border: 1px solid var(--glass-border);
-  padding: 0.5rem 1.25rem;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  padding: 0.6rem 1.5rem;
   border-radius: 999px;
-  box-shadow: 0 8px 24px rgba(0, 30, 70, 0.15);
-}
-
-.brand-logo-img {
-  height: 32px;
-  width: auto;
-  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
-}
-
-.location-pill {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  background: rgba(2, 28, 56, 0.45);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  padding: 0.45rem 1.15rem;
-  border-radius: 999px;
-  font-size: 0.825rem;
-  font-weight: 500;
-  color: #E2F1FF;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
-}
-
-.live-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #00FFA3;
-  box-shadow: 0 0 10px #00FFA3;
-  animation: liveDotPulse 2s infinite ease-in-out;
-}
-
-.time-separator {
-  color: rgba(255, 255, 255, 0.4);
-}
-
-.time-text {
-  color: #FFD700;
   font-weight: 600;
-  font-variant-numeric: tabular-nums;
+  font-size: 0.9rem;
+  color: #fff;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  animation: float-pill ease-in-out infinite alternate;
+  will-change: transform;
 }
 
-/* ==========================================================================
-   Center Hero Presentation
-   ========================================================================== */
-.hero-section {
+@keyframes float-pill {
+  0% { transform: translateY(0px); }
+  100% { transform: translateY(-25px); }
+}
+
+/* 4. Interactive light trail / sunshine flare */
+.sunshine-flare {
+  position: absolute;
+  top: -200px;
+  left: -200px;
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0) 70%);
+  pointer-events: none;
+  z-index: 5;
+  mix-blend-mode: overlay;
+  will-change: transform;
+}
+
+/* 5. Sparkling sunlight particles */
+.particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+  z-index: 1;
+}
+
+.particle {
+  position: absolute;
+  bottom: -20px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.9);
+  animation: particle-rise linear infinite;
+  opacity: 0;
+}
+
+@keyframes particle-rise {
+  0% { transform: translateY(0) scale(0.5); opacity: 0; }
+  20% { opacity: 0.8; }
+  80% { opacity: 0.8; }
+  100% { transform: translateY(-100vh) scale(1.5); opacity: 0; }
+}
+
+/* Content Container */
+.content-container {
+  position: relative;
+  z-index: 10;
   display: flex;
   flex-direction: column;
   align-items: center;
   text-align: center;
-  margin: 2.5rem 0;
+  gap: 2.5rem;
+  max-width: 900px;
+  padding: 2rem;
   width: 100%;
 }
 
-.emblem-centerpiece {
-  position: relative;
-  width: 104px;
-  height: 104px;
-  margin-bottom: 1.75rem;
+.animate-in {
+  opacity: 0;
+  transform: translateY(15px) scale(0.96);
+  transition: opacity 0.8s var(--easing-smooth), transform 0.8s var(--easing-smooth);
+}
+
+.is-mounted .animate-in {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.is-mounted .stagger-1 { transition-delay: 50ms; }
+.is-mounted .stagger-2 { transition-delay: 150ms; }
+.is-mounted .stagger-3 { transition-delay: 250ms; }
+.is-mounted .stagger-4 { transition-delay: 350ms; }
+.is-mounted .stagger-5 { transition-delay: 450ms; }
+
+.logo {
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: -1rem;
+}
+
+.tagline {
+  font-size: clamp(2.5rem, 6vw, 4.5rem);
+  font-weight: 800;
+  color: #fff;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+/* Countdown Blocks */
+.countdown-blocks {
   display: flex;
-  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
   justify-content: center;
 }
 
-.emblem-glow-ring {
-  position: absolute;
-  inset: -8px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, rgba(255, 215, 0, 0.8), rgba(0, 242, 254, 0.9));
-  filter: blur(14px);
-  opacity: 0.8;
-  animation: ringPulse 4s ease-in-out infinite alternate;
-}
-
-.hero-emblem-img {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.9);
-  padding: 10px;
-  box-shadow: 0 12px 32px rgba(0, 40, 90, 0.35);
-  transition: transform 0.4s var(--easing-natural);
-}
-
-.hero-emblem-img:hover {
-  transform: scale(1.08) rotate(3deg);
-}
-
-.pre-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.18em;
-  color: #FFE680;
-  background: rgba(0, 30, 70, 0.4);
-  backdrop-filter: blur(12px);
-  padding: 0.35rem 1rem;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 215, 0, 0.4);
-  margin-bottom: 1.25rem;
-  text-transform: uppercase;
-}
-
-.golden-star {
-  color: #FFD700;
-  font-size: 0.85rem;
-}
-
-.main-title {
-  font-size: clamp(2.2rem, 5.5vw, 4.4rem);
-  font-weight: 900;
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-  margin-bottom: 1.25rem;
-  text-shadow: 0 4px 24px rgba(0, 20, 60, 0.45);
-}
-
-.gradient-text-gold {
-  background: linear-gradient(135deg, #FFF6D6 0%, #FFD700 45%, #FFA500 80%, #FFFFFF 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 2px 14px rgba(255, 215, 0, 0.4));
-}
-
-.subtitle {
-  max-width: 680px;
-  font-size: clamp(1rem, 1.75vw, 1.2rem);
-  font-weight: 400;
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.92);
-  margin: 0 auto 2.5rem;
-  text-shadow: 0 2px 12px rgba(0, 20, 50, 0.3);
-}
-
-/* ==========================================================================
-   Interactive Floating Tourism Feature Cards
-   ========================================================================== */
-.tourism-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1.25rem;
-  width: 100%;
-  max-width: 1120px;
-  margin-bottom: 2.5rem;
-}
-
-.luxury-card {
-  position: relative;
-  border-radius: 20px;
-  padding: 1px;
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.1) 60%, rgba(255, 215, 0, 0.4) 100%);
-  box-shadow: var(--glass-shadow);
-  cursor: pointer;
-  transition: transform 0.4s var(--easing-natural), box-shadow 0.4s var(--easing-natural);
-}
-
-.luxury-card:hover {
-  transform: translateY(-8px) scale(1.02);
-  box-shadow: 0 24px 48px -10px rgba(0, 100, 200, 0.4), 0 0 24px rgba(255, 215, 0, 0.3);
-}
-
-.luxury-card:active {
-  transform: scale(0.97);
-}
-
-/* Floating Animation Delays simulating sea waves */
-.float-delay-1 { animation: floatCard 5.5s ease-in-out infinite alternate; }
-.float-delay-2 { animation: floatCard 6.2s ease-in-out infinite alternate 1s; }
-.float-delay-3 { animation: floatCard 4.8s ease-in-out infinite alternate 0.5s; }
-.float-delay-4 { animation: floatCard 5.8s ease-in-out infinite alternate 1.5s; }
-
-.card-inner {
-  position: relative;
-  background: rgba(3, 30, 60, 0.45);
-  backdrop-filter: blur(20px);
-  border-radius: 19px;
-  padding: 1.5rem 1.35rem;
-  text-align: left;
-  height: 100%;
+.time-block {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  padding: 1.25rem 1.5rem;
+  border-radius: 16px;
+  min-width: 110px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  color: #fff;
+}
+
+.value-wrapper {
+  height: 3.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
 }
 
-.luxury-card:hover .card-inner {
-  background: rgba(3, 40, 80, 0.6);
-}
-
-.card-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1rem;
-}
-
-.card-icon {
-  font-size: 1.85rem;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
-}
-
-.card-tag {
-  font-size: 0.7rem;
+.time-block .value {
+  font-size: 3rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  display: inline-block;
+  text-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.flip-enter-active,
+.flip-leave-active {
+  transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.flip-enter-from {
+  opacity: 0;
+  transform: translateY(50%) scale(0.9);
+}
+
+.flip-leave-to {
+  opacity: 0;
+  transform: translateY(-50%) scale(1.1);
+}
+
+.time-block .label {
+  font-size: 0.8rem;
   text-transform: uppercase;
-  color: #FFE580;
-  background: rgba(255, 215, 0, 0.2);
-  border: 1px solid rgba(255, 215, 0, 0.4);
-  padding: 0.2rem 0.65rem;
-  border-radius: 999px;
+  letter-spacing: 0.15em;
+  color: rgba(255, 255, 255, 0.8);
+  margin-top: 0.75rem;
+  font-weight: 600;
 }
 
-.card-title {
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: #FFFFFF;
-  margin-bottom: 0.35rem;
-  line-height: 1.3;
-}
-
-.card-desc {
-  font-size: 0.825rem;
-  color: rgba(255, 255, 255, 0.78);
-  line-height: 1.45;
-}
-
-.card-glint {
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 60%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
-  transform: skewX(-20deg);
-  transition: left 0.75s ease;
-}
-
-.luxury-card:hover .card-glint {
-  left: 140%;
-}
-
-/* ==========================================================================
-   Grand Launch Status Pill
-   ========================================================================== */
-.status-banner {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(18px);
-  border: 1px solid var(--glass-border);
-  padding: 0.75rem 1.75rem;
-  border-radius: 999px;
-  box-shadow: 0 10px 30px rgba(0, 40, 100, 0.2);
-  display: inline-flex;
-  align-items: center;
-}
-
-.status-content {
+/* 6. Luxury Interactive CTA */
+.action-area {
+  margin-top: 1rem;
   display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.status-pulse {
-  position: relative;
-  width: 14px;
-  height: 14px;
-  display: flex;
-  align-items: center;
   justify-content: center;
 }
 
-.pulse-ring {
+.luxury-cta {
+  position: relative;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: #fff;
+  padding: 1.2rem 3rem;
+  font-size: 1.125rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  border-radius: 9999px;
+  cursor: pointer;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  /* Use transform for magnetic effect, which is set inline via vue.
+     The transition here is for when we leave the button. */
+  transition: transform 0.4s var(--easing-snappy), background 0.4s ease, box-shadow 0.4s ease;
+  will-change: transform;
+}
+
+.luxury-cta:hover {
+  background: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+}
+
+/* Active press physics */
+.luxury-cta:active {
+  transform: scale(0.97) !important; 
+}
+
+/* Shining shimmer border/sweep */
+.luxury-cta::before {
+  content: '';
   position: absolute;
-  width: 100%;
+  top: 0;
+  left: -100%;
+  width: 50%;
   height: 100%;
-  border-radius: 50%;
-  background: #FFD700;
-  opacity: 0.75;
-  animation: ringExpand 2s cubic-bezier(0.24, 0, 0.38, 1) infinite;
-}
-
-.pulse-core {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #FFD700;
-}
-
-.status-text {
-  display: flex;
-  flex-direction: column;
-  text-align: left;
-}
-
-.status-label {
-  font-size: 0.75rem;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #FFE680;
-}
-
-.status-desc {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.95);
-  font-weight: 500;
-}
-
-/* ==========================================================================
-   Footer Elements
-   ========================================================================== */
-.footer-bar {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  flex-wrap: wrap;
-  padding-top: 1.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.75);
-}
-
-.social-tags {
-  display: flex;
-  gap: 1rem;
-}
-
-.tag-link {
-  color: rgba(255, 255, 255, 0.85);
-  font-weight: 500;
-  transition: color 0.2s ease;
-}
-
-.tag-link:hover {
-  color: #FFD700;
-}
-
-/* ==========================================================================
-   Keyframe Animations
-   ========================================================================== */
-@keyframes causticsWave {
-  0% { transform: scale(1) translateY(0); }
-  100% { transform: scale(1.08) translateY(-15px); }
-}
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.6),
+    transparent
+  );
+  transform: skewX(-20deg);
 
 @keyframes sunburstPulse {
   0% { opacity: 0.6; transform: scale(0.95); }
