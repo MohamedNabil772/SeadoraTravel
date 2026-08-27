@@ -1,11 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using Seadora.Common.Messaging.Idempotency;
+using Seadora.Finance.Application.Common.Interfaces;
 using Seadora.Finance.Domain;
 using Seadora.Finance.Domain.Entities;
 
 namespace Seadora.Finance.Infrastructure.Persistence;
 
-public class FinanceDbContext : DbContext, IProcessedMessageDbContext
+public class FinanceDbContext : DbContext, IFinanceDbContext, IProcessedMessageDbContext
 {
     private static readonly DateTime SeedAsOfUtc = new(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
     private static readonly Guid IdentityRateId = Guid.Parse("c0000000-0000-0000-0000-000000000001");

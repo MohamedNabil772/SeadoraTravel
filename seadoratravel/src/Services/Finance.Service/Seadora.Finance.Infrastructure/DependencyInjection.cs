@@ -4,6 +4,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Seadora.Common.Messaging;
 using Seadora.Common.Messaging.Idempotency;
 using Seadora.Common.Tenancy;
+using Seadora.Finance.Application.Common.Interfaces;
+using Seadora.Finance.Application.Integration;
 using Seadora.Finance.Infrastructure.Persistence;
 
 namespace Seadora.Finance.Infrastructure;
@@ -25,12 +27,16 @@ public static class DependencyInjection
             options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
         });
 
+        services.AddScoped<IFinanceDbContext>(sp => sp.GetRequiredService<FinanceDbContext>());
+
         services.AddHttpContextAccessor();
         services.AddSeadoraTenancy();
 
         services.AddSeadoraIdempotency<FinanceDbContext>();
-        // ponytail: no consumers yet - add them to this call when Finance starts listening.
-        services.AddSeadoraMessaging(configuration);
+        services.AddSeadoraMessaging(configuration, x =>
+        {
+            x.AddConsumer<FinanceEventConsumers>();
+        });
         return services;
     }
 }
