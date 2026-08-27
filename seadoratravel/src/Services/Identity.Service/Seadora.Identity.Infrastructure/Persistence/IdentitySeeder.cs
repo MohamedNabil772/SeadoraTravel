@@ -26,7 +26,13 @@ public static class IdentitySeeder
             new Permission { Id = "Bookings.Edit", Module = "Bookings & Vouchers", Action = "Edit", DisplayName = "Edit Bookings" },
             new Permission { Id = "Inquiries.View", Module = "Inquiries & Concierge", Action = "View", DisplayName = "View Inquiries" },
             new Permission { Id = "AccessControl.ManageAccess", Module = "Users & Access", Action = "ManageAccess", DisplayName = "Manage Access" },
-            new Permission { Id = "Settings.Edit", Module = "System Settings", Action = "Edit", DisplayName = "Edit Settings" }
+            new Permission { Id = "Settings.Edit", Module = "System Settings", Action = "Edit", DisplayName = "Edit Settings" },
+            new Permission { Id = "Finance.ViewDashboard", Module = "Finance", Action = "ViewDashboard", DisplayName = "View Financial Dashboard" },
+            new Permission { Id = "Finance.ViewReports", Module = "Finance", Action = "ViewReports", DisplayName = "View Financial Reports" },
+            new Permission { Id = "Finance.ManagePayments", Module = "Finance", Action = "ManagePayments", DisplayName = "Record & Manage Payments" },
+            new Permission { Id = "Finance.PostAdjustments", Module = "Finance", Action = "PostAdjustments", DisplayName = "Post Financial Adjustments" },
+            new Permission { Id = "Finance.Reconcile", Module = "Finance", Action = "Reconcile", DisplayName = "Reconcile Payments" },
+            new Permission { Id = "Finance.Export", Module = "Finance", Action = "Export", DisplayName = "Export Financial Reports" }
         };
 
         foreach (var permission in permissions)
@@ -41,7 +47,7 @@ public static class IdentitySeeder
         var roleManager = serviceProvider.GetRequiredService<RoleManager<Role>>();
         var userManager = serviceProvider.GetRequiredService<UserManager<User>>();
 
-        string[] roleNames = { "SuperAdmin", "Admin", "OperationsManager", "ConciergeSpecialist", "Customer" };
+        string[] roleNames = { "SuperAdmin", "Admin", "OperationsManager", "ConciergeSpecialist", "Accountant", "BusinessOwner", "Customer" };
         foreach (var roleName in roleNames)
         {
             if (!await roleManager.RoleExistsAsync(roleName))
@@ -66,7 +72,18 @@ public static class IdentitySeeder
             await context.SaveChangesAsync();
         }
 
-        // Seed SuperAdmin
+        // Assign Finance permissions to Accountant (operate finance) and BusinessOwner (read-only insight).
+        // ponytail: idempotent add-if-missing, same shape as SuperAdmin; admins can still re-tune via RolesView.
+        await AssignPermissionsAsync(context, roleManager, "Accountant", new[]
+        {
+            "Dashboard.View", "Bookings.View",
+            "Finance.ViewDashboard", "Finance.ViewReports", "Finance.ManagePayments",
+            "Finance.PostAdjustments", "Finance.Reconcile", "Finance.Export"
+        });
+        await AssignPermissionsAsync(context, roleManager, "BusinessOwner", new[]
+        {
+            "Dashboard.View", "Finance.ViewDashboard", "Finance.ViewReports", "Finance.Export"
+        });
         var adminEmail = "admin@seadoratravel.com";
         if (await userManager.FindByEmailAsync(adminEmail) == null)
         {
@@ -91,5 +108,41 @@ public static class IdentitySeeder
             await userManager.CreateAsync(customer, "Customer123!");
             await userManager.AddToRoleAsync(customer, "Customer");
         }
+
+        // Seed a demo Accountant and Business Owner so the Finance area is reachable out of the box.
+        var accountantEmail = "accountant@seadoratravel.com";
+        if (await userManager.FindByEmailAsync(accountantEmail) == null)
+        {
+            var accountant = new User { UserName = accountantEmail, Email = accountantEmail, FirstName = "Amina", LastName = "Accountant" };
+            await userManager.CreateAsync(accountant, "Accountant123!");
+            await userManager.AddToRoleAsync(accountant, "Accountant");
+        }
+
+        var ownerEmail = "owner@seadoratravel.com";
+        if (await userManager.FindByEmailAsync(ownerEmail) == null)
+        {
+            var owner = new User { UserName = ownerEmail, Email = ownerEmail, FirstName = "Omar", LastName = "Owner" };
+            await userManager.CreateAsync(owner, "Owner123!");
+            await userManager.AddToRoleAsync(owner, "BusinessOwner");
+        }
+    }
+
+    // ponytail: idempotent role->permission assignment; skips silently if the role or a permission id is missing.
+    private static async Task AssignPermissionsAsync(SeadoraIdentityDbContext context, RoleManager<Role> roleManager, string roleName, string[] permissionIds)
+    {
+        var role = await roleManager.FindByNameAsync(roleName);
+        if (role == null) return;
+
+        var existing = await context.RolePermissions.Where(rp => rp.RoleId == role.Id).Select(rp => rp.PermissionId).ToListAsync();
+        var valid = await context.Permissions.Where(p => permissionIds.Contains(p.Id)).Select(p => p.Id).ToListAsync();
+
+        foreach (var permId in valid)
+        {
+            if (!existing.Contains(permId))
+            {
+                context.RolePermissions.Add(new RolePermission { RoleId = role.Id, PermissionId = permId });
+            }
+        }
+        await context.SaveChangesAsync();
     }
 }
