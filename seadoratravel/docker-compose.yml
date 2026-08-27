@@ -40,6 +40,7 @@ services:
       - identity-service
       - content-service
       - booking-service
+      - customer-service
       - file-server
 
   identity-service:
@@ -94,6 +95,21 @@ services:
       - Smtp__FromAddress=${SMTP_FROM:-noreply@seadoratravel.com}
       - Smtp__FromName=${SMTP_FROMNAME:-Seadora Travel}
       - Smtp__LogoUrl=${SMTP_LOGO_URL:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  customer-service:
+    build:
+      context: .
+      dockerfile: src/Services/Customer.Service/Seadora.Customer.API/Dockerfile
+    restart: on-failure
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Username=${RABBITMQ_USER:-seadora}
+      - RabbitMq__Password=${RABBITMQ_PASS:-seadora}
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Customer;Username=postgres;Password=postgres
     depends_on:
       postgres:
         condition: service_healthy
