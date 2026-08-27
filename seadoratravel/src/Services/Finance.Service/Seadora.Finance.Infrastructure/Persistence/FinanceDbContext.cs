@@ -1,12 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using Seadora.Common.Messaging.Idempotency;
+using Seadora.Common.Messaging.Outbox;
 using Seadora.Finance.Application.Common.Interfaces;
 using Seadora.Finance.Domain;
 using Seadora.Finance.Domain.Entities;
 
 namespace Seadora.Finance.Infrastructure.Persistence;
 
-public class FinanceDbContext : DbContext, IFinanceDbContext, IProcessedMessageDbContext
+public class FinanceDbContext : DbContext, IFinanceDbContext, IProcessedMessageDbContext, IOutboxDbContext
 {
     private static readonly DateTime SeedAsOfUtc = new(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc);
     private static readonly Guid IdentityRateId = Guid.Parse("c0000000-0000-0000-0000-000000000001");
@@ -22,6 +23,7 @@ public class FinanceDbContext : DbContext, IFinanceDbContext, IProcessedMessageD
     public DbSet<BookingFinancialSnapshot> BookingFinancialSnapshots => Set<BookingFinancialSnapshot>();
     public DbSet<RevenueDaily> RevenueDaily => Set<RevenueDaily>();
     public DbSet<ProcessedMessage> ProcessedMessages => Set<ProcessedMessage>();
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -146,5 +148,8 @@ public class FinanceDbContext : DbContext, IFinanceDbContext, IProcessedMessageD
         });
 
         modelBuilder.Entity<ProcessedMessage>().HasKey(p => new { p.MessageId, p.ConsumerName });
+
+        // ponytail: Finance now publishes (PaymentRecorded) via the shared transactional outbox.
+        modelBuilder.Entity<OutboxMessage>();
     }
 }

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Seadora.Common.Messaging;
 using Seadora.Common.Messaging.Idempotency;
+using Seadora.Common.Messaging.Outbox;
 using Seadora.Common.Tenancy;
 using Seadora.Finance.Application.Common.Interfaces;
 using Seadora.Finance.Application.Integration;
@@ -33,6 +34,7 @@ public static class DependencyInjection
         services.AddSeadoraTenancy();
 
         services.AddSeadoraIdempotency<FinanceDbContext>();
+        services.AddSeadoraOutbox<FinanceDbContext>();
         services.AddSeadoraMessaging(configuration, x =>
         {
             x.AddConsumer<FinanceEventConsumers>();
