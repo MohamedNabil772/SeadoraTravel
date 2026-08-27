@@ -8,6 +8,7 @@ using Seadora.Booking.Infrastructure.Persistence;
 using Seadora.Booking.Infrastructure.Services;
 using Seadora.Common.Messaging;
 using Seadora.Common.Messaging.Idempotency;
+using Seadora.Common.Messaging.Outbox;
 using Seadora.Common.Tenancy;
 
 namespace Seadora.Booking.Infrastructure;
@@ -38,6 +39,7 @@ public static class DependencyInjection
         {
             x.AddConsumer<TourProjectionConsumers>();
         });
+        services.AddSeadoraOutbox<BookingDbContext>();
 
         services.AddHostedService<Seadora.Booking.Infrastructure.BackgroundServices.CashReservationCleanupWorker>();
         

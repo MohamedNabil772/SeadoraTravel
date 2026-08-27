@@ -2,14 +2,16 @@ using Microsoft.EntityFrameworkCore;
 using Seadora.Booking.Application.Common.Interfaces;
 using Seadora.Booking.Domain.Entities;
 using Seadora.Common.Messaging.Idempotency;
+using Seadora.Common.Messaging.Outbox;
 
 namespace Seadora.Booking.Infrastructure.Persistence;
 
-public class BookingDbContext : DbContext, IBookingDbContext, IProcessedMessageDbContext
+public class BookingDbContext : DbContext, IBookingDbContext, IProcessedMessageDbContext, IOutboxDbContext
 {
     public BookingDbContext(DbContextOptions<BookingDbContext> options) : base(options) { }
 
     public DbSet<ProcessedMessage> ProcessedMessages => Set<ProcessedMessage>();
+    public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
     public DbSet<TourProjection> TourProjections => Set<TourProjection>();
     public DbSet<Departure> Departures => Set<Departure>();
 
@@ -43,8 +45,9 @@ public class BookingDbContext : DbContext, IBookingDbContext, IProcessedMessageD
             .Property(c => c.Status)
             .HasConversion<string>();
 
-        // ponytail: Booking is consumer-only here, so no OutboxMessage mapping (YAGNI until it publishes)
+        // ponytail: Booking both consumes (ProcessedMessages) and publishes (OutboxMessages) now.
         modelBuilder.Entity<ProcessedMessage>().HasKey(p => new { p.MessageId, p.ConsumerName });
+        modelBuilder.Entity<OutboxMessage>();
 
         modelBuilder.Entity<TourProjection>().HasKey(p => p.TourId);
         modelBuilder.Entity<TourProjection>().Property(p => p.AllocationModel).HasConversion<string>();

@@ -52,6 +52,7 @@ public class BookingMoneyTests
         BookingDbContext db = new MoneyTestDbContext(options);
         var handler = new CreateBookingCommandHandler(
             db, new NoOpWhatsApp(), new NoOpEmail(), new HeadOfficeBranch(),
+            new Seadora.Common.Messaging.Outbox.OutboxWriter(db),
             NullLogger<CreateBookingCommandHandler>.Instance);
         return (handler, db);
     }

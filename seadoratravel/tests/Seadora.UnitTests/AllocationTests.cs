@@ -51,6 +51,7 @@ public class AllocationTests
         BookingDbContext db = new TestBookingDbContext(options);
         var handler = new CreateBookingCommandHandler(
             db, new NoOpWhatsApp(), new NoOpEmail(), new HeadOfficeBranch(),
+            new Seadora.Common.Messaging.Outbox.OutboxWriter(db),
             NullLogger<CreateBookingCommandHandler>.Instance);
         return (handler, db);
     }
@@ -128,6 +129,22 @@ public class AllocationTests
         Assert.Equal(int.MaxValue, departure.Capacity);
         Assert.Equal(AllocationModel.Shared, departure.AllocationModel);
         Assert.Equal(SeadoraBranches.HeadOffice, departure.BranchId);
+    }
+
+    [Fact]
+    public async Task CreateBooking_Enqueues_One_BookingPlaced_Outbox_Row()
+    {
+        var (handler, db) = Build();
+        var tourId = Guid.NewGuid();
+        SeedProjection(db, tourId, maxCapacity: 10, AllocationModel.Shared);
+
+        var bookingId = await handler.Handle(Booking(tourId, 2), default);
+
+        db.ChangeTracker.Clear();
+        var row = Assert.Single(db.OutboxMessages);
+        var evt = System.Text.Json.JsonSerializer.Deserialize<Seadora.Contracts.Events.BookingPlaced>(row.Payload);
+        Assert.NotNull(evt);
+        Assert.Equal(bookingId, evt!.BookingId);
     }
 
     [Fact]

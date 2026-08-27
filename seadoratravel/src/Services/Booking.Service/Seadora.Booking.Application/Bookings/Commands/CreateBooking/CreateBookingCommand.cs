@@ -4,8 +4,10 @@ using Seadora.Booking.Domain.Entities;
 using Seadora.Booking.Domain.ValueObjects;
 using Seadora.Booking.Application.Common.Interfaces;
 using Seadora.Booking.Application.DTOs;
+using Seadora.Common.Messaging.Outbox;
 using Seadora.Common.Tenancy;
 using Seadora.Contracts.Enums;
+using Seadora.Contracts.Events;
 using Microsoft.Extensions.Logging;
 
 namespace Seadora.Booking.Application.Bookings.Commands.CreateBooking;
@@ -37,16 +39,18 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
     private readonly IWhatsAppNotificationService _whatsAppService;
     private readonly IEmailSender _emailSender;
     private readonly ICurrentBranch _currentBranch;
+    private readonly IOutboxWriter _outbox;
     private readonly ILogger<CreateBookingCommandHandler> _logger;
     private static readonly System.Text.RegularExpressions.Regex EmailRegex = 
         new(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", System.Text.RegularExpressions.RegexOptions.Compiled | System.Text.RegularExpressions.RegexOptions.IgnoreCase);
 
-    public CreateBookingCommandHandler(IBookingDbContext context, IWhatsAppNotificationService whatsAppService, IEmailSender emailSender, ICurrentBranch currentBranch, ILogger<CreateBookingCommandHandler> logger)
+    public CreateBookingCommandHandler(IBookingDbContext context, IWhatsAppNotificationService whatsAppService, IEmailSender emailSender, ICurrentBranch currentBranch, IOutboxWriter outbox, ILogger<CreateBookingCommandHandler> logger)
     {
         _context = context;
         _whatsAppService = whatsAppService;
         _emailSender = emailSender;
         _currentBranch = currentBranch;
+        _outbox = outbox;
         _logger = logger;
     }
 
@@ -177,6 +181,23 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
         booking.Money = Money.Create(subtotal, addonsTotal, discount: 0m, taxTotal: 0m,
             projection?.Currency ?? "EUR");
 
+        // ponytail: built once so its Id is stable across retries; enqueued inside the attempt lambda so it
+        // commits in the SAME transaction as the booking (outbox = atomic publish) and survives ChangeTracker.Clear().
+        // ponytail: booking.CustomerId stays null - the reverse link (Customer -> Booking.CustomerId) is deferred
+        // until a Booking-side query actually needs it.
+        var placed = new BookingPlaced
+        {
+            BookingId = booking.Id,
+            BranchId = booking.BranchId,
+            CustomerEmail = booking.CustomerEmail,
+            CustomerName = booking.CustomerName,
+            Phone = booking.WhatsApp,
+            TourId = booking.TourId,
+            TourDate = booking.TourDate,
+            Amount = booking.Money?.Total ?? booking.TotalPrice,
+            Currency = booking.Money?.Currency ?? "EUR"
+        };
+
         await CommitWithRetryAsync(async () =>
         {
             var departure = await _context.Departures.FirstOrDefaultAsync(
@@ -224,6 +245,8 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
                 // touch the row so its xmin token is checked in this same commit
                 _context.Departures.Update(departure);
             }
+
+            _outbox.Enqueue(placed);
 
             await _context.SaveChangesAsync(cancellationToken);
         }, () => _context.ChangeTracker.Clear());
