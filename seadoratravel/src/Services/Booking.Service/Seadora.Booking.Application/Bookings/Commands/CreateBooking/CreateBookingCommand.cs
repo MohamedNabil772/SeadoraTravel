@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using Seadora.Booking.Domain.Entities;
+using Seadora.Booking.Domain.ValueObjects;
 using Seadora.Booking.Application.Common.Interfaces;
 using Seadora.Booking.Application.DTOs;
 using Seadora.Common.Tenancy;
@@ -165,6 +166,16 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
 
         var projection = await _context.TourProjections
             .FirstOrDefaultAsync(p => p.TourId == request.TourId, cancellationToken);
+
+        booking.BranchId = _currentBranch.BranchId;
+        booking.TourTypeCode = projection?.TourTypeCode; // snapshot; null for legacy tours with no projection
+
+        // ponytail: discount/tax are 0 until the pricing engine lands - the breakdown only claims what the
+        // client posted, so Money.Total == request.TotalPrice and nothing downstream shifts.
+        var addonsTotal = booking.SelectedAddons?.Sum(a => a.TotalPrice) ?? 0m;
+        var subtotal = Math.Max(0m, request.TotalPrice - addonsTotal);
+        booking.Money = Money.Create(subtotal, addonsTotal, discount: 0m, taxTotal: 0m,
+            projection?.Currency ?? "EUR");
 
         await CommitWithRetryAsync(async () =>
         {

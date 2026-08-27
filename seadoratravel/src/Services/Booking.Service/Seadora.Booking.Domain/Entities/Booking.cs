@@ -1,5 +1,6 @@
 using System;
 using Seadora.Booking.Domain.Enums;
+using Seadora.Booking.Domain.ValueObjects;
 
 namespace Seadora.Booking.Domain.Entities;
 
@@ -30,4 +31,11 @@ public class Booking
     public bool MissingIdentification { get; set; }
     public List<BookingAddonSnapshot> SelectedAddons { get; set; } = new();
     public List<GuestDetail> GuestsList { get; set; } = new();
+
+    // Snapshot of the branch / tour-type the booking was made under, for multi-branch reporting.
+    public Guid BranchId { get; set; }
+    public Guid? CustomerId { get; set; }
+    public string? TourTypeCode { get; set; }
+    // ponytail: nullable so pre-existing rows and any path that doesn't set it stay valid.
+    public Money? Money { get; set; }
 }

@@ -32,6 +32,9 @@ public class BookingDbContext : DbContext, IBookingDbContext, IProcessedMessageD
             .Property(booking => booking.GuestsList)
             .HasColumnType("jsonb");
 
+        // ponytail: owned-to-columns (Money_*), not jsonb - keeps it queryable and InMemory-materializable.
+        modelBuilder.Entity<Seadora.Booking.Domain.Entities.Booking>().OwnsOne(b => b.Money);
+
         modelBuilder.Entity<Seadora.Booking.Domain.Entities.Notification>()
             .Property(n => n.Type)
             .HasConversion<string>();

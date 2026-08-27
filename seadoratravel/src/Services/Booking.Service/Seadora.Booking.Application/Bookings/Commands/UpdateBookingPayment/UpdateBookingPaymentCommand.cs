@@ -29,6 +29,14 @@ public class UpdateBookingPaymentCommandHandler : IRequestHandler<UpdateBookingP
         }
 
         booking.IsPaid = request.IsPaid;
+        // IsPaid stays the gate the confirm guard reads; Money mirrors it for the Finance phase.
+        if (booking.Money is not null)
+        {
+            booking.Money = request.IsPaid
+                ? booking.Money.WithPayment(booking.Money.Total)
+                : booking.Money.WithPayment(0m);
+        }
+
         await _context.SaveChangesAsync(cancellationToken);
 
         return Unit.Value;
