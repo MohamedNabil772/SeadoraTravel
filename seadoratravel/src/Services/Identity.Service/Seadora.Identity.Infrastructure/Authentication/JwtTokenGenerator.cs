@@ -47,6 +47,12 @@ public class JwtTokenGenerator : IJwtTokenGenerator
             if (role == "SuperAdmin")
             {
                 claims.Add(new Claim("permission", "*"));
+                // ponytail: SuperAdmin is the top role; grant the legacy "Admin" role claim so
+                // every existing [Authorize(Roles="Admin")] gate (e.g. UsersController) accepts it.
+                if (!roles.Contains("Admin"))
+                {
+                    claims.Add(new Claim(ClaimTypes.Role, "Admin"));
+                }
             }
         }
 

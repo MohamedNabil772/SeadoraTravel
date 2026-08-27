@@ -1,0 +1,14 @@
+Fix: SuperAdmin locked out of admin user management; drop defunct BookingManager refs
+
+Root cause: RBAC rework made SuperAdmin the top role, but UsersController still
+gates on [Authorize(Roles="Admin")], so the seeded SuperAdmin got 403 on
+/api/users and /api/users/roles, and the edit-user roles list came back
+empty/stale.
+
+- JwtTokenGenerator: emit an "Admin" role claim for SuperAdmin users so every
+  legacy Roles="Admin" gate accepts the top role (one place, all callers).
+- UsersView: remove hardcoded BookingManager (a role that no longer exists) from
+  the stats card and badge helper; make them role-agnostic. Role checkboxes were
+  already sourced dynamically from /api/auth/api/users/roles.
+
+Co-authored-by: Copilot <223556219+Copilot@users.noreply.github.com>

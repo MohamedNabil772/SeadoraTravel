@@ -73,10 +73,10 @@ const paginatedUsers = computed(() => {
 
 const stats = computed(() => {
   const total = users.value.length
-  const admins = users.value.filter(u => u.roles.includes('Admin')).length
-  const managers = users.value.filter(u => u.roles.includes('BookingManager')).length
+  const admins = users.value.filter(u => u.roles.includes('Admin') || u.roles.includes('SuperAdmin')).length
+  const staff = users.value.filter(u => u.roles.some(r => r !== 'Customer')).length
   const customers = users.value.filter(u => u.roles.includes('Customer')).length
-  return { total, admins, managers, customers }
+  return { total, admins, managers: staff, customers }
 })
 
 function openCreateModal() {
@@ -170,9 +170,9 @@ async function deleteUser(user: User) {
 }
 
 function getRoleClass(role: string) {
-  if (role === 'Admin') return 'role-badge-admin'
-  if (role === 'BookingManager') return 'role-badge-manager'
-  return 'role-badge-customer'
+  if (role === 'Admin' || role === 'SuperAdmin') return 'role-badge-admin'
+  if (role === 'Customer') return 'role-badge-customer'
+  return 'role-badge-manager'
 }
 
 onMounted(() => {
@@ -214,7 +214,7 @@ onMounted(() => {
       <div class="stats-card">
         <div class="stats-icon bg-purple-100 text-purple-600">💼</div>
         <div class="stats-info">
-          <span class="stats-label">Booking Managers</span>
+          <span class="stats-label">Staff</span>
           <span class="stats-value">{{ stats.managers }}</span>
         </div>
       </div>
