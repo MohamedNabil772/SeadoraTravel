@@ -41,6 +41,7 @@ services:
       - content-service
       - booking-service
       - customer-service
+      - finance-service
       - file-server
 
   identity-service:
@@ -110,6 +111,21 @@ services:
       - RabbitMq__Username=${RABBITMQ_USER:-seadora}
       - RabbitMq__Password=${RABBITMQ_PASS:-seadora}
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Customer;Username=postgres;Password=postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  finance-service:
+    build:
+      context: .
+      dockerfile: src/Services/Finance.Service/Seadora.Finance.API/Dockerfile
+    restart: on-failure
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Username=${RABBITMQ_USER:-seadora}
+      - RabbitMq__Password=${RABBITMQ_PASS:-seadora}
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Finance;Username=postgres;Password=postgres
     depends_on:
       postgres:
         condition: service_healthy
