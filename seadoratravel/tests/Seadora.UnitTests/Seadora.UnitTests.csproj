@@ -31,6 +31,7 @@
     <ProjectReference Include="..\..\src\Services\Customer.Service\Seadora.Customer.Application\Seadora.Customer.Application.csproj" />
     <ProjectReference Include="..\..\src\Services\Customer.Service\Seadora.Customer.Domain\Seadora.Customer.Domain.csproj" />
     <ProjectReference Include="..\..\src\Services\Customer.Service\Seadora.Customer.Infrastructure\Seadora.Customer.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Services\Finance.Service\Seadora.Finance.Domain\Seadora.Finance.Domain.csproj" />
   </ItemGroup>
 
 </Project>
