@@ -6,6 +6,8 @@ using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
 using Seadora.Booking.Application.Common.Interfaces;
 using Seadora.Booking.Domain.Enums;
+using Seadora.Common.Messaging.Outbox;
+using Seadora.Contracts.Events;
 using System.Collections.Generic;
 
 namespace Seadora.Booking.Application.Bookings.Commands.UpdateBookingStatus;
@@ -18,13 +20,15 @@ public class UpdateBookingStatusCommandHandler : IRequestHandler<UpdateBookingSt
     private readonly IWhatsAppNotificationService _whatsAppService;
     private readonly IEmailSender _emailSender;
     private readonly ILogger<UpdateBookingStatusCommandHandler> _logger;
+    private readonly IOutboxWriter _outbox;
 
-    public UpdateBookingStatusCommandHandler(IBookingDbContext context, IWhatsAppNotificationService whatsAppService, IEmailSender emailSender, ILogger<UpdateBookingStatusCommandHandler> logger)
+    public UpdateBookingStatusCommandHandler(IBookingDbContext context, IWhatsAppNotificationService whatsAppService, IEmailSender emailSender, ILogger<UpdateBookingStatusCommandHandler> logger, IOutboxWriter outbox)
     {
         _context = context;
         _whatsAppService = whatsAppService;
         _emailSender = emailSender;
         _logger = logger;
+        _outbox = outbox;
     }
 
     public async Task<Unit> Handle(UpdateBookingStatusCommand request, CancellationToken cancellationToken)
@@ -40,6 +44,21 @@ public class UpdateBookingStatusCommandHandler : IRequestHandler<UpdateBookingSt
         ValidateTransition(booking, request.Status);
 
         booking.Status = request.Status;
+
+        if (request.Status == BookingStatus.Cancelled)
+        {
+            _outbox.Enqueue(new BookingCancelled
+            {
+                BookingId = booking.Id,
+                BranchId = booking.BranchId,
+                // ponytail: cancellation-policy refund amount feeds this once the refund action exists; Finance
+                // reverses the accrual on cancel regardless and only posts a refund when RefundAmount > 0.
+                RefundAmount = 0m,
+                Currency = booking.Money?.Currency ?? "EUR",
+                Reason = null
+            });
+        }
+
         await _context.SaveChangesAsync(cancellationToken);
 
         if (request.Status == BookingStatus.Completed)

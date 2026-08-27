@@ -38,6 +38,7 @@ public static class DependencyInjection
         services.AddSeadoraMessaging(configuration, x =>
         {
             x.AddConsumer<TourProjectionConsumers>();
+            x.AddConsumer<PaymentRecordedConsumer>();
         });
         services.AddSeadoraOutbox<BookingDbContext>();
 

@@ -141,7 +141,8 @@ public class AllocationTests
         var bookingId = await handler.Handle(Booking(tourId, 2), default);
 
         db.ChangeTracker.Clear();
-        var row = Assert.Single(db.OutboxMessages);
+        var row = db.OutboxMessages.AsEnumerable()
+            .Single(m => m.Type.StartsWith(typeof(Seadora.Contracts.Events.BookingPlaced).FullName!, StringComparison.Ordinal));
         var evt = System.Text.Json.JsonSerializer.Deserialize<Seadora.Contracts.Events.BookingPlaced>(row.Payload);
         Assert.NotNull(evt);
         Assert.Equal(bookingId, evt!.BookingId);

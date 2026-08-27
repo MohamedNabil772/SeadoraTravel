@@ -198,6 +198,25 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
             Currency = booking.Money?.Currency ?? "EUR"
         };
 
+        // ponytail: SupplierId/SupplierPercentage stay empty - TourProjection carries no supplier info yet;
+        // supplier enrichment lands when the projection does.
+        var revenue = new BookingRevenueRecognized
+        {
+            BookingId = booking.Id,
+            BranchId = booking.BranchId,
+            CustomerId = booking.CustomerId,
+            TourId = booking.TourId,
+            TourTypeCode = booking.TourTypeCode,
+            Subtotal = booking.Money?.Subtotal ?? 0m,
+            AddonsTotal = booking.Money?.AddonsTotal ?? 0m,
+            Discount = booking.Money?.Discount ?? 0m,
+            TaxTotal = booking.Money?.TaxTotal ?? 0m,
+            Total = booking.Money?.Total ?? booking.TotalPrice,
+            Currency = booking.Money?.Currency ?? "EUR",
+            SupplierId = null,
+            SupplierPercentage = 0m
+        };
+
         await CommitWithRetryAsync(async () =>
         {
             var departure = await _context.Departures.FirstOrDefaultAsync(
@@ -247,6 +266,7 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
             }
 
             _outbox.Enqueue(placed);
+            _outbox.Enqueue(revenue);
 
             await _context.SaveChangesAsync(cancellationToken);
         }, () => _context.ChangeTracker.Clear());
