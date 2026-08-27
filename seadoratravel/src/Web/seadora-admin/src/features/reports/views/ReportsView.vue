@@ -159,6 +159,16 @@ function formatDate(dateStr: string) {
 
 <template>
   <div class="reports-page">
+    <!-- ponytail: legacy Booking-backed reports; superseded by the Finance module (double-entry ledger). Kept live for continuity. -->
+    <div class="mb-4 flex items-start gap-3 rounded-lg border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+      <span class="text-lg leading-none">ℹ️</span>
+      <p class="flex-1">
+        These are the legacy operational reports. Detailed accounting reports, owner dashboards and payment
+        recording now live in the new
+        <RouterLink to="/finance/dashboard" class="font-semibold underline hover:text-amber-700">Finance module</RouterLink>,
+        backed by the double-entry ledger.
+      </p>
+    </div>
     <div class="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
       <div class="page-header">
         <h2>Reports & Financial Center</h2>

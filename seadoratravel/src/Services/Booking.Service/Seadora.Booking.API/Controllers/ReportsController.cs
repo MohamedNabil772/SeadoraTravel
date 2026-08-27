@@ -9,6 +9,9 @@ using Seadora.Booking.Application.Common.Interfaces;
 
 namespace Seadora.Booking.API.Controllers;
 
+// ponytail: Superseded by the Finance service (Seadora.Finance) double-entry ledger reports.
+// Retained (deprecated) so existing admin ReportsView keeps working during the transition; do not extend.
+[Obsolete("Legacy operational reporting. Use the Finance service (api/finance/api/reports & /dashboard) instead.")]
 [ApiController]
 [Route("api/[controller]")]
 public class ReportsController : ControllerBase
