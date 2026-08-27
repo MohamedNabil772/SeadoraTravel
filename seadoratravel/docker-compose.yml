@@ -142,18 +142,20 @@ services:
   seadora-website:
     build:
       context: ./src/Web/seadora-website
+      args:
+        # Local docker review: bake the local gateway URL. Dockerfile default stays
+        # https://api.seadoratravel.com so production builds are unaffected.
+        VITE_API_URL: http://localhost:8000
     ports:
       - "3000:80"
-    environment:
-      - VITE_API_URL=http://localhost:8000
 
   seadora-admin:
     build:
       context: ./src/Web/seadora-admin
+      args:
+        VITE_API_URL: http://localhost:8000
     ports:
       - "3001:80"
-    environment:
-      - VITE_API_URL=http://localhost:8000
 
   backup:
     image: postgres:15-alpine
