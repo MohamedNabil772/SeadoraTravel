@@ -100,7 +100,7 @@ function handleLogout() {
         </SidebarAccordion>
 
         <!-- EXPERIENCE MANAGEMENT -->
-        <SidebarAccordion title="Experience Management" v-if="auth.user?.roles?.includes('Admin') || auth.user?.roles?.includes('BookingManager')" :default-open="true">
+        <SidebarAccordion title="Experience Management" v-if="auth.hasAnyRole(['SuperAdmin', 'Admin', 'OperationsManager'])" :default-open="true">
           <RouterLink 
             to="/tours" 
             class="group relative flex items-center gap-3 rounded-md py-2 px-4 font-medium text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white"
@@ -196,7 +196,7 @@ function handleLogout() {
         </SidebarAccordion>
 
         <!-- ADMINISTRATION & SECURITY -->
-        <SidebarAccordion title="Administration & Security" v-if="auth.user?.roles?.includes('Admin')" :default-open="false">
+        <SidebarAccordion title="Administration & Security" v-if="auth.hasAnyRole(['SuperAdmin', 'Admin'])" :default-open="false">
           <RouterLink 
             to="/settings/languages" 
             class="group relative flex items-center gap-3 rounded-md py-2 px-4 font-medium text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white"
