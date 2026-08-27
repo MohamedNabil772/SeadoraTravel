@@ -11,6 +11,7 @@ public class BookingDbContext : DbContext, IBookingDbContext, IProcessedMessageD
 
     public DbSet<ProcessedMessage> ProcessedMessages => Set<ProcessedMessage>();
     public DbSet<TourProjection> TourProjections => Set<TourProjection>();
+    public DbSet<Departure> Departures => Set<Departure>();
 
     public DbSet<Seadora.Booking.Domain.Entities.Booking> Bookings => Set<Seadora.Booking.Domain.Entities.Booking>();
     public DbSet<Seadora.Booking.Domain.Entities.Feedback> Feedbacks => Set<Seadora.Booking.Domain.Entities.Feedback>();
@@ -44,5 +45,15 @@ public class BookingDbContext : DbContext, IBookingDbContext, IProcessedMessageD
 
         modelBuilder.Entity<TourProjection>().HasKey(p => p.TourId);
         modelBuilder.Entity<TourProjection>().Property(p => p.AllocationModel).HasConversion<string>();
+
+        modelBuilder.Entity<Departure>(e =>
+        {
+            e.HasKey(d => d.Id);
+            e.Property(d => d.AllocationModel).HasConversion<string>();
+            // Npgsql system column xmin as the optimistic concurrency token - adds NO real column
+            e.Property(d => d.Version).IsRowVersion().HasColumnName("xmin").HasColumnType("xid");
+            // one departure per tour/start/slot - concurrent creators collide, one wins
+            e.HasIndex(d => new { d.TourId, d.StartUtc, d.TimeSlot }).IsUnique();
+        });
     }
 }

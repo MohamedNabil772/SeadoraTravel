@@ -28,7 +28,27 @@ public class GetTourAvailabilityQueryHandler : IRequestHandler<GetTourAvailabili
             .Where(b => b.TourId == request.TourId && b.TourDate.HasValue && b.TourDate.Value >= targetDateUtc && b.TourDate.Value < nextDateUtc)
             .Where(b => b.Status != Domain.Enums.BookingStatus.Cancelled)
             .SumAsync(b => b.Guests, cancellationToken);
-            
-        return totalBookedGuests;
+
+        var departureCapacities = await _context.Departures
+            .Where(d => d.TourId == request.TourId && d.StartUtc >= targetDateUtc && d.StartUtc < nextDateUtc)
+            .Select(d => d.Capacity)
+            .ToListAsync(cancellationToken);
+
+        long capacity;
+        if (departureCapacities.Count > 0)
+        {
+            capacity = departureCapacities.Sum(c => (long)c);
+        }
+        else
+        {
+            // ponytail: unknown catalog => don't block. No departure and no projection means unbounded.
+            var maxCapacity = await _context.TourProjections
+                .Where(p => p.TourId == request.TourId)
+                .Select(p => (int?)p.MaxCapacity)
+                .FirstOrDefaultAsync(cancellationToken);
+            capacity = maxCapacity ?? int.MaxValue;
+        }
+
+        return (int)Math.Clamp(capacity - totalBookedGuests, 0, int.MaxValue);
     }
 }

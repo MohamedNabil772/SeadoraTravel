@@ -1,7 +1,10 @@
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Seadora.Booking.Domain.Entities;
 using Seadora.Booking.Application.Common.Interfaces;
 using Seadora.Booking.Application.DTOs;
+using Seadora.Common.Tenancy;
+using Seadora.Contracts.Enums;
 using Microsoft.Extensions.Logging;
 
 namespace Seadora.Booking.Application.Bookings.Commands.CreateBooking;
@@ -32,15 +35,17 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
     private readonly IBookingDbContext _context;
     private readonly IWhatsAppNotificationService _whatsAppService;
     private readonly IEmailSender _emailSender;
+    private readonly ICurrentBranch _currentBranch;
     private readonly ILogger<CreateBookingCommandHandler> _logger;
     private static readonly System.Text.RegularExpressions.Regex EmailRegex = 
         new(@"^[^@\s]+@[^@\s]+\.[^@\s]+$", System.Text.RegularExpressions.RegexOptions.Compiled | System.Text.RegularExpressions.RegexOptions.IgnoreCase);
 
-    public CreateBookingCommandHandler(IBookingDbContext context, IWhatsAppNotificationService whatsAppService, IEmailSender emailSender, ILogger<CreateBookingCommandHandler> logger)
+    public CreateBookingCommandHandler(IBookingDbContext context, IWhatsAppNotificationService whatsAppService, IEmailSender emailSender, ICurrentBranch currentBranch, ILogger<CreateBookingCommandHandler> logger)
     {
         _context = context;
         _whatsAppService = whatsAppService;
         _emailSender = emailSender;
+        _currentBranch = currentBranch;
         _logger = logger;
     }
 
@@ -143,20 +148,74 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
             Status = Seadora.Booking.Domain.Enums.BookingStatus.Pending
         };
 
-        // CROSS-SERVICE BOUNDARY: TotalPrice is client-supplied and tour capacity is unknown here.
-        // Server-side price recomputation and overbooking checks need the Content service's package/addon
-        // pricing and per-tour capacity; only local sanity validation is enforced above.
-        _context.Bookings.Add(booking);
-        
+        // CROSS-SERVICE BOUNDARY: TotalPrice is client-supplied; server-side price recomputation still
+        // needs the Content service's package/addon pricing. Capacity is enforced below via Departures.
         var notification = Seadora.Booking.Domain.Entities.Notification.Create(
             Seadora.Booking.Domain.Enums.NotificationType.BookingCreated,
             "New VIP Tour Booking",
             $"New booking #{booking.Id.ToString().Substring(0, 8).ToUpper()} created by {request.CustomerName} for ${booking.TotalPrice:N2}",
             booking.Id.ToString()
         );
-        _context.Notifications.Add(notification);
 
-        await _context.SaveChangesAsync(cancellationToken);
+        // Departure is resolved server-side from what the website already posts - no new required input.
+        var startUtc = DateTime.SpecifyKind((request.TourDate ?? DateTime.UtcNow).Date, DateTimeKind.Utc);
+        var nextUtc = startUtc.AddDays(1);
+        var slot = request.PickupTime ?? "";
+        var guests = booking.Guests;
+
+        var projection = await _context.TourProjections
+            .FirstOrDefaultAsync(p => p.TourId == request.TourId, cancellationToken);
+
+        await CommitWithRetryAsync(async () =>
+        {
+            var departure = await _context.Departures.FirstOrDefaultAsync(
+                d => d.TourId == request.TourId && d.StartUtc == startUtc && d.TimeSlot == slot, cancellationToken);
+
+            var isNewDeparture = departure is null;
+            if (departure is null)
+            {
+                departure = new Departure
+                {
+                    Id = Guid.NewGuid(),
+                    BranchId = _currentBranch.BranchId,
+                    TourId = request.TourId,
+                    StartUtc = startUtc,
+                    TimeSlot = slot,
+                    // ponytail: unknown catalog => unbounded, don't block legacy tours with no projection.
+                    Capacity = projection?.MaxCapacity ?? int.MaxValue,
+                    AllocationModel = projection?.AllocationModel ?? AllocationModel.Shared
+                };
+                _context.Departures.Add(departure);
+            }
+
+            // ponytail: load matched by TourDate day, not a DepartureId FK - keeps the existing Booking
+            // schema and the public website contract untouched. Add the FK only if slots ever split a day.
+            var existingGuests = await _context.Bookings
+                .Where(b => b.TourId == request.TourId
+                    && b.TourDate.HasValue && b.TourDate.Value >= startUtc && b.TourDate.Value < nextUtc
+                    && b.Status != Seadora.Booking.Domain.Enums.BookingStatus.Cancelled)
+                .SumAsync(b => b.Guests, cancellationToken);
+
+            if (departure.AllocationModel == AllocationModel.WholeUnit && existingGuests > 0)
+            {
+                throw new InvalidOperationException("This departure is already reserved (whole-unit).");
+            }
+
+            if ((long)existingGuests + guests > departure.Capacity)
+            {
+                throw new InvalidOperationException($"Not enough capacity: {departure.Capacity - existingGuests} seats remain, {guests} requested.");
+            }
+
+            _context.Bookings.Add(booking);
+            _context.Notifications.Add(notification);
+            if (!isNewDeparture)
+            {
+                // touch the row so its xmin token is checked in this same commit
+                _context.Departures.Update(departure);
+            }
+
+            await _context.SaveChangesAsync(cancellationToken);
+        }, () => _context.ChangeTracker.Clear());
 
         if (!string.IsNullOrWhiteSpace(booking.WhatsApp))
         {
@@ -182,4 +241,31 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
 
         return booking.Id;
     }
+
+    // ponytail: retry only transient collisions. Capacity rejections are terminal and pass straight through.
+    // The real parallel-safety guarantee (Departure.xmin token + the unique TourId/StartUtc/TimeSlot index)
+    // is DB-level and only provable against Postgres; InMemory tests cover the wiring, not the guarantee.
+    public static async Task CommitWithRetryAsync(Func<Task> attempt, Action reset, int maxAttempts = 3)
+    {
+        for (var i = 1; ; i++)
+        {
+            try
+            {
+                await attempt();
+                return;
+            }
+            catch (DbUpdateException ex) when (ex is DbUpdateConcurrencyException || IsUniqueViolation(ex))
+            {
+                if (i >= maxAttempts)
+                {
+                    throw new InvalidOperationException("Booking could not be completed due to high demand, please retry.", ex);
+                }
+                reset();
+            }
+        }
+    }
+
+    // ponytail: duck-typed SqlState beats pulling an Npgsql reference into Application for one comparison.
+    private static bool IsUniqueViolation(DbUpdateException ex) =>
+        ex.InnerException?.GetType().GetProperty("SqlState")?.GetValue(ex.InnerException) as string == "23505";
 }
