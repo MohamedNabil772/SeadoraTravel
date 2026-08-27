@@ -76,6 +76,18 @@ const router = createRouter({
           meta: { title: 'Booking Details' }
         },
         {
+          path: 'customers',
+          name: 'customers',
+          component: () => import('../features/customers/views/CustomersView.vue'),
+          meta: { title: 'Customers (CRM)' }
+        },
+        {
+          path: 'customers/:id',
+          name: 'customer-details',
+          component: () => import('../features/customers/views/CustomerDetailsView.vue'),
+          meta: { title: 'Customer Profile' }
+        },
+        {
           path: 'feedback',
           name: 'feedback',
           component: () => import('../features/feedback/views/FeedbackView.vue')

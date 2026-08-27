@@ -29,6 +29,12 @@ public class GetCustomerByIdQueryHandler : IRequestHandler<GetCustomerByIdQuery,
 
         if (customer is null) return null;
 
+        var history = await _context.BookingHistory.AsNoTracking()
+            .Where(h => h.CustomerId == customer.Id)
+            .OrderByDescending(h => h.PlacedUtc)
+            .Select(h => new CustomerBookingHistoryDto(h.Id, h.BookingId, h.TourId, h.TourDate, h.Amount, h.Currency, h.PlacedUtc))
+            .ToListAsync(cancellationToken);
+
         return new CustomerDetailDto(
             customer.Id,
             customer.FullName,
@@ -44,6 +50,7 @@ public class GetCustomerByIdQueryHandler : IRequestHandler<GetCustomerByIdQuery,
             customer.Documents
                 .OrderByDescending(d => d.UploadedUtc)
                 .Select(d => new CustomerDocumentDto(d.Id, d.CustomerId, d.DocumentType, d.FileRef, d.FileName, d.UploadedUtc, d.RetentionUntilUtc))
-                .ToList());
+                .ToList(),
+            history);
     }
 }

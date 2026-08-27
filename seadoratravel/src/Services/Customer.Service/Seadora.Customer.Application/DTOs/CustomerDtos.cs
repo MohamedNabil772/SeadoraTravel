@@ -18,6 +18,15 @@ public record CustomerDocumentDto(
     DateTime UploadedUtc,
     DateTime? RetentionUntilUtc);
 
+public record CustomerBookingHistoryDto(
+    Guid Id,
+    Guid BookingId,
+    Guid TourId,
+    DateTime? TourDate,
+    decimal Amount,
+    string Currency,
+    DateTime PlacedUtc);
+
 public record CustomerDetailDto(
     Guid Id,
     string FullName,
@@ -30,4 +39,5 @@ public record CustomerDetailDto(
     DateTime? ConsentUpdatedUtc,
     DateTime CreatedUtc,
     DateTime UpdatedUtc,
-    List<CustomerDocumentDto> Documents);
+    List<CustomerDocumentDto> Documents,
+    List<CustomerBookingHistoryDto> BookingHistory);

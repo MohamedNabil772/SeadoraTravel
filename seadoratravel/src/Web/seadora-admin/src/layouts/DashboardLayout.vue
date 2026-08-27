@@ -146,6 +146,14 @@ function handleLogout() {
             <span>Bookings</span>
           </RouterLink>
           <RouterLink 
+            to="/customers" 
+            class="group relative flex items-center gap-3 rounded-md py-2 px-4 font-medium text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white"
+            active-class="bg-white/10 text-white shadow-sm ring-1 ring-white/10"
+          >
+            <span class="opacity-70 group-hover:opacity-100 transition-opacity">👤</span>
+            <span>Customers</span>
+          </RouterLink>
+          <RouterLink 
             to="/inquiries" 
             class="group relative flex items-center gap-3 rounded-md py-2 px-4 font-medium text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white"
             active-class="bg-white/10 text-white shadow-sm ring-1 ring-white/10"
