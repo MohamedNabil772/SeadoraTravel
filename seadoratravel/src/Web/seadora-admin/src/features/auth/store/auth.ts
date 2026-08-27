@@ -13,7 +13,7 @@ export const useAuthStore = defineStore('auth', () => {
     const data = response.data
     
     const roles: string[] = data.roles || []
-    const allowedAdminRoles = ['SuperAdmin', 'Admin', 'BookingManager', 'OperationsManager', 'ConciergeSpecialist']
+    const allowedAdminRoles = ['SuperAdmin', 'Admin', 'BookingManager', 'OperationsManager', 'ConciergeSpecialist', 'Accountant', 'BusinessOwner']
     if (roles.length > 0 && !roles.some(r => allowedAdminRoles.includes(r))) {
       throw new Error('Unauthorized: You do not have permissions to access the admin panel.')
     }
@@ -50,5 +50,16 @@ export const useAuthStore = defineStore('auth', () => {
     }
   }
 
-  return { user, token, isAuthenticated, login, logout, initAuth }
+  // Finance and other module nav/routes gate on fine-grained permissions; '*' is the super-admin wildcard.
+  function hasPermission(permission: string): boolean {
+    const perms: string[] = user.value?.permissions || []
+    return perms.includes('*') || perms.includes(permission)
+  }
+
+  function hasAnyRole(roles: string[]): boolean {
+    const userRoles: string[] = user.value?.roles || []
+    return userRoles.some(r => roles.includes(r))
+  }
+
+  return { user, token, isAuthenticated, login, logout, initAuth, hasPermission, hasAnyRole }
 })

@@ -114,6 +114,24 @@ const router = createRouter({
           component: () => import('../features/reports/views/ReportsView.vue')
         },
         {
+          path: 'finance/dashboard',
+          name: 'finance-dashboard',
+          component: () => import('../features/finance/views/FinanceDashboardView.vue'),
+          meta: { title: 'Finance Dashboard' }
+        },
+        {
+          path: 'finance/reports',
+          name: 'finance-reports',
+          component: () => import('../features/finance/views/FinanceReportsView.vue'),
+          meta: { title: 'Financial Reports' }
+        },
+        {
+          path: 'finance/payments',
+          name: 'finance-payments',
+          component: () => import('../features/finance/views/PaymentsView.vue'),
+          meta: { title: 'Payments' }
+        },
+        {
           path: 'settings/languages',
           name: 'languages',
           component: () => import('../features/languages/views/LanguagesView.vue'),

@@ -164,6 +164,37 @@ function handleLogout() {
           </RouterLink>
         </SidebarAccordion>
 
+        <!-- FINANCE & ACCOUNTING -->
+        <SidebarAccordion title="Finance & Accounting" v-if="auth.hasPermission('Finance.ViewDashboard') || auth.hasPermission('Finance.ViewReports') || auth.hasPermission('Finance.ManagePayments')" :default-open="false">
+          <RouterLink
+            v-if="auth.hasPermission('Finance.ViewDashboard')"
+            to="/finance/dashboard"
+            class="group relative flex items-center gap-3 rounded-md py-2 px-4 font-medium text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white"
+            active-class="bg-white/10 text-white shadow-sm ring-1 ring-white/10"
+          >
+            <span class="opacity-70 group-hover:opacity-100 transition-opacity">📈</span>
+            <span>Dashboard</span>
+          </RouterLink>
+          <RouterLink
+            v-if="auth.hasPermission('Finance.ViewReports')"
+            to="/finance/reports"
+            class="group relative flex items-center gap-3 rounded-md py-2 px-4 font-medium text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white"
+            active-class="bg-white/10 text-white shadow-sm ring-1 ring-white/10"
+          >
+            <span class="opacity-70 group-hover:opacity-100 transition-opacity">📑</span>
+            <span>Reports</span>
+          </RouterLink>
+          <RouterLink
+            v-if="auth.hasPermission('Finance.ManagePayments')"
+            to="/finance/payments"
+            class="group relative flex items-center gap-3 rounded-md py-2 px-4 font-medium text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white"
+            active-class="bg-white/10 text-white shadow-sm ring-1 ring-white/10"
+          >
+            <span class="opacity-70 group-hover:opacity-100 transition-opacity">💳</span>
+            <span>Payments</span>
+          </RouterLink>
+        </SidebarAccordion>
+
         <!-- ADMINISTRATION & SECURITY -->
         <SidebarAccordion title="Administration & Security" v-if="auth.user?.roles?.includes('Admin')" :default-open="false">
           <RouterLink 
