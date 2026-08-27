@@ -387,7 +387,7 @@ onMounted(() => {
                   </svg>
                 </span>
                 <span
-                  class="text-sm font-medium truncate transition-colors duration-150"
+                  class="text-sm font-medium leading-tight transition-colors duration-150"
                   :class="form.roles.includes(role) ? 'text-amber-900' : 'text-slate-600'"
                 >{{ formatRole(role) }}</span>
               </label>
