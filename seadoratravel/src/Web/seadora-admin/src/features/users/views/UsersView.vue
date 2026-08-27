@@ -175,6 +175,10 @@ function getRoleClass(role: string) {
   return 'role-badge-manager'
 }
 
+function formatRole(role: string) {
+  return role.replace(/([a-z])([A-Z])/g, '$1 $2')
+}
+
 onMounted(() => {
   authStore.initAuth()
   fetchData()
@@ -360,19 +364,35 @@ onMounted(() => {
           </div>
 
           <div class="form-group border-t border-[#E2E8F0] pt-4 mt-2">
-            <span class="mb-2 block form-group-caption">Assigned Roles</span>
-            <div class="flex flex-col sm:flex-row gap-4 mt-2">
-              <label v-for="role in roles" :key="role" class="flex items-center gap-2 cursor-pointer text-sm normal-case font-normal text-slate-700">
-                <input 
-                  type="checkbox" 
-                  :value="role" 
-                  v-model="form.roles"
-                  class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-                />
-                {{ role }}
+            <span class="block form-group-caption">Assigned Roles</span>
+            <p class="text-xs text-slate-400 mt-0.5 mb-3">Select one or more roles to grant this user.</p>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              <label
+                v-for="role in roles"
+                :key="role"
+                class="group relative flex items-center gap-2.5 rounded-lg border px-3 py-2.5 cursor-pointer select-none transition-colors duration-150 ease-out active:scale-[0.98]"
+                :class="form.roles.includes(role)
+                  ? 'border-amber-500 bg-amber-50 ring-1 ring-amber-500/30'
+                  : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'"
+              >
+                <input type="checkbox" :value="role" v-model="form.roles" class="peer sr-only" />
+                <span
+                  class="flex h-4 w-4 shrink-0 items-center justify-center rounded border transition-colors duration-150 ease-out peer-focus-visible:ring-2 peer-focus-visible:ring-amber-500 peer-focus-visible:ring-offset-1"
+                  :class="form.roles.includes(role)
+                    ? 'border-amber-500 bg-amber-500 text-white'
+                    : 'border-slate-300 bg-white text-transparent'"
+                >
+                  <svg viewBox="0 0 12 12" fill="none" class="h-3 w-3" aria-hidden="true">
+                    <path d="M2.5 6.5l2 2 5-5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </span>
+                <span
+                  class="text-sm font-medium truncate transition-colors duration-150"
+                  :class="form.roles.includes(role) ? 'text-amber-900' : 'text-slate-600'"
+                >{{ formatRole(role) }}</span>
               </label>
             </div>
-            <p v-if="form.roles.length === 0" class="text-xs text-red-500 mt-1">Please select at least one role.</p>
+            <p v-if="form.roles.length === 0" class="text-xs text-red-500 mt-2">Please select at least one role.</p>
           </div>
 
           <div class="modal-actions border-t border-[#E2E8F0] pt-4 mt-4">
