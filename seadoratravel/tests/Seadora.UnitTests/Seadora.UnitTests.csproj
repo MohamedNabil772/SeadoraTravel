@@ -28,6 +28,9 @@
     <ProjectReference Include="..\..\src\Services\Booking.Service\Seadora.Booking.Application\Seadora.Booking.Application.csproj" />
     <ProjectReference Include="..\..\src\Services\Booking.Service\Seadora.Booking.Domain\Seadora.Booking.Domain.csproj" />
     <ProjectReference Include="..\..\src\Services\Booking.Service\Seadora.Booking.Infrastructure\Seadora.Booking.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\src\Services\Customer.Service\Seadora.Customer.Application\Seadora.Customer.Application.csproj" />
+    <ProjectReference Include="..\..\src\Services\Customer.Service\Seadora.Customer.Domain\Seadora.Customer.Domain.csproj" />
+    <ProjectReference Include="..\..\src\Services\Customer.Service\Seadora.Customer.Infrastructure\Seadora.Customer.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

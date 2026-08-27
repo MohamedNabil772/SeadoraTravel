@@ -23,6 +23,9 @@ public static class DependencyInjection
             options.ConfigureWarnings(w => w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
         });
 
+        services.AddScoped<Seadora.Customer.Application.Common.Interfaces.ICustomerDbContext>(
+            sp => sp.GetRequiredService<CustomerDbContext>());
+
         services.AddHttpContextAccessor();
         services.AddSeadoraTenancy();
 
