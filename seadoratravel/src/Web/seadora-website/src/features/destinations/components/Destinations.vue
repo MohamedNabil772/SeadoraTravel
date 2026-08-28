@@ -22,7 +22,11 @@ const loading = ref(true)
 const toursCount = ref<Record<string, number>>({})
 
 const selectDestination = (dest: LocalDestination) => {
-  router.push({ path: '/tours', query: { destination: dest.id || dest.guid } })
+  const name = dest.names?.['en'] || dest.name?.['en'] || (typeof dest.name === 'string' ? dest.name : '') || ''
+  const slug = name.trim().length > 0 
+    ? name.toLowerCase().trim().replace(/\s+/g, '-') 
+    : (dest.id || dest.guid || '')
+  router.push({ path: '/tours', query: { destination: slug } })
 }
 
 const getLocalized = (field: any) => {

@@ -165,14 +165,21 @@ watch(searchQuery, (newVal) => {
 })
 
 const setFiltersFromRoute = () => {
-  const loc = route.query.location
-  const cat = route.query.category
+  const loc = route.query.destination || route.query.location || route.query.dest
+  const cat = route.query.category || route.query.cat
   const search = route.query.search || route.query.q || route.query.text
 
   if (loc) {
+    const rawLoc = String(loc).toLowerCase().trim()
+    const cleanLoc = rawLoc.replace(/[-_]/g, ' ')
     const dest = destinations.value.find(d => {
-      const name = (d.names?.['en'] || '').toLowerCase()
-      return name.includes(String(loc).toLowerCase()) || d.id === loc
+      const enName = (d.names?.['en'] || '').toLowerCase()
+      const anyName = Object.values(d.names || {}).map(v => String(v).toLowerCase())
+      return enName === cleanLoc ||
+             enName.includes(cleanLoc) || 
+             cleanLoc.includes(enName) || 
+             anyName.some(n => n.includes(cleanLoc)) ||
+             d.id.toLowerCase() === rawLoc
     })
     if (dest) {
       selectedDestinationId.value = dest.id
@@ -182,11 +189,16 @@ const setFiltersFromRoute = () => {
   }
 
   if (cat) {
+    const rawCat = String(cat).toLowerCase().trim()
+    const cleanCat = rawCat.replace(/[-_]/g, ' ')
     const category = categories.value.find(c => {
-      const name = (c.names?.['en'] || '').toLowerCase()
-      const normName = name.replace(/[^a-z0-9]/g, '-')
-      const normCat = String(cat).toLowerCase().replace(/[^a-z0-9]/g, '-')
-      return normName.includes(normCat) || normCat.includes(normName) || c.id === cat
+      const enName = (c.names?.['en'] || '').toLowerCase()
+      const anyName = Object.values(c.names || {}).map(v => String(v).toLowerCase())
+      return enName === cleanCat ||
+             enName.includes(cleanCat) || 
+             cleanCat.includes(enName) || 
+             anyName.some(n => n.includes(cleanCat)) ||
+             c.id.toLowerCase() === rawCat
     })
     if (category) {
       selectedCategoryId.value = category.id
