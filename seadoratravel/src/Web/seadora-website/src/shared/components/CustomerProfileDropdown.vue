@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
+import { useI18n } from 'vue-i18n'
 import { useAuthStore } from '@/features/auth/store/auth'
 import LuxuryIcons from '@/shared/components/LuxuryIcons.vue'
 import ProfileSettingsModal from './ProfileSettingsModal.vue'
 
+const { t } = useI18n()
 const authStore = useAuthStore()
 const router = useRouter()
 const showDropdown = ref(false)
@@ -17,8 +19,8 @@ const userInitials = computed(() => {
 })
 
 const roleBadge = computed(() => {
-  if (authStore.user?.role === 'VIP' || authStore.user?.isVip) return 'VIP Elite'
-  return 'VIP Guest'
+  if (authStore.user?.role === 'VIP' || authStore.user?.isVip) return t('portal.dropdown.vipElite')
+  return t('portal.dropdown.vipGuest')
 })
 
 const handleLogout = () => {
@@ -30,7 +32,7 @@ const handleLogout = () => {
 
 <template>
   <div class="relative inline-block text-left" v-click-outside="() => showDropdown = false">
-    <!-- Trigger Button with Tactile Active Press (Matches Admin) -->
+    <!-- Trigger Button with Tactile Active Press -->
     <button 
       type="button"
       @click="showDropdown = !showDropdown" 
@@ -40,7 +42,7 @@ const handleLogout = () => {
       aria-label="Open account menu"
     >
       <div class="text-right hidden sm:block group-hover:opacity-80 transition-opacity">
-        <span class="block text-xs font-bold text-slate-800 leading-tight">{{ authStore.user?.name || 'VIP Guest' }}</span>
+        <span class="block text-xs font-bold text-slate-800 leading-tight">{{ authStore.user?.name || t('portal.dropdown.vipGuest') }}</span>
         <div class="flex items-center justify-end gap-1 mt-0.5">
           <span class="inline-flex items-center rounded-full bg-[#c9a84c]/15 px-2 py-0.5 text-[9px] font-extrabold text-[#a38030] ring-1 ring-inset ring-[#c9a84c]/30 uppercase tracking-wider">
             {{ roleBadge }}
@@ -73,7 +75,7 @@ const handleLogout = () => {
       >
         <!-- User Info Header -->
         <div class="px-4 py-3 border-b border-slate-100 bg-[#F8FAFC]">
-          <p class="text-xs font-bold text-slate-900 truncate">{{ authStore.user?.name || 'VIP Guest' }}</p>
+          <p class="text-xs font-bold text-slate-900 truncate">{{ authStore.user?.name || t('portal.dropdown.vipGuest') }}</p>
           <p class="text-[11px] text-slate-500 truncate mt-0.5">{{ authStore.user?.email || 'traveler@seadora.com' }}</p>
         </div>
 
@@ -84,7 +86,7 @@ const handleLogout = () => {
             class="w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-[#062d4d] active:scale-[0.98] transition-[background-color,color,transform] duration-150 text-left cursor-pointer"
           >
             <LuxuryIcons name="settings" size="15" class="text-slate-400 group-hover:text-[#062d4d] transition-colors" />
-            <span>My Profile Settings</span>
+            <span>{{ $t('portal.dropdown.profileSettings') }}</span>
           </button>
           
           <router-link 
@@ -93,7 +95,7 @@ const handleLogout = () => {
             class="group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-[#062d4d] active:scale-[0.98] transition-[background-color,color,transform] duration-150 cursor-pointer"
           >
             <LuxuryIcons name="file-text" size="15" class="text-slate-400 group-hover:text-[#062d4d] transition-colors" />
-            <span>Document Vault</span>
+            <span>{{ $t('portal.dropdown.documentVault') }}</span>
           </router-link>
 
           <router-link 
@@ -102,7 +104,7 @@ const handleLogout = () => {
             class="group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-[#062d4d] active:scale-[0.98] transition-[background-color,color,transform] duration-150 cursor-pointer"
           >
             <LuxuryIcons name="help-circle" size="15" class="text-slate-400 group-hover:text-[#062d4d] transition-colors" />
-            <span>System Documentation / Help</span>
+            <span>{{ $t('portal.dropdown.help') }}</span>
           </router-link>
         </div>
 
@@ -113,7 +115,7 @@ const handleLogout = () => {
             class="w-full group flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-bold text-red-600 hover:bg-red-50 active:scale-[0.98] transition-[background-color,transform] duration-150 text-left cursor-pointer"
           >
             <LuxuryIcons name="log-out" size="15" class="text-red-500 group-hover:text-red-600 transition-colors" />
-            <span>Logout</span>
+            <span>{{ $t('portal.dropdown.logout') }}</span>
           </button>
         </div>
       </div>

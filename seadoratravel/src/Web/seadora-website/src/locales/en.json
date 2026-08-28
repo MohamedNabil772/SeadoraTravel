@@ -527,6 +527,87 @@
         "exportBtn": "Export My Data",
         "deleteBtn": "Request Data Deletion"
       }
+    },
+    "nav": {
+      "dashboard": "Dashboard Lounge",
+      "bookings": "Your Journeys",
+      "documents": "Document Vault",
+      "profile": "Preferences",
+      "support": "Private Concierge",
+      "returnHome": "Return to Main Website",
+      "exploreAll": "Explore All Journeys",
+      "vipBadge": "24/7 Red Sea Concierge",
+      "vipPriority": "VIP Priority Response"
+    },
+    "dropdown": {
+      "vipElite": "VIP Elite",
+      "vipGuest": "VIP Guest",
+      "profileSettings": "My Profile Settings",
+      "documentVault": "Document Vault",
+      "help": "System Documentation / Help",
+      "logout": "Logout"
+    },
+    "dashboard": {
+      "vipLounge": "Seadora VIP Elite Lounge",
+      "welcome": "Welcome back to Seadora,",
+      "anticipating": "Anticipating your arrival in",
+      "destinationClimate": "DESTINATION CLIMATE",
+      "days": "Days",
+      "hours": "Hours",
+      "mins": "Mins",
+      "activeJourney": "Confirmed Active Journey",
+      "viewItinerary": "View Full Itinerary & Manifest",
+      "downloadVouchers": "Download Digital Vouchers",
+      "bespokeTitle": "Private Bespoke Concierge",
+      "bespokeDesc": "Require a private helicopter transfer, luxury yacht charter, or exclusive dinner reservations?",
+      "sendBespoke": "Send Bespoke Request",
+      "curateTitle": "Curate a New Journey",
+      "curateDesc": "Explore our hand-crafted Red Sea diving safaris, Cairo antiquities, and oasis retreats.",
+      "browseExperiences": "Browse Experiences"
+    },
+    "bookings": {
+      "title": "Your Journeys",
+      "subtitle": "Manage current reservations, passenger manifests, and official travel documents.",
+      "curateNew": "Curate a New Journey",
+      "confirmed": "CONFIRMED",
+      "completed": "COMPLETED",
+      "fullyPaid": "Fully Paid",
+      "viewItinerary": "View Full Itinerary",
+      "downloadVoucher": "Download PDF Voucher",
+      "viewReceipt": "View Receipt & Summary",
+      "rebook": "Re-book Experience"
+    },
+    "documents": {
+      "title": "Document Vault",
+      "subtitle": "Access encrypted digital travel documents, official Nile vouchers, and port permits.",
+      "uploadBtn": "Upload Passport / Document",
+      "download": "Download",
+      "encryptedBadge": "256-Bit Encrypted Vault",
+      "coastGuardTitle": "Egyptian Coast Guard & Marine Permits",
+      "coastGuardDesc": "Your travel manifest & passport copies are securely stored for seamless port clearance and fast-track private flight access.",
+      "updatePassports": "Update Passport Copies"
+    },
+    "support": {
+      "title": "Private Concierge & Support Desk",
+      "subtitle": "Submit custom VIP arrangements, manage payment/refund inquiries, and track support requests.",
+      "newTicket": "New Support Ticket",
+      "vipBadge": "24/7 Red Sea & Nile Private Concierge",
+      "vipTitle": "Bespoke VIP Travel & Marine Charters",
+      "vipDesc": "Require a private luxury yacht charter, helicopter transfer, private desert stargazing majlis, or custom milestone celebration? Our VIP directors respond within 2 hours.",
+      "vipBtn": "VIP Concierge Request",
+      "inquiriesTitle": "General Inquiries & Assistance",
+      "inquiriesSubtitle": "Select a category below to open a direct assistance ticket with our operations team.",
+      "conversationsTitle": "Your Conversations & Ticket History",
+      "conversationsSubtitle": "Track real-time responses and communicate with your dedicated coordinator.",
+      "openThread": "Open Thread"
+    },
+    "categories": {
+      "payment": "Payment & Invoicing",
+      "refund": "Cancellation & Refund",
+      "modification": "Booking Modification",
+      "dietary": "Special Dietary / Needs",
+      "general": "General Inquiry",
+      "other": "Other"
     }
   }
 }

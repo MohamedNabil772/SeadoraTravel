@@ -7,28 +7,28 @@
       <div class="relative z-10 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
         <div class="max-w-2xl">
           <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#c9a84c]/15 border border-[#c9a84c]/30 text-[#a38030] text-[11px] font-bold uppercase tracking-widest mb-3">
-            <span>✦</span> Seadora VIP Elite Lounge
+            <span>✦</span> {{ $t('portal.dashboard.vipLounge') }}
           </div>
           <h1 class="text-3xl md:text-4xl font-bold text-slate-900 tracking-tight leading-tight">
-            Welcome back to Seadora, <span class="text-[#062d4d]">{{ customerFirstName }}</span>.
+            {{ $t('portal.dashboard.welcome') }} <span class="text-[#062d4d]">{{ customerFirstName }}</span>.
           </h1>
           <p class="text-slate-500 text-sm md:text-base mt-2 leading-relaxed">
-            Anticipating your arrival in <strong class="text-slate-800">Luxor & the Nile Valley</strong> for your private Dahabiya voyage:
+            {{ $t('portal.dashboard.anticipating') }} <strong class="text-slate-800">Luxor & the Nile Valley</strong>:
           </p>
 
           <!-- Countdown Timer Pills -->
           <div class="flex flex-wrap gap-3.5 mt-6">
             <div class="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl px-4 py-3 text-center min-w-[80px] shadow-xs">
               <div class="text-2xl md:text-3xl font-bold text-[#c9a84c] tracking-tight">12</div>
-              <div class="text-[10px] text-slate-400 uppercase tracking-widest font-semibold mt-0.5">Days</div>
+              <div class="text-[10px] text-slate-400 uppercase tracking-widest font-semibold mt-0.5">{{ $t('portal.dashboard.days') }}</div>
             </div>
             <div class="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl px-4 py-3 text-center min-w-[80px] shadow-xs">
               <div class="text-2xl md:text-3xl font-bold text-[#c9a84c] tracking-tight">08</div>
-              <div class="text-[10px] text-slate-400 uppercase tracking-widest font-semibold mt-0.5">Hours</div>
+              <div class="text-[10px] text-slate-400 uppercase tracking-widest font-semibold mt-0.5">{{ $t('portal.dashboard.hours') }}</div>
             </div>
             <div class="bg-[#F8FAFC] border border-slate-200/80 rounded-2xl px-4 py-3 text-center min-w-[80px] shadow-xs">
               <div class="text-2xl md:text-3xl font-bold text-[#c9a84c] tracking-tight">45</div>
-              <div class="text-[10px] text-slate-400 uppercase tracking-widest font-semibold mt-0.5">Mins</div>
+              <div class="text-[10px] text-slate-400 uppercase tracking-widest font-semibold mt-0.5">{{ $t('portal.dashboard.mins') }}</div>
             </div>
           </div>
         </div>
@@ -37,7 +37,7 @@
         <div class="bg-[#062d4d] text-white rounded-3xl p-6 md:p-8 w-full lg:w-auto shadow-xl min-w-[260px] relative overflow-hidden flex flex-col justify-between">
           <div class="absolute -bottom-8 -right-8 w-32 h-32 bg-[#c9a84c]/20 rounded-full blur-2xl"></div>
           <div>
-            <div class="text-[10px] font-bold text-[#c9a84c] uppercase tracking-widest mb-1">DESTINATION CLIMATE</div>
+            <div class="text-[10px] font-bold text-[#c9a84c] uppercase tracking-widest mb-1">{{ $t('portal.dashboard.destinationClimate') }}</div>
             <div class="text-xl font-bold">Luxor, Egypt</div>
             <div class="text-3xl md:text-4xl font-bold text-white mt-3 mb-1">
               {{ weatherTemp !== null ? weatherTemp + '°C' : '--°C' }}
@@ -61,7 +61,7 @@
           <div class="flex items-center justify-between gap-4 mb-4">
             <div class="flex items-center gap-2">
               <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Confirmed Active Journey</span>
+              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">{{ $t('portal.dashboard.activeJourney') }}</span>
             </div>
             <span class="font-mono text-xs font-bold text-[#062d4d] bg-slate-100 px-2.5 py-1 rounded-lg">#BK-10293</span>
           </div>
@@ -92,10 +92,10 @@
 
         <div class="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">
           <router-link 
-            to="/portal/bookings/BK-10293" 
+            to="/portal/bookings" 
             class="text-xs font-bold text-[#062d4d] hover:text-[#c9a84c] transition-colors flex items-center gap-1.5"
           >
-            <span>View Full Itinerary & Manifest</span>
+            <span>{{ $t('portal.dashboard.viewItinerary') }}</span>
             <span>→</span>
           </router-link>
           
@@ -103,7 +103,7 @@
             @click="showVoucherModal = true"
             class="px-4 py-2 bg-slate-100 hover:bg-[#062d4d] hover:text-white active:scale-[0.97] text-slate-700 text-xs font-bold rounded-xl transition-[background-color,color,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
           >
-            Download Digital Vouchers
+            {{ $t('portal.dashboard.downloadVouchers') }}
           </button>
         </div>
       </div>
@@ -117,49 +117,49 @@
             <div class="w-10 h-10 rounded-2xl bg-[#c9a84c] text-[#062d4d] flex items-center justify-center font-bold text-base mb-4 shadow-md">
               ✦
             </div>
-            <h3 class="text-lg font-bold mb-1">Private Bespoke Concierge</h3>
-            <p class="text-white/70 text-xs leading-relaxed">
-              Require a private helicopter transfer, luxury yacht charter, or exclusive dinner reservations?
+            <h3 class="text-lg font-bold mb-1">{{ $t('portal.dashboard.bespokeTitle') }}</h3>
+            <p class="text-xs text-white/80 leading-relaxed mb-6">
+              {{ $t('portal.dashboard.bespokeDesc') }}
             </p>
           </div>
           <router-link 
             to="/portal/support" 
-            class="mt-6 inline-flex items-center justify-center px-5 py-3 bg-[#c9a84c] hover:bg-[#d8b85c] text-[#062d4d] font-bold rounded-xl text-xs shadow-md active:scale-[0.97] transition-[background-color,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+            class="relative z-10 w-full py-3 bg-[#c9a84c] hover:bg-[#d8b85c] text-[#062d4d] font-bold rounded-xl text-xs text-center transition-all duration-200 active:scale-[0.97] shadow-sm block"
           >
-            Send Bespoke Request
+            {{ $t('portal.dashboard.sendBespoke') }}
           </router-link>
         </div>
 
-        <!-- Curate New Journey CTA Card -->
-        <div class="bg-white rounded-3xl p-7 border border-slate-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex flex-col justify-between">
+        <!-- Explore New Journeys Card -->
+        <div class="bg-white rounded-3xl p-7 border border-slate-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] flex-1 flex flex-col justify-between">
           <div>
-            <h3 class="text-base font-bold text-slate-900 mb-1">Curate a New Journey</h3>
-            <p class="text-slate-500 text-xs leading-relaxed">
-              Explore our hand-crafted Red Sea diving safaris, Cairo antiquities, and oasis retreats.
+            <div class="text-[10px] font-bold text-[#c9a84c] uppercase tracking-wider mb-1">SeeDora Catalog</div>
+            <h3 class="text-base font-bold text-slate-900 mb-1">{{ $t('portal.dashboard.curateTitle') }}</h3>
+            <p class="text-xs text-slate-500 leading-relaxed mb-4">
+              {{ $t('portal.dashboard.curateDesc') }}
             </p>
           </div>
           <router-link 
             to="/tours" 
-            class="mt-4 inline-flex items-center justify-center px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl text-xs active:scale-[0.97] transition-[background-color,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
+            class="w-full py-3 bg-slate-100 hover:bg-slate-200/80 text-slate-800 font-bold rounded-xl text-xs text-center transition-all duration-200 active:scale-[0.97] block"
           >
-            Browse Experiences →
+            {{ $t('portal.dashboard.browseExperiences') }} →
           </router-link>
         </div>
 
       </div>
-
     </div>
-    
+
+    <!-- Luxury PDF / Printable Voucher Modal -->
     <LuxuryVoucherModal 
-      :is-open="showVoucherModal" 
-      :booking="{ id: 'BK-10293', title: '7-Night Private Dahabiya Expedition', date: 'Oct 30, 2026' }"
-      @close="showVoucherModal = false" 
+      v-model:isOpen="showVoucherModal" 
+      :booking="activeBookingForVoucher" 
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useAuthStore } from '@/features/auth/store/auth';
 import LuxuryVoucherModal from '@/shared/components/LuxuryVoucherModal.vue';
 
@@ -167,42 +167,47 @@ const authStore = useAuthStore();
 const showVoucherModal = ref(false);
 
 const customerFirstName = computed(() => {
-  if (!authStore.user?.name) return 'VIP Guest';
+  if (!authStore.user || !authStore.user.name) return 'Guest';
   return authStore.user.name.split(' ')[0];
 });
 
 const weatherTemp = ref<number | null>(null);
-const weatherDescription = ref<string>('Loading...');
+const weatherDescription = ref<string>('Clear Sky & Gentle Breeze');
 
-const fetchWeather = async () => {
+const activeBookingForVoucher = ref({
+  bookingReference: 'BK-10293',
+  tourTitle: '7-Night Private Dahabiya Expedition: Luxor to Aswan',
+  departureDate: '2026-10-30',
+  returnDate: '2026-11-06',
+  pickupHotel: 'Sofitel Winter Palace Luxor',
+  roomManifest: 'Royal Suite 01 (Mr. & Mrs. Sterling)',
+  totalPaid: 3600,
+  currency: 'EUR',
+  emergencyPhone: '+20 106 894 0967'
+});
+
+const fetchLiveWeather = async () => {
   try {
-    const lat = 25.6872; // Luxor
-    const lon = 32.6396;
-    const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
-    const data = await res.json();
-    if (data && data.current_weather) {
-      weatherTemp.value = Math.round(data.current_weather.temperature);
-      const code = data.current_weather.weathercode;
-      weatherDescription.value = getWeatherDescription(code);
+    const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=25.6872&longitude=32.6396&current=temperature_2m,relative_humidity_2m,weather_code,wind_speed_10m');
+    if (res.ok) {
+      const data = await res.json();
+      if (data && data.current) {
+        weatherTemp.value = Math.round(data.current.temperature_2m);
+        const code = data.current.weather_code;
+        if (code === 0) weatherDescription.value = 'Clear Sunny Sky';
+        else if (code <= 3) weatherDescription.value = 'Partly Cloudy & Warm';
+        else if (code <= 48) weatherDescription.value = 'Gentle Mist & Breeze';
+        else weatherDescription.value = 'Pleasant Nile Climate';
+      }
     }
-  } catch (err) {
-    console.error('Weather fetch failed', err);
-    weatherTemp.value = 32;
-    weatherDescription.value = 'Clear Skies · Gentle Breeze ☀️';
+  } catch (e) {
+    console.warn('Weather API fallback', e);
+    weatherTemp.value = 29;
+    weatherDescription.value = 'Sunny & Gentle Nile Breeze';
   }
 };
 
-const getWeatherDescription = (code: number) => {
-  if (code === 0) return 'Clear Sky ☀️';
-  if ([1, 2, 3].includes(code)) return 'Partly Cloudy ⛅';
-  if ([45, 48].includes(code)) return 'Foggy 🌫️';
-  if ([51, 53, 55, 61, 63, 65].includes(code)) return 'Rainy 🌧️';
-  if ([71, 73, 75].includes(code)) return 'Snowy ❄️';
-  if ([95, 96, 99].includes(code)) return 'Thunderstorm ⛈️';
-  return 'Clear Sky ☀️';
-};
-
 onMounted(() => {
-  fetchWeather();
+  fetchLiveWeather();
 });
 </script>

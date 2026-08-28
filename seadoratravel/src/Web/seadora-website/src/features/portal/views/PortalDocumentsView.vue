@@ -3,15 +3,15 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div>
-        <h1 class="text-2xl font-bold text-slate-900">Document Vault</h1>
-        <p class="text-xs text-slate-500 mt-1">Access encrypted digital travel documents, official Nile vouchers, and port permits.</p>
+        <h1 class="text-2xl font-bold text-slate-900">{{ $t('portal.documents.title') }}</h1>
+        <p class="text-xs text-slate-500 mt-1">{{ $t('portal.documents.subtitle') }}</p>
       </div>
       <button 
         @click="triggerUpload" 
         class="px-4 py-2.5 bg-slate-900 text-white rounded-xl text-xs font-bold shadow-sm hover:bg-slate-800 active:scale-[0.97] transition-[background-color,transform] duration-200 flex items-center gap-2"
       >
         <span>+</span>
-        <span>Upload Passport / Document</span>
+        <span>{{ $t('portal.documents.uploadBtn') }}</span>
       </button>
     </div>
 
@@ -42,7 +42,7 @@
           class="px-3.5 py-2 bg-slate-100 hover:bg-[#062d4d] hover:text-white active:scale-[0.95] rounded-xl text-xs font-bold text-slate-700 transition-[background-color,color,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center gap-1.5"
           :title="'Download ' + doc.title"
         >
-          <span>Download</span>
+          <span>{{ $t('portal.documents.download') }}</span>
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
         </button>
       </div>
@@ -52,18 +52,18 @@
     <div class="bg-gradient-to-br from-slate-900 to-[#062d4d] text-white rounded-3xl p-7 shadow-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
       <div class="max-w-xl">
         <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-bold uppercase tracking-wider mb-2">
-          <span>✓</span> 256-Bit Encrypted Vault
+          <span>✓</span> {{ $t('portal.documents.encryptedBadge') }}
         </div>
-        <h3 class="text-lg font-bold">Egyptian Coast Guard & Marine Permits</h3>
+        <h3 class="text-lg font-bold">{{ $t('portal.documents.coastGuardTitle') }}</h3>
         <p class="text-white/70 text-xs mt-1 leading-relaxed">
-          Your travel manifest & passport copies are securely stored for seamless port clearance and fast-track private flight access.
+          {{ $t('portal.documents.coastGuardDesc') }}
         </p>
       </div>
       <button 
         @click="triggerUpload" 
         class="px-5 py-2.5 bg-[#c9a84c] hover:bg-[#d8b85c] text-[#062d4d] font-bold rounded-xl text-xs active:scale-[0.97] transition-[background-color,transform] duration-200 whitespace-nowrap shadow-md"
       >
-        Update Passport Copies
+        {{ $t('portal.documents.updatePassports') }}
       </button>
     </div>
   </div>
@@ -112,10 +112,10 @@ const documents = ref<TravelDoc[]>([
 ]);
 
 const downloadDoc = (title: string) => {
-  alert(`Preparing encrypted download for: ${title}`);
+  alert(`Downloading encrypted ${title}...`);
 };
 
 const triggerUpload = () => {
-  alert('Please select your updated passport PDF / photo for secure encryption and concierge verification.');
+  alert('Please select passport scans or flight manifests to upload into your encrypted vault.');
 };
 </script>

@@ -46,22 +46,25 @@ function mergeDeep(target: any, source: any) {
 }
 
 export async function loadLanguageAsync(lang: string) {
-  // Set locale immediately so fallback JSON shows instantly
-  if (i18n.global.locale.value !== lang) {
-    i18n.global.locale.value = lang
-    localStorage.setItem('seadora_lang', lang)
+  if (!lang) return;
+
+  // Unconditionally set global locale (supports both ref & primitive modes)
+  if (typeof (i18n.global.locale as any).value !== 'undefined') {
+    (i18n.global.locale as any).value = lang;
+  } else {
+    (i18n.global.locale as any) = lang;
   }
+  localStorage.setItem('seadora_lang', lang);
 
   try {
     const response = await fetch(`/api/content/api/v1/languages/${lang}/translations`)
     if (response.ok) {
       const overrides = await response.json()
-      // Merge overrides with local JSON fallback messages
       const mergedMessages = mergeDeep(localMessages[lang] || {}, overrides)
       i18n.global.setLocaleMessage(lang, mergedMessages)
     }
   } catch (error) {
-    console.error(`Failed to fetch translations for ${lang}:`, error)
+    // Local JSON fallback is already active
   }
 
   return nextTick()

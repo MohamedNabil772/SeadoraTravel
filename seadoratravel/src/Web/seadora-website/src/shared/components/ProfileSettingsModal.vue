@@ -122,6 +122,7 @@
                 <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Preferred Language</label>
                 <select 
                   v-model="formData.preferredLanguage" 
+                  @change="onLanguageChanged"
                   class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 font-medium focus:outline-none focus:border-[#c9a84c] focus:ring-2 focus:ring-[#c9a84c]/20 transition-all cursor-pointer"
                 >
                   <option value="en">English (EN)</option>
@@ -198,6 +199,12 @@ watch(() => props.isOpen, (newVal) => {
 
 const closeModal = () => {
   emit('update:isOpen', false)
+}
+
+const onLanguageChanged = () => {
+  if (formData.preferredLanguage) {
+    loadLanguageAsync(formData.preferredLanguage)
+  }
 }
 
 const triggerFileInput = () => {

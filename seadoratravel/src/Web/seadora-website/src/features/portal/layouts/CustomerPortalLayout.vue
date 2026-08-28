@@ -30,7 +30,7 @@
         <img src="/logo-emblem.png" alt="Seadora" class="w-10 h-10 object-contain drop-shadow-md group-hover:scale-105 transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]" />
         <div class="flex flex-col">
           <span class="font-bold tracking-widest text-lg text-white">SEADORA</span>
-          <span class="text-[9px] text-[#c9a84c] tracking-[0.25em] uppercase font-semibold">VIP Private Lounge</span>
+          <span class="text-[9px] text-[#c9a84c] tracking-[0.25em] uppercase font-semibold">{{ $t('portal.dashboard.vipLounge') }}</span>
         </div>
       </router-link>
 
@@ -41,7 +41,7 @@
           class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl text-xs font-medium text-white/60 hover:text-white hover:bg-white/10 active:scale-[0.97] transition-[background-color,color,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
         >
           <span>←</span>
-          <span>Return to Main Website</span>
+          <span>{{ $t('portal.nav.returnHome') }}</span>
         </router-link>
       </div>
 
@@ -73,8 +73,8 @@
             ✦
           </div>
           <div>
-            <div class="text-[11px] font-bold text-white">24/7 Red Sea Concierge</div>
-            <div class="text-[10px] text-white/50">VIP Priority Response</div>
+            <div class="text-[11px] font-bold text-white">{{ $t('portal.nav.vipBadge') }}</div>
+            <div class="text-[10px] text-white/50">{{ $t('portal.nav.vipPriority') }}</div>
           </div>
         </div>
       </div>
@@ -97,7 +97,7 @@
             class="px-4 py-2 bg-slate-100 hover:bg-slate-200/80 active:scale-[0.97] text-slate-700 text-xs font-bold rounded-xl transition-[background-color,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center gap-2"
           >
             <span>⛵</span>
-            <span>Explore All Journeys</span>
+            <span>{{ $t('portal.nav.exploreAll') }}</span>
           </router-link>
         </div>
         <div class="flex items-center gap-4">
@@ -123,8 +123,10 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import { useRoute } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import CustomerProfileDropdown from '@/shared/components/CustomerProfileDropdown.vue';
 
+const { t } = useI18n();
 const route = useRoute();
 const mobileMenuOpen = ref(false);
 
@@ -138,13 +140,13 @@ const IconDocuments = () => h('svg', { viewBox: '0 0 24 24', fill: 'none', strok
 const IconProfile = () => h('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [h('path', { d: 'M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2' }), h('circle', { cx: '12', cy: '7', r: '4' })]);
 const IconSupport = () => h('svg', { viewBox: '0 0 24 24', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' }, [h('path', { d: 'M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z' })]);
 
-const navItems = [
-  { path: '/portal', label: 'Dashboard Lounge', icon: IconDashboard },
-  { path: '/portal/bookings', label: 'Your Journeys', icon: IconBookings },
-  { path: '/portal/documents', label: 'Document Vault', icon: IconDocuments },
-  { path: '/portal/profile', label: 'Preferences', icon: IconProfile },
-  { path: '/portal/support', label: 'Private Concierge', icon: IconSupport }
-];
+const navItems = computed(() => [
+  { path: '/portal', label: t('portal.nav.dashboard'), icon: IconDashboard },
+  { path: '/portal/bookings', label: t('portal.nav.bookings'), icon: IconBookings },
+  { path: '/portal/documents', label: t('portal.nav.documents'), icon: IconDocuments },
+  { path: '/portal/profile', label: t('portal.nav.profile'), icon: IconProfile },
+  { path: '/portal/support', label: t('portal.nav.support'), icon: IconSupport }
+]);
 </script>
 
 <style scoped>

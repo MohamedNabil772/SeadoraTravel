@@ -527,6 +527,87 @@
         "exportBtn": "Esporta i Miei Dati",
         "deleteBtn": "Richiedi Eliminazione Dati"
       }
+    },
+    "nav": {
+      "dashboard": "Dashboard Lounge",
+      "bookings": "I vostri viaggi",
+      "documents": "Cassaforte documenti",
+      "profile": "Preferenze",
+      "support": "Concierge privato",
+      "returnHome": "Torna al sito principale",
+      "exploreAll": "Esplora tutti i viaggi",
+      "vipBadge": "Concierge Mar Rosso 24/7",
+      "vipPriority": "Risposta prioritaria VIP"
+    },
+    "dropdown": {
+      "vipElite": "VIP Elite",
+      "vipGuest": "Ospite VIP",
+      "profileSettings": "Impostazioni profilo",
+      "documentVault": "Cassaforte documenti",
+      "help": "Documentazione / Aiuto",
+      "logout": "Disconnetti"
+    },
+    "dashboard": {
+      "vipLounge": "Seadora VIP Elite Lounge",
+      "welcome": "Bentornato a Seadora,",
+      "anticipating": "In attesa del vostro arrivo a",
+      "destinationClimate": "CLIMA DELLA DESTINAZIONE",
+      "days": "Giorni",
+      "hours": "Ore",
+      "mins": "Minuti",
+      "activeJourney": "Viaggio attivo confermato",
+      "viewItinerary": "Visualizza itinerario completo e manifesto",
+      "downloadVouchers": "Scarica voucher digitali",
+      "bespokeTitle": "Concierge privato su misura",
+      "bespokeDesc": "Richiedete un trasferimento privato in elicottero, noleggio yacht o cene esclusive?",
+      "sendBespoke": "Invia richiesta VIP",
+      "curateTitle": "Crea un nuovo viaggio",
+      "curateDesc": "Esplorate safari nel Mar Rosso, antichità del Cairo e ritiri nelle oasi.",
+      "browseExperiences": "Sfoglia esperienze"
+    },
+    "bookings": {
+      "title": "I vostri viaggi",
+      "subtitle": "Gestisci prenotazioni attuali, manifesti passeggeri e documenti di viaggio ufficiali.",
+      "curateNew": "Crea un nuovo viaggio",
+      "confirmed": "CONFERMATO",
+      "completed": "COMPLETATO",
+      "fullyPaid": "Completamente pagato",
+      "viewItinerary": "Visualizza itinerario",
+      "downloadVoucher": "Scarica voucher PDF",
+      "viewReceipt": "Visualizza ricevuta",
+      "rebook": "Prenota di nuovo"
+    },
+    "documents": {
+      "title": "Cassaforte documenti",
+      "subtitle": "Accesso a documenti di viaggio crittografati, voucher ufficiali del Nilo e permessi portuali.",
+      "uploadBtn": "Carica passaporto / documento",
+      "download": "Scarica",
+      "encryptedBadge": "Cassaforte crittografata a 256 bit",
+      "coastGuardTitle": "Guardia costiera egiziana e permessi portuali",
+      "coastGuardDesc": "I vostri documenti sono conservati in sicurezza per un rapido sdoganamento portuale.",
+      "updatePassports": "Aggiorna copie passaporto"
+    },
+    "support": {
+      "title": "Concierge privato e supporto",
+      "subtitle": "Invia richieste VIP, gestisci pagamenti/rimborsi e monitora i ticket di supporto.",
+      "newTicket": "Nuovo ticket di supporto",
+      "vipBadge": "Concierge VIP 24/7 Mar Rosso e Nilo",
+      "vipTitle": "Viaggi VIP su misura e noleggio yacht",
+      "vipDesc": "Avete bisogno di uno yacht di lusso privato o elicottero? Il nostro team risponde entro 2 ore.",
+      "vipBtn": "Richiesta Concierge VIP",
+      "inquiriesTitle": "Richieste generali e assistenza",
+      "inquiriesSubtitle": "Seleziona una categoria per aprire un ticket diretto con il nostro team operativo.",
+      "conversationsTitle": "Le vostre conversazioni e storico",
+      "conversationsSubtitle": "Monitora le risposte in tempo reale e comunica con il tuo coordinatore dedicato.",
+      "openThread": "Apri discussione"
+    },
+    "categories": {
+      "payment": "Pagamento e fatturazione",
+      "refund": "Cancellazione e rimborso",
+      "modification": "Modifica prenotazione",
+      "dietary": "Esigenze alimentari / speciali",
+      "general": "Richiesta generale",
+      "other": "Altro"
     }
   }
 }

@@ -3,15 +3,15 @@
     <!-- Header -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
       <div>
-        <h1 class="text-2xl md:text-3xl font-bold text-slate-900">Private Concierge & Support Desk</h1>
-        <p class="text-xs md:text-sm text-slate-500 mt-1">Submit custom VIP arrangements, manage payment/refund inquiries, and track support requests.</p>
+        <h1 class="text-2xl md:text-3xl font-bold text-slate-900">{{ $t('portal.support.title') }}</h1>
+        <p class="text-xs md:text-sm text-slate-500 mt-1">{{ $t('portal.support.subtitle') }}</p>
       </div>
       <button 
         @click="openStandardModal" 
         class="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl shadow-sm text-xs flex items-center gap-2 active:scale-[0.97] transition-all"
       >
         <span>+</span>
-        <span>New Support Ticket</span>
+        <span>{{ $t('portal.support.newTicket') }}</span>
       </button>
     </div>
 
@@ -21,11 +21,11 @@
 
       <div class="relative z-10 max-w-2xl">
         <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#c9a84c]/20 border border-[#c9a84c]/30 text-[#c9a84c] text-[11px] font-bold uppercase tracking-widest mb-3">
-          <span>✦</span> 24/7 Red Sea & Nile Private Concierge
+          <span>✦</span> {{ $t('portal.support.vipBadge') }}
         </div>
-        <h2 class="text-2xl font-bold mb-2">Bespoke VIP Travel & Marine Charters</h2>
+        <h2 class="text-2xl font-bold mb-2">{{ $t('portal.support.vipTitle') }}</h2>
         <p class="text-white/80 text-xs md:text-sm leading-relaxed">
-          Require a private luxury yacht charter, helicopter transfer from Cairo to Luxor, private desert stargazing majlis, or custom milestone celebration? Our VIP directors respond within 2 hours.
+          {{ $t('portal.support.vipDesc') }}
         </p>
       </div>
 
@@ -34,7 +34,7 @@
         @click="openVipModal" 
         class="relative z-10 px-7 py-3.5 bg-gradient-to-r from-[#c9a84c] to-[#d8b85c] text-[#062d4d] font-bold rounded-2xl shadow-lg active:scale-[0.97] transition-all text-xs uppercase tracking-wider whitespace-nowrap"
       >
-        ✨ VIP Concierge Request
+        ✨ {{ $t('portal.support.vipBtn') }}
       </button>
     </div>
 
@@ -42,8 +42,8 @@
     <div class="bg-white rounded-3xl border border-slate-200/80 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-6">
       <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-100 pb-5">
         <div>
-          <h2 class="text-lg font-bold text-slate-900">General Inquiries & Assistance</h2>
-          <p class="text-xs text-slate-500 mt-0.5">Select a category below to open a direct assistance ticket with our operations team.</p>
+          <h2 class="text-lg font-bold text-slate-900">{{ $t('portal.support.inquiriesTitle') }}</h2>
+          <p class="text-xs text-slate-500 mt-0.5">{{ $t('portal.support.inquiriesSubtitle') }}</p>
         </div>
       </div>
 
@@ -65,8 +65,8 @@
     <div class="bg-white rounded-3xl border border-slate-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)] overflow-hidden">
       <div class="p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h3 class="text-base font-bold text-slate-900">Your Conversations & Ticket History</h3>
-          <p class="text-xs text-slate-500">Track real-time responses and communicate with your dedicated coordinator.</p>
+          <h3 class="text-base font-bold text-slate-900">{{ $t('portal.support.conversationsTitle') }}</h3>
+          <p class="text-xs text-slate-500">{{ $t('portal.support.conversationsSubtitle') }}</p>
         </div>
         <span class="text-xs font-bold text-[#062d4d] bg-slate-100 px-3 py-1 rounded-full">{{ tickets.length }} Active Records</span>
       </div>
@@ -120,7 +120,7 @@
                   @click.stop="openTicket(ticket)" 
                   class="px-3.5 py-1.5 rounded-xl text-xs font-bold text-[#062d4d] bg-slate-100 hover:bg-[#062d4d] hover:text-white active:scale-[0.95] transition-all"
                 >
-                  Open Thread →
+                  {{ $t('portal.support.openThread') }} →
                 </button>
               </td>
             </tr>
@@ -254,21 +254,24 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+const { t } = useI18n();
 
 const showVipModal = ref(false);
 const showStandardModal = ref(false);
 const activeTicket = ref<any>(null);
 const replyText = ref('');
 
-const standardCategories = [
-  { name: 'Payment & Invoicing', icon: '💳' },
-  { name: 'Cancellation & Refund', icon: '🔄' },
-  { name: 'Booking Modification', icon: '📅' },
-  { name: 'Special Dietary / Needs', icon: '🥗' },
-  { name: 'General Inquiry', icon: 'ℹ️' },
-  { name: 'Other', icon: '💬' }
-];
+const standardCategories = computed(() => [
+  { name: t('portal.categories.payment'), icon: '💳' },
+  { name: t('portal.categories.refund'), icon: '🔄' },
+  { name: t('portal.categories.modification'), icon: '📅' },
+  { name: t('portal.categories.dietary'), icon: '🥗' },
+  { name: t('portal.categories.general'), icon: 'ℹ️' },
+  { name: t('portal.categories.other'), icon: '💬' }
+]);
 
 const tickets = ref([
   {

@@ -523,6 +523,87 @@
         "exportBtn": "Meine Daten exportieren",
         "deleteBtn": "Datenlöschung anfordern"
       }
+    },
+    "nav": {
+      "dashboard": "Dashboard Lounge",
+      "bookings": "Ihre Reisen",
+      "documents": "Dokumententresor",
+      "profile": "Einstellungen",
+      "support": "Privater Concierge",
+      "returnHome": "Zurück zur Hauptseite",
+      "exploreAll": "Alle Reisen entdecken",
+      "vipBadge": "24/7 Rotes Meer Concierge",
+      "vipPriority": "VIP Prioritäts-Service"
+    },
+    "dropdown": {
+      "vipElite": "VIP Elite",
+      "vipGuest": "VIP Gast",
+      "profileSettings": "Meine Profileinstellungen",
+      "documentVault": "Dokumententresor",
+      "help": "System-Dokumentation / Hilfe",
+      "logout": "Abmelden"
+    },
+    "dashboard": {
+      "vipLounge": "Seadora VIP Elite Lounge",
+      "welcome": "Willkommen zurück bei Seadora,",
+      "anticipating": "Wir freuen uns auf Ihre Ankunft in",
+      "destinationClimate": "KLIMA AM ZIELORT",
+      "days": "Tage",
+      "hours": "Stunden",
+      "mins": "Minuten",
+      "activeJourney": "Bestätigte aktive Reise",
+      "viewItinerary": "Vollständigen Reiseplan & Manifest ansehen",
+      "downloadVouchers": "Digitale Gutscheine herunterladen",
+      "bespokeTitle": "Privater Maßgeschneiderter Concierge",
+      "bespokeDesc": "Benötigen Sie einen privaten Hubschraubertransfer, eine Luxusyacht oder exklusive Reservierungen?",
+      "sendBespoke": "VIP-Anfrage senden",
+      "curateTitle": "Neue Reise zusammenstellen",
+      "curateDesc": "Entdecken Sie handverlesene Rotes-Meer-Safaris, Kairo-Antiquitäten und Oasen-Retreats.",
+      "browseExperiences": "Erlebnisse durchsuchen"
+    },
+    "bookings": {
+      "title": "Ihre Reisen",
+      "subtitle": "Verwalten Sie aktuelle Reservierungen, Passagiermanifeste und offizielle Reisedokumente.",
+      "curateNew": "Neue Reise zusammenstellen",
+      "confirmed": "BESTÄTIGT",
+      "completed": "ABGESCHLOSSEN",
+      "fullyPaid": "Vollständig bezahlt",
+      "viewItinerary": "Reiseplan ansehen",
+      "downloadVoucher": "PDF-Gutschein herunterladen",
+      "viewReceipt": "Beleg & Zusammenfassung ansehen",
+      "rebook": "Erlebnis erneut buchen"
+    },
+    "documents": {
+      "title": "Dokumententresor",
+      "subtitle": "Zugriff auf verschlüsselte digitale Reisedokumente, offizielle Nil-Gutscheine und Hafengenehmigungen.",
+      "uploadBtn": "Reisepass / Dokument hochladen",
+      "download": "Herunterladen",
+      "encryptedBadge": "256-Bit-Verschlüsselter Tresor",
+      "coastGuardTitle": "Ägyptische Küstenwache & Hafengenehmigungen",
+      "coastGuardDesc": "Ihr Reisemanifest & Reisepasskopien sind sicher gespeichert für reibungslose Hafenabfertigung.",
+      "updatePassports": "Reisepasskopien aktualisieren"
+    },
+    "support": {
+      "title": "Privater Concierge & Support-Desk",
+      "subtitle": "Stellen Sie VIP-Anfragen, verwalten Sie Zahlungs-/Rückerstattungsfragen und verfolgen Sie Tickets.",
+      "newTicket": "Neues Support-Ticket",
+      "vipBadge": "24/7 Rotes Meer & Nil VIP Concierge",
+      "vipTitle": "Maßgeschneiderte VIP-Reisen & Yacht-Charter",
+      "vipDesc": "Benötigen Sie eine private Luxusyacht, Hubschraubertransfer oder besondere Feierarrangements? Unsere VIP-Direktoren antworten innerhalb von 2 Stunden.",
+      "vipBtn": "VIP Concierge-Anfrage",
+      "inquiriesTitle": "Allgemeine Anfragen & Hilfe",
+      "inquiriesSubtitle": "Wählen Sie eine Kategorie, um ein direktes Support-Ticket zu eröffnen.",
+      "conversationsTitle": "Ihre Konversationen & Ticket-Verlauf",
+      "conversationsSubtitle": "Verfolgen Sie Antworten in Echtzeit und kommunizieren Sie mit Ihrem Koordinator.",
+      "openThread": "Thread öffnen"
+    },
+    "categories": {
+      "payment": "Zahlung & Rechnungsstellung",
+      "refund": "Stornierung & Rückerstattung",
+      "modification": "Buchungsänderung",
+      "dietary": "Spezielle Ernährung / Wünsche",
+      "general": "Allgemeine Anfrage",
+      "other": "Sonstiges"
     }
   }
 }

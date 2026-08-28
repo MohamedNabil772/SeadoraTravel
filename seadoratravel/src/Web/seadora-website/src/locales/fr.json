@@ -527,6 +527,87 @@
         "exportBtn": "Exporter Mes Données",
         "deleteBtn": "Demander la Suppression des Données"
       }
+    },
+    "nav": {
+      "dashboard": "Tableau de bord Lounge",
+      "bookings": "Vos voyages",
+      "documents": "Coffre-fort de documents",
+      "profile": "Préférences",
+      "support": "Concierge privé",
+      "returnHome": "Retour au site principal",
+      "exploreAll": "Découvrir tous les voyages",
+      "vipBadge": "Concierge Mer Rouge 24/7",
+      "vipPriority": "Réponse prioritaire VIP"
+    },
+    "dropdown": {
+      "vipElite": "VIP Élite",
+      "vipGuest": "Invité VIP",
+      "profileSettings": "Paramètres de mon profil",
+      "documentVault": "Coffre-fort de documents",
+      "help": "Documentation / Aide",
+      "logout": "Déconnexion"
+    },
+    "dashboard": {
+      "vipLounge": "Salon VIP Élite Seadora",
+      "welcome": "Bienvenue à Seadora,",
+      "anticipating": "Dans l attente de votre arrivée à",
+      "destinationClimate": "CLIMAT DE LA DESTINATION",
+      "days": "Jours",
+      "hours": "Heures",
+      "mins": "Minutes",
+      "activeJourney": "Voyage actif confirmé",
+      "viewItinerary": "Voir itinéraire complet & manifeste",
+      "downloadVouchers": "Télécharger les bons numériques",
+      "bespokeTitle": "Concierge privé sur mesure",
+      "bespokeDesc": "Besoin d un transfert privé en hélicoptère, d un yacht de luxe ou de réservations exclusives ?",
+      "sendBespoke": "Envoyer une demande VIP",
+      "curateTitle": "Créer un nouveau voyage",
+      "curateDesc": "Explorez nos safaris en Mer Rouge, antiquités du Caire et retraites d oasis.",
+      "browseExperiences": "Parcourir les expériences"
+    },
+    "bookings": {
+      "title": "Vos voyages",
+      "subtitle": "Gérez vos réservations en cours, manifestes passagers et documents officiels.",
+      "curateNew": "Créer un nouveau voyage",
+      "confirmed": "CONFIRMÉ",
+      "completed": "TERMINÉ",
+      "fullyPaid": "Entièrement payé",
+      "viewItinerary": "Voir l itinéraire",
+      "downloadVoucher": "Télécharger le bon PDF",
+      "viewReceipt": "Voir le reçu et résumé",
+      "rebook": "Réserver à nouveau"
+    },
+    "documents": {
+      "title": "Coffre-fort de documents",
+      "subtitle": "Accédez aux documents de voyage chiffrés, bons officiels du Nil et permis portuaires.",
+      "uploadBtn": "Télécharger passeport / document",
+      "download": "Télécharger",
+      "encryptedBadge": "Coffre chiffré 256 bits",
+      "coastGuardTitle": "Garde-côtes égyptiens et permis portuaires",
+      "coastGuardDesc": "Vos manifestes de voyage et passeports sont stockés en sécurité.",
+      "updatePassports": "Mettre à jour les passeports"
+    },
+    "support": {
+      "title": "Concierge privé et service client",
+      "subtitle": "Soumettez vos demandes VIP, gérez vos questions de paiement et suivez vos tickets.",
+      "newTicket": "Nouveau ticket de support",
+      "vipBadge": "Concierge VIP Mer Rouge & Nil 24/7",
+      "vipTitle": "Voyages VIP sur mesure et yachts privés",
+      "vipDesc": "Besoin d un yacht de luxe privé ou transfert en hélicoptère ? Nos directeurs répondent en 2 heures.",
+      "vipBtn": "Demande Concierge VIP",
+      "inquiriesTitle": "Demandes générales et assistance",
+      "inquiriesSubtitle": "Sélectionnez une catégorie pour ouvrir un ticket avec notre équipe.",
+      "conversationsTitle": "Vos conversations et historique",
+      "conversationsSubtitle": "Suivez les réponses en temps réel avec votre coordinateur dédié.",
+      "openThread": "Ouvrir l échange"
+    },
+    "categories": {
+      "payment": "Paiement et facturation",
+      "refund": "Annulation et remboursement",
+      "modification": "Modification de réservation",
+      "dietary": "Régimes spéciaux / Besoins",
+      "general": "Demande générale",
+      "other": "Autre"
     }
   }
 }

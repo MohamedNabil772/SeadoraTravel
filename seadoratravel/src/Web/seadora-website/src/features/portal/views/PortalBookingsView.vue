@@ -3,15 +3,15 @@
     <!-- Header with Action -->
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-2">
       <div>
-        <h1 class="text-2xl font-bold text-slate-900 mb-0">Your Journeys</h1>
-        <p class="text-xs text-slate-500 mt-1">Manage current reservations, passenger manifests, and official travel documents.</p>
+        <h1 class="text-2xl font-bold text-slate-900 mb-0">{{ $t('portal.bookings.title') }}</h1>
+        <p class="text-xs text-slate-500 mt-1">{{ $t('portal.bookings.subtitle') }}</p>
       </div>
       <router-link 
         to="/tours" 
         class="px-5 py-2.5 bg-[#062d4d] text-white rounded-xl text-xs font-bold shadow-sm hover:bg-[#062d4d]/90 active:scale-[0.97] transition-[background-color,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] flex items-center gap-2"
       >
         <span>✦</span>
-        <span>Curate a New Journey</span>
+        <span>{{ $t('portal.bookings.curateNew') }}</span>
       </router-link>
     </div>
 
@@ -26,7 +26,7 @@
             alt="7-Night Private Dahabiya Expedition" 
           />
           <div class="absolute top-3 right-3 bg-emerald-500/90 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-full tracking-wider shadow-sm">
-            CONFIRMED
+            {{ $t('portal.bookings.confirmed') }}
           </div>
         </div>
 
@@ -41,7 +41,7 @@
               </div>
               <div class="text-left sm:text-right">
                 <div class="text-lg font-bold text-slate-900">€2,450</div>
-                <div class="text-xs text-emerald-600 font-semibold">Fully Paid ✓</div>
+                <div class="text-xs text-emerald-600 font-semibold">{{ $t('portal.bookings.fullyPaid') }} ✓</div>
               </div>
             </div>
             <p class="text-slate-500 text-xs mb-4">
@@ -54,13 +54,13 @@
               to="/portal/bookings/1" 
               class="px-4 py-2 bg-slate-100 hover:bg-slate-200/80 active:scale-[0.97] rounded-xl text-xs font-bold text-slate-800 transition-[background-color,transform] duration-200"
             >
-              View Full Itinerary
+              {{ $t('portal.bookings.viewItinerary') }}
             </router-link>
             <router-link 
               to="/portal/documents" 
               class="px-4 py-2 bg-[#c9a84c]/15 text-[#a38030] hover:bg-[#c9a84c]/25 active:scale-[0.97] border border-[#c9a84c]/30 rounded-xl text-xs font-bold transition-[background-color,transform] duration-200"
             >
-              Download PDF Voucher
+              {{ $t('portal.bookings.downloadVoucher') }}
             </router-link>
           </div>
         </div>
@@ -75,7 +75,7 @@
             alt="Red Sea Private Yacht Charter" 
           />
           <div class="absolute top-3 right-3 bg-slate-700/80 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-1 rounded-full tracking-wider shadow-sm">
-            COMPLETED
+            {{ $t('portal.bookings.completed') }}
           </div>
         </div>
 
@@ -100,16 +100,16 @@
 
           <div class="flex flex-wrap items-center gap-3 pt-4 border-t border-slate-100">
             <router-link 
-              to="/portal/bookings/2" 
-              class="px-4 py-2 bg-slate-100 hover:bg-slate-200/80 active:scale-[0.97] rounded-xl text-xs font-bold text-slate-700 transition-[background-color,transform] duration-200"
+              to="/portal/documents" 
+              class="px-4 py-2 bg-slate-100 hover:bg-slate-200/80 active:scale-[0.97] rounded-xl text-xs font-bold text-slate-800 transition-[background-color,transform] duration-200"
             >
-              View Receipt & Summary
+              {{ $t('portal.bookings.viewReceipt') }}
             </router-link>
             <router-link 
-              to="/portal/support" 
-              class="px-4 py-2 bg-slate-50 hover:bg-slate-100 active:scale-[0.97] rounded-xl text-xs font-semibold text-slate-600 transition-[background-color,transform] duration-200"
+              to="/tours" 
+              class="px-4 py-2 bg-slate-100 hover:bg-slate-200/80 active:scale-[0.97] rounded-xl text-xs font-bold text-[#062d4d] transition-[background-color,transform] duration-200"
             >
-              Re-book Experience
+              {{ $t('portal.bookings.rebook') }}
             </router-link>
           </div>
         </div>
@@ -117,3 +117,7 @@
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+// Portal Bookings View
+</script>
