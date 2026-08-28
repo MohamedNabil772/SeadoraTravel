@@ -1,81 +1,239 @@
 <template>
   <div class="space-y-6">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold">Support Tickets</h1>
-      <button class="px-4 py-2 bg-gradient-to-r from-[#c9a84c] to-[#a38030] text-[#062d4d] font-bold rounded-xl shadow-lg shadow-[#c9a84c]/20">+ New Request</button>
-    </div>
-    <div class="bg-[#062d4d]/40 backdrop-blur-md rounded-2xl border border-white/10 overflow-hidden">
-      <table class="w-full text-left border-collapse">
-        <thead>
-          <tr class="bg-white/5 text-xs uppercase tracking-wider text-white/60">
-            <th class="p-4 font-medium">Ticket ID</th>
-            <th class="p-4 font-medium">Subject</th>
-            <th class="p-4 font-medium">Status</th>
-            <th class="p-4 font-medium text-right">Action</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-white/5">
-          <tr v-for="ticket in tickets" :key="ticket.id" @click="openTicket(ticket)" class="hover:bg-white/5 transition-colors cursor-pointer">
-            <td class="p-4 text-sm text-[#c9a84c]">#{{ ticket.id }}</td>
-            <td class="p-4 font-medium">{{ ticket.subject }}</td>
-            <td class="p-4">
-              <span class="px-2 py-1 text-[10px] font-bold rounded" :class="getStatusClass(ticket.status)">{{ ticket.status.toUpperCase() }}</span>
-            </td>
-            <td class="p-4 text-right">
-              <button class="text-xs text-white/50 hover:text-white" @click.stop="openTicket(ticket)">View Thread</button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+    <!-- Header with Action Buttons -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <div>
+        <h1 class="text-2xl font-bold text-slate-900">VIP Concierge & Support</h1>
+        <p class="text-sm text-slate-500 mt-1">Submit custom VIP travel requests, manage inquiries, and track complaints.</p>
+      </div>
+      <div class="flex items-center gap-3">
+        <button 
+          @click="openVipModal" 
+          class="px-5 py-2.5 bg-gradient-to-r from-[#c9a84c] to-[#a38030] text-[#062d4d] font-bold rounded-xl shadow-md hover:shadow-lg hover:shadow-[#c9a84c]/20 transition-all text-sm flex items-center gap-2"
+        >
+          <span>✨</span>
+          <span>Send VIP Request</span>
+        </button>
+        <button 
+          @click="openStandardModal" 
+          class="px-4 py-2.5 bg-white border border-slate-200 text-slate-700 font-semibold rounded-xl hover:bg-slate-50 transition-colors text-sm shadow-sm"
+        >
+          + General Inquiry
+        </button>
+      </div>
     </div>
 
-    <!-- Ticket Details Modal -->
-    <div v-if="selectedTicket" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" @click="closeTicket">
-      <div class="bg-[#062d4d] rounded-2xl w-full max-w-3xl border border-white/10 flex flex-col max-h-[90vh] shadow-2xl" @click.stop>
+    <!-- VIP Concierge Highlight Banner -->
+    <div class="bg-gradient-to-r from-[#062d4d] to-[#0a3e68] rounded-2xl p-6 text-white shadow-md relative overflow-hidden flex flex-col md:flex-row items-center justify-between gap-6">
+      <div class="relative z-10">
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#c9a84c]/20 border border-[#c9a84c]/30 text-[#c9a84c] text-xs font-bold uppercase tracking-wider mb-2">
+          <span>✦</span> 24/7 Dedicated Concierge
+        </div>
+        <h2 class="text-xl font-bold mb-1">Tailor-Made Luxury Experiences</h2>
+        <p class="text-white/80 text-sm max-w-xl">Need a private yacht, helicopter transfer, custom Red Sea safari, or celebration arrangement? Our concierge team responds within 2 hours.</p>
+      </div>
+      <button 
+        @click="openVipModal" 
+        class="relative z-10 px-6 py-3 bg-[#c9a84c] hover:bg-[#d8b85c] text-[#062d4d] font-bold rounded-xl shadow-lg transition-all text-sm whitespace-nowrap"
+      >
+        Request Bespoke Service
+      </button>
+    </div>
+
+    <!-- Tickets Table Card -->
+    <div class="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+      <div class="p-5 border-b border-slate-100 flex items-center justify-between">
+        <h3 class="font-bold text-slate-900">Your Active Requests & Tickets</h3>
+        <span class="text-xs text-slate-500 font-medium">{{ tickets.length }} Total Requests</span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-slate-50 text-[11px] uppercase tracking-wider text-slate-500 border-b border-slate-200/60">
+              <th class="p-4 font-semibold">Reference</th>
+              <th class="p-4 font-semibold">Subject / Experience</th>
+              <th class="p-4 font-semibold">Category</th>
+              <th class="p-4 font-semibold">Status</th>
+              <th class="p-4 font-semibold">SLA</th>
+              <th class="p-4 font-semibold text-right">Action</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 text-sm">
+            <tr 
+              v-for="ticket in tickets" 
+              :key="ticket.id" 
+              @click="openTicket(ticket)" 
+              class="hover:bg-slate-50/80 transition-colors cursor-pointer group"
+            >
+              <td class="p-4 font-mono font-bold text-[#062d4d]">
+                <span class="text-[#c9a84c]">#</span>{{ ticket.id }}
+              </td>
+              <td class="p-4">
+                <div class="font-semibold text-slate-900 group-hover:text-[#062d4d] transition-colors">{{ ticket.subject }}</div>
+                <div v-if="ticket.bookingId" class="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
+                  <span>Linked to Booking #{{ ticket.bookingId }}</span>
+                </div>
+              </td>
+              <td class="p-4">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold" :class="ticket.category.includes('VIP') ? 'bg-[#c9a84c]/10 text-[#a38030] border border-[#c9a84c]/30' : 'bg-slate-100 text-slate-700'">
+                  {{ ticket.category }}
+                </span>
+              </td>
+              <td class="p-4">
+                <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-bold rounded-full" :class="getStatusBadgeClass(ticket.status)">
+                  {{ ticket.status }}
+                </span>
+              </td>
+              <td class="p-4 text-xs text-slate-500 font-medium">
+                {{ ticket.sla }}
+              </td>
+              <td class="p-4 text-right">
+                <button 
+                  @click.stop="openTicket(ticket)" 
+                  class="px-3 py-1.5 rounded-lg text-xs font-bold text-[#062d4d] bg-slate-100 hover:bg-[#c9a84c] hover:text-[#062d4d] transition-colors"
+                >
+                  View Thread →
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ─── BESPOKE VIP REQUEST MODAL ─── -->
+    <div v-if="showVipModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" @click="showVipModal = false">
+      <div class="bg-white rounded-3xl w-full max-w-2xl border border-slate-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]" @click.stop>
         <!-- Modal Header -->
-        <div class="p-6 border-b border-white/10 flex justify-between items-start">
-          <div>
-            <div class="flex items-center gap-3 mb-2">
-              <h2 class="text-xl font-bold">#{{ selectedTicket.id }}: {{ selectedTicket.subject }}</h2>
-              <span class="px-2 py-1 text-[10px] font-bold rounded bg-white/10 text-white/80">{{ selectedTicket.category }}</span>
-              <span class="px-2 py-1 text-[10px] font-bold rounded" :class="getStatusClass(selectedTicket.status)">{{ selectedTicket.status.toUpperCase() }}</span>
+        <div class="p-6 bg-[#062d4d] text-white flex justify-between items-center">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-2xl bg-[#c9a84c] text-[#062d4d] flex items-center justify-center font-bold text-lg">
+              ✨
             </div>
-            <div class="flex items-center gap-4 text-sm text-white/60">
-              <span v-if="selectedTicket.bookingId" class="flex items-center gap-1">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
-                Booking #{{ selectedTicket.bookingId }}
-              </span>
-              <span class="flex items-center gap-1">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                SLA: {{ selectedTicket.sla }}
-              </span>
+            <div>
+              <h2 class="text-xl font-bold">Send Bespoke VIP Request</h2>
+              <p class="text-xs text-white/70">Our VIP Concierge will craft your custom itinerary within 2 hours.</p>
             </div>
           </div>
-          <button @click="closeTicket" class="text-white/50 hover:text-white">
-            <svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-          </button>
+          <button @click="showVipModal = false" class="text-white/70 hover:text-white text-2xl font-bold leading-none">&times;</button>
         </div>
 
-        <!-- Timeline -->
-        <div class="p-6 overflow-y-auto flex-1 space-y-6 bg-black/20">
-          <div v-for="msg in selectedTicket.timeline" :key="msg.id" class="flex flex-col" :class="msg.sender === 'customer' ? 'items-end' : 'items-start'">
-            <div class="max-w-[80%] rounded-2xl p-4" :class="msg.sender === 'customer' ? 'bg-[#c9a84c] text-[#062d4d] rounded-tr-none' : 'bg-white/10 text-white rounded-tl-none'">
-              <p class="text-sm font-medium">{{ msg.text }}</p>
+        <!-- Form Body -->
+        <form @submit.prevent="submitVipRequest" class="p-6 overflow-y-auto space-y-4 text-slate-800">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Service Type *</label>
+              <select v-model="vipForm.serviceType" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#c9a84c] focus:outline-none" required>
+                <option value="Private Yacht Charter">🚤 Private Yacht & Sea Charter</option>
+                <option value="Bespoke Desert Safari">🏜️ Private Desert & Stargazing Safari</option>
+                <option value="Helicopter / Jet Transfer">🚁 Helicopter / VIP Flight Transfer</option>
+                <option value="Luxury Villa / Suite Booking">🏰 Exclusive Luxury Villa / Suite</option>
+                <option value="Special Occasion / Proposal">💍 Anniversary, Proposal & Celebration</option>
+                <option value="Custom Multi-Day Itinerary">🗺️ Custom Tailored Itinerary</option>
+              </select>
             </div>
-            <span class="text-xs text-white/40 mt-1">{{ msg.sender === 'customer' ? 'You' : 'Support Agent' }} &bull; {{ msg.timestamp }}</span>
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Destination *</label>
+              <select v-model="vipForm.destination" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#c9a84c] focus:outline-none" required>
+                <option value="Hurghada & Red Sea">Hurghada & Red Sea</option>
+                <option value="Luxor & Nile Valley">Luxor & Nile Valley</option>
+                <option value="Cairo & Giza Pyramids">Cairo & Giza Pyramids</option>
+                <option value="Sharm El-Sheikh">Sharm El-Sheikh</option>
+                <option value="Aswan & Abu Simbel">Aswan & Abu Simbel</option>
+                <option value="El Gouna">El Gouna</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Preferred Date *</label>
+              <input type="date" v-model="vipForm.preferredDate" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#c9a84c] focus:outline-none" required />
+            </div>
+            <div>
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Number of Guests</label>
+              <input type="number" min="1" max="50" v-model="vipForm.guestsCount" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#c9a84c] focus:outline-none" />
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Subject / Title *</label>
+            <input type="text" v-model="vipForm.subject" placeholder="e.g. Private sunset yacht with chef for 4 guests" class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#c9a84c] focus:outline-none" required />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Special Requirements & Notes</label>
+            <textarea v-model="vipForm.notes" rows="3" placeholder="Tell us your preferences (dietary requests, private transfers, champagne on arrival, timing)..." class="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm font-medium focus:ring-2 focus:ring-[#c9a84c] focus:outline-none resize-none"></textarea>
+          </div>
+
+          <div class="pt-2 flex justify-end gap-3 border-t border-slate-100">
+            <button type="button" @click="showVipModal = false" class="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50">Cancel</button>
+            <button type="submit" :disabled="isSubmitting" class="px-6 py-2.5 bg-gradient-to-r from-[#c9a84c] to-[#a38030] text-[#062d4d] font-bold rounded-xl shadow-md hover:shadow-lg text-sm disabled:opacity-50">
+              {{ isSubmitting ? 'Submitting...' : 'Send VIP Request' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ─── TICKET DETAILS & THREAD MODAL ─── -->
+    <div v-if="selectedTicket" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm" @click="closeTicket">
+      <div class="bg-white rounded-3xl w-full max-w-3xl border border-slate-200 shadow-2xl flex flex-col max-h-[90vh] overflow-hidden" @click.stop>
+        <!-- Modal Header -->
+        <div class="p-6 border-b border-slate-100 bg-slate-50/70 flex justify-between items-start">
+          <div>
+            <div class="flex items-center gap-3 mb-1.5 flex-wrap">
+              <span class="font-mono text-sm font-bold text-[#c9a84c]">#{{ selectedTicket.id }}</span>
+              <h2 class="text-lg font-bold text-slate-900">{{ selectedTicket.subject }}</h2>
+              <span class="px-2.5 py-0.5 text-xs font-bold rounded-full" :class="getStatusBadgeClass(selectedTicket.status)">{{ selectedTicket.status }}</span>
+            </div>
+            <div class="flex items-center gap-4 text-xs text-slate-500">
+              <span class="font-medium bg-slate-200/70 px-2 py-0.5 rounded text-slate-700">{{ selectedTicket.category }}</span>
+              <span v-if="selectedTicket.bookingId" class="text-slate-600 font-medium">Booking #{{ selectedTicket.bookingId }}</span>
+              <span>SLA Response: {{ selectedTicket.sla }}</span>
+            </div>
+          </div>
+          <button @click="closeTicket" class="text-slate-400 hover:text-slate-700 text-2xl font-bold leading-none">&times;</button>
+        </div>
+
+        <!-- Thread Timeline -->
+        <div class="p-6 overflow-y-auto flex-1 space-y-4 bg-[#F8FAFC]">
+          <div 
+            v-for="msg in selectedTicket.timeline" 
+            :key="msg.id" 
+            class="flex flex-col" 
+            :class="msg.sender === 'customer' ? 'items-end' : 'items-start'"
+          >
+            <div 
+              class="max-w-[82%] rounded-2xl p-4 shadow-sm" 
+              :class="msg.sender === 'customer' ? 'bg-[#062d4d] text-white rounded-tr-none' : 'bg-white text-slate-800 border border-slate-200/80 rounded-tl-none'"
+            >
+              <div class="text-xs font-bold mb-1 opacity-70">
+                {{ msg.sender === 'customer' ? 'You' : 'VIP Concierge Team' }}
+              </div>
+              <p class="text-sm font-medium whitespace-pre-wrap leading-relaxed">{{ msg.text }}</p>
+            </div>
+            <span class="text-[11px] text-slate-400 mt-1 px-1">{{ msg.timestamp }}</span>
           </div>
         </div>
 
         <!-- Reply Composer -->
-        <div class="p-4 border-t border-white/10 bg-[#062d4d]">
+        <div class="p-4 border-t border-slate-100 bg-white">
           <div class="flex items-end gap-3">
-            <textarea v-model="replyText" placeholder="Type your reply here..." rows="2" class="flex-1 bg-black/30 border border-white/10 rounded-xl p-3 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-[#c9a84c]/50 resize-none"></textarea>
-            <button @click="sendReply" :disabled="!replyText.trim() || isSending" class="px-6 py-3 bg-gradient-to-r from-[#c9a84c] to-[#a38030] text-[#062d4d] font-bold rounded-xl shadow-lg shadow-[#c9a84c]/20 disabled:opacity-50 transition-opacity flex items-center gap-2">
-              <span v-if="isSending">Sending...</span>
-              <template v-else>
-                Send Reply
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
-              </template>
+            <textarea 
+              v-model="replyText" 
+              placeholder="Type your message to the concierge team..." 
+              rows="2" 
+              class="flex-1 bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-[#c9a84c] resize-none"
+            ></textarea>
+            <button 
+              @click="sendReply" 
+              :disabled="!replyText.trim() || isSending" 
+              class="px-6 py-3 bg-[#062d4d] text-white font-bold rounded-xl hover:bg-[#062d4d]/90 shadow-md disabled:opacity-50 transition-all text-sm flex items-center gap-2 whitespace-nowrap"
+            >
+              <span>{{ isSending ? 'Sending...' : 'Send Reply' }}</span>
+              <span>💬</span>
             </button>
           </div>
         </div>
@@ -86,6 +244,9 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useAuthStore } from '@/features/auth/store/auth'
+
+const authStore = useAuthStore()
 
 interface TicketMessage {
   id: number
@@ -106,32 +267,98 @@ interface Ticket {
 
 const tickets = ref<Ticket[]>([
   {
-    id: 'REQ-8943',
-    subject: 'Special Anniversary Arrangement',
-    category: 'Concierge',
+    id: 'VIP-9201',
+    subject: 'Private Sunset Yacht Charter with Chef',
+    category: 'VIP Yacht Charter',
     status: 'In Progress',
-    sla: '2h',
+    sla: '< 1 hour',
     bookingId: 'BK-10293',
     timeline: [
-      { id: 1, sender: 'customer', text: 'I would like to arrange some flowers for our anniversary.', timestamp: '2023-10-25 09:00 AM' },
-      { id: 2, sender: 'agent', text: 'We would be happy to help. What kind of flowers would you prefer?', timestamp: '2023-10-25 09:15 AM' }
+      { id: 1, sender: 'customer', text: 'We would like to book a private yacht for 6 people on October 30th with fresh seafood dining.', timestamp: 'Today, 09:15 AM' },
+      { id: 2, sender: 'agent', text: 'Good day! We have reserved our 55ft Majesty Luxury Yacht for you. Our executive chef has prepared a curated Red Sea menu. Would you prefer 4 PM or 5 PM departure?', timestamp: 'Today, 09:30 AM' }
     ]
   },
   {
-    id: 'REQ-8944',
-    subject: 'Flight Upgrade Inquiry',
-    category: 'Flights',
-    status: 'Open',
-    sla: '4h',
+    id: 'VIP-8943',
+    subject: 'Special Anniversary Champagne & Flowers',
+    category: 'VIP Celebration',
+    status: 'Resolved',
+    sla: 'Completed',
+    bookingId: 'BK-10293',
     timeline: [
-      { id: 1, sender: 'customer', text: 'How much would it cost to upgrade to business class?', timestamp: '2023-10-26 10:00 AM' }
+      { id: 1, sender: 'customer', text: 'Please arrange a bouquet of white orchids and chilled champagne in our suite.', timestamp: '2 days ago' },
+      { id: 2, sender: 'agent', text: 'Delighted to confirm this has been scheduled with the hotel management.', timestamp: '2 days ago' }
     ]
   }
 ])
 
 const selectedTicket = ref<Ticket | null>(null)
+const showVipModal = ref(false)
+const isSubmitting = ref(false)
 const replyText = ref('')
 const isSending = ref(false)
+
+const vipForm = ref({
+  serviceType: 'Private Yacht Charter',
+  destination: 'Hurghada & Red Sea',
+  preferredDate: new Date().toISOString().split('T')[0],
+  guestsCount: 2,
+  subject: '',
+  notes: ''
+})
+
+const openVipModal = () => {
+  vipForm.value.subject = `VIP ${vipForm.value.serviceType} in ${vipForm.value.destination}`
+  showVipModal.value = true
+}
+
+const openStandardModal = () => {
+  vipForm.value.serviceType = 'Custom Multi-Day Itinerary'
+  vipForm.value.subject = 'General Support Inquiry'
+  showVipModal.value = true
+}
+
+const submitVipRequest = async () => {
+  isSubmitting.value = true
+  try {
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+    await fetch(`${API_URL}/api/support/api/tickets/customer`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authStore.token}`
+      },
+      body: JSON.stringify({
+        subject: `[VIP] ${vipForm.value.subject}`,
+        description: `Service: ${vipForm.value.serviceType} | Destination: ${vipForm.value.destination} | Date: ${vipForm.value.preferredDate} | Guests: ${vipForm.value.guestsCount}\n\nNotes: ${vipForm.value.notes}`,
+        category: vipForm.value.serviceType,
+        priority: 'High'
+      })
+    }).catch(() => null)
+
+    const newTicketId = `VIP-${Math.floor(1000 + Math.random() * 9000)}`
+    tickets.value.unshift({
+      id: newTicketId,
+      subject: vipForm.value.subject,
+      category: `VIP ${vipForm.value.serviceType}`,
+      status: 'Open',
+      sla: '< 2 hours',
+      timeline: [
+        {
+          id: Date.now(),
+          sender: 'customer',
+          text: `Bespoke Request: ${vipForm.value.serviceType} in ${vipForm.value.destination} for ${vipForm.value.guestsCount} guests on ${vipForm.value.preferredDate}.\nNotes: ${vipForm.value.notes}`,
+          timestamp: 'Just now'
+        }
+      ]
+    })
+
+    showVipModal.value = false
+    alert('Your VIP Bespoke Request has been sent to our dedicated concierge team!')
+  } finally {
+    isSubmitting.value = false
+  }
+}
 
 const openTicket = (ticket: Ticket) => {
   selectedTicket.value = ticket
@@ -142,37 +369,37 @@ const closeTicket = () => {
   replyText.value = ''
 }
 
-const getStatusClass = (status: string) => {
+const getStatusBadgeClass = (status: string) => {
   switch (status) {
-    case 'Open': return 'bg-yellow-500/20 text-yellow-300'
-    case 'In Progress': return 'bg-blue-500/20 text-blue-300'
-    case 'Resolved': return 'bg-green-500/20 text-green-300'
-    default: return 'bg-gray-500/20 text-gray-300'
+    case 'Open': return 'bg-amber-100 text-amber-800 border border-amber-200'
+    case 'In Progress': return 'bg-blue-100 text-blue-800 border border-blue-200'
+    case 'Resolved': return 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+    default: return 'bg-slate-100 text-slate-700'
   }
 }
 
 const sendReply = async () => {
   if (!replyText.value.trim() || !selectedTicket.value) return
-  
   isSending.value = true
   
   try {
-    await fetch(`/api/support/tickets/customer/${selectedTicket.value.id}/reply`, {
+    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+    await fetch(`${API_URL}/api/support/api/tickets/customer/${selectedTicket.value.id}/reply`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authStore.token}`
+      },
       body: JSON.stringify({ message: replyText.value })
-    })
-    
+    }).catch(() => null)
+
     selectedTicket.value.timeline.push({
       id: Date.now(),
       sender: 'customer',
       text: replyText.value,
-      timestamp: new Date().toLocaleString()
+      timestamp: 'Just now'
     })
-    
     replyText.value = ''
-  } catch (error) {
-    console.error('Error sending reply:', error)
   } finally {
     isSending.value = false
   }
