@@ -13,6 +13,20 @@ services:
       timeout: 5s
       retries: 5
 
+  rabbitmq:
+    image: rabbitmq:3-management
+    restart: unless-stopped
+    environment:
+      - RABBITMQ_DEFAULT_USER=${RABBITMQ_USER:-seadora}
+      - RABBITMQ_DEFAULT_PASS=${RABBITMQ_PASS:-seadora}
+    volumes:
+      - seadora-rabbitmq:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   api-gateway:
     build:
       context: .
@@ -26,6 +40,10 @@ services:
       - identity-service
       - content-service
       - booking-service
+      - customer-service
+      - finance-service
+      - support-service
+      - concierge-service
       - file-server
 
   identity-service:
@@ -35,10 +53,15 @@ services:
     restart: unless-stopped
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Username=${RABBITMQ_USER:-seadora}
+      - RabbitMq__Password=${RABBITMQ_PASS:-seadora}
       - JwtSettings__Secret=${JWT_SECRET}
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Identity;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
     depends_on:
       postgres:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
 
   content-service:
@@ -48,9 +71,14 @@ services:
     restart: unless-stopped
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Username=${RABBITMQ_USER:-seadora}
+      - RabbitMq__Password=${RABBITMQ_PASS:-seadora}
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Content;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
     depends_on:
       postgres:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
 
   booking-service:
@@ -60,6 +88,9 @@ services:
     restart: unless-stopped
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Username=${RABBITMQ_USER:-seadora}
+      - RabbitMq__Password=${RABBITMQ_PASS:-seadora}
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Booking;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
       - Smtp__Host=${SMTP_HOST:-smtp.hostinger.com}
       - Smtp__Port=${SMTP_PORT:-587}
@@ -73,6 +104,76 @@ services:
       - Smtp__LogoUrl=${SMTP_LOGO_URL:-https://seadoratravel.com/logo.png}
     depends_on:
       postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  customer-service:
+    build:
+      context: .
+      dockerfile: src/Services/Customer.Service/Seadora.Customer.API/Dockerfile
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Username=${RABBITMQ_USER:-seadora}
+      - RabbitMq__Password=${RABBITMQ_PASS:-seadora}
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Customer;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  finance-service:
+    build:
+      context: .
+      dockerfile: src/Services/Finance.Service/Seadora.Finance.API/Dockerfile
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Username=${RABBITMQ_USER:-seadora}
+      - RabbitMq__Password=${RABBITMQ_PASS:-seadora}
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Finance;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  support-service:
+    build:
+      context: .
+      dockerfile: src/Services/Support.Service/Seadora.Support.API/Dockerfile
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Username=${RABBITMQ_USER:-seadora}
+      - RabbitMq__Password=${RABBITMQ_PASS:-seadora}
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Support;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+
+  concierge-service:
+    build:
+      context: .
+      dockerfile: src/Services/Concierge.Service/Seadora.Concierge.API/Dockerfile
+    restart: unless-stopped
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Username=${RABBITMQ_USER:-seadora}
+      - RabbitMq__Password=${RABBITMQ_PASS:-seadora}
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Concierge;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
         condition: service_healthy
 
   file-server:
@@ -122,4 +223,5 @@ services:
 volumes:
   seadora-uploads:
   seadora-db-data:
+  seadora-rabbitmq:
   seadora-backups:
