@@ -4,29 +4,13 @@ import { useI18n } from 'vue-i18n'
 import { useCurrencyStore } from '@/store/currency'
 import { useAuthStore } from '@/features/auth/store/auth'
 import LuxuryIcons from '@/shared/components/LuxuryIcons.vue'
-import { useModalA11y } from '@/shared/utils/modalA11y'
-
 const { locale, t } = useI18n()
 const currencyStore = useCurrencyStore()
 const authStore = useAuthStore()
 
-const showLoginModal = ref(false)
-const { setDialogEl, trapTab } = useModalA11y(showLoginModal)
 const showProfileDropdown = ref(false)
 const showLangDropdown = ref(false)
 const showCurrencyDropdown = ref(false)
-const loginName = ref('')
-const loginEmail = ref('')
-const showLoginButton = ref(false) // hidden by default for now
-
-const handleLogin = () => {
-  if (loginName.value.trim() && loginEmail.value.trim()) {
-    authStore.login({ name: loginName.value.trim(), email: loginEmail.value.trim() })
-    showLoginModal.value = false
-    loginName.value = ''
-    loginEmail.value = ''
-  }
-}
 
 const handleLogout = () => {
   authStore.logout()
@@ -213,23 +197,37 @@ onUnmounted(() => {
 
       <!-- Login / Profile Section -->
       <div class="auth-section">
-        <button v-if="showLoginButton && !authStore.isLoggedIn" @click="showLoginModal = true" class="btn-primary" style="padding: 10px 24px; font-size: 11px;">
-          {{ t('nav.login') || 'Login' }}
+        <button 
+          v-if="!authStore.isAuthenticated" 
+          @click="authStore.openAuthModal()" 
+          class="btn-primary flex items-center gap-2" 
+          style="padding: 9px 22px; font-size: 11px; letter-spacing: 0.08em;"
+        >
+          <span>{{ t('nav.login') || 'Sign In' }}</span>
         </button>
-        <div v-else-if="authStore.isLoggedIn" class="profile-container">
-          <button @click="showProfileDropdown = !showProfileDropdown" class="profile-btn">
-            <div class="avatar">{{ userInitials }}</div>
-            <span class="username">{{ authStore.user?.name }}</span>
+        <div v-else class="profile-container flex items-center gap-1.5">
+          <router-link to="/portal" class="profile-btn" title="Open Customer Portal">
+            <div class="avatar">{{ userInitials || 'VIP' }}</div>
+            <span class="username">{{ authStore.user?.name || 'Traveler' }}</span>
+          </router-link>
+          <button @click="showProfileDropdown = !showProfileDropdown" class="p-1 hover:text-[#c9a84c] text-white/70 transition-colors" aria-label="Toggle profile menu">
+            <LuxuryIcons name="chevron-left" size="12" class="transition-transform duration-200 transform" :class="showProfileDropdown ? 'rotate-90' : '-rotate-90'" />
           </button>
           <div v-if="showProfileDropdown" class="profile-dropdown" v-click-outside="() => showProfileDropdown = false">
             <div class="profile-header">
-              <h4>{{ authStore.user?.name }}</h4>
+              <h4>{{ authStore.user?.name || 'VIP Traveler' }}</h4>
               <p>{{ authStore.user?.email }}</p>
             </div>
             <div class="profile-links">
-              <a href="#trips" @click="showProfileDropdown = false" class="profile-link">
-                <span>⭐ Favorites ({{ authStore.favorites.length }})</span>
-              </a>
+              <router-link to="/portal" @click="showProfileDropdown = false" class="profile-link">
+                <span>🏰 Customer Portal</span>
+              </router-link>
+              <router-link to="/portal/bookings" @click="showProfileDropdown = false" class="profile-link">
+                <span>🎫 My Bookings</span>
+              </router-link>
+              <router-link to="/portal/support" @click="showProfileDropdown = false" class="profile-link">
+                <span>💬 Support & Complaints</span>
+              </router-link>
               <button @click="handleLogout" class="logout-btn">
                 Log Out
               </button>
@@ -310,64 +308,21 @@ onUnmounted(() => {
 
         <!-- Mobile User Auth section -->
         <div class="mobile-drawer-auth mt-3 border-t border-white/10 pt-3">
-          <button v-if="showLoginButton && !authStore.isLoggedIn" @click="showLoginModal = true; isMenuOpen = false" class="mobile-login-btn">
-            Login as VIP Guest
+          <button v-if="!authStore.isAuthenticated" @click="authStore.openAuthModal(); isMenuOpen = false" class="mobile-login-btn">
+            Sign In / Register
           </button>
-          <div v-else-if="authStore.isLoggedIn" class="mobile-logged-in">
-            <span>Welcome, <strong>{{ authStore.user?.name }}</strong></span>
-            <button @click="handleLogout" class="mobile-logout-btn">Logout</button>
+          <div v-else class="mobile-logged-in flex flex-col gap-2">
+            <span>Welcome, <strong>{{ authStore.user?.name || 'VIP Traveler' }}</strong></span>
+            <router-link to="/portal" @click="isMenuOpen = false" class="mobile-portal-link px-3 py-1.5 bg-[#c9a84c] text-[#062d4d] rounded-lg text-xs font-bold text-center">
+              Go to Customer Portal
+            </router-link>
+            <button @click="handleLogout" class="mobile-logout-btn text-xs text-white/70 hover:text-white">Logout</button>
           </div>
         </div>
       </div>
     </div>
-  
-    <div class="ml-4 flex items-center">
-      <button v-if="!authStore.isAuthenticated" @click="authStore.openAuthModal()" class="px-5 py-2 bg-gradient-to-r from-[#c9a84c] to-[#a38030] text-[#062d4d] font-bold rounded-xl shadow-lg hover:shadow-[#c9a84c]/20 transition-all text-sm">
-        Sign In
-      </button>
-      <router-link v-else to="/portal" class="w-10 h-10 rounded-full bg-[#c9a84c] text-[#062d4d] flex items-center justify-center font-bold shadow-lg hover:shadow-[#c9a84c]/30 transition-all cursor-pointer">
-        {{ userInitials }}
-      </router-link>
-    </div>
-\n  </nav>
+  </nav>
 </header>
-
-  <!-- Login Modal -->
-  <Transition name="fade">
-    <div
-      v-if="showLoginModal"
-      :ref="setDialogEl"
-      tabindex="-1"
-      role="dialog"
-      aria-modal="true"
-      aria-label="VIP Guest Access"
-      class="login-modal-overlay"
-      @click="showLoginModal = false"
-      @keydown.esc.stop="showLoginModal = false"
-      @keydown.tab="trapTab"
-    >
-      <div class="login-modal-card" @click.stop>
-        <button type="button" aria-label="Close" @click="showLoginModal = false" class="modal-close-btn">&times;</button>
-        <h3 class="modal-title">VIP Guest Access</h3>
-        <p class="modal-subtitle">Log in to save favorites and unlock personalized concierge services.</p>
-        
-        <form @submit.prevent="handleLogin" class="login-form">
-          <div class="form-group">
-            <label for="guest-name">Full Name</label>
-            <input type="text" id="guest-name" v-model="loginName" :placeholder="$t('placeholders.fullName')" required />
-          </div>
-          <div class="form-group">
-            <label for="guest-email">Email Address</label>
-            <input type="email" id="guest-email" v-model="loginEmail" :placeholder="$t('placeholders.email')" required />
-          </div>
-          
-          <button type="submit" class="login-submit-btn">
-            Sign In as VIP Guest
-          </button>
-        </form>
-      </div>
-    </div>
-  </Transition>
 </template>
 
 <style scoped>
