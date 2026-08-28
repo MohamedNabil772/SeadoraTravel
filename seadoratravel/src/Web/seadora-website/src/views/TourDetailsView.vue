@@ -1,15 +1,19 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useCurrencyStore } from '@/store/currency'
+import { useAuthStore } from '@/features/auth/store/auth'
 import { getSlug, getFullImageUrl } from '@/shared/utils/helpers'
 import Footer from '@/shared/components/Footer.vue'
 import TourAvailabilityCalendar from '@/features/tours/components/TourAvailabilityCalendar.vue'
 
 const route = useRoute()
+const router = useRouter()
 const { locale, t } = useI18n()
 const currencyStore = useCurrencyStore()
+const authStore = useAuthStore()
+const bookingReceivedSuccess = ref(false)
 
 const routeSlug = computed(() => route.params.slug as string)
 
@@ -1128,6 +1132,11 @@ const validateForm = () => {
 
 const handleBookNow = () => {
   formErrors.value = { fullName: '', email: '', whatsapp: '', hotelName: '', passport: '' }
+  if (authStore.user) {
+    if (!bookingForm.value.fullName) bookingForm.value.fullName = authStore.user.name || authStore.user.fullName || ''
+    if (!bookingForm.value.email) bookingForm.value.email = authStore.user.email || ''
+    if (!bookingForm.value.whatsapp) bookingForm.value.whatsapp = authStore.user.phone || authStore.user.phoneNumber || ''
+  }
   isBookingModalOpen.value = true
 }
 
@@ -1182,6 +1191,7 @@ const confirmBooking = async () => {
     toastMessage.value = t("toast.bookingConfirmed")
     showToast.value = true
     isBookingModalOpen.value = false
+    bookingReceivedSuccess.value = true
     setTimeout(() => { showToast.value = false }, 5000)
   } finally {
     bookingSubmitting.value = false
@@ -2416,6 +2426,41 @@ watch(routeSlug, () => {
         <span>{{ toastMessage }}</span>
       </div>
     </Transition>
+
+    <!-- BOOKING RECEIVED CONFIRMATION MODAL -->
+    <div v-if="bookingReceivedSuccess" class="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
+      <div class="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl relative border border-[#c9a84c]/30 text-center space-y-6 animate-in zoom-in-95">
+        <div class="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center text-3xl mx-auto shadow-inner">
+          ✓
+        </div>
+        <div>
+          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#c9a84c]/15 text-[#a38030] text-[11px] font-bold uppercase tracking-wider mb-2">
+            <span>✦</span> Reservation Confirmed & Received
+          </div>
+          <h3 class="text-2xl font-bold text-slate-900">Your Journey is Booked!</h3>
+          <p class="text-xs text-slate-500 mt-2 leading-relaxed max-w-sm mx-auto">
+            Your booking has been received and verified. Our VIP concierge is finalizing your private manifest and hotel pickup schedule.
+          </p>
+        </div>
+
+        <div class="pt-2 flex flex-col sm:flex-row justify-center gap-3">
+          <button 
+            v-if="authStore.isAuthenticated"
+            @click="bookingReceivedSuccess = false; router.push('/portal/bookings')"
+            class="px-6 py-3 bg-[#062d4d] hover:bg-[#093a62] text-white font-bold rounded-xl text-xs shadow-md active:scale-[0.97] transition-all flex items-center justify-center gap-2"
+          >
+            <span>⛵</span>
+            <span>View in Your Journeys</span>
+          </button>
+          <button 
+            @click="bookingReceivedSuccess = false"
+            class="px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs active:scale-[0.97] transition-all"
+          >
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
 
     <!-- FOOTER -->
     <Footer class="mt-16" />

@@ -2,9 +2,12 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/features/auth/store/auth'
 import { getFullImageUrl } from '@/shared/utils/helpers'
 
 const { t, locale, te } = useI18n()
+const router = useRouter()
+const authStore = useAuthStore()
 
 interface Category {
   id: string;
@@ -35,8 +38,6 @@ const currentCategoryId = ref('all')
 const tours = ref<Tour[]>([])
 const categories = ref<Category[]>([])
 const loading = ref(true)
-
-const router = useRouter()
 
 const getSlug = (name: string) => {
   return name
@@ -133,6 +134,10 @@ const getCategoryName = (catId: string) => {
 
 const openBookingModal = (tour: Tour) => {
   selectedTour.value = tour;
+  if (authStore.user) {
+    customerName.value = authStore.user.name || authStore.user.fullName || '';
+    customerEmail.value = authStore.user.email || '';
+  }
   showModal.value = true;
   bookingSuccess.value = false;
 }
@@ -277,9 +282,19 @@ const submitBooking = async () => {
               <p class="text-muted text-xs leading-relaxed max-w-sm mx-auto">
                 Shukran! We have received your luxury reservation request. Our private concierge will contact you shortly to coordinate payment and details.
               </p>
-              <button @click="showModal = false" class="mt-8 bg-gradient-to-r from-sea-deep to-sea text-white px-8 py-3 rounded-lg font-bold uppercase text-[10px] tracking-widest shadow-md hover:translate-y-[-1px] transition-all cursor-pointer">
-                Close Window
-              </button>
+              <div class="mt-8 flex flex-col sm:flex-row justify-center gap-3">
+                <button 
+                  v-if="authStore.isAuthenticated"
+                  @click="showModal = false; router.push('/portal/bookings')"
+                  class="bg-gradient-to-r from-sea-deep to-sea text-white px-6 py-3 rounded-lg font-bold uppercase text-[10px] tracking-widest shadow-md hover:translate-y-[-1px] transition-all cursor-pointer flex items-center justify-center gap-2"
+                >
+                  <span>⛵</span>
+                  <span>View in Your Journeys</span>
+                </button>
+                <button @click="showModal = false" class="bg-slate-100 hover:bg-slate-200 text-slate-700 px-6 py-3 rounded-lg font-bold uppercase text-[10px] tracking-widest transition-all cursor-pointer">
+                  Close Window
+                </button>
+              </div>
             </div>
             
             <div v-else>
