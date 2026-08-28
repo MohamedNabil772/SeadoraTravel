@@ -23,66 +23,85 @@ const handleLogout = () => {
 
 <template>
   <div class="relative inline-block text-left" v-click-outside="() => showDropdown = false">
-    <!-- Trigger -->
+    <!-- Trigger Button with Tactile Active Press -->
     <button 
       @click="showDropdown = !showDropdown" 
-      class="flex items-center gap-3 p-1 rounded-full hover:bg-slate-100 transition-colors focus:outline-none"
+      class="flex items-center gap-3 p-1.5 rounded-full hover:bg-slate-100/80 active:scale-[0.97] transition-[background-color,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] focus:outline-none focus-visible:ring-2 focus-visible:ring-[#c9a84c]"
+      aria-haspopup="menu"
+      :aria-expanded="showDropdown"
+      aria-label="User profile options"
     >
-      <div class="flex items-center justify-center w-9 h-9 rounded-full bg-[#062d4d] text-white font-semibold text-sm shadow-sm ring-2 ring-white">
+      <div class="flex items-center justify-center w-9 h-9 rounded-full bg-[#062d4d] text-white font-semibold text-xs shadow-sm ring-2 ring-white">
         {{ userInitials }}
       </div>
-      <div class="hidden md:flex flex-col items-start">
-        <span class="text-sm font-medium text-slate-700 leading-tight">{{ authStore.user?.name || 'Guest' }}</span>
-        <span class="text-[10px] font-bold text-[#c9a84c] uppercase tracking-wider bg-[#c9a84c]/10 px-1.5 py-0.5 rounded border border-[#c9a84c]/20">
-          {{ authStore.user?.role === 'VIP' ? 'VIP Guest' : 'Traveler' }}
+      <div class="hidden md:flex flex-col items-start text-left">
+        <span class="text-xs font-semibold text-slate-800 leading-tight">{{ authStore.user?.name || 'VIP Guest' }}</span>
+        <span class="text-[9px] font-bold text-[#a38030] uppercase tracking-wider bg-[#c9a84c]/15 px-1.5 py-0.5 rounded border border-[#c9a84c]/25 mt-0.5">
+          {{ authStore.user?.role === 'VIP' ? 'VIP Elite' : 'VIP Traveler' }}
         </span>
       </div>
-      <LuxuryIcons name="chevron-down" size="14" class="text-slate-400 hidden md:block transition-transform duration-200" :class="showDropdown ? 'rotate-180' : ''" />
+      <LuxuryIcons name="chevron-down" size="12" class="text-slate-400 hidden md:block transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]" :class="showDropdown ? 'rotate-180 text-slate-600' : ''" />
     </button>
 
-    <!-- Dropdown Menu -->
+    <!-- Dropdown Menu with Spring Popover Physics -->
     <Transition
-      enter-active-class="transition ease-out duration-100"
-      enter-from-class="transform opacity-0 scale-95"
-      enter-to-class="transform opacity-100 scale-100"
-      leave-active-class="transition ease-in duration-75"
-      leave-from-class="transform opacity-100 scale-100"
-      leave-to-class="transform opacity-0 scale-95"
+      enter-active-class="transition duration-250 ease-[cubic-bezier(0.16,1,0.3,1)]"
+      enter-from-class="transform opacity-0 scale-[0.96] translate-y-1"
+      enter-to-class="transform opacity-100 scale-100 translate-y-0"
+      leave-active-class="transition duration-150 ease-in"
+      leave-from-class="transform opacity-100 scale-100 translate-y-0"
+      leave-to-class="transform opacity-0 scale-[0.96] translate-y-1"
     >
-      <div v-if="showDropdown" class="absolute right-0 mt-2 w-64 origin-top-right bg-white border border-slate-200/80 rounded-2xl shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50 overflow-hidden">
-        
+      <div 
+        v-if="showDropdown" 
+        class="absolute right-0 mt-2 w-64 origin-top-right bg-white/98 backdrop-blur-xl border border-slate-200/80 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.08)] ring-1 ring-black/5 focus:outline-none z-50 overflow-hidden"
+      >
         <!-- Header -->
-        <div class="px-4 py-3 border-b border-slate-100 bg-[#F8FAFC]">
-          <p class="text-sm font-medium text-slate-900 truncate">{{ authStore.user?.name || 'Guest' }}</p>
-          <p class="text-xs text-slate-500 truncate">{{ authStore.user?.email || 'guest@example.com' }}</p>
+        <div class="px-4 py-3.5 border-b border-slate-100 bg-[#F8FAFC]/80">
+          <p class="text-xs font-bold text-slate-900 truncate">{{ authStore.user?.name || 'VIP Guest' }}</p>
+          <p class="text-[11px] text-slate-500 truncate mt-0.5">{{ authStore.user?.email || 'traveler@seadora.com' }}</p>
         </div>
 
-        <!-- Links -->
-        <div class="py-1">
-          <router-link to="/portal/profile" @click="showDropdown = false" class="group flex items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 hover:text-[#062d4d] transition-colors">
-            <LuxuryIcons name="user" size="16" class="mr-3 text-slate-400 group-hover:text-[#062d4d] transition-colors" />
-            My Profile Settings
+        <!-- Navigation Links -->
+        <div class="p-1.5 space-y-0.5">
+          <router-link 
+            to="/portal/profile" 
+            @click="showDropdown = false" 
+            class="group flex items-center px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-[#062d4d] active:scale-[0.98] transition-[background-color,color,transform] duration-150"
+          >
+            <LuxuryIcons name="user" size="14" class="mr-2.5 text-slate-400 group-hover:text-[#062d4d] transition-colors" />
+            My Profile & Preferences
           </router-link>
           
-          <router-link to="/portal/documents" @click="showDropdown = false" class="group flex items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 hover:text-[#062d4d] transition-colors">
-            <LuxuryIcons name="file-text" size="16" class="mr-3 text-slate-400 group-hover:text-[#062d4d] transition-colors" />
-            Travel Documents
+          <router-link 
+            to="/portal/documents" 
+            @click="showDropdown = false" 
+            class="group flex items-center px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-[#062d4d] active:scale-[0.98] transition-[background-color,color,transform] duration-150"
+          >
+            <LuxuryIcons name="file-text" size="14" class="mr-2.5 text-slate-400 group-hover:text-[#062d4d] transition-colors" />
+            Document Vault
           </router-link>
 
-          <router-link to="/portal/support" @click="showDropdown = false" class="group flex items-center px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 hover:text-[#062d4d] transition-colors">
-            <LuxuryIcons name="headphones" size="16" class="mr-3 text-slate-400 group-hover:text-[#062d4d] transition-colors" />
-            Support & Requests
+          <router-link 
+            to="/portal/support" 
+            @click="showDropdown = false" 
+            class="group flex items-center px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-[#062d4d] active:scale-[0.98] transition-[background-color,color,transform] duration-150"
+          >
+            <LuxuryIcons name="headphones" size="14" class="mr-2.5 text-slate-400 group-hover:text-[#062d4d] transition-colors" />
+            Private Concierge Desk
           </router-link>
         </div>
 
         <!-- Logout -->
-        <div class="border-t border-slate-100 py-1">
-          <button @click="handleLogout" class="group flex w-full items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors">
-            <LuxuryIcons name="log-out" size="16" class="mr-3 text-red-500 group-hover:text-red-600 transition-colors" />
-            Logout
+        <div class="border-t border-slate-100 p-1.5">
+          <button 
+            @click="handleLogout" 
+            class="group flex w-full items-center px-3 py-2 rounded-xl text-xs font-semibold text-red-600 hover:bg-red-50/80 active:scale-[0.98] transition-[background-color,transform] duration-150 text-left"
+          >
+            <LuxuryIcons name="log-out" size="14" class="mr-2.5 text-red-500 group-hover:text-red-600 transition-colors" />
+            Log Out
           </button>
         </div>
-
       </div>
     </Transition>
   </div>
