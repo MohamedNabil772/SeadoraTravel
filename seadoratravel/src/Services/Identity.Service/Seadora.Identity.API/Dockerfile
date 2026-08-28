@@ -5,6 +5,7 @@ COPY ["src/Services/Identity.Service/Seadora.Identity.Application/Seadora.Identi
 COPY ["src/Services/Identity.Service/Seadora.Identity.Domain/Seadora.Identity.Domain.csproj", "src/Services/Identity.Service/Seadora.Identity.Domain/"]
 COPY ["src/Services/Identity.Service/Seadora.Identity.Infrastructure/Seadora.Identity.Infrastructure.csproj", "src/Services/Identity.Service/Seadora.Identity.Infrastructure/"]
 COPY ["src/Services/Common/Seadora.Common/Seadora.Common.csproj", "src/Services/Common/Seadora.Common/"]
+COPY ["src/Services/Common/Seadora.Contracts/Seadora.Contracts.csproj", "src/Services/Common/Seadora.Contracts/"]
 RUN dotnet restore "src/Services/Identity.Service/Seadora.Identity.API/Seadora.Identity.API.csproj"
 COPY . .
 WORKDIR "/src/src/Services/Identity.Service/Seadora.Identity.API"

@@ -318,6 +318,15 @@ booking persists a money breakdown and a snapshotted `TourTypeCode`.
 - **Task 2.4 — Admin CRM views** (customers list, profile with booking history + lifetime value).
   *Accept:* admin SPA lists/searches customers and opens a profile; a11y + dialog patterns from the
   earlier admin work reused.
+- **Task 2.5 — Customer Identity & Registration API** (`POST /api/auth/register-customer` in `Identity.Service`
+  with automatic Customer role assignment, `CustomerRegistered` event publishing, and WhatsApp OTP verification).
+- **Task 2.6 — Customer Self-Service Portal API** (`CustomerPortalController` in `Customer.Service` for
+  `/portal/me`, `/portal/bookings`, `/portal/documents`, and `/portal/profile`).
+- **Task 2.7 — Website Luxury Auth Modal & State** (`AuthModal.vue` + Pinia store in `seadora-website`
+  supporting Login, Register, WhatsApp OTP, and session persistence).
+- **Task 2.8 — Website Customer Portal Views** (Personalized portal hub: `PortalDashboardView`,
+  `PortalBookingsView`, `PortalBookingDetailView`, `PortalDocumentsView`, `PortalProfileView`, and `PortalSupportView`).
+  *Detailed Spec:* `seadoratravel/docs/superpowers/plans/2026-08-28-customer-portal-and-auth.md`.
 
 ## Phase 3 — Support service (email mailbox + tickets)
 

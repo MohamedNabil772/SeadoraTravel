@@ -5,6 +5,7 @@ COPY ["src/Services/Booking.Service/Seadora.Booking.Application/Seadora.Booking.
 COPY ["src/Services/Booking.Service/Seadora.Booking.Domain/Seadora.Booking.Domain.csproj", "src/Services/Booking.Service/Seadora.Booking.Domain/"]
 COPY ["src/Services/Booking.Service/Seadora.Booking.Infrastructure/Seadora.Booking.Infrastructure.csproj", "src/Services/Booking.Service/Seadora.Booking.Infrastructure/"]
 COPY ["src/Services/Common/Seadora.Common/Seadora.Common.csproj", "src/Services/Common/Seadora.Common/"]
+COPY ["src/Services/Common/Seadora.Contracts/Seadora.Contracts.csproj", "src/Services/Common/Seadora.Contracts/"]
 RUN dotnet restore "src/Services/Booking.Service/Seadora.Booking.API/Seadora.Booking.API.csproj"
 COPY . .
 WORKDIR "/src/src/Services/Booking.Service/Seadora.Booking.API"

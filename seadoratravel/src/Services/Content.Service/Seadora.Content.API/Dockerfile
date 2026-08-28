@@ -5,6 +5,7 @@ COPY ["src/Services/Content.Service/Seadora.Content.Application/Seadora.Content.
 COPY ["src/Services/Content.Service/Seadora.Content.Domain/Seadora.Content.Domain.csproj", "src/Services/Content.Service/Seadora.Content.Domain/"]
 COPY ["src/Services/Content.Service/Seadora.Content.Infrastructure/Seadora.Content.Infrastructure.csproj", "src/Services/Content.Service/Seadora.Content.Infrastructure/"]
 COPY ["src/Services/Common/Seadora.Common/Seadora.Common.csproj", "src/Services/Common/Seadora.Common/"]
+COPY ["src/Services/Common/Seadora.Contracts/Seadora.Contracts.csproj", "src/Services/Common/Seadora.Contracts/"]
 RUN dotnet restore "src/Services/Content.Service/Seadora.Content.API/Seadora.Content.API.csproj"
 COPY . .
 WORKDIR "/src/src/Services/Content.Service/Seadora.Content.API"
