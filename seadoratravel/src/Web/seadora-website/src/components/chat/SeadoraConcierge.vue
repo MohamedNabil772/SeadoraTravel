@@ -496,18 +496,19 @@ watch(isMobile, (newVal) => {
             v-motion 
             :initial="{ scale: 0 }" 
             :enter="{ scale: 1, transition: { type: 'spring', stiffness: 300, damping: 20 } }" 
-            class="pointer-events-auto relative group w-14 h-14 md:w-16 md:h-16 bg-[#062d4d] rounded-full shadow-[0_10px_25px_-5px_rgba(6,45,77,0.5)] flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 border border-[#c9a84c]/50 hover:border-[#c9a84c]"
-            :class="isMobile ? 'fixed bottom-6 right-6' : ''">
+            class="pointer-events-auto relative group w-14 h-14 md:w-16 md:h-16 bg-[#062d4d] rounded-full shadow-[0_10px_25px_-5px_rgba(6,45,77,0.5)] flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 border border-[#c9a84c]/50 hover:border-[#c9a84c] cursor-pointer"
+            :class="isMobile ? 'fixed bottom-6 right-6' : ''"
+            aria-label="Open AI Concierge">
       <div v-if="showNotification" class="absolute -top-1 -right-1 w-4 h-4 md:w-5 md:h-5 bg-red-500 border-2 border-white rounded-full flex items-center justify-center animate-pulse z-10"></div>
-      <div v-show="!isOpen" class="absolute inset-0 rounded-full bg-[#c9a84c] opacity-0 group-hover:opacity-20 transition-opacity blur-md"></div>
+      <div v-show="!isOpen" class="absolute inset-0 rounded-full bg-[#c9a84c] opacity-0 group-hover:opacity-20 transition-opacity blur-md pointer-events-none"></div>
       
-      <div class="relative w-7 h-7 md:w-8 md:h-8 text-[#c9a84c] transition-all duration-300 transform" :class="isOpen && !isMinimized ? 'rotate-90 scale-0 opacity-0' : 'rotate-0 scale-100 opacity-100 absolute'">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="absolute inset-0 flex items-center justify-center text-[#c9a84c] transition-all duration-[300ms] ease-[cubic-bezier(0.32,0.72,0,1)]" :class="isOpen && !isMinimized ? 'rotate-90 scale-0 opacity-0' : 'rotate-0 scale-100 opacity-100'">
+        <svg class="w-7 h-7 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
         </svg>
       </div>
-      <div class="relative w-7 h-7 md:w-8 md:h-8 text-[#c9a84c] transition-all duration-300 transform" :class="isOpen && !isMinimized ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0 absolute'">
-        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <div class="absolute inset-0 flex items-center justify-center text-[#c9a84c] transition-all duration-[300ms] ease-[cubic-bezier(0.32,0.72,0,1)]" :class="isOpen && !isMinimized ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0'">
+        <svg class="w-7 h-7 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
         </svg>
       </div>
