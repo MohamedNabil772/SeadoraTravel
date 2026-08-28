@@ -563,7 +563,17 @@
       "sendBespoke": "Invia richiesta VIP",
       "curateTitle": "Crea un nuovo viaggio",
       "curateDesc": "Esplorate safari nel Mar Rosso, antichità del Cairo e ritiri nelle oasi.",
-      "browseExperiences": "Sfoglia esperienze"
+      "browseExperiences": "Sfoglia esperienze",
+      "datesLabel": "Date",
+      "guestsLabel": "Ospiti",
+      "passportsLabel": "Passaporti",
+      "verifiedOnFile": "Verificato negli archivi ✓",
+      "waterTemp": "Acqua: 27°C",
+      "optimalSailing": "Navigazione ottimale",
+      "weatherClear": "Cielo limpido e soleggiato",
+      "weatherPartlyCloudy": "Parzialmente nuvoloso e caldo",
+      "weatherMist": "Foschia leggera e brezza",
+      "weatherPleasant": "Clima piacevole del Nilo"
     },
     "bookings": {
       "title": "I vostri viaggi",
@@ -575,7 +585,8 @@
       "viewItinerary": "Visualizza itinerario",
       "downloadVoucher": "Scarica voucher PDF",
       "viewReceipt": "Visualizza ricevuta",
-      "rebook": "Prenota di nuovo"
+      "rebook": "Prenota di nuovo",
+      "completedOn": "Completato il 12 maggio 2026"
     },
     "documents": {
       "title": "Cassaforte documenti",
@@ -585,7 +596,21 @@
       "encryptedBadge": "Cassaforte crittografata a 256 bit",
       "coastGuardTitle": "Guardia costiera egiziana e permessi portuali",
       "coastGuardDesc": "I vostri documenti sono conservati in sicurezza per un rapido sdoganamento portuale.",
-      "updatePassports": "Aggiorna copie passaporto"
+      "updatePassports": "Aggiorna copie passaporto",
+      "doc1Type": "Voucher ufficiale di imbarco",
+      "doc1Title": "Voucher spedizione Dahabiya Nilo 7 notti",
+      "doc1Status": "Verificato negli archivi",
+      "doc2Type": "Permesso portuale marittimo",
+      "doc2Title": "Permesso di ingresso Marina Hurghada Mar Rosso",
+      "doc2Status": "Rilasciato e attivo",
+      "doc3Type": "Protezione di viaggio",
+      "doc3Title": "Polizza assicurativa viaggio Allianz Global VIP",
+      "doc3Status": "Copertura attiva",
+      "doc4Type": "Identificazione",
+      "doc4Title": "Manifesto copie passaporti (2 ospiti VIP)",
+      "doc4Status": "Verificato ✓",
+      "downloadAlert": "Download documento di viaggio crittografato in corso...",
+      "uploadAlert": "Seleziona le scansioni dei passaporti o i manifesti di volo da caricare."
     },
     "support": {
       "title": "Concierge privato e supporto",
@@ -599,7 +624,63 @@
       "inquiriesSubtitle": "Seleziona una categoria per aprire un ticket diretto con il nostro team operativo.",
       "conversationsTitle": "Le vostre conversazioni e storico",
       "conversationsSubtitle": "Monitora le risposte in tempo reale e comunica con il tuo coordinatore dedicato.",
-      "openThread": "Apri discussione"
+      "openThread": "Apri discussione",
+      "activeRecords": "Ticket attivi",
+      "table": {
+        "ref": "Rif #",
+        "subject": "Oggetto / Esperienza",
+        "category": "Categoria",
+        "status": "Stato",
+        "responseTime": "Tempo di risposta",
+        "action": "Azione"
+      },
+      "status": {
+        "open": "Aperto",
+        "inProgress": "In corso",
+        "resolved": "Risolto",
+        "waiting": "In attesa del cliente",
+        "closed": "Chiuso"
+      },
+      "vipModal": {
+        "title": "Organizzazione viaggio VIP su misura",
+        "serviceType": "Tipo di servizio VIP",
+        "optionYacht": "Noleggio yacht di lusso privato (Mar Rosso)",
+        "optionAviation": "Elicottero / Trasferimento aereo privato",
+        "optionDahabiya": "Itinerario personalizzato Dahabiya Nilo",
+        "optionSafari": "Safari VIP nel deserto e osservazione stelle",
+        "optionVilla": "Villa privata e servizio di sicurezza",
+        "preferredDate": "Data preferita",
+        "guestsCount": "Numero di ospiti",
+        "notes": "Dettagli e preferenze",
+        "notesPlaceholder": "Specifica catering, guide private o champagne...",
+        "cancel": "Annulla",
+        "submit": "Invia richiesta VIP",
+        "dispatchedAlert": "La tua richiesta VIP è stata inviata. Un direttore ti contatterà entro 2 ore."
+      },
+      "ticketModal": {
+        "title": "Invia ticket di supporto",
+        "category": "Categoria",
+        "subject": "Oggetto",
+        "subjectPlaceholder": "es. Richiesta fattura o modifica dieta",
+        "bookingId": "Prenotazione collegata (Opzionale)",
+        "bookingIdPlaceholder": "es. BK-10293",
+        "description": "Descrizione messaggio",
+        "descriptionPlaceholder": "Fornisci tutti i dettagli della richiesta...",
+        "cancel": "Annulla",
+        "submit": "Invia ticket",
+        "submittedAlert": "Il tuo ticket è stato inviato. Riferimento: "
+      },
+      "threadModal": {
+        "typePlaceholder": "Scrivi un messaggio al tuo coordinatore...",
+        "replyBtn": "Rispondi",
+        "youLabel": "Tu (Ospite VIP)",
+        "leadConcierge": "Primo Concierge Karim",
+        "operationsTeam": "Operazioni Concierge",
+        "justNow": "Proprio ora",
+        "today": "Oggi alle",
+        "yesterday": "Ieri",
+        "linkedBooking": "Collegato a Prenotazione #"
+      }
     },
     "categories": {
       "payment": "Pagamento e fatturazione",
@@ -608,6 +689,63 @@
       "dietary": "Esigenze alimentari / speciali",
       "general": "Richiesta generale",
       "other": "Altro"
+    },
+    "settingsModal": {
+      "title": "Impostazioni profilo",
+      "subtitle": "Gestisci i tuoi dati personali e la sicurezza",
+      "profilePhoto": "Foto profilo",
+      "photoHint": "JPG, PNG o WebP. Dimensione max 2MB.",
+      "changePhoto": "Cambia foto",
+      "removePhoto": "Rimuovi",
+      "fullName": "Nome completo",
+      "email": "Indirizzo Email",
+      "verified": "Verificato",
+      "phone": "Telefono / WhatsApp",
+      "preferredLanguage": "Lingua preferita",
+      "langHint": "Aggiorna la lingua dell interfaccia nel portale e nel sito.",
+      "cancel": "Annulla",
+      "save": "Salva modifiche",
+      "saving": "Salvataggio..."
+    },
+    "bookingDetail": {
+      "back": "Torna ai viaggi",
+      "itineraryTimeline": "Cronologia itinerario",
+      "day": "Giorno",
+      "guidedTour": "Visita guidata tra gli antichi templi e le tombe reali."
+    },
+    "profileView": {
+      "title": "Profilo ospite e preferenze",
+      "subtitle": "Gestisci i tuoi contatti, foto profilo e preferenze di viaggio VIP.",
+      "profilePhoto": "Foto profilo",
+      "photoHint": "JPG, PNG o WebP. Max 2MB.",
+      "uploadPhoto": "Carica foto",
+      "remove": "Rimuovi",
+      "fullName": "Nome completo",
+      "email": "Indirizzo Email",
+      "phone": "Telefono / WhatsApp",
+      "preferredLanguage": "Lingua preferita",
+      "dietaryTitle": "Preferenze alimentari e di bordo",
+      "dietaryStandard": "Menu gourmet standard (Pesce e Internazionale)",
+      "dietaryVegetarian": "Gourmet vegetariano",
+      "dietaryVegan": "Base vegetale / Vegan lusso",
+      "dietaryHalal": "Ristorazione certificata Halal",
+      "dietaryGlutenFree": "Preparazione senza glutine",
+      "dietaryPescatarian": "Pescetariano (Pescato fresco del Mar Rosso)",
+      "saveChanges": "Aggiorna preferenze",
+      "saving": "Salvataggio...",
+      "savedSuccess": "Le tue preferenze e il tuo profilo sono stati salvati con successo.",
+      "gdprBadge": "GDPR e protezione dati europea",
+      "gdprTitle": "Controlli di privacy e consenso",
+      "gdprSubtitle": "Controlla come i tuoi dati personali vengono utilizzati dal nostro team.",
+      "marketingTitle": "Inviti di viaggio esclusivi e itinerari privati",
+      "marketingDesc": "Ricevi annunci su charter privati e viaggi sul Nilo.",
+      "conciergeTitle": "Personalizzazione del Concierge",
+      "conciergeDesc": "Consenti al nostro concierge di fare riferimento alle preferenze precedenti.",
+      "essentialTitle": "Dati essenziali marittimi e portuali",
+      "essentialDesc": "Necessari per i permessi della Guardia Costiera e copertura assicurativa.",
+      "exportBtn": "Esporta i miei dati (GDPR JSON)",
+      "deleteBtn": "Richiedi cancellazione account e dati",
+      "deleteConfirm": "Sei sicuro di voler richiedere la cancellazione dei dati?"
     }
   }
 }

@@ -2,8 +2,8 @@
   <div class="max-w-3xl space-y-8 pb-12">
     <!-- Header -->
     <div>
-      <h1 class="text-2xl md:text-3xl font-bold text-slate-900">Guest Profile & Preferences</h1>
-      <p class="text-xs md:text-sm text-slate-500 mt-1">Manage your official contact details, avatar picture, and concierge travel preferences.</p>
+      <h1 class="text-2xl md:text-3xl font-bold text-slate-900">{{ $t('portal.profileView.title') }}</h1>
+      <p class="text-xs md:text-sm text-slate-500 mt-1">{{ $t('portal.profileView.subtitle') }}</p>
     </div>
     
     <!-- Profile Form Card -->
@@ -23,7 +23,7 @@
             type="button"
             @click="triggerFileInput"
             class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer text-white"
-            title="Upload new profile picture"
+            :title="$t('portal.profileView.uploadPhoto')"
           >
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
           </button>
@@ -31,24 +31,24 @@
         </div>
 
         <div class="flex-1">
-          <h3 class="text-sm font-bold text-slate-900">Profile Picture</h3>
-          <p class="text-xs text-slate-500 mt-0.5">JPG, PNG or WebP. Max size 2MB.</p>
+          <h3 class="text-sm font-bold text-slate-900">{{ $t('portal.profileView.profilePhoto') }}</h3>
+          <p class="text-xs text-slate-500 mt-0.5">{{ $t('portal.profileView.photoHint') }}</p>
           <div class="mt-2 flex items-center gap-3">
             <button 
               type="button" 
               @click="triggerFileInput" 
-              class="text-xs font-bold text-[#062d4d] hover:text-[#c9a84c] transition-colors"
+              class="text-xs font-bold text-[#062d4d] hover:text-[#c9a84c] transition-colors cursor-pointer"
             >
-              Upload Photo
+              {{ $t('portal.profileView.uploadPhoto') }}
             </button>
-            <span class="text-slate-300">•</span>
+            <span v-if="profile.avatarUrl" class="text-slate-300">•</span>
             <button 
               v-if="profile.avatarUrl" 
               type="button" 
               @click="removeAvatar" 
-              class="text-xs font-semibold text-red-500 hover:text-red-700 transition-colors"
+              class="text-xs font-semibold text-red-500 hover:text-red-700 transition-colors cursor-pointer"
             >
-              Remove
+              {{ $t('portal.profileView.remove') }}
             </button>
           </div>
         </div>
@@ -57,7 +57,7 @@
       <!-- Form Inputs: Name, Email, Phone, Preferred Language -->
       <div class="space-y-4">
         <div>
-          <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Full Name</label>
+          <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">{{ $t('portal.profileView.fullName') }}</label>
           <input 
             type="text" 
             v-model="profile.fullName"
@@ -67,7 +67,7 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Email Address</label>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">{{ $t('portal.profileView.email') }}</label>
             <input 
               type="email" 
               v-model="profile.email" 
@@ -76,7 +76,7 @@
             />
           </div>
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Phone / WhatsApp Number</label>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">{{ $t('portal.profileView.phone') }}</label>
             <input 
               type="tel" 
               v-model="profile.phoneNumber"
@@ -88,10 +88,11 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Preferred Language</label>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">{{ $t('portal.profileView.preferredLanguage') }}</label>
             <select 
               v-model="profile.preferredLanguage"
-              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 font-medium focus:ring-2 focus:ring-[#c9a84c] focus:outline-none"
+              @change="onLanguageChanged"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 font-medium focus:ring-2 focus:ring-[#c9a84c] focus:outline-none cursor-pointer"
             >
               <option value="en">English (EN)</option>
               <option value="de">Deutsch (DE)</option>
@@ -102,17 +103,17 @@
           </div>
 
           <div>
-            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Dietary & Onboard Preferences</label>
+            <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">{{ $t('portal.profileView.dietaryTitle') }}</label>
             <select 
               v-model="profile.dietary"
-              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 font-medium focus:ring-2 focus:ring-[#c9a84c] focus:outline-none"
+              class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-900 font-medium focus:ring-2 focus:ring-[#c9a84c] focus:outline-none cursor-pointer"
             >
-              <option value="Standard Luxury">Standard Curated Menu (Seafood & International)</option>
-              <option value="Vegetarian">Vegetarian Gourmet</option>
-              <option value="Vegan">Plant-Based / Vegan Luxury</option>
-              <option value="Halal">Certified Halal Dining</option>
-              <option value="Gluten-Free">Gluten-Free Strict Preparation</option>
-              <option value="Pescatarian">Pescatarian Fresh Red Sea Catch</option>
+              <option value="Standard Luxury">{{ $t('portal.profileView.dietaryStandard') }}</option>
+              <option value="Vegetarian">{{ $t('portal.profileView.dietaryVegetarian') }}</option>
+              <option value="Vegan">{{ $t('portal.profileView.dietaryVegan') }}</option>
+              <option value="Halal">{{ $t('portal.profileView.dietaryHalal') }}</option>
+              <option value="Gluten-Free">{{ $t('portal.profileView.dietaryGlutenFree') }}</option>
+              <option value="Pescatarian">{{ $t('portal.profileView.dietaryPescatarian') }}</option>
             </select>
           </div>
         </div>
@@ -122,10 +123,10 @@
         <button 
           @click="saveProfile" 
           :disabled="isSaving"
-          class="px-6 py-3 bg-[#062d4d] text-white font-bold rounded-xl text-xs shadow-sm hover:bg-[#062d4d]/90 active:scale-[0.97] transition-[background-color,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] disabled:opacity-50 flex items-center gap-2"
+          class="px-6 py-3 bg-[#062d4d] text-white font-bold rounded-xl text-xs shadow-sm hover:bg-[#062d4d]/90 active:scale-[0.97] transition-[background-color,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)] disabled:opacity-50 flex items-center gap-2 cursor-pointer"
         >
           <svg v-if="isSaving" class="animate-spin w-4 h-4" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-          <span>{{ isSaving ? 'Saving Changes...' : 'Update Preferences' }}</span>
+          <span>{{ isSaving ? $t('portal.profileView.saving') : $t('portal.profileView.saveChanges') }}</span>
         </button>
       </div>
     </div>
@@ -134,10 +135,10 @@
     <div class="bg-white rounded-3xl border border-slate-200/80 p-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] space-y-6">
       <div>
         <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold uppercase tracking-wider mb-2">
-          <span>🔒</span> GDPR & European Data Protection
+          <span>🔒</span> {{ $t('portal.profileView.gdprBadge') }}
         </div>
-        <h2 class="text-lg font-bold text-slate-900">Privacy & Consent Controls</h2>
-        <p class="text-xs text-slate-500 mt-0.5">Control how your personal data is utilized by our concierge and travel teams.</p>
+        <h2 class="text-lg font-bold text-slate-900">{{ $t('portal.profileView.gdprTitle') }}</h2>
+        <p class="text-xs text-slate-500 mt-0.5">{{ $t('portal.profileView.gdprSubtitle') }}</p>
       </div>
 
       <div class="space-y-3.5">
@@ -148,8 +149,8 @@
             class="mt-1 w-4 h-4 rounded border-slate-300 text-[#062d4d] focus:ring-[#c9a84c]" 
           />
           <div class="flex flex-col">
-            <span class="text-xs font-bold text-slate-800">Exclusive Travel Invitations & Private Itineraries</span>
-            <span class="text-[11px] text-slate-500 mt-0.5">Receive private charter announcements, seasonal Nile voyages, and culinary previews.</span>
+            <span class="text-xs font-bold text-slate-800">{{ $t('portal.profileView.marketingTitle') }}</span>
+            <span class="text-[11px] text-slate-500 mt-0.5">{{ $t('portal.profileView.marketingDesc') }}</span>
           </div>
         </label>
 
@@ -160,8 +161,8 @@
             class="mt-1 w-4 h-4 rounded border-slate-300 text-[#062d4d] focus:ring-[#c9a84c]" 
           />
           <div class="flex flex-col">
-            <span class="text-xs font-bold text-slate-800">Bespoke Concierge Personalization</span>
-            <span class="text-[11px] text-slate-500 mt-0.5">Allow our VIP concierge to reference previous trip preferences for personalized yacht & hotel curation.</span>
+            <span class="text-xs font-bold text-slate-800">{{ $t('portal.profileView.conciergeTitle') }}</span>
+            <span class="text-[11px] text-slate-500 mt-0.5">{{ $t('portal.profileView.conciergeDesc') }}</span>
           </div>
         </label>
 
@@ -173,8 +174,8 @@
             class="mt-1 w-4 h-4 rounded border-slate-300 text-slate-400 cursor-not-allowed" 
           />
           <div class="flex flex-col">
-            <span class="text-xs font-bold text-slate-700">Essential Marine & Port Clearance Data</span>
-            <span class="text-[11px] text-slate-500 mt-0.5">Strictly required for Egyptian Coast Guard permits, port entry manifests, and guest insurance coverage.</span>
+            <span class="text-xs font-bold text-slate-700">{{ $t('portal.profileView.essentialTitle') }}</span>
+            <span class="text-[11px] text-slate-500 mt-0.5">{{ $t('portal.profileView.essentialDesc') }}</span>
           </div>
         </label>
       </div>
@@ -183,17 +184,17 @@
       <div class="pt-6 border-t border-slate-100 flex flex-wrap gap-3">
         <button 
           @click="exportData"
-          class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200/80 active:scale-[0.97] text-slate-700 font-bold rounded-xl text-xs transition-[background-color,transform] duration-200 flex items-center gap-2"
+          class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200/80 active:scale-[0.97] text-slate-700 font-bold rounded-xl text-xs transition-[background-color,transform] duration-200 flex items-center gap-2 cursor-pointer"
         >
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-          Export My Data (GDPR JSON)
+          {{ $t('portal.profileView.exportBtn') }}
         </button>
         <button 
           @click="requestDeletion"
-          class="px-4 py-2.5 bg-red-50 hover:bg-red-100 active:scale-[0.97] text-red-600 border border-red-200/60 font-bold rounded-xl text-xs transition-[background-color,transform] duration-200 flex items-center gap-2"
+          class="px-4 py-2.5 bg-red-50 hover:bg-red-100 active:scale-[0.97] text-red-600 border border-red-200/60 font-bold rounded-xl text-xs transition-[background-color,transform] duration-200 flex items-center gap-2 cursor-pointer"
         >
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-          Request Account & Data Deletion
+          {{ $t('portal.profileView.deleteBtn') }}
         </button>
       </div>
     </div>
@@ -202,10 +203,12 @@
 
 <script setup lang="ts">
 import { ref, computed } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/features/auth/store/auth';
 import { authApi } from '@/features/auth/api/authApi';
 import { loadLanguageAsync } from '@/i18n';
 
+const { t } = useI18n();
 const authStore = useAuthStore();
 const fileInput = ref<HTMLInputElement | null>(null);
 
@@ -233,6 +236,12 @@ const isSaving = ref(false);
 
 const triggerFileInput = () => {
   fileInput.value?.click();
+};
+
+const onLanguageChanged = () => {
+  if (profile.value.preferredLanguage) {
+    loadLanguageAsync(profile.value.preferredLanguage);
+  }
 };
 
 const onFileSelected = (e: Event) => {
@@ -282,7 +291,7 @@ const saveProfile = async () => {
       await loadLanguageAsync(profile.value.preferredLanguage);
     }
 
-    alert('Your preferences and profile have been successfully saved.');
+    alert(t('portal.profileView.savedSuccess'));
   } finally {
     isSaving.value = false;
   }
@@ -299,7 +308,7 @@ const exportData = () => {
 };
 
 const requestDeletion = () => {
-  if (confirm('Are you sure you want to request data deletion? Our data protection officer will review and purge your stored records in accordance with GDPR regulations.')) {
+  if (confirm(t('portal.profileView.deleteConfirm'))) {
     alert('Data deletion request submitted to our compliance officer.');
   }
 };

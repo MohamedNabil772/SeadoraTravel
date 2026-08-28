@@ -563,7 +563,17 @@
       "sendBespoke": "Send Bespoke Request",
       "curateTitle": "Curate a New Journey",
       "curateDesc": "Explore our hand-crafted Red Sea diving safaris, Cairo antiquities, and oasis retreats.",
-      "browseExperiences": "Browse Experiences"
+      "browseExperiences": "Browse Experiences",
+      "datesLabel": "Dates",
+      "guestsLabel": "Guests",
+      "passportsLabel": "Passports",
+      "verifiedOnFile": "Verified on File ✓",
+      "waterTemp": "Water: 27°C",
+      "optimalSailing": "Optimal Sailing",
+      "weatherClear": "Clear Sunny Sky",
+      "weatherPartlyCloudy": "Partly Cloudy & Warm",
+      "weatherMist": "Gentle Mist & Breeze",
+      "weatherPleasant": "Pleasant Nile Climate"
     },
     "bookings": {
       "title": "Your Journeys",
@@ -575,7 +585,8 @@
       "viewItinerary": "View Full Itinerary",
       "downloadVoucher": "Download PDF Voucher",
       "viewReceipt": "View Receipt & Summary",
-      "rebook": "Re-book Experience"
+      "rebook": "Re-book Experience",
+      "completedOn": "Completed on May 12, 2026"
     },
     "documents": {
       "title": "Document Vault",
@@ -585,7 +596,21 @@
       "encryptedBadge": "256-Bit Encrypted Vault",
       "coastGuardTitle": "Egyptian Coast Guard & Marine Permits",
       "coastGuardDesc": "Your travel manifest & passport copies are securely stored for seamless port clearance and fast-track private flight access.",
-      "updatePassports": "Update Passport Copies"
+      "updatePassports": "Update Passport Copies",
+      "doc1Type": "Official Boarding Voucher",
+      "doc1Title": "7-Night Dahabiya Nile Expedition Voucher",
+      "doc1Status": "Verified on File",
+      "doc2Type": "Marine Port Clearance",
+      "doc2Title": "Hurghada Red Sea Marina Entry Permit",
+      "doc2Status": "Issued & Active",
+      "doc3Type": "Travel Protection",
+      "doc3Title": "Allianz Global VIP Travel Insurance Policy",
+      "doc3Status": "Active Coverage",
+      "doc4Type": "Identification",
+      "doc4Title": "Passport Copy Manifest (2 VIP Travelers)",
+      "doc4Status": "Verified ✓",
+      "downloadAlert": "Downloading encrypted travel document...",
+      "uploadAlert": "Please select passport scans or flight manifests to upload."
     },
     "support": {
       "title": "Private Concierge & Support Desk",
@@ -599,7 +624,63 @@
       "inquiriesSubtitle": "Select a category below to open a direct assistance ticket with our operations team.",
       "conversationsTitle": "Your Conversations & Ticket History",
       "conversationsSubtitle": "Track real-time responses and communicate with your dedicated coordinator.",
-      "openThread": "Open Thread"
+      "openThread": "Open Thread",
+      "activeRecords": "Active Records",
+      "table": {
+        "ref": "Ref #",
+        "subject": "Subject / Experience",
+        "category": "Category",
+        "status": "Status",
+        "responseTime": "Response Time",
+        "action": "Action"
+      },
+      "status": {
+        "open": "Open",
+        "inProgress": "In Progress",
+        "resolved": "Resolved",
+        "waiting": "Waiting on Customer",
+        "closed": "Closed"
+      },
+      "vipModal": {
+        "title": "Bespoke VIP Travel Arrangement",
+        "serviceType": "VIP Service Type",
+        "optionYacht": "Private Luxury Yacht Charter (Red Sea)",
+        "optionAviation": "Helicopter / Private Aviation Transfer",
+        "optionDahabiya": "Custom Nile Dahabiya Itinerary",
+        "optionSafari": "VIP Desert Safari & Stargazing Majlis",
+        "optionVilla": "Private Villa & Security Detail",
+        "preferredDate": "Preferred Date",
+        "guestsCount": "Guests Count",
+        "notes": "Bespoke Details & Preferences",
+        "notesPlaceholder": "Specify catering, preferred routes, private guides, or special champagne arrangements...",
+        "cancel": "Cancel",
+        "submit": "Dispatch VIP Request",
+        "dispatchedAlert": "Your VIP Bespoke Concierge request has been dispatched. A director will contact you within 2 hours."
+      },
+      "ticketModal": {
+        "title": "Submit Support Ticket",
+        "category": "Inquiry Category",
+        "subject": "Subject",
+        "subjectPlaceholder": "e.g. Invoice copy request or dietary update",
+        "bookingId": "Linked Booking # (Optional)",
+        "bookingIdPlaceholder": "e.g. BK-10293",
+        "description": "Message Description",
+        "descriptionPlaceholder": "Provide full details of your request...",
+        "cancel": "Cancel",
+        "submit": "Submit Ticket",
+        "submittedAlert": "Your support ticket has been submitted. Reference: "
+      },
+      "threadModal": {
+        "typePlaceholder": "Type a message to your coordinator...",
+        "replyBtn": "Reply",
+        "youLabel": "You (VIP Guest)",
+        "leadConcierge": "Lead Concierge Karim",
+        "operationsTeam": "Concierge Operations",
+        "justNow": "Just now",
+        "today": "Today at",
+        "yesterday": "Yesterday",
+        "linkedBooking": "Linked to Booking #"
+      }
     },
     "categories": {
       "payment": "Payment & Invoicing",
@@ -608,6 +689,63 @@
       "dietary": "Special Dietary / Needs",
       "general": "General Inquiry",
       "other": "Other"
+    },
+    "settingsModal": {
+      "title": "Profile Settings",
+      "subtitle": "Manage your personal information and security",
+      "profilePhoto": "Profile Picture",
+      "photoHint": "JPG, PNG or WebP. Max size 2MB.",
+      "changePhoto": "Change Picture",
+      "removePhoto": "Remove",
+      "fullName": "Full Name",
+      "email": "Email Address",
+      "verified": "Verified",
+      "phone": "Phone / WhatsApp Number",
+      "preferredLanguage": "Preferred Language",
+      "langHint": "Updates interface language across both the portal and website.",
+      "cancel": "Cancel",
+      "save": "Save Changes",
+      "saving": "Saving..."
+    },
+    "bookingDetail": {
+      "back": "Back to Bookings",
+      "itineraryTimeline": "Itinerary Timeline",
+      "day": "Day",
+      "guidedTour": "Guided tour through the ancient temples and royal tombs."
+    },
+    "profileView": {
+      "title": "Guest Profile & Preferences",
+      "subtitle": "Manage your official contact details, avatar picture, and concierge travel preferences.",
+      "profilePhoto": "Profile Picture",
+      "photoHint": "JPG, PNG or WebP. Max size 2MB.",
+      "uploadPhoto": "Upload Photo",
+      "remove": "Remove",
+      "fullName": "Full Name",
+      "email": "Email Address",
+      "phone": "Phone / WhatsApp Number",
+      "preferredLanguage": "Preferred Language",
+      "dietaryTitle": "Dietary & Onboard Preferences",
+      "dietaryStandard": "Standard Curated Menu (Seafood & International)",
+      "dietaryVegetarian": "Vegetarian Gourmet",
+      "dietaryVegan": "Plant-Based / Vegan Luxury",
+      "dietaryHalal": "Certified Halal Dining",
+      "dietaryGlutenFree": "Gluten-Free Strict Preparation",
+      "dietaryPescatarian": "Pescatarian Fresh Red Sea Catch",
+      "saveChanges": "Update Preferences",
+      "saving": "Saving Changes...",
+      "savedSuccess": "Your preferences and profile have been successfully saved.",
+      "gdprBadge": "GDPR & European Data Protection",
+      "gdprTitle": "Privacy & Consent Controls",
+      "gdprSubtitle": "Control how your personal data is utilized by our concierge and travel teams.",
+      "marketingTitle": "Exclusive Travel Invitations & Private Itineraries",
+      "marketingDesc": "Receive private charter announcements, seasonal Nile voyages, and culinary previews.",
+      "conciergeTitle": "Bespoke Concierge Personalization",
+      "conciergeDesc": "Allow our VIP concierge to reference previous trip preferences for personalized yacht & hotel curation.",
+      "essentialTitle": "Essential Marine & Port Clearance Data",
+      "essentialDesc": "Strictly required for Egyptian Coast Guard permits, port entry manifests, and guest insurance coverage.",
+      "exportBtn": "Export My Data (GDPR JSON)",
+      "deleteBtn": "Request Account & Data Deletion",
+      "deleteConfirm": "Are you sure you want to request data deletion? Our data protection officer will review and purge your stored records in accordance with GDPR regulations."
     }
   }
 }

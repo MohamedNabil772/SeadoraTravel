@@ -563,7 +563,17 @@
       "sendBespoke": "Envoyer une demande VIP",
       "curateTitle": "Créer un nouveau voyage",
       "curateDesc": "Explorez nos safaris en Mer Rouge, antiquités du Caire et retraites d oasis.",
-      "browseExperiences": "Parcourir les expériences"
+      "browseExperiences": "Parcourir les expériences",
+      "datesLabel": "Dates",
+      "guestsLabel": "Invités",
+      "passportsLabel": "Passeports",
+      "verifiedOnFile": "Vérifié au dossier ✓",
+      "waterTemp": "Eau: 27°C",
+      "optimalSailing": "Navigation optimale",
+      "weatherClear": "Ciel ensoleillé et dégagé",
+      "weatherPartlyCloudy": "Partiellement nuageux et chaud",
+      "weatherMist": "Brume légère et brise",
+      "weatherPleasant": "Climat agréable du Nil"
     },
     "bookings": {
       "title": "Vos voyages",
@@ -575,7 +585,8 @@
       "viewItinerary": "Voir l itinéraire",
       "downloadVoucher": "Télécharger le bon PDF",
       "viewReceipt": "Voir le reçu et résumé",
-      "rebook": "Réserver à nouveau"
+      "rebook": "Réserver à nouveau",
+      "completedOn": "Terminé le 12 mai 2026"
     },
     "documents": {
       "title": "Coffre-fort de documents",
@@ -585,7 +596,21 @@
       "encryptedBadge": "Coffre chiffré 256 bits",
       "coastGuardTitle": "Garde-côtes égyptiens et permis portuaires",
       "coastGuardDesc": "Vos manifestes de voyage et passeports sont stockés en sécurité.",
-      "updatePassports": "Mettre à jour les passeports"
+      "updatePassports": "Mettre à jour les passeports",
+      "doc1Type": "Bon d embarquement officiel",
+      "doc1Title": "Bon d expédition Dahabiya Nil 7 nuits",
+      "doc1Status": "Vérifié au dossier",
+      "doc2Type": "Permis portuaire maritime",
+      "doc2Title": "Permis d entrée Marina Hurghada Mer Rouge",
+      "doc2Status": "Délivré & Actif",
+      "doc3Type": "Protection de voyage",
+      "doc3Title": "Police d assurance voyage Allianz Global VIP",
+      "doc3Status": "Couverture active",
+      "doc4Type": "Identification",
+      "doc4Title": "Manifeste passeports (2 invités VIP)",
+      "doc4Status": "Vérifié ✓",
+      "downloadAlert": "Téléchargement du document sécurisé en cours...",
+      "uploadAlert": "Veuillez sélectionner les scans de passeports à télécharger."
     },
     "support": {
       "title": "Concierge privé et service client",
@@ -599,7 +624,63 @@
       "inquiriesSubtitle": "Sélectionnez une catégorie pour ouvrir un ticket avec notre équipe.",
       "conversationsTitle": "Vos conversations et historique",
       "conversationsSubtitle": "Suivez les réponses en temps réel avec votre coordinateur dédié.",
-      "openThread": "Ouvrir l échange"
+      "openThread": "Ouvrir l échange",
+      "activeRecords": "Dossiers actifs",
+      "table": {
+        "ref": "Réf #",
+        "subject": "Sujet / Expérience",
+        "category": "Catégorie",
+        "status": "Statut",
+        "responseTime": "Délai de réponse",
+        "action": "Action"
+      },
+      "status": {
+        "open": "Ouvert",
+        "inProgress": "En cours",
+        "resolved": "Résolu",
+        "waiting": "En attente du client",
+        "closed": "Fermé"
+      },
+      "vipModal": {
+        "title": "Arrangement de voyage VIP sur mesure",
+        "serviceType": "Type de service VIP",
+        "optionYacht": "Location de yacht privé de luxe (Mer Rouge)",
+        "optionAviation": "Transfert hélicoptère / vol privé",
+        "optionDahabiya": "Itinéraire Dahabiya personnalisé sur le Nil",
+        "optionSafari": "Safari désert VIP & observation des étoiles",
+        "optionVilla": "Villa privée & service de sécurité",
+        "preferredDate": "Date souhaitée",
+        "guestsCount": "Nombre d invités",
+        "notes": "Détails & préférences sur mesure",
+        "notesPlaceholder": "Précisez traiteur, itinéraires, guides privés...",
+        "cancel": "Annuler",
+        "submit": "Envoyer la demande VIP",
+        "dispatchedAlert": "Votre demande VIP a été transmise. Un directeur vous contactera sous 2 heures."
+      },
+      "ticketModal": {
+        "title": "Soumettre un ticket de support",
+        "category": "Catégorie",
+        "subject": "Sujet",
+        "subjectPlaceholder": "ex. Demande de facture ou modification de repas",
+        "bookingId": "N° de réservation liée (Facultatif)",
+        "bookingIdPlaceholder": "ex. BK-10293",
+        "description": "Description de la demande",
+        "descriptionPlaceholder": "Détaillez votre demande...",
+        "cancel": "Annuler",
+        "submit": "Soumettre le ticket",
+        "submittedAlert": "Votre ticket a été envoyé. Référence : "
+      },
+      "threadModal": {
+        "typePlaceholder": "Écrivez un message à votre coordinateur...",
+        "replyBtn": "Répondre",
+        "youLabel": "Vous (Invité VIP)",
+        "leadConcierge": "Chef Concierge Karim",
+        "operationsTeam": "Opérations Conciergerie",
+        "justNow": "À l instant",
+        "today": "Aujourd hui à",
+        "yesterday": "Hier",
+        "linkedBooking": "Lié à la réservation #"
+      }
     },
     "categories": {
       "payment": "Paiement et facturation",
@@ -608,6 +689,63 @@
       "dietary": "Régimes spéciaux / Besoins",
       "general": "Demande générale",
       "other": "Autre"
+    },
+    "settingsModal": {
+      "title": "Paramètres du profil",
+      "subtitle": "Gérez vos informations personnelles et votre sécurité",
+      "profilePhoto": "Photo de profil",
+      "photoHint": "JPG, PNG ou WebP. Taille max 2Mo.",
+      "changePhoto": "Changer la photo",
+      "removePhoto": "Supprimer",
+      "fullName": "Nom complet",
+      "email": "Adresse Email",
+      "verified": "Vérifié",
+      "phone": "Téléphone / WhatsApp",
+      "preferredLanguage": "Langue préférée",
+      "langHint": "Met à jour la langue dans le portail et sur le site.",
+      "cancel": "Annuler",
+      "save": "Enregistrer les modifications",
+      "saving": "Enregistrement..."
+    },
+    "bookingDetail": {
+      "back": "Retour aux voyages",
+      "itineraryTimeline": "Chronologie de l itinéraire",
+      "day": "Jour",
+      "guidedTour": "Visite guidée à travers les temples antiques et les tombes royales."
+    },
+    "profileView": {
+      "title": "Profil invité et préférences",
+      "subtitle": "Gérez vos coordonnées, photo de profil et préférences VIP.",
+      "profilePhoto": "Photo de profil",
+      "photoHint": "JPG, PNG ou WebP. Taille max 2Mo.",
+      "uploadPhoto": "Téléverser photo",
+      "remove": "Supprimer",
+      "fullName": "Nom complet",
+      "email": "Adresse Email",
+      "phone": "Téléphone / WhatsApp",
+      "preferredLanguage": "Langue préférée",
+      "dietaryTitle": "Préférences alimentaires et à bord",
+      "dietaryStandard": "Menu gastronomique standard (Fruits de mer & International)",
+      "dietaryVegetarian": "Gourmet végétarien",
+      "dietaryVegan": "Végétalien / Végan de luxe",
+      "dietaryHalal": "Restauration certifiée Halal",
+      "dietaryGlutenFree": "Préparation sans gluten",
+      "dietaryPescatarian": "Pescétarien (Pêche fraîche de Mer Rouge)",
+      "saveChanges": "Mettre à jour les préférences",
+      "saving": "Enregistrement...",
+      "savedSuccess": "Vos préférences et votre profil ont été enregistrés avec succès.",
+      "gdprBadge": "RGPD & Protection européenne des données",
+      "gdprTitle": "Contrôles de confidentialité et consentement",
+      "gdprSubtitle": "Contrôlez l utilisation de vos données par notre équipe.",
+      "marketingTitle": "Invitations exclusives et itinéraires privés",
+      "marketingDesc": "Recevez des annonces de charters privés et de voyages sur le Nil.",
+      "conciergeTitle": "Personnalisation du Concierge",
+      "conciergeDesc": "Permettez à notre concierge de se référer à vos préférences passées.",
+      "essentialTitle": "Données maritimes et portuaires essentielles",
+      "essentialDesc": "Strictement requis pour les permis de garde-côtes et les assurances.",
+      "exportBtn": "Exporter mes données (RGPD JSON)",
+      "deleteBtn": "Demander la suppression de mon compte",
+      "deleteConfirm": "Êtes-vous sûr de vouloir demander la suppression de vos données ?"
     }
   }
 }

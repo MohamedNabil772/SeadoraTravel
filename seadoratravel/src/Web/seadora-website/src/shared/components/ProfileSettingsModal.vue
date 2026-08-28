@@ -21,8 +21,8 @@
           <!-- Header -->
           <div class="px-6 py-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/60">
             <div>
-              <h2 id="profile-settings-title" class="text-xl font-bold text-slate-900 tracking-tight">Profile Settings</h2>
-              <p class="text-xs text-slate-500 mt-0.5">Manage your personal information and security</p>
+              <h2 id="profile-settings-title" class="text-xl font-bold text-slate-900 tracking-tight">{{ $t('portal.settingsModal.title') }}</h2>
+              <p class="text-xs text-slate-500 mt-0.5">{{ $t('portal.settingsModal.subtitle') }}</p>
             </div>
             <button 
               type="button" 
@@ -46,16 +46,16 @@
                 </div>
                 <button 
                   type="button"
-                  class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white"
-                  title="Upload profile picture"
+                  class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity text-white cursor-pointer"
+                  :title="$t('portal.settingsModal.changePhoto')"
                 >
                   <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
                 </button>
               </div>
               
               <div class="flex-1">
-                <h3 class="text-sm font-bold text-slate-900">Profile Picture</h3>
-                <p class="text-xs text-slate-500 mt-0.5">JPG, PNG or WebP. Max size 2MB.</p>
+                <h3 class="text-sm font-bold text-slate-900">{{ $t('portal.settingsModal.profilePhoto') }}</h3>
+                <p class="text-xs text-slate-500 mt-0.5">{{ $t('portal.settingsModal.photoHint') }}</p>
                 <div class="mt-2 flex items-center gap-3">
                   <input type="file" ref="fileInput" accept="image/*" class="hidden" @change="onFileChange" />
                   <button 
@@ -63,7 +63,7 @@
                     @click="triggerFileInput" 
                     class="text-xs font-bold text-[#062d4d] hover:text-[#c9a84c] transition-colors cursor-pointer"
                   >
-                    Change Picture
+                    {{ $t('portal.settingsModal.changePhoto') }}
                   </button>
                   <span v-if="formData.avatarUrl" class="text-slate-300">•</span>
                   <button 
@@ -72,7 +72,7 @@
                     @click="formData.avatarUrl = ''" 
                     class="text-xs font-semibold text-red-500 hover:text-red-700 transition-colors cursor-pointer"
                   >
-                    Remove
+                    {{ $t('portal.settingsModal.removePhoto') }}
                   </button>
                 </div>
               </div>
@@ -83,7 +83,7 @@
               
               <!-- Full Name -->
               <div>
-                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Full Name</label>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">{{ $t('portal.settingsModal.fullName') }}</label>
                 <input 
                   v-model="formData.name" 
                   type="text" 
@@ -94,7 +94,7 @@
 
               <!-- Email (Read-Only) -->
               <div>
-                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Email Address</label>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">{{ $t('portal.settingsModal.email') }}</label>
                 <div class="relative">
                   <input 
                     :value="authStore.user?.email || 'customer@gmail.com'" 
@@ -102,13 +102,13 @@
                     readonly 
                     class="w-full bg-slate-100 border border-slate-200 rounded-xl px-4 py-3 text-sm text-slate-500 font-medium cursor-not-allowed" 
                   />
-                  <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">🔒 Verified</span>
+                  <span class="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xs">🔒 {{ $t('portal.settingsModal.verified') }}</span>
                 </div>
               </div>
 
               <!-- Phone Number -->
               <div>
-                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Phone / WhatsApp Number</label>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">{{ $t('portal.settingsModal.phone') }}</label>
                 <input 
                   v-model="formData.phoneNumber" 
                   type="tel" 
@@ -119,7 +119,7 @@
 
               <!-- Preferred Language -->
               <div>
-                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">Preferred Language</label>
+                <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1.5">{{ $t('portal.settingsModal.preferredLanguage') }}</label>
                 <select 
                   v-model="formData.preferredLanguage" 
                   @change="onLanguageChanged"
@@ -131,7 +131,7 @@
                   <option value="fr">Français (FR)</option>
                   <option value="ru">Русский (RU)</option>
                 </select>
-                <p class="text-[11px] text-slate-400 mt-1">Updates interface language across both the portal and website.</p>
+                <p class="text-[11px] text-slate-400 mt-1">{{ $t('portal.settingsModal.langHint') }}</p>
               </div>
 
               <!-- Footer Buttons -->
@@ -141,7 +141,7 @@
                   @click="closeModal" 
                   class="px-5 py-2.5 text-xs font-bold text-slate-600 hover:text-slate-800 bg-slate-100 hover:bg-slate-200 active:scale-[0.97] rounded-xl transition-all cursor-pointer"
                 >
-                  Cancel
+                  {{ $t('portal.settingsModal.cancel') }}
                 </button>
                 <button 
                   type="submit" 
@@ -149,7 +149,7 @@
                   class="px-6 py-2.5 text-xs font-bold text-white bg-[#062d4d] hover:bg-[#093a62] active:scale-[0.97] rounded-xl shadow-md transition-all disabled:opacity-50 flex items-center gap-2 cursor-pointer"
                 >
                   <svg v-if="isLoading" class="animate-spin w-3.5 h-3.5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                  <span>{{ isLoading ? 'Saving...' : 'Save Changes' }}</span>
+                  <span>{{ isLoading ? $t('portal.settingsModal.saving') : $t('portal.settingsModal.save') }}</span>
                 </button>
               </div>
 
