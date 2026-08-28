@@ -17,7 +17,7 @@ const authStore = useAuthStore()
         <component :is="Component" />
       </transition>
     </router-view>
-    <SeadoraConcierge v-if="false" />
+    <SeadoraConcierge />
     <AuthModal :isOpen="authStore.isAuthModalOpen" @close="authStore.closeAuthModal()" />
   </MotionConfig>
 </template>

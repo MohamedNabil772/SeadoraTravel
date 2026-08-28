@@ -1,4 +1,4 @@
-services:
+﻿services:
   postgres:
     image: postgres:15-alpine
     environment:
@@ -42,6 +42,8 @@ services:
       - booking-service
       - customer-service
       - finance-service
+      - support-service
+      - concierge-service
       - file-server
 
   identity-service:
@@ -51,7 +53,6 @@ services:
     restart: on-failure
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      # ponytail: no depends_on rabbitmq; restart:on-failure already handles the startup race
       - RabbitMq__Host=rabbitmq
       - RabbitMq__Username=${RABBITMQ_USER:-seadora}
       - RabbitMq__Password=${RABBITMQ_PASS:-seadora}
@@ -87,7 +88,6 @@ services:
       - RabbitMq__Username=${RABBITMQ_USER:-seadora}
       - RabbitMq__Password=${RABBITMQ_PASS:-seadora}
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Booking;Username=postgres;Password=postgres
-      # SMTP relay (send-only). Set these to your Hostinger mailbox / relay creds.
       - Smtp__Host=${SMTP_HOST:-}
       - Smtp__Port=${SMTP_PORT:-587}
       - Smtp__UseSsl=${SMTP_USESSL:-true}
@@ -130,6 +130,37 @@ services:
       postgres:
         condition: service_healthy
 
+  support-service:
+    build:
+      context: .
+      dockerfile: src/Services/Support.Service/Seadora.Support.API/Dockerfile
+    restart: on-failure
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Username=${RABBITMQ_USER:-seadora}
+      - RabbitMq__Password=${RABBITMQ_PASS:-seadora}
+      - JwtSettings__Secret=YourSuperSecretKeyHereYourSuperSecretKeyHere
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Support;Username=postgres;Password=postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  concierge-service:
+    build:
+      context: .
+      dockerfile: src/Services/Concierge.Service/Seadora.Concierge.API/Dockerfile
+    restart: on-failure
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Username=${RABBITMQ_USER:-seadora}
+      - RabbitMq__Password=${RABBITMQ_PASS:-seadora}
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Concierge;Username=postgres;Password=postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   file-server:
     build:
       context: .
@@ -143,8 +174,6 @@ services:
     build:
       context: ./src/Web/seadora-website
       args:
-        # Local docker review: bake the local gateway URL. Dockerfile default stays
-        # https://api.seadoratravel.com so production builds are unaffected.
         VITE_API_URL: http://localhost:8000
     ports:
       - "3000:80"
@@ -178,21 +207,3 @@ volumes:
   seadora-db-data:
   seadora-backups:
   seadora-rabbitmq:
-
-  support-service:
-    build:
-      context: .
-      dockerfile: src/Services/Support.Service/Seadora.Support.API/Dockerfile
-    restart: on-failure
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - RabbitMq__Host=rabbitmq
-      - RabbitMq__Username=
-      - RabbitMq__Password=
-      - JwtSettings__Secret=YourSuperSecretKeyHereYourSuperSecretKeyHere
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Support;Username=postgres;Password=postgres
-    depends_on:
-      postgres:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy

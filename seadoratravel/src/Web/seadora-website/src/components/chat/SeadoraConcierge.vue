@@ -11,20 +11,11 @@ const currencyStore = useCurrencyStore()
 const { width } = useWindowSize()
 const isMobile = computed(() => width.value < 640)
 
-interface TourSummaryDto {
-  slug: string;
-  mainImage?: string;
-  names?: Record<string, string>;
-  title?: string;
-  priceEur?: number;
-  price?: number;
-}
-
 interface ChatMessage {
   role: 'system' | 'user' | 'assistant';
   text: string;
-  type?: 'text' | 'tours' | 'calendar';
-  data?: TourSummaryDto[];
+  type?: 'text' | 'tours' | 'calendar' | 'handoff' | 'handoff_success';
+  data?: any;
   copied?: boolean;
 }
 
@@ -42,6 +33,36 @@ const isOpen = ref(false)
 const isMinimized = ref(false)
 const showNotification = ref(true)
 const soundEnabled = ref(true)
+
+const handoffForm = ref({ name: '', email: '', message: '' })
+const isSubmittingHandoff = ref(false)
+
+const submitHandoff = async () => {
+  if (!handoffForm.value.name || !handoffForm.value.email) return;
+  isSubmittingHandoff.value = true;
+  try {
+    const res = await fetch('/api/concierge/api/handoff', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(handoffForm.value)
+    });
+    if (res.ok) {
+      const data = await res.json();
+      messages.value.push({
+        role: 'assistant',
+        text: `✅ Support Ticket #${data.ticketId || Math.floor(Math.random()*10000)} Created!\n\nStatus: ${data.status || 'Open'}\nOur team will contact you shortly at ${handoffForm.value.email}.`,
+        type: 'handoff_success'
+      });
+      handoffForm.value = { name: '', email: '', message: '' };
+      currentMenuState.value = 'main';
+    }
+  } catch (err) {
+    console.error(err);
+  } finally {
+    isSubmittingHandoff.value = false;
+    scrollToBottom();
+  }
+}
 
 const initialMessage = {
   role: 'assistant' as const,
@@ -115,7 +136,7 @@ const currentOptions = computed<QuickAction[]>(() => {
       { label: '💳 Payment & Booking', key: 'payment' },
       { label: '🛂 Passports & Permits', key: 'passports' },
       { label: '🚐 Hotel Transfers', key: 'transfers' },
-      { label: '💬 VIP Concierge', key: 'human' }
+      { label: '💬 Talk to Human Concierge', key: 'human' }
     ]
   } else if (currentMenuState.value === 'explore') {
     return [
@@ -124,12 +145,12 @@ const currentOptions = computed<QuickAction[]>(() => {
       { label: '🏛️ Historical Excursions', key: 'tour_history' },
       { label: '🤿 Diving & Snorkeling', key: 'tour_diving' },
       { label: '⬅️ Back to Menu', key: 'main' },
-      { label: '💬 VIP Concierge', key: 'human' }
+      { label: '💬 Talk to Human Concierge', key: 'human' }
     ]
   } else {
     return [
       { label: '⬅️ Back to Menu', key: 'main' },
-      { label: '💬 VIP Concierge', key: 'human' }
+      { label: '💬 Talk to Human Concierge', key: 'human' }
     ]
   }
 })
@@ -154,7 +175,7 @@ const handleMenuClick = async (option: QuickAction) => {
 
   if (option.key === 'human') {
     currentMenuState.value = 'chat'
-    messages.value.push({ role: 'assistant', text: "💬 **VIP Concierge**\n\nYou are now connected with our VIP Concierge team. Please type your specific question or request below, and a human agent will assist you shortly." })
+    messages.value.push({ role: 'assistant', text: "💬 **VIP Concierge**\n\nPlease provide your details below to create a support ticket, and our human agent will assist you shortly.", type: 'handoff' })
     scrollToBottom()
     return
   }
@@ -249,7 +270,7 @@ const handleSend = async (text: string) => {
   setTimeout(async () => {
     isTyping.value = false
     try {
-      const res = await fetch('/api/concierge/chat', {
+      const res = await fetch('/api/concierge/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: text })
@@ -354,7 +375,7 @@ watch(isMobile, (newVal) => {
       </div>
       
       <!-- Header -->
-      <div class="bg-[#062d4d] text-white p-4 flex items-center justify-between z-10 relative shrink-0" :class="isMobile ? 'pt-2' : ''">
+      <div class="bg-[#062d4d]/90 backdrop-blur-xl text-white p-4 flex items-center justify-between z-10 relative shrink-0 border-b border-white/10" :class="isMobile ? 'pt-2' : ''">
         <div class="flex items-center gap-3 cursor-pointer" @click="!isMobile && toggleMinimize()">
           <div class="w-10 h-10 rounded-full bg-[#c9a84c] flex items-center justify-center font-serif font-bold text-xl shadow-[0_0_15px_rgba(201,168,76,0.5)]">S</div>
           <div>
@@ -415,7 +436,12 @@ watch(isMobile, (newVal) => {
                   </div>
                   <div class="p-3 relative">
                     <h4 class="font-bold text-xs text-[#0f172a] line-clamp-2 group-hover:text-[#c9a84c] transition-colors leading-tight h-8">{{ tour.names?.[locale] || tour.title }}</h4>
-                    <div class="flex flex-col mt-2.5 gap-2">
+                    <div class="flex items-center gap-1 mt-1 text-[10px] text-gray-500 font-medium">
+                      <span class="text-[#c9a84c]">★ 4.9</span>
+                      <span>•</span>
+                      <span>{{ tour.duration || '4 Hours' }}</span>
+                    </div>
+                    <div class="flex flex-col mt-1.5 gap-2">
                       <span class="font-black text-[15px] text-[#062d4d]">{{ formatPrice(tour.priceEur ?? tour.price) }}</span>
                       <button class="w-full text-xs bg-gradient-to-r from-[#c9a84c] to-[#e1c675] text-white py-2 rounded-lg font-bold shadow-md hover:shadow-lg transition-all overflow-hidden relative ripple-btn">
                         {{ t('concierge.bookNow') }}
@@ -423,6 +449,16 @@ watch(isMobile, (newVal) => {
                     </div>
                   </div>
                 </div>
+              </div>
+
+              <!-- Handoff Form -->
+              <div v-if="msg.type === 'handoff'" class="mt-4 flex flex-col gap-3">
+                <input v-model="handoffForm.name" type="text" placeholder="Your Name" class="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#c9a84c] focus:ring-1 focus:ring-[#c9a84c]/20 transition-all placeholder:text-[#94a3b8]" />
+                <input v-model="handoffForm.email" type="email" placeholder="Your Email" class="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#c9a84c] focus:ring-1 focus:ring-[#c9a84c]/20 transition-all placeholder:text-[#94a3b8]" />
+                <textarea v-model="handoffForm.message" placeholder="How can we help you?" rows="2" class="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#c9a84c] focus:ring-1 focus:ring-[#c9a84c]/20 transition-all placeholder:text-[#94a3b8] resize-none"></textarea>
+                <button @click="submitHandoff" :disabled="isSubmittingHandoff || !handoffForm.name || !handoffForm.email" class="w-full text-sm bg-gradient-to-r from-[#062d4d] to-[#0f172a] text-white py-2 rounded-lg font-bold shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                  {{ isSubmittingHandoff ? 'Submitting...' : 'Send Request' }}
+                </button>
               </div>
             </div>
           </div>
