@@ -178,3 +178,21 @@ volumes:
   seadora-db-data:
   seadora-backups:
   seadora-rabbitmq:
+
+  support-service:
+    build:
+      context: .
+      dockerfile: src/Services/Support.Service/Seadora.Support.API/Dockerfile
+    restart: on-failure
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - RabbitMq__Host=rabbitmq
+      - RabbitMq__Username=
+      - RabbitMq__Password=
+      - JwtSettings__Secret=YourSuperSecretKeyHereYourSuperSecretKeyHere
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Support;Username=postgres;Password=postgres
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy

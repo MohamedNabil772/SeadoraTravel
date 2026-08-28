@@ -162,6 +162,15 @@ function handleLogout() {
             <span class="flex-1">VIP Inquiries</span>
             <span v-if="notificationStore.unreadInquiriesCount > 0" class="bg-amber-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{{ notificationStore.unreadInquiriesCount }}</span>
           </RouterLink>
+          <RouterLink 
+            v-if="auth.hasPermission('Support.View') || auth.hasPermission('Support.Manage')"
+            to="/support" 
+            class="group relative flex items-center gap-3 rounded-md py-2 px-4 font-medium text-white/70 transition-all duration-300 hover:bg-white/10 hover:text-white"
+            active-class="bg-white/10 text-white shadow-sm ring-1 ring-white/10"
+          >
+            <span class="opacity-70 group-hover:opacity-100 transition-opacity">🎧</span>
+            <span>Service Desk</span>
+          </RouterLink>
         </SidebarAccordion>
 
         <!-- FINANCE & ACCOUNTING -->

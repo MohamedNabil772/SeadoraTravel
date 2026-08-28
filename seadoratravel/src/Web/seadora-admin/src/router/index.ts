@@ -155,6 +155,18 @@ const router = createRouter({
           name: 'inquiries',
           component: () => import('../features/inquiries/views/InquiriesView.vue'),
           meta: { title: 'VIP Inquiries & Contact Requests' }
+        },
+        {
+          path: 'support',
+          name: 'support-tickets',
+          component: () => import('../features/support/views/SupportTicketsView.vue'),
+          meta: { title: 'Service Desk' }
+        },
+        {
+          path: 'support/:id',
+          name: 'support-ticket-details',
+          component: () => import('../features/support/views/TicketDetailsView.vue'),
+          meta: { title: 'Ticket Details' }
         }
       ]
     }
