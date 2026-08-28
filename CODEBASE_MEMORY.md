@@ -4,7 +4,7 @@
 > It is the single source of truth for understanding the system architecture, current state,
 > and known issues. **Update this file whenever changes are made.**
 
-> **Last Updated**: 2026-07-26
+> **Last Updated**: 2026-08-28
 
 ---
 
@@ -14,23 +14,24 @@
 2. [Workspace Layout](#2-workspace-layout)
 3. [Technology Stack](#3-technology-stack)
 4. [Architecture Overview](#4-architecture-overview)
-5. [Static Landing Page](#5-static-landing-page)
-6. [Microservices Backend](#6-microservices-backend)
-   - [6.1 Identity Service](#61-identity-service)
-   - [6.2 Content Service](#62-content-service)
-   - [6.3 Booking Service](#63-booking-service)
-   - [6.4 File Server](#64-file-server)
-7. [Shared Library: Seadora.Common](#7-shared-library-seadoracommon)
-8. [API Gateway](#8-api-gateway)
-9. [Web Frontends](#9-web-frontends)
-   - [9.1 Customer Website](#91-customer-website)
-   - [9.2 Admin Dashboard](#92-admin-dashboard)
-10. [Docker Compose Topology](#10-docker-compose-topology)
-11. [Test Projects](#11-test-projects)
-12. [Business Rules](#12-business-rules)
-13. [Seed Data Reference](#13-seed-data-reference)
-14. [Known Issues & Gaps](#14-known-issues--gaps)
-15. [Change Log](#15-change-log)
+5. [Microservices Backend](#5-microservices-backend)
+   - [5.1 Identity Service](#51-identity-service)
+   - [5.2 Content Service](#52-content-service)
+   - [5.3 Booking Service](#53-booking-service)
+   - [5.4 Customer CRM Service](#54-customer-crm-service)
+   - [5.5 Finance & Ledger Service](#55-finance--ledger-service)
+   - [5.6 Support & Service Desk](#56-support--service-desk)
+   - [5.7 Concierge AI Service](#57-concierge-ai-service)
+   - [5.8 File Server](#58-file-server)
+6. [Shared Libraries: Seadora.Common & Seadora.Contracts](#6-shared-libraries-seadoracommon--seadoracontracts)
+7. [API Gateway (YARP)](#7-api-gateway-yarp)
+8. [Web Frontends](#8-web-frontends)
+   - [8.1 Customer Website & VIP Portal](#81-customer-website--vip-portal)
+   - [8.2 Admin Operations Dashboard](#82-admin-operations-dashboard)
+9. [Docker Compose Topology (13 Services)](#9-docker-compose-topology-13-services)
+10. [Business Rules & Workflows](#10-business-rules--workflows)
+11. [Seed Data & Test Credentials Reference](#11-seed-data--test-credentials-reference)
+12. [Change Log](#12-change-log)
 
 ---
 
@@ -38,17 +39,13 @@
 
 | Field | Value |
 |---|---|
-| **Brand Name** | SeeDora Travel / Seadora Travel |
-| **Business** | Luxury Egyptian travel agency |
+| **Brand Name** | Seadora Travel (SeeDora Travel) |
+| **Business** | Luxury Egyptian travel agency & experiential concierge |
 | **Base** | Hurghada, Red Sea, Egypt |
-| **Target Audience** | European travellers (DE, IT, FR, RU, EN) |
-| **Phone** | +20 100 129 6641 |
-| **Email** | info@sedoratravel.com |
-| **Languages** | English, German, Italian, French, Russian |
-
-The solution has **two independent parts**:
-1. **Static landing page** — `index.html` at workspace root (standalone marketing site)
-2. **Microservices platform** — `seadoratravel/` directory (full-stack booking system)
+| **Target Audience** | European & International travellers (EN, DE, IT, FR, RU) |
+| **Phone** | +20 106 894 0967 |
+| **Email** | info@seadoratravel.com |
+| **Languages** | English (`en`), German (`de`), Italian (`it`), French (`fr`), Russian (`ru`) |
 
 ---
 
@@ -56,662 +53,216 @@ The solution has **two independent parts**:
 
 ```
 D:\Seadora Travel\
-├── index.html                          # Static marketing landing page (82 KB, 1556 lines)
-├── CODEBASE_MEMORY.md                  # ← This file
+├── index.html                          # Legacy static marketing landing page
+├── CODEBASE_MEMORY.md                  # ← This living documentation file
+├── BUSINESS_LOGIC.md                   # Enterprise business rules & policies
+├── ARCHITECTURAL_FINDINGS.md           # Architecture audit & decisions
 │
-└── seadoratravel\                      # Microservices platform
-    ├── SEADORA.sln                     # Visual Studio solution (all projects)
-    ├── BUSINESS_RULES.md               # Documented business policies (DRAFT)
-    ├── docker-compose.yml              # 8-service Docker topology
+└── seadoratravel\                      # Microservices platform root
+    ├── SEADORA.sln                     # Complete solution (all microservices & tests)
+    ├── docker-compose.yml              # 13-service Docker compose topology
     │
     ├── src\
-    │   ├── ApiGateway\                 # YARP reverse proxy
+    │   ├── ApiGateway\                 # YARP reverse proxy (port 8000)
     │   │   └── Seadora.ApiGateway\
     │   │
     │   ├── Services\
     │   │   ├── Common\
-    │   │   │   └── Seadora.Common\     # Shared library
+    │   │   │   ├── Seadora.Common\     # Shared kernel (Outbox, Idempotency, Tenancy, Polly)
+    │   │   │   └── Seadora.Contracts\  # Integration event records (RabbitMQ MassTransit)
     │   │   │
-    │   │   ├── Identity.Service\       # Auth & user management
-    │   │   │   ├── Seadora.Identity.API\
-    │   │   │   ├── Seadora.Identity.Application\
-    │   │   │   ├── Seadora.Identity.Domain\
-    │   │   │   └── Seadora.Identity.Infrastructure\
-    │   │   │
-    │   │   ├── Content.Service\        # Destinations, tours, categories
-    │   │   │   ├── Seadora.Content.API\
-    │   │   │   ├── Seadora.Content.Application\
-    │   │   │   ├── Seadora.Content.Domain\
-    │   │   │   └── Seadora.Content.Infrastructure\
-    │   │   │
-    │   │   ├── Booking.Service\        # Bookings & feedback
-    │   │   │   ├── Seadora.Booking.API\
-    │   │   │   ├── Seadora.Booking.Application\
-    │   │   │   ├── Seadora.Booking.Domain\
-    │   │   │   └── Seadora.Booking.Infrastructure\
-    │   │   │
-    │   │   └── FileServer\             # File uploads/downloads
-    │   │       └── Seadora.FileServer.API\
+    │   │   ├── Identity.Service\       # Auth, RBAC, Customer Registration & WhatsApp OTP
+    │   │   ├── Content.Service\        # Tour Catalog, Categories, Destinations, Policies
+    │   │   ├── Booking.Service\        # Departures, Concurrency lock, Booking Aggregate
+    │   │   ├── Customer.Service\       # CRM, Profile, Booking Projections, Customer Portal API
+    │   │   ├── Finance.Service\        # Double-entry ledger, Chart of Accounts, 9 Financial Reports, Owner KPIs
+    │   │   ├── Support.Service\        # Tickets, Threaded conversations, SLAs, Customer & Admin APIs
+    │   │   ├── Concierge.Service\      # Grounded AI Chatbot, Catalog embeddings index, Human Handoff
+    │   │   └── FileServer\             # Document & media storage
     │   │
     │   └── Web\
-    │       ├── seadora-website\        # Vue 3 customer-facing SPA
-    │       └── seadora-admin\          # Vue 3 admin dashboard SPA
+    │       ├── seadora-website\        # Vue 3 SPA (Port 3000) - Luxury Website & VIP Customer Portal
+    │       └── seadora-admin\          # Vue 3 SPA (Port 3001) - Operations, CRM, Finance, Support Desk
     │
-    └── tests\
-        ├── Seadora.Common.Tests\
-        ├── Seadora.UnitTests\
-        ├── Seadora.IntegrationTests\
-        └── Services\
-            └── Identity\
-                └── Seadora.Identity.Application.Tests\
+    ├── docs\
+    │   └── superpowers\plans\          # Multi-phase execution plans
+    │
+    └── tests\                          # xUnit test suites across all domains
 ```
 
 ---
 
 ## 3. Technology Stack
 
-| Layer | Technology | Version |
-|---|---|---|
-| **Backend Runtime** | .NET | 9.0 |
-| **Web Framework** | ASP.NET Core Minimal APIs + Controllers | 9.0 |
-| **CQRS / Mediator** | MediatR | 14.1 |
-| **ORM** | Entity Framework Core | 9.0 |
-| **Database** | PostgreSQL (Npgsql) | 15 Alpine |
-| **Auth** | ASP.NET Identity + JWT Bearer (HMAC-SHA256) | — |
-| **API Gateway** | YARP (Yet Another Reverse Proxy) | 2.3.0 |
-| **Logging** | Serilog + Serilog.AspNetCore | 4.2 / 9.0 |
-| **Frontend Framework** | Vue | 3.5 |
-| **Frontend Language** | TypeScript | 6.0 |
-| **Build Tool** | Vite | 8.0 |
-| **State Management** | Pinia | 3.0 |
-| **Routing** | Vue Router | 4.6 |
-| **i18n** | Vue I18n | 9.14 |
-| **CSS (Website)** | Tailwind CSS | 4.3 |
-| **CSS (Admin)** | Tailwind CSS | 3.4 |
-| **CSS (Landing Page)** | Vanilla CSS | — |
-| **Containerization** | Docker Compose | — |
-| **Testing** | xUnit + Moq + FluentAssertions | 2.9.3 / 4.20 / 8.10 |
+- **Backend Framework**: .NET 9.0 (C# 13)
+- **Database & Persistence**: PostgreSQL 16, Entity Framework Core 9 (Code-First Migrations, Outbox pattern, Idempotency tracking)
+- **Messaging & Event-Driven Bus**: RabbitMQ 3.13 + MassTransit 8 (Transactional Outbox & Deduplication)
+- **API Gateway**: Microsoft YARP Reverse Proxy with Polly Resilience & CORS
+- **Frontends**: Vue 3 (Composition API), Vite 8, Pinia, Vue Router 4, Vue I18n 11, Tailwind CSS, Motion-v, Chart.js, Lucide Icons
 
 ---
 
 ## 4. Architecture Overview
 
-**Pattern**: Microservices with Clean Architecture per service
+The system employs a **decoupled, event-driven microservices architecture** where each bounded context owns its schema and publishes domain/integration events via the **Transactional Outbox Pattern**:
 
-Each backend service follows 4-layer Clean Architecture:
-```
-API (Controllers/Endpoints) → Application (Commands/Queries via MediatR) → Domain (Entities) → Infrastructure (EF Core, PostgreSQL)
-```
-
-**Communication**:
-- Frontends → API Gateway (YARP on `:8000`) → Individual microservices
-- Database-per-service (each service has its own PostgreSQL database)
-- No inter-service communication (no message bus, no gRPC, no REST cross-calls)
-- Cross-service references are denormalized (e.g., `TourId` stored in Booking without validation)
-
-**Data Flow**:
-```
-Vue 3 SPA ──HTTP──► YARP Gateway (:8000) ──proxy──► Microservice ──EF Core──► PostgreSQL
+```mermaid
+graph TD
+    ClientWeb[seadora-website :3000] -->|HTTP / REST| Gateway[YARP ApiGateway :8000]
+    ClientAdmin[seadora-admin :3001] -->|HTTP / REST| Gateway
+    
+    Gateway -->|/api/identity| IdentitySvc[Identity.Service]
+    Gateway -->|/api/content| ContentSvc[Content.Service]
+    Gateway -->|/api/booking| BookingSvc[Booking.Service]
+    Gateway -->|/api/customer| CustomerSvc[Customer.Service]
+    Gateway -->|/api/finance| FinanceSvc[Finance.Service]
+    Gateway -->|/api/support| SupportSvc[Support.Service]
+    Gateway -->|/api/concierge| ConciergeSvc[Concierge.Service]
+    
+    IdentitySvc -.->|CustomerRegistered| Bus((RabbitMQ))
+    ContentSvc -.->|TourPublished / Updated| Bus
+    BookingSvc -.->|BookingPlaced / Confirmed| Bus
+    FinanceSvc -.->|PaymentRecorded / Refunded| Bus
+    SupportSvc -.->|InquiryReceived / TicketCreated| Bus
+    
+    Bus -.-> CustomerSvc
+    Bus -.-> FinanceSvc
+    Bus -.-> ConciergeSvc
+    Bus -.-> BookingSvc
 ```
 
 ---
 
-## 5. Static Landing Page
+## 5. Microservices Backend
 
-**File**: `index.html` (root of workspace)
-**Size**: 82 KB, 1,556 lines
-**Type**: Self-contained single HTML file (inline CSS + inline JS)
+### 5.1 Identity Service (`Seadora.Identity`)
+- **Responsibilities**: User authentication, JWT tokens, RBAC permissions, Customer self-registration, WhatsApp OTP.
+- **Key Endpoints**:
+  - `POST /api/auth/login`
+  - `POST /api/auth/register-customer`
+  - `POST /api/auth/whatsapp/send-otp` / `POST /api/auth/whatsapp/verify-otp`
+  - `GET /api/users` & `PUT /api/users/{id}/roles`
 
-### Sections
-| Section | Description |
+### 5.2 Content Service (`Seadora.Content`)
+- **Responsibilities**: Tour catalog, destinations, categories, tour type pricing models (PerPerson vs FlatGroup), allocation policies.
+- **Key Endpoints**:
+  - `GET /api/destinations`, `GET /api/categories`, `GET /api/tours`
+  - `POST /api/tours` (Admin), `PUT /api/tours/{id}`, `DELETE /api/tours/{id}`
+
+### 5.3 Booking Service (`Seadora.Booking`)
+- **Responsibilities**: Departures availability, optimistic concurrency locks, guest room manifests, booking lifecycle state machine (`Pending`, `Confirmed`, `Completed`, `Cancelled`).
+- **Key Endpoints**:
+  - `POST /api/bookings` (Place booking)
+  - `GET /api/bookings/{id}`
+  - `PUT /api/bookings/{id}/status`
+
+### 5.4 Customer CRM Service (`Seadora.Customer`)
+- **Responsibilities**: Customer profiles, loyalty tiers, booking history projections, document storage, Customer Portal endpoints.
+- **Key Endpoints**:
+  - `GET /api/customer/portal/me` & `PUT /api/customer/portal/me`
+  - `GET /api/customer/portal/bookings`
+  - `GET /api/customer/portal/documents`
+
+### 5.5 Finance & Ledger Service (`Seadora.Finance`)
+- **Responsibilities**: Double-entry bookkeeping, Chart of Accounts, Journal entries, Payments subledger, 9 Accountant Financial Reports, Business Owner KPIs.
+- **Key Endpoints**:
+  - `GET /api/finance/dashboard/kpis` & `GET /api/finance/dashboard/revenue-trend`
+  - `GET /api/finance/reports/{reportType}` (Trial Balance, P&L, Balance Sheet, Cash Flow, Tax VAT, Tour Margin, Accounts Receivable, Currency Exposure)
+
+### 5.6 Support & Service Desk (`Seadora.Support`)
+- **Responsibilities**: Customer tickets, threaded conversation timeline, SLA response countdown, multi-channel intake (Web, Email, Chat, WhatsApp).
+- **Key Endpoints**:
+  - `POST /api/support/api/tickets/customer` (VIP request / complaint creation)
+  - `GET /api/support/api/tickets/my` (Customer ticket list)
+  - `POST /api/support/api/tickets/customer/{id}/reply`
+  - `GET /api/support/api/tickets` (Admin queue with filters)
+
+### 5.7 Concierge AI Service (`Seadora.Concierge`)
+- **Responsibilities**: Grounded AI conversation engine, real-time tour suggestions, intent matching, human concierge handoff.
+- **Key Endpoints**:
+  - `POST /api/chat`
+  - `POST /api/handoff`
+
+---
+
+## 6. Shared Libraries: Seadora.Common & Seadora.Contracts
+
+- **`Seadora.Common`**:
+  - `Messaging`: MassTransit configuration, transactional `OutboxMessage`, `IEventPublisher`.
+  - `Idempotency`: `IProcessedMessageDbContext` preventing duplicate event processing.
+  - `Tenancy`: Multi-branch scoping via `BranchId`.
+  - `Middlewares`: Global exception handling returning RFC 7807 ProblemDetails.
+- **`Seadora.Contracts`**:
+  - `CustomerRegistered`, `TourPublished`, `TourUpdated`, `BookingPlaced`, `PaymentRecorded`, `InquiryReceived`, `TicketCreated`.
+
+---
+
+## 7. Web Frontends
+
+### 7.1 Customer Website & VIP Portal (`seadora-website`) — Port 3000
+- **Luxury Aesthetic**: Red Sea & Egyptian Gold (`#062d4d`, `#c9a84c`, `#f8fafc`).
+- **Features**:
+  - Multi-tab Auth Modal (`AuthModal.vue`): Email Login, Customer Registration with GDPR compliance, WhatsApp OTP, Password Reset.
+  - Automatic Post-Login redirection to `/portal/dashboard`.
+  - Customer Profile Dropdown (`CustomerProfileDropdown.vue`): User initials, VIP Guest tier badge, quick links to Profile, Documents, Support, and Logout.
+  - Clean SEO Name Slugs in URL filters: `/tours?destination=hurghada`, `/tours?category=sea-diving`.
+  - Full Customer Portal Suite (`/portal/**`):
+    - `PortalDashboardView.vue`: Personalized welcome, trip countdown, quick action cards.
+    - `PortalBookingsView.vue`: Active & past trips, payment breakdown, invoice download.
+    - `PortalDocumentsView.vue`: Digital PDF vouchers and passport vault.
+    - `PortalProfileView.vue`: Personal info & GDPR privacy toggles (Export Data / Delete Data).
+    - `PortalSupportView.vue`: Bespoke VIP Concierge Request Modal (Yachts, Safaris, Flights) & Threaded conversation viewer.
+  - Seamless "Return to Main Website" and "Book Experience" navigation.
+
+### 7.2 Admin Operations Dashboard (`seadora-admin`) — Port 3001
+- **Features**:
+  - Executive Overview & KPI charts (`DashboardView.vue`).
+  - Tour & Inventory Management (`ToursView.vue`, `DestinationsView.vue`, `CategoriesView.vue`, `TourTypesView.vue`).
+  - Customer Care & Booking Processing (`BookingsView.vue`, `CustomersView.vue`, `CustomerDetailsView.vue`).
+  - Finance Suite (`FinanceDashboardView.vue`, `FinanceReportsView.vue`, `FinancePaymentsView.vue`).
+  - Service Desk (`SupportTicketsView.vue`, `TicketDetailsView.vue`).
+  - User & Role Access Control (`UsersView.vue`, `RolesView.vue`).
+
+---
+
+## 8. Docker Compose Topology (13 Services)
+
+| Container Name | Internal Service | Exposed Port | Purpose |
+|---|---|---|---|
+| `seadoratravel-seadora-website-1` | Website & Customer Portal | `3000:80` | Customer-facing SPA |
+| `seadoratravel-seadora-admin-1` | Admin Operations Portal | `3001:80` | Backoffice management SPA |
+| `seadoratravel-api-gateway-1` | YARP Reverse Proxy | `8000:8080` | Unified API Gateway |
+| `seadoratravel-identity-service-1` | Identity.Service | Internal | Auth & RBAC API |
+| `seadoratravel-content-service-1` | Content.Service | Internal | Catalog API |
+| `seadoratravel-booking-service-1` | Booking.Service | Internal | Bookings API |
+| `seadoratravel-customer-service-1` | Customer.Service | Internal | CRM & Portal API |
+| `seadoratravel-finance-service-1` | Finance.Service | Internal | Ledger & Reports API |
+| `seadoratravel-support-service-1` | Support.Service | Internal | Service Desk API |
+| `seadoratravel-concierge-service-1` | Concierge.Service | Internal | Chatbot Engine API |
+| `seadoratravel-file-server-1` | FileServer | Internal | File storage |
+| `seadoratravel-postgres-1` | PostgreSQL 16 | `5432:5432` | Primary database cluster |
+| `seadoratravel-backup-1` | Automated Backup | Internal | Scheduled DB dumps |
+
+---
+
+## 9. Seed Data & Test Credentials Reference
+
+| Role | Email / Username | Password | Purpose / Default Access |
+|---|---|---|---|
+| **Super Admin** | `admin@seadora.com` | `Admin@123456` | Full platform administration (Admin Portal :3001) |
+| **Business Owner** | `owner@seadoratravel.com` | `Owner123!` | Executive KPIs & financial overview (:3001) |
+| **Lead Accountant** | `accountant@seadoratravel.com` | `Accountant123!` | Finance subledger & 9 financial reports (:3001) |
+| **VIP Customer** | `customer@gmail.com` | `Customer123!` | Customer Portal & Booking self-service (:3000) |
+| **New Traveler** | Any registered email | Selected on register | Auto-assigned `Customer` role via Website |
+
+---
+
+## 10. Change Log
+
+| Date | Change Summary |
 |---|---|
-| Language Bar | 5-language switcher (EN, DE, IT, FR, RU) using `data-lang` attributes + CSS class toggle |
-| Navbar | Sticky, glass-blur backdrop, gold-accented logo, nav links, orange CTA |
-| Hero | Full-viewport gradient (sea-deep blues → greens), animated stats sidebar |
-| Destinations | 4-column responsive grid: Hurghada, Cairo, Luxor, Sharm El-Sheikh |
-| Trips | Tab-filtered grid (All/Sea/Desert/Cultural/Cruise), 3-column cards |
-| Why Choose Us | 6 icon feature cards |
-| Testimonials | 3 multilingual review cards with emoji country flags |
-| Contact | 2-column: info + form (mock submit — no backend connection) |
-| Footer | 4-column: brand, destinations, tours, contact |
-
-### Fonts
-- **Playfair Display** (serif, headings)
-- **Cormorant Garamond** (serif, body accent)
-- **Jost** (sans-serif, body text)
-
-### Color Palette (CSS custom properties)
-| Variable | Hex | Usage |
-|---|---|---|
-| `--sea` | `#0a5c8a` | Primary blue |
-| `--sea-light` | `#1a8bc4` | Light blue |
-| `--sea-deep` | `#063a5c` | Dark blue (nav, hero) |
-| `--sun` | `#e8820a` | Primary orange (CTAs) |
-| `--sun-light` | `#f5a435` | Light orange |
-| `--grass` | `#2e7d4f` | Green accents |
-| `--gold` | `#c9a84c` | Gold accents |
-| `--cream` | `#faf7f2` | Background |
-| `--dark` | `#0d1f2d` | Dark sections |
-
-### JavaScript Features
-- `setLang(lang, btn)` — language switcher via CSS class on `<body>`
-- `filterTrips(cat, btn)` — tab-based trip category filter
-- `handleSubmit(btn)` — mock form submission (visual feedback only)
-- `IntersectionObserver` — scroll-reveal animations on cards
-
-> **Note**: The landing page is completely standalone. It does NOT connect to any backend service.
-
----
-
-## 6. Microservices Backend
-
-### 6.1 Identity Service
-
-**Path**: `seadoratravel/src/Services/Identity.Service/`
-**Database**: `Seadora_Identity` (PostgreSQL)
-**Ports**: HTTP `5062`, HTTPS `7002`
-
-#### Domain Entities
-
-**User** (extends `IdentityUser<string>`):
-| Property | Type | Notes |
-|---|---|---|
-| `Id` | `string` | Auto-generated GUID string |
-| `FirstName` | `string` | — |
-| `LastName` | `string` | — |
-| `Roles` | `List<Role>` | Navigation (many-to-many) |
-| *(inherited)* | — | UserName, Email, PasswordHash, PhoneNumber, etc. |
-
-**Role** (extends `IdentityRole<string>`):
-| Property | Type | Notes |
-|---|---|---|
-| `Id` | `string` | Auto-generated GUID string |
-| `Users` | `List<User>` | Navigation (many-to-many) |
-
-#### CQRS (MediatR)
-
-| Type | Name | Input | Output |
-|---|---|---|---|
-| Command | `RegisterCommand` | `(FirstName, LastName, Email, Password)` | `AuthResponse` |
-| Command | `LoginCommand` | `(Email, Password)` | `AuthResponse` |
-
-**AuthResponse** DTO: `record AuthResponse(string Token, string Email)`
-
-Queries and Commands exist for User Management CRUD: GET all users, GET roles, POST create user, PUT update user, DELETE user.
-
-#### API Endpoints (Controller-based)
-
-| Method | Route | Auth | Handler |
-|---|---|---|---|
-| `POST` | `/api/Auth/register` | Anonymous | `RegisterCommand` |
-| `POST` | `/api/Auth/login` | Anonymous | `LoginCommand` |
-| `GET` | `/api/Users` | Admin | Retrieves all users with their roles |
-| `GET` | `/api/Users/roles` | Admin | Retrieves all available roles |
-| `POST` | `/api/Users` | Admin | Creates a new user and assigns roles |
-| `PUT` | `/api/Users/{id}` | Admin | Updates user information and roles |
-| `DELETE` | `/api/Users/{id}` | Admin | Deletes user (with self-deletion guard) |
-| `GET` | `/WeatherForecast` | Anonymous | ⚠️ Scaffold leftover |
-
-#### JWT Configuration
-
-| Setting | Value | Source |
-|---|---|---|
-| Algorithm | HMAC-SHA256 | Hardcoded |
-| Expiry | **7 days** | Hardcoded (ignores `ExpiryMinutes` config) |
-| Issuer | `"SeadoraTravel"` | Fallback default |
-| Audience | `"SeadoraTravelUsers"` | Fallback default |
-| Secret | `"YourSuperSecretKeyHereYourSuperSecretKeyHere"` | ⚠️ Hardcoded fallback |
-| Roles in JWT | **NOT INCLUDED** | ⚠️ Role-based auth won't work |
-
-#### Infrastructure
-- **DbContext**: `SeadoraIdentityDbContext` — defined inside `DependencyInjection.cs` (not its own file)
-- **Schema**: `EnsureCreatedAsync()` — no EF migrations
-- **Seeder**: Runs on startup, creates 3 roles + 3 users
-- **Validation**: FluentValidation package referenced but **commented out**
-- **Email**: Not implemented
-- **CORS**: `AllowAll` (any origin, method, header)
-
-#### Seed Data
-| Role | User | Email | Password |
-|---|---|---|---|
-| Admin | System Admin | `admin@seadoratravel.com` | `Admin123!` |
-| BookingManager | Booking Manager | `manager@seadoratravel.com` | `Manager123!` |
-| Customer | John Doe | `customer@gmail.com` | `Customer123!` |
-
----
-
-### 6.2 Content Service
-
-**Path**: `seadoratravel/src/Services/Content.Service/`
-**Database**: `Seadora_Content` (PostgreSQL)
-**Ports**: HTTP `5190`, HTTPS `7030`
-**Nature**: **Read-only** — no write endpoints exist
-
-#### Domain Entities
-
-**Category**:
-| Property | Type | Notes |
-|---|---|---|
-| `Id` | `Guid` | PK |
-| `Names` | `Dictionary<string, string>` | Localized (jsonb) |
-| `Icon` | `string` | Emoji or CSS class |
-| `Tours` | `ICollection<Tour>` | Navigation (1:M) |
-
-**Destination**:
-| Property | Type | Notes |
-|---|---|---|
-| `Id` | `Guid` | PK |
-| `Names` | `Dictionary<string, string>` | Localized (jsonb) |
-| `Descriptions` | `Dictionary<string, string>` | Localized (jsonb) |
-| `ImageUrl` | `string` | — |
-| `Flag` | `string` | Emoji flag |
-| `Tours` | `ICollection<Tour>` | Navigation (1:M) |
-
-**Tour**:
-| Property | Type | Notes |
-|---|---|---|
-| `Id` | `Guid` | PK |
-| `Names` | `Dictionary<string, string>` | Localized (jsonb) |
-| `Descriptions` | `Dictionary<string, string>` | Localized (jsonb) |
-| `Price` | `decimal` | — |
-| `Duration` | `string` | Free-form: `"fullDay"`, `"halfDay"`, `"twoDays"`, `"fiveDays"`, `"oneDay"`, `"threeHours"`, `"evening"` |
-| `Includes` | `List<string>` | e.g. `["🚌 Transfer", "🥗 Lunch"]` |
-| `ImageUrl` | `string` | — |
-| `Emoji` | `string` | — |
-| `BgGradient` | `string` | CSS gradient for card |
-| `Badge` | `string` | — |
-| `DestinationId` | `Guid` | FK → Destination |
-| `CategoryId` | `Guid` | FK → Category |
-
-**Relationships**: Tour → Destination (M:1), Tour → Category (M:1)
-
-#### CQRS (MediatR)
-
-| Type | Name | Handler |
-|---|---|---|
-| Query | `GetDestinationsQuery` | Returns `List<Destination>` via DbContext |
-| Query | `GetToursQuery` | Returns `List<Tour>` (includes Destination) |
-
-No Commands exist — service is purely read-only.
-
-#### API Endpoints (Controller-based)
-
-| Method | Route | Pattern | Returns |
-|---|---|---|---|
-| `GET` | `/api/categories` | Direct DbContext (no MediatR) | `List<Category>` |
-| `GET` | `/api/destinations` | MediatR Query | `List<Destination>` |
-| `GET` | `/api/tours` | MediatR Query | `List<Tour>` (with Destination) |
-
-**No DTOs** — domain entities returned directly. Circular references handled by `ReferenceHandler.IgnoreCycles`.
-
-#### Infrastructure
-- **DbContext**: `ContentDbContext` — jsonb configuration for all `Dictionary<string, string>` properties
-- **Schema**: `EnsureDeletedAsync()` + `EnsureCreatedAsync()` — **destructive re-creation every startup**
-- **No migrations**
-- **CORS**: `AllowAll`
-- **JSON**: `EnableDynamicJson()` on Npgsql data source
-
-#### Seed Data
-- **3 Categories**: Sea & Diving, Culture & History, Safari & Adventure
-- **4 Destinations**: Hurghada, Luxor, Cairo, Sharm El-Sheikh
-- **9 Tours**: Each with full 5-language localization (en, de, it, fr, ru)
-
----
-
-### 6.3 Booking Service
-
-**Path**: `seadoratravel/src/Services/Booking.Service/`
-**Database**: `Seadora_Booking` (PostgreSQL)
-**Ports**: HTTP `5076`, HTTPS `7286`
-
-#### Domain Entities
-
-**Booking** (anemic POCO):
-| Property | Type | Default |
-|---|---|---|
-| `Id` | `Guid` | — |
-| `TourId` | `Guid` | — |
-| `CustomerName` | `string` | `""` |
-| `CustomerEmail` | `string` | `""` |
-| `BookingDate` | `DateTime` | — |
-| `Status` | `string` | `"Pending"` |
-
-**Feedback** (anemic POCO):
-| Property | Type | Default |
-|---|---|---|
-| `Id` | `Guid` | — |
-| `TourId` | `Guid` | — |
-| `Rating` | `double` | — |
-| `Comment` | `string` | `""` |
-| `CustomerName` | `string` | `""` |
-| `CustomerEmail` | `string` | `""` |
-| `CreatedAt` | `DateTime` | — |
-| `IsVisible` | `bool` | `true` |
-
-#### CQRS (MediatR)
-
-| Type | Name | Input | Output |
-|---|---|---|---|
-| Command | `CreateBookingCommand` | `(TourId, CustomerName, CustomerEmail)` | `Guid` |
-| Command | `CreateFeedbackCommand` | `(TourId, Rating, Comment, CustomerName, CustomerEmail)` | `Feedback` |
-| Command | `UpdateFeedbackVisibilityCommand` | `(Id, IsVisible)` | `Unit` |
-| Query | `GetFeedbacksQuery` | `(TourId?, IncludeHidden)` | `List<Feedback>` |
-
-Inline validation in handlers (no FluentValidation):
-- Booking: TourId required, name 2–100 chars, email regex
-- Feedback: Rating between 0.5–5.0 (bug: message says "1 and 5")
-
-#### API Endpoints (Controller-based)
-
-| Method | Route | Handler | Returns |
-|---|---|---|---|
-| `POST` | `/api/bookings` | `CreateBookingCommand` | `Guid` |
-| `POST` | `/api/feedbacks` | `CreateFeedbackCommand` | `Feedback` |
-| `GET` | `/api/feedbacks?tourId={guid}&includeHidden={bool}` | `GetFeedbacksQuery` | `List<Feedback>` |
-| `PUT` | `/api/feedbacks/{id}/visibility` | `UpdateFeedbackVisibilityCommand` | `NoContent` |
-
-**Missing**: No GET/PUT/DELETE for bookings. No booking detail or listing endpoint.
-
-#### Domain Service (DRAFT — NOT ACTIVE)
-`CancellationPolicyService` in `Domain/Services/`:
-- `CalculateRefundAmount()` — **commented out**, currently returns full amount
-- `IsCashReservationValid()` — **commented out**, currently returns `true`
-- **Not registered in DI**, not used anywhere
-
-#### Infrastructure
-- **DbContext**: `BookingDbContext` — no `OnModelCreating`, no Fluent API, no indexes
-- **Schema**: `EnsureDeletedAsync()` + `EnsureCreatedAsync()` — destructive every startup
-- **No migrations**
-- **CORS**: `AllowAll`
-
-#### Seed Data
-- **0 bookings** seeded
-- **19 feedbacks** seeded (7 named + 12 generic) for TourIds `00000000-0000-0000-0000-000000000101` through `109`
-
----
-
-### 6.4 File Server
-
-**Path**: `seadoratravel/src/Services/FileServer/Seadora.FileServer.API/`
-**Storage**: Local disk (`uploads/` directory, Docker volume `seadora-uploads`)
-
-#### API Endpoints (Controller-based)
-
-| Method | Route | Purpose | Returns |
-|---|---|---|---|
-| `POST` | `/api/files` | Upload file | `{ FileId }` |
-| `GET` | `/api/files/{fileId}` | Download file | File stream (`application/octet-stream`) |
-| `DELETE` | `/api/files/{fileId}` | Delete file | 204 No Content |
-
-- Files renamed to `{GUID}{extension}` on disk
-- Uses `LocalStorageService` from `Seadora.Common`
-- Config: `StorageSettings:Path = "uploads"`
-
----
-
-## 7. Shared Library: Seadora.Common
-
-**Path**: `seadoratravel/src/Services/Common/Seadora.Common/`
-**Target**: .NET 9.0 class library
-**Dependencies**: `Microsoft.AspNetCore.Http.Abstractions 2.2.0`, `Serilog 4.2.0`, `Serilog.AspNetCore 9.0.0`
-
-### Storage Abstraction
-| Class | Description |
-|---|---|
-| `IStorageService` | Interface: `UploadFileAsync`, `GetFileAsync`, `DeleteFileAsync` |
-| `LocalStorageService` | Writes to local directory, `{GUID}{ext}` naming |
-| `RemoteStorageService` | HTTP proxy to FileServer via `HttpClient` |
-| `StorageDependencyInjection` | `AddSeadoraStorage()` — reads `StorageSettings:Type` config (`"Remote"` or local) |
-
-### Logging
-| Class | Description |
-|---|---|
-| `CorrelationIdMiddleware` | Reads/generates `X-Correlation-ID` header, pushes to Serilog `LogContext` |
-
----
-
-## 8. API Gateway
-
-**Path**: `seadoratravel/src/ApiGateway/`
-**Technology**: YARP 2.3.0
-**Port**: `:8000` (Docker: `8000→8080`)
-**CORS**: `AllowAll`
-
-### Route Table
-
-| Route Pattern | Backend Cluster | Backend Address | Path Transform |
-|---|---|---|---|
-| `/api/auth/{**catch-all}` | `identity-cluster` | `http://identity-service:8080` | Strip `/api/auth` |
-| `/api/content/{**catch-all}` | `content-cluster` | `http://content-service:8080` | Strip `/api/content` |
-| `/api/booking/{**catch-all}` | `booking-cluster` | `http://booking-service:8080` | Strip `/api/booking` |
-| `/api/files/{**catch-all}` | `file-cluster` | `http://file-server:8080` | Strip `/api/files` |
-
-**Example request flow**:
-```
-Frontend: GET /api/content/api/tours
-Gateway strips "/api/content" → forwards to content-service:8080 as GET /api/tours
-```
-
----
-
-## 9. Web Frontends
-
-### 9.1 Customer Website
-
-**Path**: `seadoratravel/src/Web/seadora-website/`
-**Stack**: Vue 3.5 + TypeScript 6.0 + Vite 8.0 + Pinia 3.0 + Vue Router 4.6 + Vue I18n 9.14 + Tailwind CSS 4.3
-**Docker**: Multi-stage → Nginx Alpine (`:3000→80`), custom `nginx.conf` with SPA fallback
-
-#### Routes
-| Path | View | Description |
-|---|---|---|
-| `/` | `HomeView` | Hero, Destinations, Trips, Testimonials, WhyChoose, Contact |
-| `/tours` | `ToursView` | Full tour listing (46 KB — feature-rich) |
-| `/tour/:slug` | `TourDetailsView` | Tour detail page (90 KB — very detailed) |
-| `/feedback` | `FeedbackView` | Feedback/reviews page (17 KB) |
-
-#### Components (10)
-`Navbar`, `Hero`, `Destinations`, `Trips`, `TourDetailsModal`, `Contact`, `Testimonials`, `WhyChoose`, `Footer`, `HelloWorld`
-
-#### i18n
-5 language locale files (~7–9 KB each): `en.json`, `de.json`, `it.json`, `fr.json`, `ru.json`
-
-#### Tailwind Theme
-Custom colors: `sea` (blues), `sun` (oranges), `grass` (greens), `gold`, `cream`, `dark`, `text`, `muted`
-Fonts: Playfair Display, Cormorant Garamond, Jost
-
-#### State
-Pinia store `contact.ts` — contact form with loading/success/error states (simulates API call via `setTimeout`)
-
----
-
-### 9.2 Admin Dashboard
-
-**Path**: `seadoratravel/src/Web/seadora-admin/`
-**Stack**: Vue 3.5 + TypeScript 6.0 + Vite 8.0 + Pinia 3.0 + Vue Router 4.6 + Vue I18n 9.14 + Tailwind CSS 3.4
-**Docker**: Multi-stage → Nginx Alpine (`:3001→80`)
-
-#### Routes
-| Path | View | Notes |
-|---|---|---|
-| `/login` | `LoginView` | Standalone login view with async auth and error alert |
-| `/` | `DashboardView` | Summary cards showing active tours, destinations, categories, total bookings, recent bookings |
-| `/tours` | `ToursView` | Complete CRUD for tours with localized tab inputs |
-| `/destinations` | `DestinationsView` | Complete CRUD for destinations with localized tab inputs |
-| `/categories` | `CategoriesView` | Complete CRUD for categories with localized tab inputs |
-| `/bookings` | `BookingsView` | Table of bookings with status badges and Confirm/Complete/Cancel actions |
-| `/feedback` | `FeedbackView` | Star ratings and comments of customer feedbacks |
-| `/users` | `UsersView` | Complete user list, create, update, delete, and role management CRUD |
-
-#### Layout
-`DashboardLayout.vue` — sidebar (Dashboard, Tours, Destinations, Categories, Bookings, Feedback, Users, Logout) + header with route name + admin avatar
-
-#### State
-Pinia store `auth.ts` — real async API auth on POST `/api/auth/api/Auth/login`, verification guards, localStorage persistence, `login()`/`logout()`/`initAuth()`
-
-#### i18n
-5 languages via separate `i18n/` directory
-
-#### Status: Fully Functional
-- `App.vue` fully wires routing via `<RouterView />`
-- `main.ts` successfully imports and registers Pinia, router, and i18n
-- Fully connected and calling backend microservices through YARP Gateway interceptor
-
----
-
-## 10. Docker Compose Topology
-
-**File**: `seadoratravel/docker-compose.yml`
-**Services**: 8
-
-| Service | Image/Build | Port Mapping | Depends On | Database |
-|---|---|---|---|---|
-| `postgres` | `postgres:15-alpine` | `5432:5432` | — | — |
-| `api-gateway` | Build from `src/ApiGateway/Dockerfile` | `8000:8080` | identity, content, booking, file-server | — |
-| `identity-service` | Build from Identity.API Dockerfile | Internal | postgres (healthy) | `Seadora_Identity` |
-| `content-service` | Build from Content.API Dockerfile | Internal | postgres (healthy) | `Seadora_Content` |
-| `booking-service` | Build from Booking.API Dockerfile | Internal | postgres (healthy) | `Seadora_Booking` |
-| `file-server` | Build from FileServer.API Dockerfile | Internal | — | — |
-| `seadora-website` | Build from `src/Web/seadora-website` | `3000:80` | — | — |
-| `seadora-admin` | Build from `src/Web/seadora-admin` | `3001:80` | — | — |
-
-**Volumes**:
-- `seadora-db-data` → PostgreSQL data
-- `seadora-uploads` → File Server uploads
-
-**Environment Variables** (from docker-compose):
-- PostgreSQL: `POSTGRES_USER=postgres`, `POSTGRES_PASSWORD=postgres`
-- Identity: `JwtSettings__Secret=YourSuperSecretKeyHereYourSuperSecretKeyHere`
-- All services: `ASPNETCORE_ENVIRONMENT=Development`
-- Connection strings provided via env vars (not in appsettings)
-- Frontends: `VITE_API_URL=http://localhost:8000`
-
----
-
-## 11. Test Projects
-
-| Project | Path | Deps | Reference | Status |
-|---|---|---|---|---|
-| `Seadora.Common.Tests` | `tests/Seadora.Common.Tests/` | xUnit + Moq + FluentAssertions | `Seadora.Common` | ⬜ Empty scaffold |
-| `Seadora.Identity.Application.Tests` | `tests/Services/Identity/...` | xUnit + Moq + FluentAssertions | `Seadora.Identity.Application` | ⬜ Empty scaffold |
-| `Seadora.UnitTests` | `tests/Seadora.UnitTests/` | xUnit + coverlet | None | ⬜ Empty scaffold |
-| `Seadora.IntegrationTests` | `tests/Seadora.IntegrationTests/` | xUnit + coverlet | None | ⬜ Empty scaffold |
-
-All test projects contain only a single empty `Test1()` method. No actual tests written.
-
----
-
-## 12. Business Rules
-
-**Source**: `seadoratravel/BUSINESS_RULES.md`
-**Status**: DRAFT — **NOT IMPLEMENTED**
-
-### 1. Cash Payment Deadline
-- Cash bookings must be confirmed 48 hours before `BookingDate`
-- Auto-cancel if not confirmed in time
-
-### 2. Cancellation & Refund Tiers (Online Payments)
-| Tier | Window | Penalty |
-|---|---|---|
-| Free Cancellation | >72 hours before | 0% (full refund) |
-| Late Cancellation | 48–72 hours before | 25% retained |
-| Last-Minute | <24 hours before | 50% retained |
-
-### Implementation Notes
-- Need `ICancellationPolicyService` in Booking.Service domain
-- Need background worker (Hangfire/Quartz) for cash booking pruning
-- `CancellationPolicyService.cs` exists but all logic is **commented out**
-
----
-
-## 13. Seed Data Reference
-
-### Identity Service
-| Role | Email | Password |
-|---|---|---|
-| Admin | `admin@seadoratravel.com` | `Admin123!` |
-| BookingManager | `manager@seadoratravel.com` | `Manager123!` |
-| Customer | `customer@gmail.com` | `Customer123!` |
-
-### Content Service
-**Categories**: Sea & Diving, Culture & History, Safari & Adventure
-
-**Destinations**: Hurghada, Luxor, Cairo, Sharm El-Sheikh
-
-**Tours** (9 total, all 5-language localized):
-Glass Boat, Desert Safari Quad, Luxor Full Day, Pyramids of Giza, Red Sea Diving, Nile Dinner Cruise, and 3 more
-
-### Booking Service
-**Bookings**: None seeded
-**Feedbacks**: 19 records for TourIds `00000000-0000-0000-0000-000000000101` through `109`
-
----
-
-## 14. Known Issues & Gaps
-
-### 🔴 Critical
-| # | Issue | Service | Detail |
-|---|---|---|---|
-| 1 | **Destructive DB on startup** | All services | `EnsureDeletedAsync()` + `EnsureCreatedAsync()` wipes all data on every restart |
-| 2 | **No EF migrations** | All services | No migration history — impossible to evolve schema safely |
-| 3 | **Missing config** | Identity | No connection string or JWT settings in appsettings.json — relies on env vars |
-
-### 🟠 High
-| # | Issue | Service | Detail |
-|---|---|---|---|
-| 4 | **Roles not in JWT** | Identity | **RESOLVED**: Roles added to claims in JwtTokenGenerator and handlers. |
-| 5 | **No auth on endpoints** | Content, Booking | No `[Authorize]` attributes — APIs fully open |
-| 6 | **Booking: minimal CRUD** | Booking | **RESOLVED**: Exposed GET (all), GET (by id), and PUT (status update) endpoints. |
-| 7 | **Admin app not wired** | Admin Frontend | **RESOLVED**: App is fully wired up with Pinia, Router, i18n, and auth guard. |
-
-### 🟡 Medium
-| # | Issue | Service | Detail |
-|---|---|---|---|
-| 8 | **JWT expiry hardcoded** | Identity | **RESOLVED**: Configurable expiry read from ExpiryMinutes config setting. |
-| 9 | **No refresh tokens** | Identity | Only access tokens issued |
-| 10 | **No validation pipeline** | Identity | FluentValidation referenced but commented out |
-| 11 | **Status as magic string** | Booking | `Booking.Status` is `string`, not enum — no state machine |
-| 12 | **Business rules inactive** | Booking | Cancellation policy logic commented out |
-| 13 | **Content: read-only** | Content | **RESOLVED**: Exposed full Create, Update, Delete CRUD commands and endpoints. |
-| 14 | **Content: no DTOs** | Content | Domain entities exposed directly in API responses |
-| 15 | **All tests empty** | All | 4 test projects are scaffolds with empty `Test1()` |
-| 16 | **CORS wide open** | All services | `AllowAll` — too permissive for production |
-| 17 | **Rating validation bug** | Booking | Error says "1 to 5" but code allows 0.5 |
-| 18 | **Payment not implemented** | — | Stripe/PayPal mentioned but not coded |
-| 19 | **Email not implemented** | — | No email service exists |
-| 20 | **Contact form mock** | Website | Uses `setTimeout` — not connected to backend |
-
-### 🔵 Low
-| # | Issue | Service | Detail |
-|---|---|---|---|
-| 21 | **Inconsistent CQRS** | Content | CategoriesController bypasses MediatR, others use it |
-| 22 | **Scaffold artifacts** | Identity, Booking | WeatherForecast, Class1.cs, HelloWorld still present |
-| 23 | **Tailwind version mismatch** | Frontends | Website uses v4.3, admin uses v3.4 |
-| 24 | **DbContext in wrong file** | Identity | Defined inside `DependencyInjection.cs` |
-| 25 | **Duration as string** | Content | Free-form strings instead of enum |
-
----
-
-## 15. Change Log
-
-| Date | Change | Author |
-|---|---|---|
-| 2026-08-03 | Implemented Egyptra-inspired client UX: SEO-friendly query parameter URL slug filters (location/category), local search inputs supporting localized values and tag matching, custom Mega Menu Explore drop-downs in Navbar, user profile auth modals for VIP Guest logins with client-side heart favorites, link sharing clipboard copying, and golden Toast notifications. Swapped emoji placeholders globally with custom inline SVGs. | AI Assistant |
-| 2026-07-28 | Implemented backend API for user management and role retrieval under Identity Service, and built the corresponding admin dashboard User Management view page with search and role management capabilities. | AI Assistant |
-| 2026-07-26 | Implemented Bookinga-style two-column luxury boarding ticket and invoice receipt templates on booking success | AI Assistant |
-| 2026-07-26 | Refactored and modernized booking and contact forms across the SPA and static page with luxury golden aesthetics | AI Assistant |
-| 2026-07-26 | Enhanced front-ends with luxury aesthetics, SVG logos, high-res destination images, and staggered scroll reveals | AI Assistant |
-| 2026-07-06 | Implemented feedback visibility control toggles on admin panel and API backend | AI Assistant |
-| 2026-07-06 | Implemented full admin dashboard routing, auth store, CRUD endpoints, and views | AI Assistant |
-| 2026-07-06 | Initial codebase memory document created from full investigation | AI Assistant |
-
----
-
-> **Maintenance Note**: This file should be updated whenever:
-> - New endpoints are added or modified
-> - Entity schemas change
-> - New services or frontends are added
-> - Issues from Section 14 are resolved
-> - New issues are discovered
-> - Configuration changes are made
-> - Dependencies are upgraded
+| **2026-08-28** | **Phase 2.5 Customer Portal & VIP Concierge Experience Deployed**: Full Vue 3 customer portal with luxury admin light aesthetic (`#F8FAFC`), i18n localization (EN, DE, IT, FR, RU), customer profile dropdown, bespoke VIP concierge request modal, interactive ticket details viewer, GDPR privacy checkboxes, SEO name slugs in URL filters, and "Return to Website" navigation. |
+| **2026-08-28** | **Phase 4 Concierge AI Chatbot Service Implemented**: Built `Seadora.Concierge` service with grounded catalog indexing, MediatR intent scoring, and human handoff ticketing. Centered chatbot icon with smooth spring transitions. |
+| **2026-08-28** | **Phase 3 Support / Service Desk Platform Implemented**: Built `Seadora.Support` microservice with CQRS ticket lifecycle, SLA monitoring, and backoffice support ticket desk in `seadora-admin`. |
+| **2026-08-27** | **Phase 2 CRM & Finance Platform Implemented**: Built `Customer.Service` and `Finance.Service` with double-entry ledger, Chart of Accounts, 9 accountant financial reports, and Owner KPI dashboards. |
+| **2026-08-26** | **Phase 0 & 1 Foundations & Bounded Contexts**: Added RabbitMQ, transactional outbox pattern, Money value object, and optimistic departure allocation locks. |
