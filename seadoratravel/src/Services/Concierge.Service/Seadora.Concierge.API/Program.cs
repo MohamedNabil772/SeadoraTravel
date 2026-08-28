@@ -32,16 +32,26 @@ builder.Services.AddMassTransit(x =>
 
     x.UsingRabbitMq((context, cfg) =>
     {
-        cfg.Host(builder.Configuration["RabbitMQ:Host"] ?? "localhost", "/", h =>
+        var host = builder.Configuration["RabbitMq:Host"] ?? builder.Configuration["RabbitMQ:Host"] ?? "localhost";
+        var user = builder.Configuration["RabbitMq:Username"] ?? builder.Configuration["RabbitMQ:Username"] ?? "seadora";
+        var pass = builder.Configuration["RabbitMq:Password"] ?? builder.Configuration["RabbitMQ:Password"] ?? "seadora";
+
+        cfg.Host(host, "/", h =>
         {
-            h.Username(builder.Configuration["RabbitMQ:Username"] ?? "guest");
-            h.Password(builder.Configuration["RabbitMQ:Password"] ?? "guest");
+            h.Username(user);
+            h.Password(pass);
         });
         cfg.ConfigureEndpoints(context);
     });
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<Seadora.Concierge.Infrastructure.Data.ConciergeDbContext>();
+    db.Database.EnsureCreated();
+}
 
 app.UseSwagger();
 app.UseSwaggerUI();

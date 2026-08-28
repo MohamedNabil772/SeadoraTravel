@@ -118,6 +118,7 @@ services:
       - RabbitMq__Host=rabbitmq
       - RabbitMq__Username=${RABBITMQ_USER:-seadora}
       - RabbitMq__Password=${RABBITMQ_PASS:-seadora}
+      - JwtSettings__Secret=${JWT_SECRET}
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Customer;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
     depends_on:
       postgres:
@@ -135,6 +136,7 @@ services:
       - RabbitMq__Host=rabbitmq
       - RabbitMq__Username=${RABBITMQ_USER:-seadora}
       - RabbitMq__Password=${RABBITMQ_PASS:-seadora}
+      - JwtSettings__Secret=${JWT_SECRET}
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Finance;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
     depends_on:
       postgres:
@@ -152,6 +154,7 @@ services:
       - RabbitMq__Host=rabbitmq
       - RabbitMq__Username=${RABBITMQ_USER:-seadora}
       - RabbitMq__Password=${RABBITMQ_PASS:-seadora}
+      - JwtSettings__Secret=${JWT_SECRET}
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Support;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
     depends_on:
       postgres:
@@ -170,6 +173,7 @@ services:
       - RabbitMq__Username=${RABBITMQ_USER:-seadora}
       - RabbitMq__Password=${RABBITMQ_PASS:-seadora}
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Concierge;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
+      - ConnectionStrings__ConciergeDb=Host=postgres;Port=5432;Database=Seadora_Concierge;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
     depends_on:
       postgres:
         condition: service_healthy

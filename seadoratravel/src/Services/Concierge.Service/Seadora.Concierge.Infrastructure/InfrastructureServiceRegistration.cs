@@ -10,8 +10,12 @@ public static class InfrastructureServiceRegistration
 {
     public static IServiceCollection AddConciergeInfrastructure(this IServiceCollection services, IConfiguration configuration)
     {
+        var connStr = configuration.GetConnectionString("ConciergeDb")
+            ?? configuration.GetConnectionString("DefaultConnection")
+            ?? "Host=localhost;Database=ConciergeDb;Username=postgres;Password=postgres";
+
         services.AddDbContext<ConciergeDbContext>(options =>
-            options.UseNpgsql(configuration.GetConnectionString("ConciergeDb") ?? "Host=localhost;Database=ConciergeDb;Username=postgres;Password=postgres"));
+            options.UseNpgsql(connStr));
 
         services.AddScoped<IConciergeDbContext>(provider => provider.GetRequiredService<ConciergeDbContext>());
 
