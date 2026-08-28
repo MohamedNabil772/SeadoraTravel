@@ -21,7 +21,8 @@ public record SocialUserDto(
     string? FullName,
     string? AvatarUrl,
     string? PhoneNumber,
-    IList<string> Roles);
+    IList<string> Roles,
+    string PreferredLanguage = "en");
 
 public record SocialAuthResponse(string Token, SocialUserDto User);
 
@@ -85,7 +86,8 @@ public class SocialLoginCommandHandler : IRequestHandler<SocialLoginCommand, Soc
             user.FullName,
             user.AvatarUrl,
             user.PhoneNumber,
-            roles);
+            roles,
+            user.PreferredLanguage);
 
         return new SocialAuthResponse(token, userDto);
     }

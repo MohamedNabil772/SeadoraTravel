@@ -15,6 +15,9 @@ public class Customer
     public DateTime? ConsentUpdatedUtc { get; set; }
     public DateTime CreatedUtc { get; set; }
     public DateTime UpdatedUtc { get; set; }
+    public string? AvatarUrl { get; set; }
+    public string PreferredLanguage { get; set; } = "en";
+    public string? DietaryRequirements { get; set; }
     public List<CustomerDocument> Documents { get; set; } = new();
 
     public static string NormalizeEmail(string? email) => (email ?? string.Empty).Trim().ToLowerInvariant();

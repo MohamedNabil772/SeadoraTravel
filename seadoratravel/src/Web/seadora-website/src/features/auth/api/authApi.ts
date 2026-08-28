@@ -37,8 +37,14 @@ export const authApi = {
   },
 
   fetchProfile() {
-    return Promise.resolve({
-      data: { id: 1, name: 'John Doe', email: 'john@example.com' }
-    });
+    return apiClient.get('/customer/portal/me');
+  },
+  
+  updateProfile(data: any) {
+    return apiClient.put('/customer/portal/me', data);
+  },
+  
+  fetchVoucher(id: string) {
+    return apiClient.get(`/customer/portal/bookings/${id}/voucher`);
   }
 };

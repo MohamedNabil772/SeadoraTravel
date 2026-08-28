@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -33,7 +33,16 @@ public class CustomerPortalController : ControllerBase
         var id = GetUserId();
         var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Id == id);
         if (customer == null) return NotFound();
-        return Ok(customer);
+        
+        return Ok(new {
+            id = customer.Id,
+            email = customer.Email,
+            fullName = customer.FullName,
+            phoneNumber = customer.Phone,
+            avatarUrl = customer.AvatarUrl,
+            preferredLanguage = customer.PreferredLanguage,
+            dietaryRequirements = customer.DietaryRequirements
+        });
     }
 
     [HttpPut("me")]
@@ -43,14 +52,56 @@ public class CustomerPortalController : ControllerBase
         var customer = await _context.Customers.FirstOrDefaultAsync(c => c.Id == id);
         if (customer == null) return NotFound();
         
-        customer.Phone = request.Phone;
-        customer.Nationality = request.Nationality;
-        customer.PassportNumber = request.PassportNumber;
+        if (request.FullName != null) customer.FullName = request.FullName;
+        customer.Phone = request.PhoneNumber;
+        customer.AvatarUrl = request.AvatarUrl;
+        if (request.PreferredLanguage != null) customer.PreferredLanguage = request.PreferredLanguage;
+        customer.DietaryRequirements = request.DietaryRequirements;
         customer.UpdatedUtc = DateTime.UtcNow;
         
         _context.Customers.Update(customer);
         await _context.SaveChangesAsync(default);
-        return Ok(customer);
+        
+        return Ok(new {
+            id = customer.Id,
+            email = customer.Email,
+            fullName = customer.FullName,
+            phoneNumber = customer.Phone,
+            avatarUrl = customer.AvatarUrl,
+            preferredLanguage = customer.PreferredLanguage,
+            dietaryRequirements = customer.DietaryRequirements
+        });
+    }
+
+    [HttpGet("bookings/{id}/voucher")]
+    public async Task<IActionResult> GetVoucher(Guid id)
+    {
+        var userId = GetUserId();
+        var booking = await _context.BookingHistory.FirstOrDefaultAsync(b => b.BookingId == id && b.CustomerId == userId);
+        if (booking == null) return NotFound();
+
+        // Stubbing voucher payload as full data would come from Booking/Tour service
+        return Ok(new {
+            bookingId = booking.BookingId,
+            bookingReference = $"BKG-{booking.BookingId.ToString().Substring(0, 8).ToUpper()}",
+            tourTitle = "Seadora Exclusive Tour",
+            departureDate = booking.TourDate ?? DateTime.UtcNow.AddDays(7),
+            returnDate = (booking.TourDate ?? DateTime.UtcNow.AddDays(7)).AddDays(3),
+            destination = "Maldives",
+            pickupLocation = "Main Lobby, Seadora Resort",
+            roomType = "Ocean Villa",
+            guestsCount = 2,
+            passengers = new[] {
+                new { name = "John Doe", type = "Adult" },
+                new { name = "Jane Doe", type = "Adult" }
+            },
+            amountPaid = booking.Amount,
+            currency = booking.Currency,
+            isPaid = true,
+            qrCodeData = $"VOUCHER:{booking.BookingId}",
+            emergencyPhone = "+1-800-SEADORA",
+            generatedAtUtc = DateTime.UtcNow
+        });
     }
 
     [HttpGet("bookings")]
@@ -72,7 +123,9 @@ public class CustomerPortalController : ControllerBase
 
 public class UpdateProfileRequest
 {
-    public string? Phone { get; set; }
-    public string? Nationality { get; set; }
-    public string? PassportNumber { get; set; }
+    public string? FullName { get; set; }
+    public string? PhoneNumber { get; set; }
+    public string? AvatarUrl { get; set; }
+    public string? PreferredLanguage { get; set; }
+    public string? DietaryRequirements { get; set; }
 }

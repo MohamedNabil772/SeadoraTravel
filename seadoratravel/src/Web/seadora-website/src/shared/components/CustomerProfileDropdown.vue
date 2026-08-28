@@ -3,13 +3,15 @@ import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/features/auth/store/auth'
 import LuxuryIcons from '@/shared/components/LuxuryIcons.vue'
+import ProfileSettingsModal from './ProfileSettingsModal.vue'
 
 const authStore = useAuthStore()
 const router = useRouter()
 const showDropdown = ref(false)
+const isProfileModalOpen = ref(false)
 
 const userInitials = computed(() => {
-  if (!authStore.user) return 'VIP'
+  if (!authStore.user || !authStore.user.name) return 'VIP'
   const names = authStore.user.name.split(' ')
   return names.map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
 })
@@ -31,7 +33,10 @@ const handleLogout = () => {
       :aria-expanded="showDropdown"
       aria-label="User profile options"
     >
-      <div class="flex items-center justify-center w-9 h-9 rounded-full bg-[#062d4d] text-white font-semibold text-xs shadow-sm ring-2 ring-white">
+      <div v-if="authStore.user?.avatarUrl" class="w-9 h-9 rounded-full overflow-hidden border-2 border-white shadow-sm shrink-0">
+        <img :src="authStore.user.avatarUrl" alt="Profile" class="w-full h-full object-cover" />
+      </div>
+      <div v-else class="flex items-center justify-center w-9 h-9 rounded-full bg-[#062d4d] text-white font-semibold text-xs shadow-sm ring-2 ring-white shrink-0">
         {{ userInitials }}
       </div>
       <div class="hidden md:flex flex-col items-start text-left">
@@ -64,31 +69,21 @@ const handleLogout = () => {
 
         <!-- Navigation Links -->
         <div class="p-1.5 space-y-0.5">
-          <router-link 
-            to="/portal/profile" 
-            @click="showDropdown = false" 
-            class="group flex items-center px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-[#062d4d] active:scale-[0.98] transition-[background-color,color,transform] duration-150"
+          <button 
+            @click="isProfileModalOpen = true; showDropdown = false" 
+            class="w-full group flex items-center px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-[#062d4d] active:scale-[0.98] transition-[background-color,color,transform] duration-150 text-left"
           >
             <LuxuryIcons name="user" size="14" class="mr-2.5 text-slate-400 group-hover:text-[#062d4d] transition-colors" />
-            My Profile & Preferences
-          </router-link>
+            My Profile Settings
+          </button>
           
-          <router-link 
-            to="/portal/documents" 
-            @click="showDropdown = false" 
-            class="group flex items-center px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-[#062d4d] active:scale-[0.98] transition-[background-color,color,transform] duration-150"
-          >
-            <LuxuryIcons name="file-text" size="14" class="mr-2.5 text-slate-400 group-hover:text-[#062d4d] transition-colors" />
-            Document Vault
-          </router-link>
-
           <router-link 
             to="/portal/support" 
             @click="showDropdown = false" 
             class="group flex items-center px-3 py-2 rounded-xl text-xs font-medium text-slate-700 hover:bg-slate-50 hover:text-[#062d4d] active:scale-[0.98] transition-[background-color,color,transform] duration-150"
           >
-            <LuxuryIcons name="headphones" size="14" class="mr-2.5 text-slate-400 group-hover:text-[#062d4d] transition-colors" />
-            Private Concierge Desk
+            <LuxuryIcons name="help-circle" size="14" class="mr-2.5 text-slate-400 group-hover:text-[#062d4d] transition-colors" />
+            System Documentation / Help
           </router-link>
         </div>
 
@@ -99,10 +94,13 @@ const handleLogout = () => {
             class="group flex w-full items-center px-3 py-2 rounded-xl text-xs font-semibold text-red-600 hover:bg-red-50/80 active:scale-[0.98] transition-[background-color,transform] duration-150 text-left"
           >
             <LuxuryIcons name="log-out" size="14" class="mr-2.5 text-red-500 group-hover:text-red-600 transition-colors" />
-            Log Out
+            Logout
           </button>
         </div>
       </div>
     </Transition>
+    
+    <!-- Profile Settings Modal -->
+    <ProfileSettingsModal v-model:isOpen="isProfileModalOpen" />
   </div>
 </template>

@@ -39,8 +39,10 @@
           <div>
             <div class="text-[10px] font-bold text-[#c9a84c] uppercase tracking-widest mb-1">DESTINATION CLIMATE</div>
             <div class="text-xl font-bold">Luxor, Egypt</div>
-            <div class="text-3xl md:text-4xl font-bold text-white mt-3 mb-1">32°C</div>
-            <div class="text-xs text-white/70 font-medium">Clear Skies · Gentle Breeze ☀️</div>
+            <div class="text-3xl md:text-4xl font-bold text-white mt-3 mb-1">
+              {{ weatherTemp !== null ? weatherTemp + '°C' : '--°C' }}
+            </div>
+            <div class="text-xs text-white/70 font-medium">{{ weatherDescription }}</div>
           </div>
           <div class="mt-6 pt-4 border-t border-white/10 flex items-center justify-between text-xs text-white/80">
             <span>Water: 27°C</span>
@@ -90,19 +92,19 @@
 
         <div class="pt-4 border-t border-slate-100 flex flex-wrap items-center justify-between gap-4">
           <router-link 
-            to="/portal/bookings" 
+            to="/portal/bookings/BK-10293" 
             class="text-xs font-bold text-[#062d4d] hover:text-[#c9a84c] transition-colors flex items-center gap-1.5"
           >
             <span>View Full Itinerary & Manifest</span>
             <span>→</span>
           </router-link>
           
-          <router-link 
-            to="/portal/documents" 
+          <button 
+            @click="showVoucherModal = true"
             class="px-4 py-2 bg-slate-100 hover:bg-[#062d4d] hover:text-white active:scale-[0.97] text-slate-700 text-xs font-bold rounded-xl transition-[background-color,color,transform] duration-200 ease-[cubic-bezier(0.16,1,0.3,1)]"
           >
             Download Digital Vouchers
-          </router-link>
+          </button>
         </div>
       </div>
 
@@ -147,17 +149,60 @@
       </div>
 
     </div>
+    
+    <LuxuryVoucherModal 
+      :is-open="showVoucherModal" 
+      :booking="{ id: 'BK-10293', title: '7-Night Private Dahabiya Expedition', date: 'Oct 30, 2026' }"
+      @close="showVoucherModal = false" 
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import { useAuthStore } from '@/features/auth/store/auth';
+import LuxuryVoucherModal from '@/shared/components/LuxuryVoucherModal.vue';
 
 const authStore = useAuthStore();
+const showVoucherModal = ref(false);
 
 const customerFirstName = computed(() => {
   if (!authStore.user?.name) return 'VIP Guest';
   return authStore.user.name.split(' ')[0];
+});
+
+const weatherTemp = ref<number | null>(null);
+const weatherDescription = ref<string>('Loading...');
+
+const fetchWeather = async () => {
+  try {
+    const lat = 25.6872; // Luxor
+    const lon = 32.6396;
+    const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+    const data = await res.json();
+    if (data && data.current_weather) {
+      weatherTemp.value = Math.round(data.current_weather.temperature);
+      const code = data.current_weather.weathercode;
+      weatherDescription.value = getWeatherDescription(code);
+    }
+  } catch (err) {
+    console.error('Weather fetch failed', err);
+    weatherTemp.value = 32;
+    weatherDescription.value = 'Clear Skies · Gentle Breeze ☀️';
+  }
+};
+
+const getWeatherDescription = (code: number) => {
+  if (code === 0) return 'Clear Sky ☀️';
+  if ([1, 2, 3].includes(code)) return 'Partly Cloudy ⛅';
+  if ([45, 48].includes(code)) return 'Foggy 🌫️';
+  if ([51, 53, 55, 61, 63, 65].includes(code)) return 'Rainy 🌧️';
+  if ([71, 73, 75].includes(code)) return 'Snowy ❄️';
+  if ([95, 96, 99].includes(code)) return 'Thunderstorm ⛈️';
+  return 'Clear Sky ☀️';
+};
+
+onMounted(() => {
+  fetchWeather();
 });
 </script>

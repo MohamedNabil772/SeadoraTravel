@@ -16,6 +16,7 @@ public class User : IdentityUser<string>
     public string? FacebookId { get; set; }
     public string? AppleId { get; set; }
     public string? AvatarUrl { get; set; }
+    public string PreferredLanguage { get; set; } = "en";
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? LastLoginAt { get; set; }
     public List<Role> Roles { get; set; } = new();

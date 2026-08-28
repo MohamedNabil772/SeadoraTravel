@@ -8,7 +8,7 @@ namespace Seadora.Identity.Application.Authentication.Commands.Register;
 
 public record RegisterCommand(string FirstName, string LastName, string Email, string Password) : IRequest<AuthResponse>;
 
-public record AuthResponse(string Token, string Email, IList<string> Roles);
+public record AuthResponse(string Token, string Email, IList<string> Roles, string? AvatarUrl = null, string PreferredLanguage = "en");
 
 public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthResponse>
 {
@@ -31,6 +31,6 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthRespo
         await _userManager.AddToRoleAsync(user, "Customer");
         var roles = new List<string> { "Customer" };
         var token = _jwtTokenGenerator.GenerateToken(user, roles);
-        return new AuthResponse(token, user.Email!, roles);
+        return new AuthResponse(token, user.Email!, roles, user.AvatarUrl, user.PreferredLanguage);
     }
 }

@@ -12,7 +12,7 @@
           class="px-5 py-2.5 bg-gradient-to-r from-[#c9a84c] to-[#a38030] text-[#062d4d] font-bold rounded-xl shadow-md hover:shadow-lg hover:shadow-[#c9a84c]/20 transition-all text-sm flex items-center gap-2"
         >
           <span>✨</span>
-          <span>Send VIP Request</span>
+          <span>VIP Concierge Request</span>
         </button>
         <button 
           @click="openStandardModal" 
@@ -36,7 +36,7 @@
         @click="openVipModal" 
         class="relative z-10 px-6 py-3 bg-[#c9a84c] hover:bg-[#d8b85c] text-[#062d4d] font-bold rounded-xl shadow-lg transition-all text-sm whitespace-nowrap"
       >
-        Request Bespoke Service
+        ✨ VIP Concierge Request
       </button>
     </div>
 
@@ -170,7 +170,7 @@
           <div class="pt-2 flex justify-end gap-3 border-t border-slate-100">
             <button type="button" @click="showVipModal = false" class="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50">Cancel</button>
             <button type="submit" :disabled="isSubmitting" class="px-6 py-2.5 bg-gradient-to-r from-[#c9a84c] to-[#a38030] text-[#062d4d] font-bold rounded-xl shadow-md hover:shadow-lg text-sm disabled:opacity-50">
-              {{ isSubmitting ? 'Submitting...' : 'Send VIP Request' }}
+              {{ isSubmitting ? 'Submitting...' : '✨ VIP Concierge Request' }}
             </button>
           </div>
         </form>

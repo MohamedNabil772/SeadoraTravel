@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 import { authApi } from '../api/authApi';
+import { loadLanguageAsync } from '@/i18n';
 
 export const useAuthStore = defineStore('auth', () => {
   const user = ref<any>(null);
@@ -18,6 +19,7 @@ export const useAuthStore = defineStore('auth', () => {
       const storedUser = localStorage.getItem('user');
       if (storedUser) {
         user.value = JSON.parse(storedUser);
+        if (user.value.preferredLanguage) loadLanguageAsync(user.value.preferredLanguage);
       } else {
         fetchProfile();
       }
@@ -40,6 +42,7 @@ export const useAuthStore = defineStore('auth', () => {
     isAuthenticated.value = true;
     localStorage.setItem('token', sessionToken);
     localStorage.setItem('user', JSON.stringify(sessionUser));
+    if (sessionUser?.preferredLanguage) loadLanguageAsync(sessionUser.preferredLanguage);
   };
 
   const login = async (data: any) => {
@@ -69,6 +72,7 @@ export const useAuthStore = defineStore('auth', () => {
       const response = await authApi.fetchProfile();
       user.value = response.data;
       localStorage.setItem('user', JSON.stringify(user.value));
+      if (user.value?.preferredLanguage) loadLanguageAsync(user.value.preferredLanguage);
       return response.data;
     } catch (error) {
       console.error('Fetch profile error', error);
@@ -85,6 +89,13 @@ export const useAuthStore = defineStore('auth', () => {
     localStorage.removeItem('user');
   };
 
+  const updateUser = (updates: any) => {
+    if (user.value) {
+      user.value = { ...user.value, ...updates };
+      localStorage.setItem('user', JSON.stringify(user.value));
+    }
+  };
+
   return {
     user,
     token,
@@ -99,6 +110,7 @@ export const useAuthStore = defineStore('auth', () => {
     favorites,
     isFavorite,
     toggleFavorite,
-    logout
+    logout,
+    updateUser
   };
 });
