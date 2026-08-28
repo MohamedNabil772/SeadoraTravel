@@ -33,6 +33,9 @@ public static class DependencyInjection
         services.AddSeadoraTenancy();
 
         services.AddSeadoraIdempotency<CustomerDbContext>();
-        services.AddSeadoraMessaging(configuration, x => x.AddConsumer<BookingPlacedConsumer>());
+        services.AddSeadoraMessaging(configuration, x => {
+            x.AddConsumer<BookingPlacedConsumer>();
+            x.AddConsumer<Seadora.Customer.Application.Consumers.CustomerRegisteredConsumer>();
+        });
         return services;    }
 }

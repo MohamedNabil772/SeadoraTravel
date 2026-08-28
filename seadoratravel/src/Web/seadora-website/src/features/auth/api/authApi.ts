@@ -1,21 +1,44 @@
-import axios from 'axios'
+import axios from 'axios';
 
-const API_BASE_URL = '/api/auth'
+// Mock API for Auth
+const apiClient = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:3000/api',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token && config.headers) {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
 export const authApi = {
-  sendWhatsAppOtp(phone: string) {
-    return axios.post(`${API_BASE_URL}/send-otp`, { phone })
+  login(data: any) {
+    // Mocked implementation
+    return Promise.resolve({
+      data: {
+        token: 'mock-jwt-token',
+        user: { id: 1, name: data.name || 'John Doe', email: data.email || data.phone }
+      }
+    });
   },
-  verifyWhatsAppOtp(phone: string, code: string) {
-    return axios.post(`${API_BASE_URL}/verify-otp`, { phone, code })
+  
+  registerCustomer(data: any) {
+    return Promise.resolve({
+      data: {
+        token: 'mock-jwt-token',
+        user: { id: 1, name: data.name, email: data.email }
+      }
+    });
   },
-  socialLogin(provider: string, token: string, profile: any) {
-    return axios.post(`${API_BASE_URL}/social-login`, { provider, token, profile })
-  },
-  login(credentials: any) {
-    return axios.post(`${API_BASE_URL}/login`, credentials)
-  },
-  register(userData: any) {
-    return axios.post(`${API_BASE_URL}/register`, userData)
+
+  fetchProfile() {
+    return Promise.resolve({
+      data: { id: 1, name: 'John Doe', email: 'john@example.com' }
+    });
   }
-}
+};

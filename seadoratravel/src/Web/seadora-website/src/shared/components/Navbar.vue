@@ -36,7 +36,7 @@ const handleLogout = () => {
 const userInitials = computed(() => {
   if (!authStore.user) return ''
   const names = authStore.user.name.split(' ')
-  return names.map(n => n[0]).join('').toUpperCase().slice(0, 2)
+  return names.map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
 })
 
 import { loadLanguageAsync } from '@/i18n'
@@ -320,7 +320,16 @@ onUnmounted(() => {
         </div>
       </div>
     </div>
-  </nav>
+  
+    <div class="ml-4 flex items-center">
+      <button v-if="!authStore.isAuthenticated" @click="authStore.openAuthModal()" class="px-5 py-2 bg-gradient-to-r from-[#c9a84c] to-[#a38030] text-[#062d4d] font-bold rounded-xl shadow-lg hover:shadow-[#c9a84c]/20 transition-all text-sm">
+        Sign In
+      </button>
+      <router-link v-else to="/portal" class="w-10 h-10 rounded-full bg-[#c9a84c] text-[#062d4d] flex items-center justify-center font-bold shadow-lg hover:shadow-[#c9a84c]/30 transition-all cursor-pointer">
+        {{ userInitials }}
+      </router-link>
+    </div>
+\n  </nav>
 </header>
 
   <!-- Login Modal -->

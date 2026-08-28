@@ -23,7 +23,7 @@ public class JwtTokenGenerator : IJwtTokenGenerator
         _context = context;
     }
 
-    public string GenerateToken(User user, IList<string> roles)
+    public string GenerateToken(User user, IList<string> roles, string? branchId = null)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         var secret = _configuration["JwtSettings:Secret"] ?? "YourSuperSecretKeyHereYourSuperSecretKeyHere";
@@ -38,7 +38,7 @@ public class JwtTokenGenerator : IJwtTokenGenerator
             new(JwtRegisteredClaimNames.Name, !string.IsNullOrEmpty(user.FullName) ? user.FullName : $"user.FirstName user.LastName".Trim()),
             new("firstName", user.FirstName),
             new("lastName", user.LastName),
-            new(SeadoraBranches.BranchClaimType, SeadoraBranches.HeadOfficeClaimValue)
+            new(SeadoraBranches.BranchClaimType, !string.IsNullOrEmpty(branchId) ? branchId : SeadoraBranches.HeadOfficeClaimValue)
         };
 
         foreach (var role in roles)

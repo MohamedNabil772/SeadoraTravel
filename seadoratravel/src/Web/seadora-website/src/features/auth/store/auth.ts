@@ -1,92 +1,104 @@
-import { defineStore } from 'pinia'
-import { authApi } from '../api/authApi'
+import { defineStore } from 'pinia';
+import { ref } from 'vue';
+import { authApi } from '../api/authApi';
 
-export interface User {
-  id?: string;
-  name: string;
-  email: string;
-  phone?: string;
-  avatar?: string;
-  roles?: string[];
-}
+export const useAuthStore = defineStore('auth', () => {
+  const user = ref<any>(null);
+  const token = ref<string | null>(localStorage.getItem('token') || null);
+  const isAuthenticated = ref<boolean>(!!token.value);
+  const isLoggedIn = isAuthenticated; // alias for compatibility
+  const isAuthModalOpen = ref(false);
+  const favorites = ref<(number | string)[]>([]);
+  const isFavorite = (id: number | string) => favorites.value.includes(id);
+  const toggleFavorite = (id: number | string) => { if (isFavorite(id)) { favorites.value = favorites.value.filter(fid => fid !== id); } else { favorites.value.push(id); } };
 
-export type AuthModalMode = 'login' | 'register' | 'otp';
-
-export const useAuthStore = defineStore('auth', {
-  state: () => ({
-    token: localStorage.getItem('seadora_token') || null as string | null,
-    user: localStorage.getItem('seadora_user') ? JSON.parse(localStorage.getItem('seadora_user')!) as User : null as User | null,
-    isAuthenticated: !!localStorage.getItem('seadora_token'),
-    isAuthModalOpen: false,
-    authModalMode: 'login' as AuthModalMode,
-    favorites: localStorage.getItem('seadora_favorites') ? JSON.parse(localStorage.getItem('seadora_favorites')!) as string[] : [] as string[]
-  }),
-  getters: {
-    isLoggedIn: (state) => state.isAuthenticated && state.user !== null
-  },
-  actions: {
-    async sendWhatsAppOtp(phone: string) {
-      return await authApi.sendWhatsAppOtp(phone)
-    },
-    async verifyWhatsAppOtp(phone: string, code: string) {
-      const response = await authApi.verifyWhatsAppOtp(phone, code)
-      this.setAuthData(response.data.token, response.data.user)
-      return response
-    },
-    async socialLogin(provider: string, token: string, profile: any) {
-      const response = await authApi.socialLogin(provider, token, profile)
-      this.setAuthData(response.data.token, response.data.user)
-      return response
-    },
-    async login(credentials: any) {
-      const response = await authApi.login(credentials)
-      this.setAuthData(response.data.token, response.data.user)
-      return response
-    },
-    async register(userData: any) {
-      const response = await authApi.register(userData)
-      this.setAuthData(response.data.token, response.data.user)
-      return response
-    },
-    setAuthData(token: string, user: User) {
-      this.token = token
-      this.user = user
-      this.isAuthenticated = true
-      localStorage.setItem('seadora_token', token)
-      localStorage.setItem('seadora_user', JSON.stringify(user))
-    },
-    logout() {
-      this.token = null
-      this.user = null
-      this.isAuthenticated = false
-      this.favorites = []
-      localStorage.removeItem('seadora_token')
-      localStorage.removeItem('seadora_user')
-      localStorage.removeItem('seadora_favorites')
-    },
-    openAuthModal(mode: AuthModalMode = 'login') {
-      this.authModalMode = mode
-      this.isAuthModalOpen = true
-    },
-    closeAuthModal() {
-      this.isAuthModalOpen = false
-    },
-    toggleFavorite(tourId: string): boolean {
-      if (!this.isLoggedIn) {
-        this.openAuthModal('login')
-        return false
-      }
-      const index = this.favorites.indexOf(tourId)
-      if (index > -1) {
-        this.favorites.splice(index, 1)
+  // Initialize session from localStorage if token exists
+  if (token.value) {
+    try {
+      const storedUser = localStorage.getItem('user');
+      if (storedUser) {
+        user.value = JSON.parse(storedUser);
       } else {
-        this.favorites.push(tourId)
+        fetchProfile();
       }
-      localStorage.setItem('seadora_favorites', JSON.stringify(this.favorites))
-      return true
-    },
-    isFavorite(tourId: string): boolean {
-      return this.favorites.includes(tourId)
+    } catch (e) {
+      console.error('Failed to parse user from localStorage', e);
     }
   }
-})
+
+  const openAuthModal = () => {
+    isAuthModalOpen.value = true;
+  };
+
+  const closeAuthModal = () => {
+    isAuthModalOpen.value = false;
+  };
+
+  const setSession = (sessionToken: string, sessionUser: any) => {
+    token.value = sessionToken;
+    user.value = sessionUser;
+    isAuthenticated.value = true;
+    localStorage.setItem('token', sessionToken);
+    localStorage.setItem('user', JSON.stringify(sessionUser));
+  };
+
+  const login = async (data: any) => {
+    try {
+      const response = await authApi.login(data);
+      setSession(response.data.token, response.data.user);
+      return response.data;
+    } catch (error) {
+      console.error('Login error', error);
+      throw error;
+    }
+  };
+
+  const registerCustomer = async (data: any) => {
+    try {
+      const response = await authApi.registerCustomer(data);
+      setSession(response.data.token, response.data.user);
+      return response.data;
+    } catch (error) {
+      console.error('Registration error', error);
+      throw error;
+    }
+  };
+
+  async function fetchProfile() {
+    try {
+      const response = await authApi.fetchProfile();
+      user.value = response.data;
+      localStorage.setItem('user', JSON.stringify(user.value));
+      return response.data;
+    } catch (error) {
+      console.error('Fetch profile error', error);
+      logout();
+      throw error;
+    }
+  };
+
+  const logout = () => {
+    user.value = null;
+    token.value = null;
+    isAuthenticated.value = false;
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+  };
+
+  return {
+    user,
+    token,
+    isAuthenticated,
+    isAuthModalOpen,
+    openAuthModal,
+    closeAuthModal,
+    login,
+    registerCustomer,
+    fetchProfile,
+    isLoggedIn,
+    favorites,
+    isFavorite,
+    toggleFavorite,
+    logout
+  };
+});

@@ -5,5 +5,5 @@ namespace Seadora.Identity.Application.Common.Interfaces;
 
 public interface IJwtTokenGenerator
 {
-    string GenerateToken(User user, IList<string> roles);
+    string GenerateToken(User user, IList<string> roles, string? branchId = null);
 }

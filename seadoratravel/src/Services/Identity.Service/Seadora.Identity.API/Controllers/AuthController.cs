@@ -32,6 +32,19 @@ public class AuthController : ControllerBase
         }
     }
 
+    [HttpPost("register-customer")]
+    public async Task<IActionResult> RegisterCustomer([FromBody] Seadora.Identity.Application.Authentication.Commands.RegisterCustomer.RegisterCustomerCommand command)
+    {
+        try
+        {
+            return Ok(await _mediator.Send(command));
+        }
+        catch (System.Exception e)
+        {
+            return BadRequest(new { error = e.Message });
+        }
+    }
+
     [HttpPost("login")]
     public async Task<IActionResult> Login(LoginCommand command)
     {

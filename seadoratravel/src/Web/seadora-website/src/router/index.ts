@@ -1,3 +1,5 @@
+
+import { useAuthStore } from '@/features/auth/store/auth';
 import { createRouter, createWebHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 import FeedbackView from '../features/feedback/views/FeedbackView.vue'
@@ -7,6 +9,19 @@ import ToursView from '../features/tours/views/ToursView.vue'
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    {
+      path: '/portal',
+      component: () => import('../features/portal/layouts/CustomerPortalLayout.vue'),
+      meta: { requiresAuth: true },
+      children: [
+        { path: '', name: 'portal-dashboard', component: () => import('../features/portal/views/PortalDashboardView.vue') },
+        { path: 'bookings', name: 'portal-bookings', component: () => import('../features/portal/views/PortalBookingsView.vue') },
+        { path: 'bookings/:id', name: 'portal-booking-detail', component: () => import('../features/portal/views/PortalBookingDetailView.vue') },
+        { path: 'documents', name: 'portal-documents', component: () => import('../features/portal/views/PortalDocumentsView.vue') },
+        { path: 'profile', name: 'portal-profile', component: () => import('../features/portal/views/PortalProfileView.vue') },
+        { path: 'support', name: 'portal-support', component: () => import('../features/portal/views/PortalSupportView.vue') }
+      ]
+    },
     {
       path: '/',
       name: 'home',
@@ -37,3 +52,13 @@ const router = createRouter({
 })
 
 export default router
+
+router.beforeEach((to, _from, next) => {
+  const authStore = useAuthStore();
+  if (to.meta.requiresAuth && !authStore.isAuthenticated) {
+    authStore.openAuthModal();
+    next('/'); // Or preserve path for redirect after login
+  } else {
+    next();
+  }
+});
