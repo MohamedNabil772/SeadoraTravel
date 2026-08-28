@@ -87,6 +87,14 @@
                 <label class="block text-xs font-medium text-white/60 mb-1 ml-1">Password</label>
                 <input v-model="formData.password" type="password" placeholder="Create a password" required class="w-full bg-[#041a2e] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 focus:outline-none focus:border-[#c9a84c] focus:ring-1 focus:ring-[#c9a84c] transition-all" />
               </div>
+              
+              <div class="flex items-start gap-2 pt-2">
+                <input v-model="gdprConsent" type="checkbox" id="gdpr-consent" required class="mt-1 w-4 h-4 rounded border-white/10 bg-[#041a2e] text-[#c9a84c] focus:ring-[#c9a84c] focus:ring-offset-[#062d4d]" />
+                <label for="gdpr-consent" class="text-xs text-white/70 leading-relaxed">
+                  I agree to the <a href="#" class="text-[#c9a84c] hover:underline">Terms of Service</a> & <a href="#" class="text-[#c9a84c] hover:underline">Privacy Policy</a> (GDPR Compliance)
+                </label>
+              </div>
+
               <button type="submit" class="w-full bg-gradient-to-r from-[#c9a84c] to-[#a38030] text-[#062d4d] font-bold py-3 px-4 rounded-xl shadow-lg hover:shadow-[#c9a84c]/25 transform hover:-translate-y-0.5 transition-all duration-200">
                 Create Account
               </button>
@@ -128,6 +136,7 @@
 
 <script setup lang="ts">
 import { ref, reactive, toRef } from 'vue';
+import { useRouter, useRoute } from 'vue-router';
 import { useAuthStore } from '../store/auth';
 import { useModalA11y } from '@/shared/utils/modalA11y';
 
@@ -135,6 +144,8 @@ const props = defineProps<{ isOpen: boolean }>();
 const emit = defineEmits<{ (e: 'close'): void }>();
 
 const authStore = useAuthStore();
+const router = useRouter();
+const route = useRoute();
 const { setDialogEl, trapTab } = useModalA11y(toRef(props, 'isOpen'));
 
 const activeTab = ref<'login' | 'register' | 'whatsapp' | 'forgot'>('login');
@@ -144,13 +155,20 @@ const formData = reactive({
   phone: '',
   password: ''
 });
+const gdprConsent = ref(false);
 
 const closeModal = () => emit('close');
+
+const redirectAfterAuth = () => {
+  const redirect = route.query.redirect as string || '/portal/dashboard';
+  router.push(redirect);
+};
 
 const handleLogin = async () => {
   try {
     await authStore.login({ email: formData.email, password: formData.password });
     closeModal();
+    redirectAfterAuth();
   } catch (e) {
     console.error('Login Failed', e);
   }
@@ -158,8 +176,10 @@ const handleLogin = async () => {
 
 const handleRegister = async () => {
   try {
+    if (!gdprConsent.value) return;
     await authStore.registerCustomer(formData);
     closeModal();
+    redirectAfterAuth();
   } catch (e) {
     console.error('Register Failed', e);
   }

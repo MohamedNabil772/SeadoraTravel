@@ -18,9 +18,9 @@ public class RegisterCustomerCommandHandler : IRequestHandler<RegisterCustomerCo
 {
     private readonly UserManager<User> _userManager;
     private readonly IJwtTokenGenerator _jwtTokenGenerator;
-    private readonly IEventPublisher _eventPublisher;
+    private readonly IEventPublisher? _eventPublisher;
 
-    public RegisterCustomerCommandHandler(UserManager<User> userManager, IJwtTokenGenerator jwtTokenGenerator, IEventPublisher eventPublisher)
+    public RegisterCustomerCommandHandler(UserManager<User> userManager, IJwtTokenGenerator jwtTokenGenerator, IEventPublisher? eventPublisher = null)
     {
         _userManager = userManager;
         _jwtTokenGenerator = jwtTokenGenerator;
@@ -32,13 +32,15 @@ public class RegisterCustomerCommandHandler : IRequestHandler<RegisterCustomerCo
         var user = new User { UserName = request.Email, Email = request.Email, FirstName = request.FirstName, LastName = request.LastName };
         var result = await _userManager.CreateAsync(user, request.Password);
 
-        if (!result.Succeeded) throw new Exception("Registration failed");
+        if (!result.Succeeded) throw new Exception("Registration failed: " + string.Join(", ", result.Errors.Select(e => e.Description)));
 
         await _userManager.AddToRoleAsync(user, "Customer");
         var roles = new List<string> { "Customer" };
-        // Wait, issue JWT with branchId ? Let's see IJwtTokenGenerator.
         var token = _jwtTokenGenerator.GenerateToken(user, roles, request.BranchId);
-        await _eventPublisher.PublishAsync(new CustomerRegistered(user.Id, user.Email, user.FirstName, user.LastName, request.BranchId), cancellationToken);
+        if (_eventPublisher != null)
+        {
+            await _eventPublisher.PublishAsync(new CustomerRegistered(user.Id, user.Email, user.FirstName, user.LastName, request.BranchId), cancellationToken);
+        }
 
         return new AuthResponse(token, user.Email!, roles);
     }

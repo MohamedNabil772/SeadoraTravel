@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useCurrencyStore } from '@/store/currency'
 import { useAuthStore } from '@/features/auth/store/auth'
 import LuxuryIcons from '@/shared/components/LuxuryIcons.vue'
+import CustomerProfileDropdown from '@/shared/components/CustomerProfileDropdown.vue'
 const { locale, t } = useI18n()
 const currencyStore = useCurrencyStore()
 const authStore = useAuthStore()
@@ -17,11 +18,7 @@ const handleLogout = () => {
   showProfileDropdown.value = false
 }
 
-const userInitials = computed(() => {
-  if (!authStore.user) return ''
-  const names = authStore.user.name.split(' ')
-  return names.map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)
-})
+
 
 import { loadLanguageAsync } from '@/i18n'
 
@@ -206,33 +203,7 @@ onUnmounted(() => {
           <span>{{ t('nav.login') || 'Sign In' }}</span>
         </button>
         <div v-else class="profile-container flex items-center gap-1.5">
-          <router-link to="/portal" class="profile-btn" title="Open Customer Portal">
-            <div class="avatar">{{ userInitials || 'VIP' }}</div>
-            <span class="username">{{ authStore.user?.name || 'Traveler' }}</span>
-          </router-link>
-          <button @click="showProfileDropdown = !showProfileDropdown" class="p-1 hover:text-[#c9a84c] text-white/70 transition-colors" aria-label="Toggle profile menu">
-            <LuxuryIcons name="chevron-left" size="12" class="transition-transform duration-200 transform" :class="showProfileDropdown ? 'rotate-90' : '-rotate-90'" />
-          </button>
-          <div v-if="showProfileDropdown" class="profile-dropdown" v-click-outside="() => showProfileDropdown = false">
-            <div class="profile-header">
-              <h4>{{ authStore.user?.name || 'VIP Traveler' }}</h4>
-              <p>{{ authStore.user?.email }}</p>
-            </div>
-            <div class="profile-links">
-              <router-link to="/portal" @click="showProfileDropdown = false" class="profile-link">
-                <span>🏰 Customer Portal</span>
-              </router-link>
-              <router-link to="/portal/bookings" @click="showProfileDropdown = false" class="profile-link">
-                <span>🎫 My Bookings</span>
-              </router-link>
-              <router-link to="/portal/support" @click="showProfileDropdown = false" class="profile-link">
-                <span>💬 Support & Complaints</span>
-              </router-link>
-              <button @click="handleLogout" class="logout-btn">
-                Log Out
-              </button>
-            </div>
-          </div>
+          <CustomerProfileDropdown />
         </div>
       </div>
     </div>

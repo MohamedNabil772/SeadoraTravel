@@ -501,5 +501,32 @@
       "facebook": "Facebook",
       "apple": "Apple"
     }
+  },
+  "portal": {
+    "profile": {
+      "title": "Profilo e Preferenze",
+      "firstName": "Nome",
+      "lastName": "Cognome",
+      "dietary": "Esigenze Dietetiche",
+      "dietaryOptions": {
+        "none": "Nessuna",
+        "vegetarian": "Vegetariano",
+        "vegan": "Vegano",
+        "halal": "Halal"
+      },
+      "saveBtn": "Salva modifiche profilo",
+      "gdpr": {
+        "title": "Privacy e Consenso (GDPR)",
+        "desc": "Gestisci come utilizziamo i tuoi dati per migliorare la tua esperienza di lusso.",
+        "marketing": "Comunicazioni di Marketing",
+        "marketingDesc": "Ricevi offerte esclusive, ispirazioni di viaggio e aggiornamenti tramite newsletter.",
+        "concierge": "Dati Concierge Personalizzati",
+        "conciergeDesc": "Consenti al nostro concierge VIP di utilizzare le tue prenotazioni precedenti per curare consigli su misura.",
+        "essential": "Elaborazione Dati Essenziali",
+        "essentialDesc": "Richiesto per la funzionalità di prenotazione, i permessi della guardia costiera e il nulla osta di sicurezza.",
+        "exportBtn": "Esporta i Miei Dati",
+        "deleteBtn": "Richiedi Eliminazione Dati"
+      }
+    }
   }
 }

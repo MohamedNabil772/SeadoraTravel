@@ -501,5 +501,32 @@
       "facebook": "Facebook",
       "apple": "Apple"
     }
+  },
+  "portal": {
+    "profile": {
+      "title": "Profile & Preferences",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "dietary": "Dietary Requirements",
+      "dietaryOptions": {
+        "none": "None",
+        "vegetarian": "Vegetarian",
+        "vegan": "Vegan",
+        "halal": "Halal"
+      },
+      "saveBtn": "Save Profile Changes",
+      "gdpr": {
+        "title": "Privacy & Consent (GDPR)",
+        "desc": "Manage how we use your data to improve your luxury experience.",
+        "marketing": "Marketing Communications",
+        "marketingDesc": "Receive exclusive offers, luxury travel inspiration, and newsletter updates.",
+        "concierge": "Personalized Concierge Data",
+        "conciergeDesc": "Allow our VIP concierge to use your previous bookings to curate bespoke recommendations.",
+        "essential": "Essential Data Processing",
+        "essentialDesc": "Required for booking functionality, Coast Guard permits, and security clearance.",
+        "exportBtn": "Export My Data",
+        "deleteBtn": "Request Data Deletion"
+      }
+    }
   }
 }
