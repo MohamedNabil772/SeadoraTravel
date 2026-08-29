@@ -82,6 +82,9 @@ const i18nContent = computed(() => {
       home: 'Home',
       allTours: 'All Tours',
       bestseller: 'Bestseller',
+      topRated: 'Top Rated',
+      reservePayLater: 'Reserve & Pay Later',
+      hotelPickup: 'Hotel Pickup',
       reviewsCount: '4,288 reviews',
       duration: 'Duration',
       durationLabel: '5 Hours',
@@ -204,6 +207,9 @@ const i18nContent = computed(() => {
       home: 'Startseite',
       allTours: 'Alle Touren',
       bestseller: 'Bestseller',
+      topRated: 'Top Rated',
+      reservePayLater: 'Reserve & Pay Later',
+      hotelPickup: 'Hotel Pickup',
       reviewsCount: '4.288 Bewertungen',
       duration: 'Dauer',
       durationLabel: '5 Stunden',
@@ -570,6 +576,9 @@ const i18nContent = computed(() => {
       home: 'Главная',
       allTours: 'Все туры',
       bestseller: 'Хит продаж',
+      topRated: 'Высокий рейтинг',
+      reservePayLater: 'Бронируйте сейчас, платите позже',
+      hotelPickup: 'Трансфер из отеля',
       reviewsCount: '4 288 отзывов',
       duration: 'Длительность',
       durationLabel: '5 часов',
@@ -1496,11 +1505,11 @@ watch(routeSlug, () => {
           </span>
           
           <span v-if="tour?.isTopRated" class="bg-[#e0e7ff] text-[#3730a3] border border-[#c7d2fe] px-2.5 py-1 rounded-full font-bold flex items-center gap-1">
-            <span>⭐</span> Top Rated
+            <span>⭐</span> {{ i18nContent.topRated || 'Top Rated' }}
           </span>
           
           <span v-if="tour?.reserveAndPayLater !== false" class="bg-[#f0f9ff] text-[#0284c7] border border-[#bae6fd] px-2.5 py-1 rounded-full font-bold flex items-center gap-1">
-            <span>💳</span> Reserve & Pay Later
+            <span>💳</span> {{ i18nContent.reservePayLater || 'Reserve & Pay Later' }}
           </span>
 
           <span v-if="tour?.freeCancellation !== false" class="bg-[#ecfdf5] text-[#059669] border border-[#a7f3d0] px-2.5 py-1 rounded-full font-bold flex items-center gap-1">
@@ -1508,7 +1517,7 @@ watch(routeSlug, () => {
           </span>
           
           <span v-if="tour?.hotelPickup !== false" class="bg-gray-100 text-[#475569] border border-gray-200 px-2.5 py-1 rounded-full font-bold flex items-center gap-1">
-            <span>🚐</span> Hotel Pickup
+            <span>🚐</span> {{ i18nContent.hotelPickup || 'Hotel Pickup' }}
           </span>
         </div>
       </div>

@@ -35,6 +35,15 @@ const setLang = async (lang: string) => {
   showLangDropdown.value = false
 }
 
+const goToMobilePortal = (path: string = '/portal') => {
+  isMenuOpen.value = false
+  if (authStore.isAuthenticated) {
+    router.push(path)
+  } else {
+    authStore.openAuthModal()
+  }
+}
+
 const selectCurrency = (curr: string) => {
   currencyStore.setCurrency(curr)
   isMenuOpen.value = false // close menu on switch
@@ -285,16 +294,21 @@ onUnmounted(() => {
         </div>
 
         <!-- Mobile User Auth section -->
-        <div class="mobile-drawer-auth mt-3 border-t border-white/10 pt-3">
-          <button v-if="!authStore.isAuthenticated" @click="authStore.openAuthModal(); isMenuOpen = false" class="mobile-login-btn">
-            Sign In / Register
+        <div class="mobile-drawer-auth mt-3 border-t border-white/10 pt-3 flex flex-col gap-2.5">
+          <button 
+            type="button"
+            @click="goToMobilePortal('/portal')" 
+            class="w-full py-2.5 px-4 bg-gradient-to-r from-[#c9a84c] to-[#dfc379] text-[#062d4d] rounded-xl text-xs font-bold text-center shadow-md active:scale-95 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            <span>👑</span>
+            <span>{{ authStore.isAuthenticated ? (t('portal.nav.dashboard') || 'Go to Customer Portal') : (t('nav.login') || 'Sign In / Customer Portal') }}</span>
+            <span>→</span>
           </button>
-          <div v-else class="mobile-logged-in flex flex-col gap-2">
-            <span>Welcome, <strong>{{ authStore.user?.name || 'VIP Traveler' }}</strong></span>
-            <router-link to="/portal" @click="isMenuOpen = false" class="mobile-portal-link px-3 py-1.5 bg-[#c9a84c] text-[#062d4d] rounded-lg text-xs font-bold text-center">
-              Go to Customer Portal
-            </router-link>
-            <button @click="handleLogout" class="mobile-logout-btn text-xs text-white/70 hover:text-white">Logout</button>
+          <div v-if="authStore.isAuthenticated" class="mobile-logged-in flex justify-between items-center text-xs text-white/80 pt-1">
+            <span>VIP: <strong class="text-white">{{ authStore.user?.name || 'Guest' }}</strong></span>
+            <button @click="handleLogout" class="mobile-logout-btn text-xs text-amber-400 hover:text-amber-300 font-bold underline cursor-pointer">
+              {{ t('portal.nav.logout') || 'Logout' }}
+            </button>
           </div>
         </div>
       </div>
