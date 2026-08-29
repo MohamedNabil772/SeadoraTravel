@@ -150,6 +150,57 @@
       </div>
     </div>
 
+    <!-- Saved Experiences / Wishlist Preview Section -->
+    <div v-if="favoritedTours.length > 0" class="bg-white rounded-3xl p-8 border border-slate-200/80 shadow-[0_8px_30px_rgb(0,0,0,0.04)]">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <div class="inline-flex items-center gap-1.5 text-xs font-bold text-rose-500 uppercase tracking-wider mb-1">
+            <span>💖</span> {{ $t('portal.nav.savedExperiences') || 'Wishlist' }}
+          </div>
+          <h2 class="text-xl font-bold text-slate-900 tracking-tight">Your Saved Favorites ({{ favoritedTours.length }})</h2>
+        </div>
+        <router-link 
+          to="/portal/favorites" 
+          class="text-xs font-bold text-[#062d4d] hover:text-[#c9a84c] transition-colors flex items-center gap-1"
+        >
+          <span>View All</span>
+          <span>→</span>
+        </router-link>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <div 
+          v-for="fav in favoritedTours.slice(0, 3)" 
+          :key="fav.id"
+          class="rounded-2xl border border-slate-100 bg-slate-50/50 hover:bg-white hover:shadow-md transition-all duration-300 overflow-hidden flex flex-col cursor-pointer group"
+          @click="router.push(`/tour/${fav.slug || fav.id}`)"
+        >
+          <div class="h-32 relative overflow-hidden bg-slate-200">
+            <img 
+              :src="fav.imageUrl || fav.mainImage || 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=600&q=80'" 
+              class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            />
+            <div class="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-black/60 backdrop-blur-md text-[10px] text-white font-medium">
+              ★ {{ fav.rating || '4.9' }}
+            </div>
+          </div>
+          <div class="p-4 flex flex-col justify-between flex-1 gap-2">
+            <h4 class="font-bold text-xs text-slate-900 line-clamp-1 group-hover:text-[#c9a84c] transition-colors">
+              {{ fav.names?.['en'] || fav.title }}
+            </h4>
+            <div class="flex items-center justify-between text-xs mt-1">
+              <span class="font-black text-sm text-[#062d4d]">
+                {{ currencyStore.formatPrice(fav.price) }}
+              </span>
+              <span class="text-[11px] font-bold text-[#c9a84c] group-hover:underline">
+                Book →
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Luxury PDF / Printable Voucher Modal -->
     <LuxuryVoucherModal 
       v-model:isOpen="showVoucherModal" 
@@ -160,11 +211,20 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/features/auth/store/auth';
+import { useCurrencyStore } from '@/store/currency';
 import LuxuryVoucherModal from '@/shared/components/LuxuryVoucherModal.vue';
 
+const router = useRouter();
 const authStore = useAuthStore();
+const currencyStore = useCurrencyStore();
 const showVoucherModal = ref(false);
+
+const allTours = ref<any[]>([]);
+const favoritedTours = computed(() => {
+  return allTours.value.filter(t => authStore.isFavorite(t.id));
+});
 
 const customerFirstName = computed(() => {
   if (!authStore.user || !authStore.user.name) return 'Guest';
@@ -207,7 +267,15 @@ const fetchLiveWeather = async () => {
   }
 };
 
-onMounted(() => {
+onMounted(async () => {
   fetchLiveWeather();
+  try {
+    const res = await fetch('/api/content/api/tours');
+    if (res.ok) {
+      allTours.value = await res.json();
+    }
+  } catch (err) {
+    console.warn('Failed to load tours for portal dashboard', err);
+  }
 });
 </script>

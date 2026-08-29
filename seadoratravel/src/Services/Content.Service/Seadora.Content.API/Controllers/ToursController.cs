@@ -62,4 +62,20 @@ public class ToursController : ControllerBase
         await _mediator.Send(new DeleteTourCommand(id));
         return NoContent();
     }
+
+    [HttpPost("{id:guid}/favorite")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ToggleFavorite(Guid id, [FromQuery] bool isFavorite = true)
+    {
+        var count = await _mediator.Send(new ToggleTourFavoriteCommand(id, isFavorite));
+        return Ok(new { id, favoriteCount = count, isFavorite });
+    }
+
+    [HttpGet("favorites/leaderboard")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetFavoritesLeaderboard([FromQuery] int limit = 20)
+    {
+        var result = await _mediator.Send(new Seadora.Content.Application.Tours.Queries.Admin.GetTourFavoritesLeaderboardQuery(limit));
+        return Ok(result);
+    }
 }

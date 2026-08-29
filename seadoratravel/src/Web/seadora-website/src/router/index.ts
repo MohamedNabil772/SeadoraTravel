@@ -15,6 +15,7 @@ const router = createRouter({
       meta: { requiresAuth: true },
       children: [
         { path: '', alias: ['dashboard', '/portal/dashboard'], name: 'portal-dashboard', component: () => import('../features/portal/views/PortalDashboardView.vue') },
+        { path: 'favorites', name: 'portal-favorites', component: () => import('../features/portal/views/PortalFavoritesView.vue') },
         { path: 'bookings', name: 'portal-bookings', component: () => import('../features/portal/views/PortalBookingsView.vue') },
         { path: 'bookings/:id', name: 'portal-booking-detail', component: () => import('../features/portal/views/PortalBookingDetailView.vue') },
         { path: 'documents', name: 'portal-documents', component: () => import('../features/portal/views/PortalDocumentsView.vue') },

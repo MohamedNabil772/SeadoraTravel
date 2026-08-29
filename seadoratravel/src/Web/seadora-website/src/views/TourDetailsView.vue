@@ -50,7 +50,6 @@ const selectCurrency = (code: string) => {
 
 // UI States
 const activeTab = ref('overview')
-const isSaved = ref(false)
 const readMoreExpanded = ref(false)
 const galleryModalOpen = ref(false)
 const activeLightboxIndex = ref(0)
@@ -1198,9 +1197,16 @@ const confirmBooking = async () => {
   }
 }
 
+const isSaved = computed(() => {
+  if (!tour.value?.id) return false
+  return authStore.isFavorite(tour.value.id)
+})
+
 const toggleSave = () => {
-  isSaved.value = !isSaved.value
-  toastMessage.value = isSaved.value ? t("toast.tourSaved") : 'Removed from favorites'
+  if (!tour.value?.id) return
+  authStore.toggleFavorite(tour.value.id)
+  const saved = authStore.isFavorite(tour.value.id)
+  toastMessage.value = saved ? t("toast.tourSaved") : 'Removed from favorites'
   showToast.value = true
   setTimeout(() => { showToast.value = false }, 3000)
 }

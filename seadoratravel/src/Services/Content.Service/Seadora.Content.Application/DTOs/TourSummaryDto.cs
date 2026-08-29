@@ -31,4 +31,5 @@ public class TourSummaryDto
     public decimal SupplierPercentage { get; set; }
     public decimal? OriginalPrice { get; set; }
     public decimal? DiscountPercentage { get; set; }
+    public int FavoriteCount { get; set; }
 }

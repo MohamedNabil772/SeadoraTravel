@@ -48,4 +48,11 @@ public class ToursController : ControllerBase
         await _mediator.Send(new DeleteTourCommand(id));
         return NoContent();
     }
+
+    [HttpGet("favorites/leaderboard")]
+    public async Task<IActionResult> GetFavoritesLeaderboard([FromQuery] int limit = 20)
+    {
+        var result = await _mediator.Send(new GetTourFavoritesLeaderboardQuery(limit));
+        return Ok(result);
+    }
 }

@@ -672,33 +672,19 @@ const triggerToast = (msg: string) => {
   }, 3000)
 }
 
-const favoriteTourIds = ref<Set<string>>(new Set(JSON.parse(localStorage.getItem('seadora_guest_favorites') || '[]')))
-
 const isTourFavorite = (tourId: string) => {
-  if (authStore.isLoggedIn) {
-    return authStore.isFavorite(tourId)
-  }
-  return favoriteTourIds.value.has(tourId)
+  return authStore.isFavorite(tourId)
 }
 
 const toggleFavoriteTour = (tourId: string) => {
-  if (authStore.isLoggedIn) {
-    authStore.toggleFavorite(tourId)
-    const isFav = authStore.isFavorite(tourId)
-    triggerToast(isFav ? "Saved to favorites!" : "Removed from favorites.")
-  } else {
-    if (favoriteTourIds.value.has(tourId)) {
-      favoriteTourIds.value.delete(tourId)
-      triggerToast("Removed from favorites.")
-    } else {
-      favoriteTourIds.value.add(tourId)
-      triggerToast("Saved to favorites!")
-    }
-    // Force Vue reactivity trigger & persist
-    favoriteTourIds.value = new Set(favoriteTourIds.value)
-    localStorage.setItem('seadora_guest_favorites', JSON.stringify(Array.from(favoriteTourIds.value)))
-  }
+  authStore.toggleFavorite(tourId)
+  const isFav = authStore.isFavorite(tourId)
+  triggerToast(isFav ? "Saved to favorites!" : "Removed from favorites.")
 }
+
+const favoritedToursList = computed(() => {
+  return tours.value.filter(t => authStore.isFavorite(t.id))
+})
 
 const shareTour = (tour: Tour) => {
   const slug = getSlug(tour.names?.['en'] || 'tour')
@@ -1611,6 +1597,68 @@ onUnmounted(() => {
         </div>
 
         <div v-else>
+          <!-- FAVORITES SECTION (Shown when user has favorited tours) -->
+          <div v-if="favoritedToursList.length > 0" class="mb-8 p-5 sm:p-6 bg-gradient-to-br from-[#062d4d]/5 via-[#c9a84c]/10 to-[#062d4d]/5 rounded-3xl border border-[#c9a84c]/30 shadow-sm relative overflow-hidden">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-2.5">
+                <span class="w-8 h-8 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center text-base">💖</span>
+                <div>
+                  <h3 class="font-playfair text-lg sm:text-xl font-bold text-[#062d4d] flex items-center gap-2">
+                    {{ locale === 'ar' ? 'رحلاتك المفضلة' : locale === 'de' ? 'Ihre Gespeicherten Favoriten' : 'Your Saved Favorites' }}
+                    <span class="text-xs font-sans px-2.5 py-0.5 rounded-full bg-[#c9a84c] text-white font-bold">{{ favoritedToursList.length }}</span>
+                  </h3>
+                  <p class="text-xs text-slate-500">
+                    {{ locale === 'ar' ? 'محفوظة للوصول السريع والحجز المباشر' : 'Saved for quick access and seamless VIP booking' }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Horizontal Gliding Favorites Cards -->
+            <div class="flex gap-4 overflow-x-auto pb-3 pt-1 snap-x snap-mandatory hide-scrollbar" style="-webkit-overflow-scrolling: touch;">
+              <div 
+                v-for="fav in favoritedToursList" 
+                :key="'fav-' + fav.id"
+                class="min-w-[260px] sm:min-w-[280px] max-w-[280px] snap-start bg-white rounded-2xl border border-[#c9a84c]/30 shadow-md hover:shadow-xl transition-all duration-300 flex flex-col overflow-hidden cursor-pointer group shrink-0"
+                @click="openDetailsPage(fav)"
+              >
+                <div class="relative h-36 w-full overflow-hidden bg-slate-100">
+                  <div 
+                    class="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-105"
+                    :style="{ backgroundImage: (fav.imageUrl || fav.mainImage) ? `url(${getFullImageUrl(fav.imageUrl || fav.mainImage)})` : (fav.bgGradient || 'linear-gradient(135deg,#063a5c,#c9a84c)') }"
+                  ></div>
+                  <!-- Remove Favorite Heart -->
+                  <button 
+                    @click.stop="toggleFavoriteTour(fav.id)"
+                    class="absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-white/90 backdrop-blur-sm text-rose-500 shadow-sm flex items-center justify-center hover:scale-110 active:scale-95 transition-all"
+                    title="Remove from favorites"
+                  >
+                    <svg class="w-3.5 h-3.5 fill-rose-500" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                    </svg>
+                  </button>
+                  <div class="absolute bottom-2 left-2 px-2 py-0.5 rounded bg-black/60 backdrop-blur-md text-[10px] text-white font-medium">
+                    ★ {{ fav.rating || '4.9' }}
+                  </div>
+                </div>
+
+                <div class="p-3.5 flex flex-col flex-1 justify-between gap-2">
+                  <h4 class="font-bold text-xs sm:text-sm text-slate-900 line-clamp-1 group-hover:text-[#c9a84c] transition-colors">
+                    {{ getLocalized(fav.names, fav.title || 'Tour') }}
+                  </h4>
+                  <div class="flex items-center justify-between text-xs mt-1">
+                    <span class="font-black text-sm text-[#062d4d]">
+                      {{ currencyStore.formatPrice(fav.price) }}
+                    </span>
+                    <button class="px-3 py-1 bg-gradient-to-r from-[#062d4d] to-[#0f172a] hover:from-[#c9a84c] hover:to-[#dfc379] text-white hover:text-slate-900 text-[11px] font-bold rounded-lg transition-all shadow-xs">
+                      {{ localizedLabels.viewDetails || 'Book' }}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Empty State -->
           <div v-if="sortedTours.length === 0" class="bg-white border border-gray-200 rounded-2xl py-24 text-center px-6 shadow-sm">
             <span class="text-5xl block mb-5">🐪</span>

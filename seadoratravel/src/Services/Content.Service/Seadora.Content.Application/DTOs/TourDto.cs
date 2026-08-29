@@ -37,6 +37,7 @@ public class TourDto
     public string StartTime { get; set; } = string.Empty;
     public decimal Rating { get; set; }
     public int ReviewCount { get; set; }
+    public int FavoriteCount { get; set; }
     
     // Flags
     public bool IsTopRated { get; set; }

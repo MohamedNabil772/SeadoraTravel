@@ -95,7 +95,8 @@ public class GetToursQueryHandler : IRequestHandler<GetToursQuery, List<TourSumm
             SupplierId = t.SupplierId,
             SupplierPercentage = t.SupplierPercentage,
             OriginalPrice = t.OriginalPrice,
-            DiscountPercentage = t.DiscountPercentage
+            DiscountPercentage = t.DiscountPercentage,
+            FavoriteCount = t.FavoriteCount
         }).ToList();
 
         return dtos;

@@ -42,6 +42,7 @@ public class Tour
     public string StartTime { get; set; } = string.Empty;
     public decimal Rating { get; set; }
     public int ReviewCount { get; set; }
+    public int FavoriteCount { get; set; } = 0;
     
     // Flags
     public bool IsTopRated { get; set; }

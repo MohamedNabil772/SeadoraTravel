@@ -3,6 +3,7 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useCurrencyStore } from '@/store/currency'
+import { useAuthStore } from '@/features/auth/store/auth'
 import { getSlug, getFullImageUrl } from '@/shared/utils/helpers'
 import Footer from '@/shared/components/Footer.vue'
 import GuestInfoForm from '@/features/tours/components/GuestInfoForm.vue'
@@ -11,6 +12,7 @@ import TourAvailabilityCalendar from '@/features/tours/components/TourAvailabili
 const route = useRoute()
 const { locale, t } = useI18n()
 const currencyStore = useCurrencyStore()
+const authStore = useAuthStore()
 
 const routeSlug = computed(() => route.params.slug as string)
 
@@ -23,7 +25,8 @@ const languages = [
   { code: 'de', label: 'Deutsch', flag: '🇩🇪', iso: 'DE' },
   { code: 'it', label: 'Italiano', flag: '🇮🇹', iso: 'IT' },
   { code: 'fr', label: 'Français', flag: '🇫🇷', iso: 'FR' },
-  { code: 'ru', label: 'Русский', flag: '🇷🇺', iso: 'RU' }
+  { code: 'ru', label: 'Русский', flag: '🇷🇺', iso: 'RU' },
+  { code: 'ar', label: 'العربية', flag: '🇪🇬', iso: 'AR' }
 ]
 
 const currencies = [
@@ -47,7 +50,6 @@ const selectCurrency = (code: string) => {
 
 // UI States
 const activeTab = ref('overview')
-const isSaved = ref(false)
 const readMoreExpanded = ref(false)
 const galleryModalOpen = ref(false)
 const activeLightboxIndex = ref(0)
@@ -1239,9 +1241,16 @@ const confirmBooking = async () => {
   }
 }
 
+const isSaved = computed(() => {
+  if (!tour.value?.id) return false
+  return authStore.isFavorite(tour.value.id)
+})
+
 const toggleSave = () => {
-  isSaved.value = !isSaved.value
-  toastMessage.value = isSaved.value ? t("toast.tourSaved") : 'Removed from favorites'
+  if (!tour.value?.id) return
+  authStore.toggleFavorite(tour.value.id)
+  const saved = authStore.isFavorite(tour.value.id)
+  toastMessage.value = saved ? t("toast.tourSaved") : 'Removed from favorites'
   showToast.value = true
   setTimeout(() => { showToast.value = false }, 3000)
 }
