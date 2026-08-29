@@ -30,16 +30,19 @@ builder.Services.AddAuthentication(options =>
 })
 .AddJwtBearer(options =>
 {
+    var secret = builder.Configuration["JwtSettings:Secret"] ?? builder.Configuration["Jwt:Key"] ?? "YourSuperSecretKeyHereYourSuperSecretKeyHere";
+    var issuer = builder.Configuration["JwtSettings:Issuer"] ?? builder.Configuration["Jwt:Issuer"] ?? "SeadoraTravel";
+    var audience = builder.Configuration["JwtSettings:Audience"] ?? builder.Configuration["Jwt:Audience"] ?? "SeadoraTravelUsers";
+
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = true,
         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        // TODO security: the signing secret must come from a secret store / env var in production, not appsettings.json.
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? "SuperSecretKeyForSeadoraAdminPanel!"))
+        ValidIssuer = issuer,
+        ValidAudience = audience,
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secret))
     };
 });
 
@@ -48,7 +51,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("AdminPolicy", policy =>
     {
         policy.RequireAuthenticatedUser();
-        policy.RequireRole("Admin", "SuperAdmin");
+        policy.RequireRole("Admin", "SuperAdmin", "BookingManager", "OperationsManager", "ConciergeSpecialist", "Accountant", "BusinessOwner");
     });
 });
 

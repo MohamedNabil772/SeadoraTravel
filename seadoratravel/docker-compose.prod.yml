@@ -36,6 +36,12 @@ services:
       - "127.0.0.1:8000:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
+      - JwtSettings__Secret=${JWT_SECRET}
+      - Jwt__Key=${JWT_SECRET}
+      - JwtSettings__Issuer=SeadoraTravel
+      - JwtSettings__Audience=SeadoraTravelUsers
+      - Jwt__Issuer=SeadoraTravel
+      - Jwt__Audience=SeadoraTravelUsers
     depends_on:
       - identity-service
       - content-service
@@ -74,6 +80,7 @@ services:
       - RabbitMq__Host=rabbitmq
       - RabbitMq__Username=${RABBITMQ_USER:-seadora}
       - RabbitMq__Password=${RABBITMQ_PASS:-seadora}
+      - JwtSettings__Secret=${JWT_SECRET}
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Content;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
     depends_on:
       postgres:
@@ -91,6 +98,7 @@ services:
       - RabbitMq__Host=rabbitmq
       - RabbitMq__Username=${RABBITMQ_USER:-seadora}
       - RabbitMq__Password=${RABBITMQ_PASS:-seadora}
+      - JwtSettings__Secret=${JWT_SECRET}
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Booking;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
       - Smtp__Host=${SMTP_HOST:-smtp.hostinger.com}
       - Smtp__Port=${SMTP_PORT:-587}
@@ -172,6 +180,7 @@ services:
       - RabbitMq__Host=rabbitmq
       - RabbitMq__Username=${RABBITMQ_USER:-seadora}
       - RabbitMq__Password=${RABBITMQ_PASS:-seadora}
+      - JwtSettings__Secret=${JWT_SECRET}
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=Seadora_Concierge;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
       - ConnectionStrings__ConciergeDb=Host=postgres;Port=5432;Database=Seadora_Concierge;Username=${POSTGRES_USER:-postgres};Password=${POSTGRES_PASSWORD}
     depends_on:
@@ -189,6 +198,7 @@ services:
       - seadora-uploads:/app/uploads
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
+      - JwtSettings__Secret=${JWT_SECRET}
 
   seadora-website:
     build:
