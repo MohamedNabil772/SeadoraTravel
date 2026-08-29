@@ -66,7 +66,7 @@
           <!-- Badges -->
           <div class="absolute top-4 left-4 flex flex-col gap-1.5">
             <span class="px-2.5 py-1 bg-[#062d4d]/90 backdrop-blur-md text-white text-[10px] font-bold rounded-lg uppercase tracking-wider">
-              {{ tour.destinationName || 'Red Sea' }}
+              {{ getTourDestination(tour) }}
             </span>
           </div>
 
@@ -96,19 +96,19 @@
         <div class="p-6 flex flex-col flex-1 justify-between gap-4">
           <div>
             <div class="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1">
-              {{ tour.categoryName || 'Luxury Excursion' }}
+              {{ getTourCategory(tour) }}
             </div>
             <h3 class="font-bold text-base text-slate-900 group-hover:text-[#c9a84c] transition-colors leading-snug line-clamp-2">
               {{ getTourTitle(tour) }}
             </h3>
             <p class="text-xs text-slate-500 mt-2 line-clamp-2 leading-relaxed">
-              {{ tour.description || 'Experience the unparalleled beauty of Egypt with private VIP access and first-class services.' }}
+              {{ getTourDescription(tour) }}
             </p>
           </div>
 
           <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
             <div>
-              <span class="text-[10px] uppercase font-bold text-slate-400 block">Starting From</span>
+              <span class="text-[10px] uppercase font-bold text-slate-400 block">{{ $t('tours.from') || 'Starting From' }}</span>
               <span class="text-lg font-black text-[#062d4d]">
                 {{ currencyStore.formatPrice(tour.price) }}
               </span>
@@ -118,7 +118,7 @@
               @click.stop="goToTour(tour)"
               class="px-4 py-2 bg-gradient-to-r from-[#062d4d] to-[#0f172a] hover:from-[#c9a84c] hover:to-[#dfc379] text-white hover:text-slate-900 text-xs font-bold rounded-xl transition-all shadow-sm active:scale-95"
             >
-              Book Now →
+              {{ $t('tourDetails.sidebar.bookNow') || 'Book Now' }} →
             </button>
           </div>
         </div>
@@ -147,13 +147,49 @@ const favoritedTours = computed(() => {
 });
 
 function getTourTitle(tour: any) {
-  if (tour.names && tour.names[locale.value]) {
+  if (tour?.names && tour.names[locale.value]) {
     return tour.names[locale.value];
   }
-  if (tour.names && tour.names['en']) {
+  if (tour?.names && tour.names['en']) {
     return tour.names['en'];
   }
-  return tour.title || 'Luxury Experience';
+  return tour?.title || 'Luxury Experience';
+}
+
+function getTourDescription(tour: any) {
+  if (tour?.shortDescriptions && tour.shortDescriptions[locale.value]) {
+    return tour.shortDescriptions[locale.value];
+  }
+  if (tour?.descriptions && tour.descriptions[locale.value]) {
+    return tour.descriptions[locale.value];
+  }
+  if (tour?.shortDescriptions && tour.shortDescriptions['en']) {
+    return tour.shortDescriptions['en'];
+  }
+  if (tour?.descriptions && tour.descriptions['en']) {
+    return tour.descriptions['en'];
+  }
+  return tour?.description || 'Experience the unparalleled beauty of Egypt with private VIP access and first-class services.';
+}
+
+function getTourDestination(tour: any) {
+  if (tour?.destinationNames && tour.destinationNames[locale.value]) {
+    return tour.destinationNames[locale.value];
+  }
+  if (tour?.destinationNames && tour.destinationNames['en']) {
+    return tour.destinationNames['en'];
+  }
+  return tour?.destinationName || 'Red Sea';
+}
+
+function getTourCategory(tour: any) {
+  if (tour?.categoryNames && tour.categoryNames[locale.value]) {
+    return tour.categoryNames[locale.value];
+  }
+  if (tour?.categoryNames && tour.categoryNames['en']) {
+    return tour.categoryNames['en'];
+  }
+  return tour?.categoryName || 'Luxury Excursion';
 }
 
 function getImageUrl(tour: any) {

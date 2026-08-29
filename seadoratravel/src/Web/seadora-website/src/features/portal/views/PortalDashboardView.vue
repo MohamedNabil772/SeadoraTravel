@@ -186,7 +186,7 @@
           </div>
           <div class="p-4 flex flex-col justify-between flex-1 gap-2">
             <h4 class="font-bold text-xs text-slate-900 line-clamp-1 group-hover:text-[#c9a84c] transition-colors">
-              {{ fav.names?.['en'] || fav.title }}
+              {{ getTourTitle(fav) }}
             </h4>
             <div class="flex items-center justify-between text-xs mt-1">
               <span class="font-black text-sm text-[#062d4d]">
@@ -212,11 +212,13 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/features/auth/store/auth';
 import { useCurrencyStore } from '@/store/currency';
 import LuxuryVoucherModal from '@/shared/components/LuxuryVoucherModal.vue';
 
 const router = useRouter();
+const { locale } = useI18n();
 const authStore = useAuthStore();
 const currencyStore = useCurrencyStore();
 const showVoucherModal = ref(false);
@@ -225,6 +227,16 @@ const allTours = ref<any[]>([]);
 const favoritedTours = computed(() => {
   return allTours.value.filter(t => authStore.isFavorite(t.id));
 });
+
+function getTourTitle(tour: any) {
+  if (tour?.names && tour.names[locale.value]) {
+    return tour.names[locale.value];
+  }
+  if (tour?.names && tour.names['en']) {
+    return tour.names['en'];
+  }
+  return tour?.title || 'Luxury Experience';
+}
 
 const customerFirstName = computed(() => {
   if (!authStore.user || !authStore.user.name) return 'Guest';

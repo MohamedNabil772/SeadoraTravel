@@ -8,6 +8,8 @@ import { getSlug, getFullImageUrl } from '@/shared/utils/helpers'
 import Footer from '@/shared/components/Footer.vue'
 import TourAvailabilityCalendar from '@/features/tours/components/TourAvailabilityCalendar.vue'
 
+import { loadLanguageAsync } from '@/i18n'
+
 const route = useRoute()
 const router = useRouter()
 const { locale, t } = useI18n()
@@ -38,8 +40,8 @@ const currencies = [
 const currentLangObj = computed(() => languages.find(l => l.code === locale.value) || languages[0])
 const currentCurrencyObj = computed(() => currencies.find(c => c.code === currencyStore.selectedCurrency) || currencies[0])
 
-const setLanguage = (code: string) => {
-  locale.value = code
+const setLanguage = async (code: string) => {
+  await loadLanguageAsync(code)
   showLangDropdown.value = false
 }
 

@@ -9,6 +9,8 @@ import Footer from '@/shared/components/Footer.vue'
 import GuestInfoForm from '@/features/tours/components/GuestInfoForm.vue'
 import TourAvailabilityCalendar from '@/features/tours/components/TourAvailabilityCalendar.vue'
 
+import { loadLanguageAsync } from '@/i18n'
+
 const route = useRoute()
 const { locale, t } = useI18n()
 const currencyStore = useCurrencyStore()
@@ -25,8 +27,7 @@ const languages = [
   { code: 'de', label: 'Deutsch', flag: '🇩🇪', iso: 'DE' },
   { code: 'it', label: 'Italiano', flag: '🇮🇹', iso: 'IT' },
   { code: 'fr', label: 'Français', flag: '🇫🇷', iso: 'FR' },
-  { code: 'ru', label: 'Русский', flag: '🇷🇺', iso: 'RU' },
-  { code: 'ar', label: 'العربية', flag: '🇪🇬', iso: 'AR' }
+  { code: 'ru', label: 'Русский', flag: '🇷🇺', iso: 'RU' }
 ]
 
 const currencies = [
@@ -38,8 +39,8 @@ const currencies = [
 const currentLangObj = computed(() => languages.find(l => l.code === locale.value) || languages[0])
 const currentCurrencyObj = computed(() => currencies.find(c => c.code === currencyStore.selectedCurrency) || currencies[0])
 
-const setLanguage = (code: string) => {
-  locale.value = code
+const setLanguage = async (code: string) => {
+  await loadLanguageAsync(code)
   showLangDropdown.value = false
 }
 
