@@ -1,21 +1,20 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useCurrencyStore } from '@/store/currency'
 import { useAuthStore } from '@/features/auth/store/auth'
 import { getSlug, getFullImageUrl } from '@/shared/utils/helpers'
 import Footer from '@/shared/components/Footer.vue'
+import GuestInfoForm from '@/features/tours/components/GuestInfoForm.vue'
 import TourAvailabilityCalendar from '@/features/tours/components/TourAvailabilityCalendar.vue'
 
 import { loadLanguageAsync } from '@/i18n'
 
 const route = useRoute()
-const router = useRouter()
 const { locale, t } = useI18n()
 const currencyStore = useCurrencyStore()
 const authStore = useAuthStore()
-const bookingReceivedSuccess = ref(false)
 
 const routeSlug = computed(() => route.params.slug as string)
 
@@ -53,13 +52,113 @@ const selectCurrency = (code: string) => {
 // UI States
 const activeTab = ref('overview')
 const readMoreExpanded = ref(false)
-const galleryModalOpen = ref(false)
-const activeLightboxIndex = ref(0)
 const showShareModal = ref(false)
 const showToast = ref(false)
 const toastMessage = ref('')
 const activeFaq = ref<number | null>(0)
-const faqSearch = ref('')
+const timelineProgress = ref(0)
+const timelineRef = ref<HTMLElement | null>(null)
+
+// ==========================================
+// LUXURY IMAGE GALLERY & LIGHTBOX SYSTEM
+// ==========================================
+const galleryModalOpen = ref(false)
+const activeLightboxIndex = ref(0)
+const mobileCarouselIndex = ref(0)
+
+const galleryImages = computed(() => {
+  const list: { url: string; title: string; caption: string }[] = []
+  
+  if (tour.value?.images && Array.isArray(tour.value.images) && tour.value.images.length > 0) {
+    tour.value.images.forEach((img: string, idx: number) => {
+      list.push({
+        url: getFullImageUrl(img),
+        title: `${tourTitle.value || 'Tour'} — Photo ${idx + 1}`,
+        caption: tourDescription.value || ''
+      })
+    })
+  } else if (tour.value?.mediaUrls && Array.isArray(tour.value.mediaUrls) && tour.value.mediaUrls.length > 0) {
+    tour.value.mediaUrls.forEach((img: string, idx: number) => {
+      list.push({
+        url: getFullImageUrl(img),
+        title: `${tourTitle.value || 'Tour'} — Photo ${idx + 1}`,
+        caption: tourDescription.value || ''
+      })
+    })
+  } else if (tour.value?.mainImage || tour.value?.imageUrl) {
+    list.push({
+      url: getFullImageUrl(tour.value.mainImage || tour.value.imageUrl),
+      title: tourTitle.value || 'Tour',
+      caption: tourDescription.value || ''
+    })
+  }
+
+  const fallbacks = [
+    { url: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1400&q=80', title: 'Quad Desert Safari', caption: 'High-speed quad bike adventure across Sinai desert sands' },
+    { url: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1000&q=80', title: 'Bedouin Camel Caravan', caption: 'Sunset camel trek across dramatic desert sand dunes' },
+    { url: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1000&q=80', title: 'Bedouin Camp Feast', caption: 'Authentic Bedouin camp with open-flame BBQ dinner' },
+    { url: 'https://images.unsplash.com/photo-1473580044384-7ba9967e16a0?auto=format&fit=crop&w=1000&q=80', title: 'Echo Mountains Canyon', caption: 'Spectacular sandstone formations and mountain echo shouts' },
+    { url: 'https://images.unsplash.com/photo-1570481662006-a3a1374699e8?auto=format&fit=crop&w=1000&q=80', title: 'Oriental Fire & Tanoura Show', caption: 'Live performance under the starlit Egyptian desert sky' }
+  ]
+
+  while (list.length < 5) {
+    const nextFallback = fallbacks[list.length % fallbacks.length]
+    list.push(nextFallback)
+  }
+
+  return list
+})
+
+const openLightbox = (index: number = 0) => {
+  activeLightboxIndex.value = Math.max(0, Math.min(index, galleryImages.value.length - 1))
+  galleryModalOpen.value = true
+  if (typeof document !== 'undefined') {
+    document.body.style.overflow = 'hidden'
+  }
+}
+
+const closeLightbox = () => {
+  galleryModalOpen.value = false
+  if (typeof document !== 'undefined') {
+    document.body.style.overflow = ''
+  }
+}
+
+const nextLightboxPhoto = () => {
+  activeLightboxIndex.value = (activeLightboxIndex.value + 1) % galleryImages.value.length
+}
+
+const prevLightboxPhoto = () => {
+  activeLightboxIndex.value = (activeLightboxIndex.value - 1 + galleryImages.value.length) % galleryImages.value.length
+}
+
+const onMobileCarouselScroll = (e: Event) => {
+  const el = e.target as HTMLElement
+  if (el) {
+    const width = el.offsetWidth || 1
+    const scrollLeft = el.scrollLeft || 0
+    mobileCarouselIndex.value = Math.round(scrollLeft / width)
+  }
+}
+
+const handleLightboxKeydown = (e: KeyboardEvent) => {
+  if (!galleryModalOpen.value) return
+  if (e.key === 'Escape') closeLightbox()
+  if (e.key === 'ArrowRight') nextLightboxPhoto()
+  if (e.key === 'ArrowLeft') prevLightboxPhoto()
+}
+
+const viewAllPhotosLabel = computed(() => {
+  const count = galleryImages.value.length
+  const dict: Record<string, string> = {
+    en: `View All ${count} Photos`,
+    de: `Alle ${count} Fotos ansehen`,
+    fr: `Voir les ${count} photos`,
+    it: `Mostra tutte le ${count} foto`,
+    ru: `Все ${count} фото`
+  }
+  return dict[locale.value] || dict['en']
+})
 
 // Booking Options State
 const selectedDate = ref(new Date(Date.now() + 86400000).toISOString().split('T')[0])
@@ -86,7 +185,9 @@ const i18nContent = computed(() => {
       reservePayLater: 'Reserve & Pay Later',
       hotelPickup: 'Hotel Pickup',
       reviewsCount: '4,288 reviews',
+      duration: 'Duration',
       durationLabel: '5 Hours',
+      egypt: 'Egypt',
       freeCancel: 'Free Cancellation (Up to 24h)',
       hotelTransfer: 'Hotel Transfer',
       included: 'Included',
@@ -96,6 +197,8 @@ const i18nContent = computed(() => {
       instantVoucher: 'Instant Voucher',
       viewAllPhotos: 'View All 30 Photos',
       hookQuote: 'Trade the resort for open desert, and let one golden evening hold five unforgettable adventures.',
+      totalPrice: 'Total Price',
+      bookNow: 'Book Now',
       tabs: {
         overview: 'Overview',
         highlights: 'Highlights',
@@ -207,7 +310,9 @@ const i18nContent = computed(() => {
       reservePayLater: 'Reserve & Pay Later',
       hotelPickup: 'Hotel Pickup',
       reviewsCount: '4.288 Bewertungen',
+      duration: 'Dauer',
       durationLabel: '5 Stunden',
+      egypt: 'Ägypten',
       freeCancel: 'Kostenlose Stornierung (bis zu 24 Std.)',
       hotelTransfer: 'Hoteltransfer',
       included: 'Inklusive',
@@ -217,6 +322,8 @@ const i18nContent = computed(() => {
       instantVoucher: 'Sofortige Bestätigung',
       viewAllPhotos: 'Alle 30 Fotos ansehen',
       hookQuote: 'Tauschen Sie das Hotel gegen die Wüste und erleben Sie fünf Abenteuer an einem goldenen Abend.',
+      totalPrice: 'Gesamtpreis',
+      bookNow: 'Jetzt buchen',
       tabs: {
         overview: 'Übersicht',
         highlights: 'Höhepunkte',
@@ -325,7 +432,9 @@ const i18nContent = computed(() => {
       allTours: 'Tutti i Tour',
       bestseller: 'Più Venduto',
       reviewsCount: '4.288 recensioni',
+      duration: 'Durata',
       durationLabel: '5 Ore',
+      egypt: 'Egitto',
       freeCancel: 'Cancellazione Gratuita (fino a 24h prima)',
       hotelTransfer: 'Trasferimento Hotel',
       included: 'Incluso',
@@ -335,6 +444,8 @@ const i18nContent = computed(() => {
       instantVoucher: 'Conferma Immediata',
       viewAllPhotos: 'Mostra tutte le 30 foto',
       hookQuote: "Lascia il resort per il deserto aperto e vivi cinque avventure indimenticabili in una serata d'oro.",
+      totalPrice: 'Prezzo totale',
+      bookNow: 'Prenota ora',
       tabs: {
         overview: 'Panoramica',
         highlights: 'Punti Forti',
@@ -443,7 +554,9 @@ const i18nContent = computed(() => {
       allTours: 'Tous les Tours',
       bestseller: 'Meilleure Vente',
       reviewsCount: '4 288 avis',
+      duration: 'Durée',
       durationLabel: '5 Heures',
+      egypt: 'Égypte',
       freeCancel: 'Annulation Gratuite (jusqu’à 24h avant)',
       hotelTransfer: 'Transfert Hôtel',
       included: 'Inclus',
@@ -453,6 +566,8 @@ const i18nContent = computed(() => {
       instantVoucher: 'Confirmation Immédiate',
       viewAllPhotos: 'Voir les 30 photos',
       hookQuote: 'Quittez votre hôtel pour le désert ouvert et vivez cinq aventures magiques en une soirée dorée.',
+      totalPrice: 'Prix total',
+      bookNow: 'Réserver',
       tabs: {
         overview: 'Aperçu',
         highlights: 'Points Forts',
@@ -564,7 +679,9 @@ const i18nContent = computed(() => {
       reservePayLater: 'Бронируйте сейчас, платите позже',
       hotelPickup: 'Трансфер из отеля',
       reviewsCount: '4 288 отзывов',
+      duration: 'Длительность',
       durationLabel: '5 часов',
+      egypt: 'Египет',
       freeCancel: 'Бесплатная отмена (за 24 ч.)',
       hotelTransfer: 'Трансфер из отеля',
       included: 'Включено',
@@ -574,6 +691,8 @@ const i18nContent = computed(() => {
       instantVoucher: 'Мгновенное подтверждение',
       viewAllPhotos: 'Все 30 фото',
       hookQuote: 'Смените отель на бескрайнюю пустыню и проживите 5 ярких приключений за один золотой вечер.',
+      totalPrice: 'Итого',
+      bookNow: 'Забронировать',
       tabs: {
         overview: 'Обзор',
         highlights: 'Главное',
@@ -679,7 +798,77 @@ const i18nContent = computed(() => {
     }
   }
 
-  return dict[lang] || dict['en']
+  const base = dict[lang] || dict['en']
+  return {
+    ...base,
+    home: t('tourDetails.home'),
+    allTours: t('tourDetails.allTours'),
+    bestseller: t('tourDetails.bestseller'),
+    reviewsCount: t('tourDetails.reviewsCount'),
+    durationLabel: t('tourDetails.durationLabel'),
+    freeCancel: t('tourDetails.freeCancel'),
+    hotelTransfer: t('tourDetails.hotelTransfer'),
+    included: t('tourDetails.included'),
+    liveGuide: t('tourDetails.liveGuide'),
+    guideLangs: t('tourDetails.guideLangs'),
+    mobileTicket: t('tourDetails.mobileTicket'),
+    instantVoucher: t('tourDetails.instantVoucher'),
+    viewAllPhotos: t('tourDetails.viewAllPhotos'),
+    hookQuote: t('tourDetails.hookQuote'),
+    tabs: {
+      overview: t('tourDetails.navigation.overview'),
+      highlights: t('tourDetails.navigation.highlights'),
+      itinerary: t('tourDetails.navigation.itinerary'),
+      includes: t('tourDetails.navigation.includes'),
+      info: t('tourDetails.navigation.info'),
+      reviews: t('tourDetails.navigation.reviews'),
+      faq: t('tourDetails.navigation.faq')
+    },
+    descHeading: t('tourDetails.descHeading'),
+    readMore: t('tourDetails.readMore'),
+    showLess: t('tourDetails.showLess'),
+    highlightsHeading: t('tourDetails.highlightsHeading'),
+    itineraryHeading: t('tourDetails.itineraryHeading'),
+    includesHeading: t('tourDetails.includesHeading'),
+    includedTitle: t('tourDetails.includedTitle'),
+    excludedTitle: t('tourDetails.excludedTitle'),
+    infoHeading: t('tourDetails.infoHeading'),
+    whatToBringTitle: t('tourDetails.whatToBringTitle'),
+    notSuitableTitle: t('tourDetails.notSuitableTitle'),
+    notSuitableText: t('tourDetails.notSuitableText'),
+    reviewsHeading: t('tourDetails.reviewsHeading'),
+    reviewsSub: t('tourDetails.reviewsSub'),
+    verifiedBooking: t('tourDetails.verifiedBooking'),
+    faqHeading: t('tourDetails.faqHeading'),
+    sidebar: {
+      startingFrom: t('tourDetails.sidebar.startingFrom'),
+      saveBadge: t('tourDetails.sidebar.saveBadge'),
+      perPerson: t('tourDetails.sidebar.perPerson'),
+      step1: t('tourDetails.sidebar.step1'),
+      step2: t('tourDetails.sidebar.step2'),
+      step3: t('tourDetails.sidebar.step3'),
+      adults: t('tourDetails.sidebar.adults'),
+      adultsAge: t('tourDetails.sidebar.adultsAge'),
+      children: t('tourDetails.sidebar.children'),
+      childrenAge: t('tourDetails.sidebar.childrenAge'),
+      step4: t('tourDetails.sidebar.step4'),
+      totalAmount: t('tourDetails.sidebar.totalAmount'),
+      taxesIncluded: t('tourDetails.sidebar.taxesIncluded'),
+      bookBtn: t('tourDetails.sidebar.bookBtn'),
+      instantConfirmation: t('tourDetails.sidebar.instantConfirmation'),
+      trust1: t('tourDetails.sidebar.trust1'),
+      trust2: t('tourDetails.sidebar.trust2'),
+      trust3: t('tourDetails.sidebar.trust3')
+    },
+    reviewForm: {
+      title: t('tourDetails.reviewForm.title'),
+      yourRating: t('tourDetails.reviewForm.yourRating'),
+      yourName: t('tourDetails.reviewForm.yourName'),
+      reviewTitle: t('tourDetails.reviewForm.reviewTitle'),
+      shareExperience: t('tourDetails.reviewForm.shareExperience'),
+      submitReview: t('tourDetails.reviewForm.submitReview')
+    }
+  }
 })
 
 const tourTitle = computed(() => {
@@ -724,7 +913,15 @@ const defaultAddons = computed(() => {
   }))
 })
 
-const availableAddons = computed(() => tour.value?.addons || defaultAddons.value)
+const availableAddons = computed(() => {
+  if (tour.value?.addons && Array.isArray(tour.value.addons)) {
+    return tour.value.addons;
+  }
+  if (tour.value && typeof tour.value.id === 'string' && tour.value.id.length > 10) {
+    return [];
+  }
+  return defaultAddons.value;
+})
 
 const getLocalized = (dict: Record<string, string>, fallback: string) => {
   if (!dict) return fallback
@@ -733,8 +930,7 @@ const getLocalized = (dict: Record<string, string>, fallback: string) => {
 
 const isBookingModalOpen = ref(false)
 const bookingSubmitting = ref(false)
-const passportUploading = ref(false)
-const passportFile = ref<{ name: string; size: string; url: string; fileId?: string } | null>(null)
+const guestInfoFormRef = ref<any>(null)
 
 const bookingForm = ref({
   fullName: '',
@@ -750,8 +946,7 @@ const formErrors = ref({
   fullName: '',
   email: '',
   whatsapp: '',
-  hotelName: '',
-  passport: ''
+  hotelName: ''
 })
 
 const tourHighlights = computed(() => {
@@ -781,25 +976,6 @@ const tourFaqs = computed(() => {
   if (tour.value?.faqs) return tour.value.faqs
   return i18nContent.value.faqs
 })
-
-const getFaqBadge = (q: string) => {
-  const text = q.toLowerCase()
-  if (text.includes('cancel') || text.includes('stornier')) return { label: 'Cancellation', color: 'bg-red-50 text-red-600 border-red-100' }
-  if (text.includes('pay') || text.includes('child') || text.includes('kinder')) return { label: 'Policy', color: 'bg-emerald-50 text-emerald-600 border-emerald-100' }
-  if (text.includes('pickup') || text.includes('hotel') || text.includes('abholung')) return { label: 'Pickup', color: 'bg-blue-50 text-blue-600 border-blue-100' }
-  if (text.includes('license') || text.includes('passport') || text.includes('führerschein')) return { label: 'Permits', color: 'bg-purple-50 text-purple-600 border-purple-100' }
-  return null
-}
-
-const filteredFaqs = computed(() => {
-  let list = tourFaqs.value
-  if (faqSearch.value) {
-    const s = faqSearch.value.toLowerCase()
-    list = list.filter((f: any) => f.q.toLowerCase().includes(s) || f.a.toLowerCase().includes(s))
-  }
-  return list
-})
-
 const tourWhatToBring = computed(() => {
   if (tour.value?.whatToBring?.[locale.value]) return tour.value.whatToBring[locale.value]
   if (tour.value?.whatToBring?.['en']) return tour.value.whatToBring['en']
@@ -834,17 +1010,29 @@ const availablePickupTimes = computed(() => {
 const dynamicOptions = computed(() => {
   if (tour.value?.packages && Array.isArray(tour.value.packages) && tour.value.packages.length > 0) {
     return tour.value.packages.map((pkg: any) => {
-      const title = typeof pkg.name === 'object' ? (pkg.name[locale.value] || pkg.name['en']) : (pkg.name || pkg.title || 'Package')
-      const subtitle = typeof pkg.description === 'object' ? (pkg.description[locale.value] || pkg.description['en']) : (pkg.description || pkg.subtitle || '')
-      const features = Array.isArray(pkg.features) ? pkg.features : (pkg.features ? [pkg.features] : [])
+      const title = pkg.titles ? (pkg.titles[locale.value] || pkg.titles['en'] || Object.values(pkg.titles)[0] || 'Package')
+        : (typeof pkg.name === 'object' ? (pkg.name[locale.value] || pkg.name['en']) : (pkg.name || pkg.title || 'Package'))
+      
+      const subtitle = pkg.descriptions ? (pkg.descriptions[locale.value] || pkg.descriptions['en'] || Object.values(pkg.descriptions)[0] || '')
+        : (typeof pkg.description === 'object' ? (pkg.description[locale.value] || pkg.description['en']) : (pkg.description || pkg.subtitle || ''))
+      
+      let rawFeatures = pkg.features
+      if (typeof rawFeatures === 'object' && !Array.isArray(rawFeatures)) {
+        rawFeatures = rawFeatures[locale.value] || rawFeatures['en'] || Object.values(rawFeatures)[0] || []
+      }
+      const features = Array.isArray(rawFeatures) 
+        ? rawFeatures 
+        : (typeof rawFeatures === 'string' ? rawFeatures.split(',').map((s: string) => s.trim()).filter(Boolean) : [])
+
       return {
         id: pkg.id,
         title,
         subtitle,
-        features: features.map((f: any) => typeof f === 'object' ? (f[locale.value] || f['en'] || f) : f),
+        features: features.map((f: any) => typeof f === 'object' ? (f[locale.value] || f['en'] || f) : String(f)),
         basePriceEur: Number(pkg.price) || Number(tour.value?.price) || 25,
         wasPriceEur: Number(pkg.originalPrice) || Math.round((Number(pkg.price) || Number(tour.value?.price) || 25) * 1.25),
-        departureTime: '15:30'
+        departureTime: '15:30',
+        badge: pkg.badge || (pkg.badges ? (pkg.badges[locale.value] || pkg.badges['en']) : '')
       }
     })
   }
@@ -912,7 +1100,15 @@ const rawTotalPriceEur = computed(() => {
   }
   selectedAddons.value.forEach(id => {
     const addon = availableAddons.value.find((a: any) => a.id === id)
-    if (addon) totalEur += addon.priceEur
+    if (addon) {
+      const price = addon.priceEur || addon.price || 0
+      const isPerPerson = addon.pricingType === 'PerPerson' || addon.isPerPerson === true
+      if (isPerPerson) {
+        totalEur += price * (Math.max(1, adultsCount.value) + childrenCount.value)
+      } else {
+        totalEur += price
+      }
+    }
   })
   return totalEur
 })
@@ -922,62 +1118,7 @@ const totalPriceFormatted = computed(() => currencyStore.formatPrice(rawTotalPri
 const shareUrl = computed(() => typeof window !== 'undefined' ? window.location.href : '')
 
 // Gallery Images
-const defaultGalleryImages = [
-  {
-    url: 'https://images.unsplash.com/photo-1542362567-b07eac790947?auto=format&fit=crop&w=1400&q=80',
-    title: 'Desert Quad ATV Safari',
-    caption: 'Quad biking across the golden Sinai desert sands at sunset'
-  },
-  {
-    url: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1000&q=80',
-    title: 'Bedouin Camel Caravan',
-    caption: 'Sunset camel trek across dramatic desert sand dunes'
-  },
-  {
-    url: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1000&q=80',
-    title: 'Bedouin Camp Feast',
-    caption: 'Authentic Bedouin camp with open-flame BBQ dinner'
-  },
-  {
-    url: 'https://images.unsplash.com/photo-1473580044384-7ba9967e16a0?auto=format&fit=crop&w=1000&q=80',
-    title: 'Echo Mountains Canyon',
-    caption: 'Spectacular sandstone formations and mountain echo shouts'
-  },
-  {
-    url: 'https://images.unsplash.com/photo-1570481662006-a3a1374699e8?auto=format&fit=crop&w=1000&q=80',
-    title: 'Oriental Fire & Tanoura Show',
-    caption: 'Live performance under the starlit Egyptian desert sky'
-  }
-]
 
-const galleryImages = computed(() => {
-  const urls: string[] = (tour.value?.mediaUrls && Array.isArray(tour.value.mediaUrls) && tour.value.mediaUrls.length > 0)
-    ? tour.value.mediaUrls
-    : (tour.value?.images && Array.isArray(tour.value.images) && tour.value.images.length > 0)
-      ? tour.value.images
-      : []
-
-  if (urls.length > 0) {
-    return urls.map((url: string, index: number) => ({
-      url: getFullImageUrl(url),
-      title: `${tourTitle.value} - Photo ${index + 1}`,
-      caption: tourDescription.value
-    }))
-  }
-
-  const cover = tour.value?.imageUrl || tour.value?.mainImage
-  if (cover) {
-    return [
-      {
-        url: getFullImageUrl(cover),
-        title: tourTitle.value,
-        caption: tourDescription.value
-      }
-    ]
-  }
-
-  return defaultGalleryImages
-})
 
 // Fetch Tour API
 const fetchTourData = async () => {
@@ -1051,70 +1192,9 @@ const toggleAddon = (id: number) => {
   }
 }
 
-const handlePassportUpload = async (e: Event) => {
-  const target = e.target as HTMLInputElement
-  if (!target.files || target.files.length === 0) return
-  const file = target.files[0]
-  
-  if (file.size > 10 * 1024 * 1024) {
-    formErrors.value.passport = 'File size must be under 10MB.'
-    return
-  }
-  
-  passportUploading.value = true
-  formErrors.value.passport = ''
-  
-  try {
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-    const formData = new FormData()
-    formData.append('file', file)
-    
-    let fileUrl = URL.createObjectURL(file)
-    let fileId = ''
-    
-    try {
-      const uploadRes = await fetch(`${API_URL}/api/files`, {
-        method: 'POST',
-        body: formData
-      })
-      if (uploadRes.ok) {
-        const data = await uploadRes.json()
-        fileId = data.fileId || ''
-        fileUrl = `${API_URL}/api/files/${fileId}`
-      }
-    } catch {
-      // Local preview fallback
-    }
-    
-    passportFile.value = {
-      name: file.name,
-      size: `${(file.size / (1024 * 1024)).toFixed(2)} MB`,
-      url: fileUrl,
-      fileId
-    }
-    formErrors.value.passport = ''
-  } catch (err) {
-    console.error('Passport upload error', err)
-    formErrors.value.passport = 'Failed to upload document.'
-  } finally {
-    passportUploading.value = false
-    target.value = ''
-  }
-}
-
-const removePassportFile = () => {
-  passportFile.value = null
-  formErrors.value.passport = ''
-}
-
 const validateForm = () => {
   let isValid = true
-  formErrors.value = { fullName: '', email: '', whatsapp: '', hotelName: '', passport: '' }
-  
-  if (!bookingForm.value.fullName || bookingForm.value.fullName.trim().length < 2) {
-    formErrors.value.fullName = t("validation.fullNameRequired")
-    isValid = false
-  }
+  formErrors.value = { fullName: '', email: '', whatsapp: '', hotelName: '' }
   
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   if (!bookingForm.value.email || !emailRegex.test(bookingForm.value.email.trim())) {
@@ -1132,21 +1212,21 @@ const validateForm = () => {
     isValid = false
   }
 
-  if (!passportFile.value) {
-    formErrors.value.passport = t("validation.passportRequired")
+  // Validate GuestInfoForm
+  const guestsValid = guestInfoFormRef.value ? guestInfoFormRef.value.validate() : true
+  if (!guestsValid) {
     isValid = false
   }
+
+  // GuestInfoForm now handles guest-specific details like passport and name.
+  // We bypass those checks here.
+  bookingForm.value.fullName = bookingForm.value.fullName || "Primary Guest"
   
   return isValid
 }
 
 const handleBookNow = () => {
-  formErrors.value = { fullName: '', email: '', whatsapp: '', hotelName: '', passport: '' }
-  if (authStore.user) {
-    if (!bookingForm.value.fullName) bookingForm.value.fullName = authStore.user.name || authStore.user.fullName || ''
-    if (!bookingForm.value.email) bookingForm.value.email = authStore.user.email || ''
-    if (!bookingForm.value.whatsapp) bookingForm.value.whatsapp = authStore.user.phone || authStore.user.phoneNumber || ''
-  }
+  formErrors.value = { fullName: '', email: '', whatsapp: '', hotelName: '' }
   isBookingModalOpen.value = true
 }
 
@@ -1180,12 +1260,20 @@ const confirmBooking = async () => {
       hotelName: bookingForm.value.hotelName.trim(),
       roomNumber: bookingForm.value.roomNumber.trim(),
       pickupTime: bookingForm.value.pickupTime,
-      passportFileName: passportFile.value?.fileId || passportFile.value?.name || null,
+      passportFileName: null,
       tourDate: selectedDate.value,
       guests: adultsCount.value + childrenCount.value,
       totalPrice: rawTotalPriceEur.value,
+      language: locale.value || 'en',
       hotelPickup: true,
-      selectedAddons: addonsPayload
+      selectedAddons: addonsPayload,
+      guestsList: guestInfoFormRef.value?.guests?.map((g: any) => ({
+        fullName: g.fullName,
+        passportFileName: g.documentUrl || g.passportFileName || '',
+        ageCategory: g.ageCategory || (g.isChild ? 'Child' : 'Adult'),
+        nationality: g.nationality || '',
+        specialRequests: g.notes || g.specialRequests || ''
+      })) || []
     }
     
     try {
@@ -1201,7 +1289,6 @@ const confirmBooking = async () => {
     toastMessage.value = t("toast.bookingConfirmed")
     showToast.value = true
     isBookingModalOpen.value = false
-    bookingReceivedSuccess.value = true
     setTimeout(() => { showToast.value = false }, 5000)
   } finally {
     bookingSubmitting.value = false
@@ -1220,11 +1307,6 @@ const toggleSave = () => {
   toastMessage.value = saved ? t("toast.tourSaved") : 'Removed from favorites'
   showToast.value = true
   setTimeout(() => { showToast.value = false }, 3000)
-}
-
-const openLightbox = (idx: number) => {
-  activeLightboxIndex.value = idx
-  galleryModalOpen.value = true
 }
 
 const copyShareLink = () => {
@@ -1253,12 +1335,33 @@ const handleGlobalClick = (e: MouseEvent) => {
   }
 }
 
-onMounted(() => {
-  fetchTourData()
+const handleTimelineScroll = () => {
+  if (!timelineRef.value) return
+  const rect = timelineRef.value.getBoundingClientRect()
+  const windowHeight = window.innerHeight
+  
+  if (rect.top > windowHeight) {
+    timelineProgress.value = 0
+  } else if (rect.bottom < 0) {
+    timelineProgress.value = 1
+  } else {
+    // Calculate progress as it scrolls through the viewport
+    const totalHeight = rect.height
+    const visibleHeight = windowHeight - rect.top
+    let progress = (visibleHeight - windowHeight * 0.2) / (totalHeight + windowHeight * 0.2)
+    progress = Math.max(0, Math.min(1, progress))
+    timelineProgress.value = progress
+  }
+}
+
+onMounted(async () => {
+  await fetchTourData()
+  window.addEventListener('scroll', handleTimelineScroll)
   window.addEventListener('click', handleGlobalClick)
 })
 
 onUnmounted(() => {
+  window.removeEventListener('scroll', handleTimelineScroll)
   window.removeEventListener('click', handleGlobalClick)
 })
 
@@ -1272,17 +1375,15 @@ watch(routeSlug, () => {
     
     <!-- TOP CLEAN NAVIGATION BAR (Full Width Header) -->
     <header class="sticky top-0 z-50 bg-white border-b border-[#e2e8f0] shadow-xs w-full">
-      <div class="w-full max-w-[1480px] mx-auto px-4 sm:px-8 xl:px-12 h-16 flex items-center justify-between">
+      <div class="w-full max-w-[1480px] mx-auto px-3 sm:px-8 xl:px-12 h-16 flex items-center justify-between">
         
         <!-- Logo & Back link -->
-        <div class="flex items-center gap-4">
-          <router-link to="/" class="flex items-center gap-2.5 text-decoration-none group">
-            <div class="w-9 h-9 bg-gradient-to-tr from-[#062d4d] to-[#0a4878] rounded-xl flex items-center justify-center text-white shadow-sm group-hover:scale-105 transition-transform">
-              <span class="text-lg">🌊</span>
-            </div>
-            <div class="flex flex-col">
-              <span class="font-serif text-lg font-bold text-[#062d4d] leading-none tracking-tight">SeeDora</span>
-              <span class="text-[9px] uppercase font-bold tracking-widest text-[#c9a84c] leading-none mt-0.5">Luxury Egypt</span>
+        <div class="flex items-center gap-2 sm:gap-4 flex-shrink-0">
+          <router-link to="/" class="flex items-center gap-1.5 sm:gap-2.5 text-decoration-none group flex-shrink-0">
+            <img src="/logo-emblem.png" alt="Seadora" class="w-8 h-8 sm:w-10 sm:h-10 object-contain drop-shadow-sm group-hover:scale-105 transition-transform shrink-0" />
+            <div class="flex flex-col shrink-0">
+              <span class="font-serif text-sm sm:text-lg font-bold text-[#062d4d] leading-none tracking-wider whitespace-nowrap">SEADORA TRAVEL</span>
+              <span class="text-[7px] sm:text-[9px] uppercase font-bold tracking-widest text-[#c9a84c] leading-none mt-0.5 whitespace-nowrap">Egypt</span>
             </div>
           </router-link>
 
@@ -1297,18 +1398,18 @@ watch(routeSlug, () => {
         </div>
 
         <!-- Right Header Actions (Language & Currency Dropdown Buttons) -->
-        <div class="flex items-center gap-2.5">
+        <div class="flex items-center gap-1 sm:gap-2.5 shrink-0">
           
           <!-- Language Selector Button with Dropdown -->
           <div class="relative lang-dropdown-container">
             <button 
               @click.stop="showLangDropdown = !showLangDropdown; showCurrencyDropdown = false"
-              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#e2e8f0] bg-white hover:bg-[#f1f5f9] text-xs font-bold text-[#0f172a] transition-all shadow-xs cursor-pointer"
+              class="flex items-center gap-1 sm:gap-1.5 px-2 py-1.5 rounded-lg border border-[#e2e8f0] bg-white hover:bg-[#f1f5f9] text-xs font-bold text-[#0f172a] transition-all shadow-xs cursor-pointer"
               aria-label="Select Language"
             >
-              <span class="text-sm">{{ currentLangObj.flag }}</span>
-              <span>{{ currentLangObj.iso }}</span>
-              <svg class="w-3 h-3 text-[#64748b] transition-transform" :class="{ 'rotate-180': showLangDropdown }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <span class="text-sm leading-none">{{ currentLangObj.flag }}</span>
+              <span class="hidden sm:inline">{{ currentLangObj.iso }}</span>
+              <svg class="w-3 h-3 text-[#64748b] transition-transform hidden sm:block" :class="{ 'rotate-180': showLangDropdown }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
             </button>
@@ -1341,12 +1442,12 @@ watch(routeSlug, () => {
           <div class="relative currency-dropdown-container">
             <button 
               @click.stop="showCurrencyDropdown = !showCurrencyDropdown; showLangDropdown = false"
-              class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#e2e8f0] bg-white hover:bg-[#f1f5f9] text-xs font-bold text-[#0f172a] transition-all shadow-xs cursor-pointer"
+              class="flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg border border-[#e2e8f0] bg-white hover:bg-[#f1f5f9] text-xs font-bold text-[#0f172a] transition-all shadow-xs cursor-pointer"
               aria-label="Select Currency"
             >
-              <span class="text-[#047857] font-extrabold">{{ currentCurrencyObj.symbol }}</span>
-              <span>{{ currentCurrencyObj.code }}</span>
-              <svg class="w-3 h-3 text-[#64748b] transition-transform" :class="{ 'rotate-180': showCurrencyDropdown }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+              <span class="text-[#047857] font-extrabold leading-none">{{ currentCurrencyObj.symbol }}</span>
+              <span class="hidden sm:inline">{{ currentCurrencyObj.code }}</span>
+              <svg class="w-3 h-3 text-[#64748b] transition-transform hidden sm:block" :class="{ 'rotate-180': showCurrencyDropdown }" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
             </button>
@@ -1402,7 +1503,7 @@ watch(routeSlug, () => {
     </header>
 
     <!-- FULL WIDTH PRODUCT CONTAINER -->
-    <main class="w-full max-w-[1480px] mx-auto px-4 sm:px-6 xl:px-12 py-6">
+    <main class="w-full max-w-[1480px] mx-auto px-4 sm:px-6 xl:px-12 py-6 pb-28 sm:pb-12">
       
       <!-- DESKTOP TOP TITLE & BADGES ROW -->
       <div class="mb-5">
@@ -1419,7 +1520,7 @@ watch(routeSlug, () => {
         </h1>
 
         <!-- Rating & Trust Pills Header Row -->
-        <div class="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-2 text-[11px] sm:text-xs">
           <!-- Rating -->
           <div class="flex items-center gap-1.5 bg-[#ecfdf5] border border-[#a7f3d0] px-2.5 py-1 rounded-full text-[#065f46] font-bold">
             <span class="text-amber-500 text-sm">★</span>
@@ -1427,69 +1528,130 @@ watch(routeSlug, () => {
             <span class="text-[#047857] font-normal underline cursor-pointer">({{ tourReviewCount.toLocaleString() }} {{ $t('tourDetails.navigation.reviews') || 'reviews' }})</span>
           </div>
 
-          <!-- Bestseller badge -->
-          <span class="bg-[#fef3c7] text-[#92400e] border border-[#fde68a] px-2.5 py-1 rounded-full font-bold flex items-center gap-1">
-            <span>👑</span> {{ i18nContent.bestseller }}
-          </span>
-
           <!-- Location -->
-          <span class="text-[#475569] flex items-center gap-1 font-medium">
-            <span>📍</span> Egypt
+          <span class="bg-gray-100 border border-gray-200 text-[#475569] px-2.5 py-1 rounded-full flex items-center gap-1 font-medium">
+            <span>📍</span> {{ i18nContent.egypt || 'Egypt' }}
           </span>
 
           <!-- Duration -->
-          <span class="text-[#475569] flex items-center gap-1 font-medium">
+          <span class="bg-gray-100 border border-gray-200 text-[#475569] px-2.5 py-1 rounded-full flex items-center gap-1 font-medium">
             <span>⏱️</span> {{ tourDuration }}
           </span>
 
-          <!-- Free Cancellation -->
-          <span class="text-[#059669] font-bold flex items-center gap-1">
-            <span>✓</span> {{ i18nContent.freeCancel }}
+          <!-- Badges -->
+          <span v-if="tour?.isBestseller !== false" class="bg-[#fef3c7] text-[#92400e] border border-[#fde68a] px-2.5 py-1 rounded-full font-bold flex items-center gap-1">
+            <span>👑</span> {{ i18nContent.bestseller || 'Bestseller' }}
+          </span>
+          
+          <span v-if="tour?.isTopRated" class="bg-[#e0e7ff] text-[#3730a3] border border-[#c7d2fe] px-2.5 py-1 rounded-full font-bold flex items-center gap-1">
+            <span>⭐</span> {{ i18nContent.topRated || 'Top Rated' }}
+          </span>
+          
+          <span v-if="tour?.reserveAndPayLater !== false" class="bg-[#f0f9ff] text-[#0284c7] border border-[#bae6fd] px-2.5 py-1 rounded-full font-bold flex items-center gap-1">
+            <span>💳</span> {{ i18nContent.reservePayLater || 'Reserve & Pay Later' }}
+          </span>
+
+          <span v-if="tour?.freeCancellation !== false" class="bg-[#ecfdf5] text-[#059669] border border-[#a7f3d0] px-2.5 py-1 rounded-full font-bold flex items-center gap-1">
+            <span>✓</span> {{ i18nContent.freeCancel || 'Free Cancellation' }}
+          </span>
+          
+          <span v-if="tour?.hotelPickup !== false" class="bg-gray-100 text-[#475569] border border-gray-200 px-2.5 py-1 rounded-full font-bold flex items-center gap-1">
+            <span>🚐</span> {{ i18nContent.hotelPickup || 'Hotel Pickup' }}
           </span>
         </div>
       </div>
 
-      <!-- AIRBNB-STYLE 5-PHOTO MOSAIC GALLERY -->
-      <section class="mb-8 relative rounded-2xl overflow-hidden shadow-md">
-        <div class="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-2 h-[260px] sm:h-[340px] md:h-[450px] lg:h-[500px]">
-          
-          <!-- Large Hero Photo (Spans 2 cols, 2 rows on desktop) -->
+      <!-- BESPOKE LUXURY PHOTO GALLERY (Mobile Swipeable Touch Slider + Desktop Mosaic) -->
+      <section class="mb-8 relative rounded-3xl overflow-hidden shadow-lg border border-slate-200/80 bg-slate-900">
+        
+        <!-- 1. MOBILE TOUCH-SWIPE SLIDER (Visible on mobile < md) -->
+        <div class="block md:hidden relative">
           <div 
-            @click="openLightbox(0)" 
-            class="md:col-span-2 md:row-span-2 w-full h-full relative group cursor-pointer overflow-hidden bg-[#e2e8f0]"
+            class="flex overflow-x-auto snap-x snap-mandatory scrollbar-none touch-pan-x"
+            @scroll="onMobileCarouselScroll"
           >
-            <img 
-              :src="galleryImages[0].url" 
-              :alt="galleryImages[0].title"
-              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-            <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-5 text-white">
-              <span class="text-base font-semibold">{{ galleryImages[0].title }}</span>
+            <div 
+              v-for="(img, idx) in galleryImages" 
+              :key="idx" 
+              class="w-full shrink-0 snap-center h-[280px] sm:h-[350px] relative cursor-pointer"
+              @click="openLightbox(idx)"
+            >
+              <img 
+                :src="img.url" 
+                :alt="img.title" 
+                class="w-full h-full object-cover" 
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
             </div>
           </div>
 
-          <!-- 4 Thumbnail Grid Photos -->
+          <!-- Floating Photo Index & Expand Badge -->
+          <div class="absolute bottom-4 left-4 right-4 flex justify-between items-center pointer-events-none">
+            <div class="px-3 py-1 bg-black/70 backdrop-blur-md text-white text-xs font-bold rounded-full pointer-events-auto flex items-center gap-1.5 shadow-md">
+              <span>📸</span>
+              <span>{{ mobileCarouselIndex + 1 }} / {{ galleryImages.length }}</span>
+            </div>
+
+            <button 
+              @click="openLightbox(mobileCarouselIndex)"
+              class="px-3 py-1 bg-white/90 hover:bg-white backdrop-blur-md text-slate-900 text-xs font-bold rounded-full pointer-events-auto flex items-center gap-1 shadow-md active:scale-95 transition-transform cursor-pointer"
+            >
+              <span>🔍</span>
+              <span>{{ $t('tourDetails.gallery.viewAll') || 'Enlarge' }}</span>
+            </button>
+          </div>
+
+          <!-- Dot Indicators -->
+          <div class="absolute bottom-1.5 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
+            <span 
+              v-for="(_, dIdx) in galleryImages" 
+              :key="dIdx" 
+              :class="mobileCarouselIndex === dIdx ? 'w-5 bg-[#c9a84c]' : 'w-1.5 bg-white/50'" 
+              class="h-1.5 rounded-full transition-all duration-300"
+            ></span>
+          </div>
+        </div>
+
+        <!-- 2. DESKTOP 5-PHOTO ASYMMETRIC MOSAIC (Visible on md+) -->
+        <div class="hidden md:grid md:grid-cols-4 md:grid-rows-2 gap-2 h-[420px] lg:h-[500px]">
+          
+          <!-- Main Hero Photo (Spans 2 columns & 2 rows) -->
+          <div 
+            @click="openLightbox(0)" 
+            class="md:col-span-2 md:row-span-2 w-full h-full relative group cursor-pointer overflow-hidden bg-slate-800"
+          >
+            <img 
+              :src="galleryImages[0]?.url" 
+              :alt="galleryImages[0]?.title"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6 text-white">
+              <span class="text-base font-bold">{{ galleryImages[0]?.title }}</span>
+            </div>
+          </div>
+
+          <!-- 4 Grid Thumbnails -->
           <div 
             v-for="(img, i) in galleryImages.slice(1, 5)" 
             :key="i"
             @click="openLightbox(Number(i) + 1)"
-            class="hidden md:block relative group cursor-pointer overflow-hidden bg-[#e2e8f0]"
+            class="relative group cursor-pointer overflow-hidden bg-slate-800"
           >
             <img 
               :src="img.url" 
               :alt="img.title"
-              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
             />
-            <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
+            <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-300"></div>
 
-            <!-- "Show All Photos" Trigger on the last thumbnail -->
+            <!-- "Show All Photos" Trigger on the 4th thumbnail -->
             <button 
-              v-if="i === 3" 
+              v-if="i === 3 || i === (galleryImages.slice(1, 5).length - 1)" 
               @click.stop="openLightbox(0)"
-              class="absolute bottom-4 right-4 bg-white/95 backdrop-blur-md hover:bg-white text-[#0f172a] px-4 py-2.5 rounded-xl text-xs font-bold shadow-lg flex items-center gap-2 transition-all hover:scale-105 cursor-pointer"
+              class="absolute bottom-4 right-4 bg-white/95 backdrop-blur-md hover:bg-white text-slate-900 px-4 py-2.5 rounded-xl text-xs font-black shadow-xl flex items-center gap-2 transition-all hover:scale-105 active:scale-95 cursor-pointer border border-slate-200"
             >
               <span>📸</span>
-              <span>{{ i18nContent.viewAllPhotos }}</span>
+              <span>{{ viewAllPhotosLabel }}</span>
             </button>
           </div>
 
@@ -1518,7 +1680,7 @@ watch(routeSlug, () => {
                   ⏱️
                 </div>
                 <div>
-                  <div class="text-[10px] uppercase font-bold text-[#94a3b8]">Duration</div>
+                  <div class="text-[10px] uppercase font-bold text-[#94a3b8]">{{ i18nContent.duration || 'Duration' }}</div>
                   <div class="text-xs sm:text-sm font-bold text-[#0f172a]">{{ i18nContent.durationLabel }}</div>
                 </div>
               </div>
@@ -1617,16 +1779,22 @@ watch(routeSlug, () => {
           <!-- 3. Itinerary Timeline -->
           <div v-show="activeTab === 'itinerary' || activeTab === 'overview'" class="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e8f0] shadow-xs">
             <h3 class="text-lg sm:text-xl font-bold text-[#0f172a] mb-6">{{ i18nContent.itineraryHeading }}</h3>
-            <div class="relative pl-8 space-y-7 before:content-[''] before:absolute before:left-[19px] before:top-2 before:bottom-2 before:w-[2px] before:bg-gradient-to-b before:from-[#c9a84c] before:to-[#e2e8f0]">
+            <div class="relative pl-8 space-y-7" ref="timelineRef">
+              <!-- Animated Timeline Progress Line -->
+              <div class="absolute left-3 top-2 bottom-2 w-0.5 bg-[#e2e8f0] rounded-full overflow-hidden">
+                <div class="w-full bg-[#062d4d] origin-top transition-transform duration-300 ease-out"
+                     :style="{ transform: `scaleY(${timelineProgress})`, height: '100%' }"></div>
+              </div>
+
               <div v-for="(step, idx) in tourItinerary" :key="idx" class="relative group">
                 <!-- Marker Dot -->
-                <div class="absolute -left-[39px] top-0.5 w-7 h-7 rounded-full bg-[#c9a84c] text-white text-[13px] font-bold flex items-center justify-center ring-4 ring-white shadow-md z-10 transition-transform group-hover:scale-110">
+                <div class="absolute -left-[35px] top-0.5 w-6 h-6 rounded-full bg-[#062d4d] text-white text-xs font-bold flex items-center justify-center ring-4 ring-white shadow-xs transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-125">
                   {{ Number(idx) + 1 }}
                 </div>
-                <div class="bg-white transition-all">
-                  <span class="inline-block px-2.5 py-0.5 bg-[#f8fafc] border border-[#e2e8f0] rounded-full text-[10px] font-extrabold uppercase tracking-widest text-[#c9a84c] mb-2 shadow-sm">{{ step.time }}</span>
-                  <h4 class="text-base sm:text-lg font-serif font-bold text-[#062d4d]">{{ step.title }}</h4>
-                  <p class="text-sm text-[#475569] mt-1.5 leading-relaxed">{{ step.desc }}</p>
+                <div>
+                  <span class="text-xs font-bold uppercase tracking-wider text-[#0284c7] block">{{ step.time }}</span>
+                  <h4 class="text-sm sm:text-base font-bold text-[#0f172a] mt-0.5">{{ step.title }}</h4>
+                  <p class="text-xs sm:text-sm text-[#64748b] mt-1 leading-relaxed">{{ step.desc }}</p>
                 </div>
               </div>
             </div>
@@ -1757,43 +1925,80 @@ watch(routeSlug, () => {
                 </p>
               </div>
             </div>
+
+            <!-- Review Submission Form -->
+            <div class="mt-8 pt-6 border-t border-[#e2e8f0]">
+              <h4 class="text-base sm:text-lg font-bold text-[#0f172a] mb-4">{{ i18nContent.reviewForm.title }}</h4>
+              <form @submit.prevent="" class="space-y-4 bg-[#f8fafc] p-4 sm:p-5 rounded-xl border border-[#f1f5f9]">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs font-bold text-[#334155] mb-1.5">{{ i18nContent.reviewForm.yourName }}</label>
+                    <input type="text" class="w-full px-3.5 py-2.5 rounded-xl border border-[#cbd5e1] text-xs sm:text-sm font-medium focus:outline-none focus:border-[#062d4d] focus:ring-1 focus:ring-[#062d4d] bg-white" />
+                  </div>
+                  <div>
+                    <label class="block text-xs font-bold text-[#334155] mb-1.5">{{ i18nContent.reviewForm.yourRating }}</label>
+                    <select class="w-full px-3.5 py-2.5 rounded-xl border border-[#cbd5e1] text-xs sm:text-sm font-medium focus:outline-none focus:border-[#062d4d] focus:ring-1 focus:ring-[#062d4d] bg-white text-[#475569]">
+                      <option value="5">★★★★★ (5/5)</option>
+                      <option value="4">★★★★☆ (4/5)</option>
+                      <option value="3">★★★☆☆ (3/5)</option>
+                      <option value="2">★★☆☆☆ (2/5)</option>
+                      <option value="1">★☆☆☆☆ (1/5)</option>
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-[#334155] mb-1.5">{{ i18nContent.reviewForm.reviewTitle }}</label>
+                  <input type="text" class="w-full px-3.5 py-2.5 rounded-xl border border-[#cbd5e1] text-xs sm:text-sm font-medium focus:outline-none focus:border-[#062d4d] focus:ring-1 focus:ring-[#062d4d] bg-white" />
+                </div>
+                <div>
+                  <label class="block text-xs font-bold text-[#334155] mb-1.5">{{ i18nContent.reviewForm.shareExperience }}</label>
+                  <textarea rows="4" class="w-full px-3.5 py-2.5 rounded-xl border border-[#cbd5e1] text-xs sm:text-sm font-medium focus:outline-none focus:border-[#062d4d] focus:ring-1 focus:ring-[#062d4d] bg-white resize-none" :placeholder="i18nContent.reviewForm.shareExperience"></textarea>
+                </div>
+                <div class="flex justify-end pt-2">
+                  <button type="submit" class="px-6 py-3 bg-[#062d4d] hover:bg-[#0a3f6b] text-white text-xs sm:text-sm font-bold rounded-xl shadow-md transition-colors cursor-pointer">
+                    {{ i18nContent.reviewForm.submitReview }}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
 
           <!-- 7. FAQ Accordion -->
-          <div v-show="activeTab === 'faq' || activeTab === 'overview'" class="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e8f0] shadow-xs space-y-5">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <h3 class="text-lg sm:text-xl font-bold text-[#0f172a]">{{ i18nContent.faqHeading }}</h3>
-              <div class="relative w-full sm:w-64">
-                <input v-model="faqSearch" type="text" placeholder="Search FAQs..." class="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded-full pl-10 pr-4 py-2 text-sm focus:outline-none focus:border-[#c9a84c] focus:ring-1 focus:ring-[#c9a84c] transition-all" />
-                <svg class="w-4 h-4 text-[#94a3b8] absolute left-3.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-              </div>
-            </div>
+          <div v-show="activeTab === 'faq' || activeTab === 'overview'" class="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e8f0] shadow-xs space-y-4">
+            <h3 class="text-lg sm:text-xl font-bold text-[#0f172a]">{{ i18nContent.faqHeading }}</h3>
             <div class="space-y-3">
               <div 
-                v-for="(f, idx) in filteredFaqs" 
+                v-for="(f, idx) in tourFaqs" 
                 :key="idx" 
-                class="border border-[#e2e8f0] rounded-xl overflow-hidden transition-all duration-300"
-                :class="activeFaq === Number(idx) ? 'shadow-md border-[#c9a84c]/30' : 'hover:border-[#cbd5e1]'"
+                class="border border-[#e2e8f0] rounded-xl overflow-hidden"
               >
                 <button 
                   @click="activeFaq = activeFaq === Number(idx) ? null : Number(idx)"
-                  class="w-full px-5 py-4 text-left flex items-start sm:items-center justify-between gap-4 bg-white hover:bg-[#f8fafc] transition-colors cursor-pointer group"
+                  class="w-full px-4 sm:px-5 py-3.5 text-left text-xs sm:text-sm font-bold text-[#0f172a] flex items-center justify-between hover:bg-[#f8fafc] transition-colors cursor-pointer"
                 >
-                  <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
-                    <span class="text-sm font-bold text-[#062d4d] group-hover:text-[#c9a84c] transition-colors">{{ f.q }}</span>
-                    <span v-if="getFaqBadge(f.q)" :class="['text-[10px] font-bold px-2 py-0.5 rounded border uppercase tracking-wider whitespace-nowrap w-fit', getFaqBadge(f.q)?.color]">{{ getFaqBadge(f.q)?.label }}</span>
-                  </div>
-                  <span class="text-[#c9a84c] text-lg font-light transition-transform duration-300" :class="activeFaq === Number(idx) ? 'rotate-45' : ''">+</span>
+                  <span>{{ f.q }}</span>
+                  <svg 
+                    xmlns="http://www.w3.org/2000/svg" 
+                    fill="none" 
+                    viewBox="0 0 24 24" 
+                    stroke-width="2" 
+                    stroke="currentColor" 
+                    class="w-4 h-4 text-[#64748b] transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                    :class="activeFaq === Number(idx) ? 'rotate-180' : ''"
+                  >
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+                  </svg>
                 </button>
                 <div 
-                  class="px-5 text-sm text-[#475569] leading-relaxed bg-[#f8fafc] overflow-hidden transition-all duration-300 ease-in-out"
-                  :style="{ maxHeight: activeFaq === Number(idx) ? '300px' : '0px', paddingBottom: activeFaq === Number(idx) ? '1rem' : '0' }"
+                  class="grid transition-[grid-template-rows] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                  :class="activeFaq === Number(idx) ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'"
                 >
-                  <div class="pt-2 border-t border-[#e2e8f0]">{{ f.a }}</div>
+                  <div class="overflow-hidden">
+                    <div class="px-4 sm:px-5 pb-4 text-xs sm:text-sm text-[#475569] leading-relaxed bg-[#f8fafc]/50">
+                      {{ f.a }}
+                    </div>
+                  </div>
                 </div>
-              </div>
-              <div v-if="filteredFaqs.length === 0" class="text-center py-8 text-[#94a3b8] text-sm">
-                No FAQs found matching your search.
               </div>
             </div>
           </div>
@@ -1862,7 +2067,7 @@ watch(routeSlug, () => {
 
               <!-- 3. Guest Counters -->
               <div>
-                <label class="block text-[11px] font-bold text-[#0f172a] uppercase tracking-wider mb-1.5">{{ dynamicOptions.length > 0 ? i18nContent.sidebar.step3 : '2. Number of Guests' }}</label>
+                <label class="block text-[11px] font-bold text-[#0f172a] uppercase tracking-wider mb-1.5">{{ i18nContent.sidebar.step3 }}</label>
                 <div class="grid grid-cols-2 gap-3">
                   <!-- Adults -->
                   <div class="p-3 rounded-xl border border-[#e2e8f0] flex items-center justify-between">
@@ -1905,8 +2110,8 @@ watch(routeSlug, () => {
               </div>
 
               <!-- 4. Optional Add-ons -->
-              <div>
-                <label class="block text-[11px] font-bold text-[#0f172a] uppercase tracking-wider mb-1.5">{{ dynamicOptions.length > 0 ? i18nContent.sidebar.step4 : '3. Popular Add-ons (Optional)' }}</label>
+              <div v-if="availableAddons && availableAddons.length > 0">
+                <label class="block text-[11px] font-bold text-[#0f172a] uppercase tracking-wider mb-1.5">{{ i18nContent.sidebar.step4 }}</label>
                 <div class="space-y-2">
                   <label 
                     v-for="addon in availableAddons" 
@@ -1978,64 +2183,19 @@ watch(routeSlug, () => {
     </main>
 
     <!-- MOBILE STICKY BOTTOM BAR -->
-    <div class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-[#e2e8f0] p-3 px-4 shadow-xl flex items-center justify-between">
+    <div class="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/80 px-4 py-3 pb-safe flex items-center justify-between shadow-[0_-8px_25px_rgba(6,45,77,0.08)]">
       <div>
-        <span class="text-[10px] uppercase font-bold text-[#64748b] block">Total</span>
+        <span class="text-[10px] uppercase font-bold text-slate-500 block">{{ i18nContent.totalPrice || $t('tourDetails.sidebar.totalPrice') || 'Total Price' }}</span>
         <div class="flex items-baseline gap-1">
           <span class="text-lg font-extrabold text-[#062d4d]">{{ totalPriceFormatted }}</span>
-          <span class="text-[10px] text-[#94a3b8]">/ {{ adultsCount }} pax</span>
         </div>
       </div>
       <button 
         @click="handleBookNow"
-        class="px-6 py-2.5 rounded-xl bg-[#062d4d] text-white text-xs font-bold shadow-md hover:bg-[#0a3f6b] cursor-pointer"
+        class="px-6 py-2.5 rounded-xl bg-[#d97706] hover:bg-[#b45309] active:scale-95 transition-transform duration-300 ease-out text-white text-xs font-bold shadow-lg shadow-[#d97706]/20 cursor-pointer"
       >
-        {{ i18nContent.sidebar.bookBtn }}
+        {{ i18nContent.bookNow || $t('tourDetails.sidebar.bookNow') || 'Book Now' }}
       </button>
-    </div>
-
-    <!-- PHOTO GALLERY LIGHTBOX MODAL -->
-    <div 
-      v-if="galleryModalOpen" 
-      class="fixed inset-0 z-50 bg-black/95 flex flex-col justify-between p-4 sm:p-8 animate-in fade-in"
-    >
-      <div class="flex items-center justify-between text-white">
-        <span class="text-xs font-bold tracking-wider">{{ activeLightboxIndex + 1 }} / {{ galleryImages.length }}</span>
-        <button 
-          @click="galleryModalOpen = false" 
-          class="text-white text-sm font-bold bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg cursor-pointer"
-        >
-          ✕ Close
-        </button>
-      </div>
-
-      <div class="flex-1 flex items-center justify-center p-4">
-        <img 
-          :src="galleryImages[activeLightboxIndex].url" 
-          :alt="galleryImages[activeLightboxIndex].title" 
-          class="max-h-[80vh] max-w-full rounded-xl object-contain shadow-2xl"
-        />
-      </div>
-
-      <div class="text-center text-white text-xs font-medium">
-        <p class="font-bold text-sm">{{ galleryImages[activeLightboxIndex].title }}</p>
-        <p class="text-white/70 text-[11px]">{{ galleryImages[activeLightboxIndex].caption }}</p>
-      </div>
-
-      <div class="flex justify-center gap-4 mt-2">
-        <button 
-          @click="activeLightboxIndex = (activeLightboxIndex - 1 + galleryImages.length) % galleryImages.length"
-          class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-bold cursor-pointer"
-        >
-          ← Prev
-        </button>
-        <button 
-          @click="activeLightboxIndex = (activeLightboxIndex + 1) % galleryImages.length"
-          class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-bold cursor-pointer"
-        >
-          Next →
-        </button>
-      </div>
     </div>
 
     <!-- SHARE MODAL -->
@@ -2089,11 +2249,11 @@ watch(routeSlug, () => {
           <!-- Scrollable Form Area -->
           <div class="p-6 overflow-y-auto space-y-4.5 flex-1 bg-[#f8fafc]">
             
-            <!-- 1. Lead Traveler Details & WhatsApp Contact Number -->
+            <!-- 1. Contact Information -->
             <div class="space-y-3.5 bg-white p-5 rounded-2xl border border-[#e2e8f0] shadow-xs">
               <div class="flex items-center justify-between">
                 <h3 class="text-xs uppercase font-extrabold tracking-wider text-[#062d4d] flex items-center gap-1.5">
-                  <span>👤</span> {{ $t("bookingPopup.leadTraveler") }}
+                  <span>📞</span> Contact Information
                 </h3>
                 <span class="text-[10px] bg-[#dcfce7] text-[#15803d] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
                   <span>💬</span> {{ $t("bookingPopup.whatsappVoucher") }}
@@ -2101,21 +2261,6 @@ watch(routeSlug, () => {
               </div>
               
               <div class="space-y-3">
-                <div>
-                  <label class="block text-xs font-bold text-[#334155] mb-1">{{ $t("bookingPopup.fullName") }} <span class="text-red-500">*</span></label>
-                  <input 
-                    type="text" 
-                    v-model="bookingForm.fullName" 
-                    @input="formErrors.fullName = ''"
-                    :placeholder="$t('placeholders.fullName')" 
-                    class="w-full px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm font-medium focus:outline-none transition-colors bg-white"
-                    :class="formErrors.fullName ? 'border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500 bg-red-50/30' : 'border-[#cbd5e1] focus:border-[#062d4d] focus:ring-1 focus:ring-[#062d4d]'" 
-                  />
-                  <p v-if="formErrors.fullName" class="text-[11px] text-red-500 font-semibold mt-1 flex items-center gap-1">
-                    <span>⚠️</span> {{ formErrors.fullName }}
-                  </p>
-                </div>
-
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label class="block text-xs font-bold text-[#334155] mb-1">{{ $t("bookingPopup.email") }} <span class="text-red-500">*</span></label>
@@ -2150,6 +2295,9 @@ watch(routeSlug, () => {
                 <p class="text-[11px] text-[#64748b]">{{ $t("bookingPopup.whatsappNotice") }}</p>
               </div>
             </div>
+
+            <!-- 1.5 Guest Information -->
+            <GuestInfoForm ref="guestInfoFormRef" :guest-count="adultsCount + childrenCount" />
 
             <!-- 2. Hotel Name, Room Number & Pickup Time -->
             <div class="space-y-3.5 bg-white p-5 rounded-2xl border border-[#e2e8f0] shadow-xs">
@@ -2263,110 +2411,7 @@ watch(routeSlug, () => {
               </div>
             </div>
 
-            <!-- 3. Passport / Identification Upload Box -->
-            <div class="space-y-3 bg-white p-5 rounded-2xl border border-[#e2e8f0] shadow-xs">
-              <div class="flex items-center justify-between">
-                <h3 class="text-xs uppercase font-extrabold tracking-wider text-[#062d4d] flex items-center gap-2">
-                  <svg class="w-4 h-4 text-[#c9a84c]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="3" y="4" width="18" height="16" rx="2" />
-                    <circle cx="9" cy="10" r="2" />
-                    <path d="M15 8h2" />
-                    <path d="M15 12h2" />
-                    <path d="M7 16h10" />
-                  </svg>
-                  <span>{{ $t("bookingPopup.passportPhoto") }} <span class="text-red-500 font-extrabold">*</span></span>
-                </h3>
-                <span class="text-[10px] text-[#062d4d] bg-[#f0f7fc] border border-[#bae6fd] px-2.5 py-0.5 rounded-full font-bold">
-                  {{ $t("bookingPopup.securityPermits") }}
-                </span>
-              </div>
-
-              <!-- Uploaded file preview -->
-              <div v-if="passportFile" class="flex items-center justify-between p-3.5 rounded-xl bg-[#f0fdf4] border border-[#bbf7d0]">
-                <div class="flex items-center gap-3">
-                  <div class="w-11 h-11 rounded-xl bg-white border border-[#86efac] overflow-hidden flex items-center justify-center shadow-xs flex-shrink-0">
-                    <img v-if="passportFile.url.startsWith('blob:') || passportFile.url.includes('image')" :src="passportFile.url" alt="Passport" class="w-full h-full object-cover" />
-                    <svg v-else class="w-6 h-6 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                      <polyline points="14 2 14 8 20 8" />
-                      <line x1="16" y1="13" x2="8" y2="13" />
-                      <line x1="16" y1="17" x2="8" y2="17" />
-                    </svg>
-                  </div>
-                  <div>
-                    <span class="text-xs font-bold text-[#166534] block truncate max-w-[200px]">{{ passportFile.name }}</span>
-                    <span class="text-[10px] text-[#15803d] font-semibold flex items-center gap-1">
-                      <svg class="w-3 h-3 text-emerald-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-                      {{ passportFile.size }} · {{ $t("bookingPopup.readyForPermit") }}
-                    </span>
-                  </div>
-                </div>
-                <button type="button" @click="removePassportFile" class="p-1.5 rounded-lg text-red-500 hover:bg-red-50 cursor-pointer font-bold transition-colors" title="Remove file">
-                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                </button>
-              </div>
-
-              <!-- Upload Drag & Drop Trigger with Vector SVG Icon -->
-              <div v-else>
-                <label 
-                  class="flex flex-col items-center justify-center p-5 rounded-2xl border-2 border-dashed transition-all cursor-pointer text-center group relative overflow-hidden"
-                  :class="formErrors.passport ? 'border-red-400 bg-red-50/20' : 'border-[#cbd5e1] hover:border-[#c9a84c] hover:bg-[#f8fafc] bg-white'"
-                >
-                  <input 
-                    type="file" 
-                    accept="image/jpeg,image/png,image/webp,application/pdf" 
-                    @change="handlePassportUpload" 
-                    class="hidden" 
-                    :disabled="passportUploading"
-                  />
-
-                  <div v-if="passportUploading" class="flex flex-col items-center gap-2 py-2">
-                    <div class="w-8 h-8 border-3 border-[#062d4d]/20 border-t-[#062d4d] rounded-full animate-spin"></div>
-                    <span class="text-xs font-bold text-[#062d4d]">{{ $t("bookingPopup.uploadingDoc") }}</span>
-                  </div>
-
-                  <div v-else class="flex flex-col items-center space-y-2.5">
-                    <!-- Vector SVG Upload Emblem -->
-                    <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#062d4d]/10 via-[#c9a84c]/10 to-[#0a4878]/10 group-hover:from-[#062d4d] group-hover:to-[#0a4878] group-hover:text-white text-[#062d4d] flex items-center justify-center transition-all duration-300 shadow-sm border border-[#e2e8f0] group-hover:border-[#062d4d] group-hover:scale-105">
-                      <svg class="w-7 h-7 transition-colors" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H15l5 5v12.5A2.5 2.5 0 0 1 17.5 22h-11A2.5 2.5 0 0 1 4 19.5v-15z" />
-                        <path d="M14 2v6h6" />
-                        <circle cx="10" cy="13" r="2" />
-                        <path d="M6.5 18a3.5 3.5 0 0 1 7 0" />
-                        <path d="M17 14v4m-2-2l2-2 2 2" stroke-width="2" />
-                      </svg>
-                    </div>
-
-                    <!-- Label & Formats -->
-                    <div class="space-y-1">
-                      <div class="text-xs font-bold text-[#0f172a] group-hover:text-[#062d4d] transition-colors flex items-center justify-center gap-1.5">
-                        <span>{{ $t("bookingPopup.uploadPassport") }}</span>
-                        <span class="text-red-500 font-extrabold">*</span>
-                      </div>
-                      <p class="text-[11px] text-[#64748b]">
-                        {{ $t("bookingPopup.supportsFormats") }}
-                      </p>
-                    </div>
-                  </div>
-                </label>
-
-                <p v-if="formErrors.passport" class="text-[11px] text-red-500 font-semibold mt-1.5 flex items-center gap-1">
-                  <svg class="w-3.5 h-3.5 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                  <span>{{ formErrors.passport }}</span>
-                </p>
-              </div>
-
-              <!-- Security Notice with Lock SVG -->
-              <div class="flex items-start gap-1.5 pt-1 text-[10px] text-[#64748b] leading-tight">
-                <svg class="w-3.5 h-3.5 text-emerald-600 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                </svg>
-                <span>{{ $t("bookingPopup.encryptedWarning") }}</span>
-              </div>
-            </div>
-
-            <!-- 4. Special Requests -->
+            <!-- 3. Special Requests -->
             <div class="space-y-2.5 bg-white p-5 rounded-2xl border border-[#e2e8f0] shadow-xs">
               <h3 class="text-xs uppercase font-extrabold tracking-wider text-[#062d4d] flex items-center gap-1.5">
                 <span>💬</span> {{ $t("bookingPopup.specialRequests") }}
@@ -2381,7 +2426,7 @@ watch(routeSlug, () => {
               </div>
             </div>
 
-            <!-- 5. Order Summary Card -->
+            <!-- 4. Order Summary Card -->
             <div class="bg-gradient-to-br from-[#062d4d] to-[#0a4878] p-5 rounded-2xl text-white shadow-md">
               <h3 class="text-xs uppercase font-extrabold tracking-wider mb-3 text-white/90">{{ $t("bookingPopup.bookingSummary") }}</h3>
               <div class="space-y-2 text-xs sm:text-sm text-white/80">
@@ -2444,40 +2489,91 @@ watch(routeSlug, () => {
       </div>
     </Transition>
 
-    <!-- BOOKING RECEIVED CONFIRMATION MODAL -->
-    <div v-if="bookingReceivedSuccess" class="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-      <div class="bg-white rounded-3xl max-w-lg w-full p-8 shadow-2xl relative border border-[#c9a84c]/30 text-center space-y-6 animate-in zoom-in-95">
-        <div class="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200 flex items-center justify-center text-3xl mx-auto shadow-inner">
-          ✓
-        </div>
-        <div>
-          <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#c9a84c]/15 text-[#a38030] text-[11px] font-bold uppercase tracking-wider mb-2">
-            <span>✦</span> Reservation Confirmed & Received
-          </div>
-          <h3 class="text-2xl font-bold text-slate-900">Your Journey is Booked!</h3>
-          <p class="text-xs text-slate-500 mt-2 leading-relaxed max-w-sm mx-auto">
-            Your booking has been received and verified. Our VIP concierge is finalizing your private manifest and hotel pickup schedule.
-          </p>
-        </div>
+    <!-- FULLSCREEN LUXURY PHOTO LIGHTBOX MODAL -->
+    <Teleport to="body">
+      <Transition
+        enter-active-class="transition duration-300 ease-out"
+        enter-from-class="opacity-0 scale-95"
+        enter-to-class="opacity-100 scale-100"
+        leave-active-class="transition duration-200 ease-in"
+        leave-from-class="opacity-100 scale-100"
+        leave-to-class="opacity-0 scale-95"
+      >
+        <div 
+          v-if="galleryModalOpen" 
+          class="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-2xl flex flex-col justify-between select-none"
+          @click.self="closeLightbox"
+          @keydown="handleLightboxKeydown"
+          tabindex="0"
+        >
+          <!-- Top Control Bar -->
+          <div class="px-6 py-4 flex items-center justify-between text-white border-b border-white/10">
+            <div class="flex items-center gap-3">
+              <span class="px-3 py-1 bg-white/10 rounded-full text-xs font-mono font-bold tracking-wider text-amber-400">
+                {{ activeLightboxIndex + 1 }} / {{ galleryImages.length }}
+              </span>
+              <span class="text-sm font-bold text-white/90 truncate max-w-xs sm:max-w-md">
+                {{ galleryImages[activeLightboxIndex]?.title }}
+              </span>
+            </div>
 
-        <div class="pt-2 flex flex-col sm:flex-row justify-center gap-3">
-          <button 
-            v-if="authStore.isAuthenticated"
-            @click="bookingReceivedSuccess = false; router.push('/portal/bookings')"
-            class="px-6 py-3 bg-[#062d4d] hover:bg-[#093a62] text-white font-bold rounded-xl text-xs shadow-md active:scale-[0.97] transition-all flex items-center justify-center gap-2"
-          >
-            <span>⛵</span>
-            <span>View in Your Journeys</span>
-          </button>
-          <button 
-            @click="bookingReceivedSuccess = false"
-            class="px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs active:scale-[0.97] transition-all"
-          >
-            Close
-          </button>
+            <div class="flex items-center gap-3">
+              <button 
+                @click="closeLightbox" 
+                class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-lg font-bold transition-all cursor-pointer"
+                title="Close (Esc)"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+
+          <!-- Central Large Image Stage -->
+          <div class="relative flex-1 flex items-center justify-center p-4 sm:p-8 overflow-hidden">
+            <!-- Previous Button -->
+            <button 
+              @click.stop="prevLightboxPhoto" 
+              class="absolute left-4 sm:left-8 z-10 w-12 h-12 rounded-full bg-black/60 hover:bg-[#c9a84c] text-white hover:text-slate-900 border border-white/20 flex items-center justify-center text-2xl font-bold transition-all active:scale-90 cursor-pointer shadow-2xl"
+              title="Previous Photo (←)"
+            >
+              ‹
+            </button>
+
+            <!-- Main High-Res Image -->
+            <div class="max-w-5xl max-h-[70vh] relative rounded-2xl overflow-hidden shadow-2xl">
+              <img 
+                :src="galleryImages[activeLightboxIndex]?.url" 
+                :alt="galleryImages[activeLightboxIndex]?.title" 
+                class="max-w-full max-h-[70vh] object-contain mx-auto transition-all duration-300"
+              />
+            </div>
+
+            <!-- Next Button -->
+            <button 
+              @click.stop="nextLightboxPhoto" 
+              class="absolute right-4 sm:right-8 z-10 w-12 h-12 rounded-full bg-black/60 hover:bg-[#c9a84c] text-white hover:text-slate-900 border border-white/20 flex items-center justify-center text-2xl font-bold transition-all active:scale-90 cursor-pointer shadow-2xl"
+              title="Next Photo (→)"
+            >
+              ›
+            </button>
+          </div>
+
+          <!-- Bottom Thumbnail Strip -->
+          <div class="px-6 py-4 bg-black/50 border-t border-white/10 overflow-x-auto flex justify-center items-center gap-3 no-scrollbar">
+            <div 
+              v-for="(img, tIdx) in galleryImages" 
+              :key="tIdx"
+              @click="activeLightboxIndex = tIdx"
+              :class="activeLightboxIndex === tIdx ? 'ring-2 ring-[#c9a84c] scale-110 opacity-100' : 'opacity-50 hover:opacity-80'"
+              class="w-16 h-12 sm:w-20 sm:h-14 rounded-xl overflow-hidden shrink-0 cursor-pointer transition-all duration-200 bg-slate-800"
+            >
+              <img :src="img.url" class="w-full h-full object-cover" />
+            </div>
+          </div>
+
         </div>
-      </div>
-    </div>
+      </Transition>
+    </Teleport>
 
     <!-- FOOTER -->
     <Footer class="mt-16" />
@@ -2486,6 +2582,11 @@ watch(routeSlug, () => {
 </template>
 
 <style scoped>
+@keyframes progressBar {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(200%); }
+}
+
 .shadow-xs {
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 }
@@ -2500,12 +2601,12 @@ watch(routeSlug, () => {
 
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateY(10px) scale(0.98);
 }
 </style>

@@ -52,14 +52,113 @@ const selectCurrency = (code: string) => {
 // UI States
 const activeTab = ref('overview')
 const readMoreExpanded = ref(false)
-const galleryModalOpen = ref(false)
-const activeLightboxIndex = ref(0)
 const showShareModal = ref(false)
 const showToast = ref(false)
 const toastMessage = ref('')
 const activeFaq = ref<number | null>(0)
 const timelineProgress = ref(0)
 const timelineRef = ref<HTMLElement | null>(null)
+
+// ==========================================
+// LUXURY IMAGE GALLERY & LIGHTBOX SYSTEM
+// ==========================================
+const galleryModalOpen = ref(false)
+const activeLightboxIndex = ref(0)
+const mobileCarouselIndex = ref(0)
+
+const galleryImages = computed(() => {
+  const list: { url: string; title: string; caption: string }[] = []
+  
+  if (tour.value?.images && Array.isArray(tour.value.images) && tour.value.images.length > 0) {
+    tour.value.images.forEach((img: string, idx: number) => {
+      list.push({
+        url: getFullImageUrl(img),
+        title: `${tourTitle.value || 'Tour'} — Photo ${idx + 1}`,
+        caption: tourDescription.value || ''
+      })
+    })
+  } else if (tour.value?.mediaUrls && Array.isArray(tour.value.mediaUrls) && tour.value.mediaUrls.length > 0) {
+    tour.value.mediaUrls.forEach((img: string, idx: number) => {
+      list.push({
+        url: getFullImageUrl(img),
+        title: `${tourTitle.value || 'Tour'} — Photo ${idx + 1}`,
+        caption: tourDescription.value || ''
+      })
+    })
+  } else if (tour.value?.mainImage || tour.value?.imageUrl) {
+    list.push({
+      url: getFullImageUrl(tour.value.mainImage || tour.value.imageUrl),
+      title: tourTitle.value || 'Tour',
+      caption: tourDescription.value || ''
+    })
+  }
+
+  const fallbacks = [
+    { url: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1400&q=80', title: 'Quad Desert Safari', caption: 'High-speed quad bike adventure across Sinai desert sands' },
+    { url: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1000&q=80', title: 'Bedouin Camel Caravan', caption: 'Sunset camel trek across dramatic desert sand dunes' },
+    { url: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1000&q=80', title: 'Bedouin Camp Feast', caption: 'Authentic Bedouin camp with open-flame BBQ dinner' },
+    { url: 'https://images.unsplash.com/photo-1473580044384-7ba9967e16a0?auto=format&fit=crop&w=1000&q=80', title: 'Echo Mountains Canyon', caption: 'Spectacular sandstone formations and mountain echo shouts' },
+    { url: 'https://images.unsplash.com/photo-1570481662006-a3a1374699e8?auto=format&fit=crop&w=1000&q=80', title: 'Oriental Fire & Tanoura Show', caption: 'Live performance under the starlit Egyptian desert sky' }
+  ]
+
+  while (list.length < 5) {
+    const nextFallback = fallbacks[list.length % fallbacks.length]
+    list.push(nextFallback)
+  }
+
+  return list
+})
+
+const openLightbox = (index: number = 0) => {
+  activeLightboxIndex.value = Math.max(0, Math.min(index, galleryImages.value.length - 1))
+  galleryModalOpen.value = true
+  if (typeof document !== 'undefined') {
+    document.body.style.overflow = 'hidden'
+  }
+}
+
+const closeLightbox = () => {
+  galleryModalOpen.value = false
+  if (typeof document !== 'undefined') {
+    document.body.style.overflow = ''
+  }
+}
+
+const nextLightboxPhoto = () => {
+  activeLightboxIndex.value = (activeLightboxIndex.value + 1) % galleryImages.value.length
+}
+
+const prevLightboxPhoto = () => {
+  activeLightboxIndex.value = (activeLightboxIndex.value - 1 + galleryImages.value.length) % galleryImages.value.length
+}
+
+const onMobileCarouselScroll = (e: Event) => {
+  const el = e.target as HTMLElement
+  if (el) {
+    const width = el.offsetWidth || 1
+    const scrollLeft = el.scrollLeft || 0
+    mobileCarouselIndex.value = Math.round(scrollLeft / width)
+  }
+}
+
+const handleLightboxKeydown = (e: KeyboardEvent) => {
+  if (!galleryModalOpen.value) return
+  if (e.key === 'Escape') closeLightbox()
+  if (e.key === 'ArrowRight') nextLightboxPhoto()
+  if (e.key === 'ArrowLeft') prevLightboxPhoto()
+}
+
+const viewAllPhotosLabel = computed(() => {
+  const count = galleryImages.value.length
+  const dict: Record<string, string> = {
+    en: `View All ${count} Photos`,
+    de: `Alle ${count} Fotos ansehen`,
+    fr: `Voir les ${count} photos`,
+    it: `Mostra tutte le ${count} foto`,
+    ru: `Все ${count} фото`
+  }
+  return dict[locale.value] || dict['en']
+})
 
 // Booking Options State
 const selectedDate = ref(new Date(Date.now() + 86400000).toISOString().split('T')[0])
@@ -1019,62 +1118,7 @@ const totalPriceFormatted = computed(() => currencyStore.formatPrice(rawTotalPri
 const shareUrl = computed(() => typeof window !== 'undefined' ? window.location.href : '')
 
 // Gallery Images
-const defaultGalleryImages = [
-  {
-    url: 'https://images.unsplash.com/photo-1542362567-b07eac790947?auto=format&fit=crop&w=1400&q=80',
-    title: 'Desert Quad ATV Safari',
-    caption: 'Quad biking across the golden Sinai desert sands at sunset'
-  },
-  {
-    url: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1000&q=80',
-    title: 'Bedouin Camel Caravan',
-    caption: 'Sunset camel trek across dramatic desert sand dunes'
-  },
-  {
-    url: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1000&q=80',
-    title: 'Bedouin Camp Feast',
-    caption: 'Authentic Bedouin camp with open-flame BBQ dinner'
-  },
-  {
-    url: 'https://images.unsplash.com/photo-1473580044384-7ba9967e16a0?auto=format&fit=crop&w=1000&q=80',
-    title: 'Echo Mountains Canyon',
-    caption: 'Spectacular sandstone formations and mountain echo shouts'
-  },
-  {
-    url: 'https://images.unsplash.com/photo-1570481662006-a3a1374699e8?auto=format&fit=crop&w=1000&q=80',
-    title: 'Oriental Fire & Tanoura Show',
-    caption: 'Live performance under the starlit Egyptian desert sky'
-  }
-]
 
-const galleryImages = computed(() => {
-  const urls: string[] = (tour.value?.mediaUrls && Array.isArray(tour.value.mediaUrls) && tour.value.mediaUrls.length > 0)
-    ? tour.value.mediaUrls
-    : (tour.value?.images && Array.isArray(tour.value.images) && tour.value.images.length > 0)
-      ? tour.value.images
-      : []
-
-  if (urls.length > 0) {
-    return urls.map((url: string, index: number) => ({
-      url: getFullImageUrl(url),
-      title: `${tourTitle.value} - Photo ${index + 1}`,
-      caption: tourDescription.value
-    }))
-  }
-
-  const cover = tour.value?.imageUrl || tour.value?.mainImage
-  if (cover) {
-    return [
-      {
-        url: getFullImageUrl(cover),
-        title: tourTitle.value,
-        caption: tourDescription.value
-      }
-    ]
-  }
-
-  return defaultGalleryImages
-})
 
 // Fetch Tour API
 const fetchTourData = async () => {
@@ -1263,11 +1307,6 @@ const toggleSave = () => {
   toastMessage.value = saved ? t("toast.tourSaved") : 'Removed from favorites'
   showToast.value = true
   setTimeout(() => { showToast.value = false }, 3000)
-}
-
-const openLightbox = (idx: number) => {
-  activeLightboxIndex.value = idx
-  galleryModalOpen.value = true
 }
 
 const copyShareLink = () => {
@@ -1522,47 +1561,97 @@ watch(routeSlug, () => {
         </div>
       </div>
 
-      <!-- AIRBNB-STYLE 5-PHOTO MOSAIC GALLERY -->
-      <section class="mb-8 relative rounded-2xl overflow-hidden shadow-md">
-        <div class="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-2 h-[260px] sm:h-[340px] md:h-[450px] lg:h-[500px]">
-          
-          <!-- Large Hero Photo (Spans 2 cols, 2 rows on desktop) -->
+      <!-- BESPOKE LUXURY PHOTO GALLERY (Mobile Swipeable Touch Slider + Desktop Mosaic) -->
+      <section class="mb-8 relative rounded-3xl overflow-hidden shadow-lg border border-slate-200/80 bg-slate-900">
+        
+        <!-- 1. MOBILE TOUCH-SWIPE SLIDER (Visible on mobile < md) -->
+        <div class="block md:hidden relative">
           <div 
-            @click="openLightbox(0)" 
-            class="md:col-span-2 md:row-span-2 w-full h-full relative group cursor-pointer overflow-hidden bg-[#e2e8f0]"
+            class="flex overflow-x-auto snap-x snap-mandatory scrollbar-none touch-pan-x"
+            @scroll="onMobileCarouselScroll"
           >
-            <img 
-              :src="galleryImages[0].url" 
-              :alt="galleryImages[0].title"
-              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-            />
-            <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-5 text-white">
-              <span class="text-base font-semibold">{{ galleryImages[0].title }}</span>
+            <div 
+              v-for="(img, idx) in galleryImages" 
+              :key="idx" 
+              class="w-full shrink-0 snap-center h-[280px] sm:h-[350px] relative cursor-pointer"
+              @click="openLightbox(idx)"
+            >
+              <img 
+                :src="img.url" 
+                :alt="img.title" 
+                class="w-full h-full object-cover" 
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
             </div>
           </div>
 
-          <!-- 4 Thumbnail Grid Photos -->
+          <!-- Floating Photo Index & Expand Badge -->
+          <div class="absolute bottom-4 left-4 right-4 flex justify-between items-center pointer-events-none">
+            <div class="px-3 py-1 bg-black/70 backdrop-blur-md text-white text-xs font-bold rounded-full pointer-events-auto flex items-center gap-1.5 shadow-md">
+              <span>📸</span>
+              <span>{{ mobileCarouselIndex + 1 }} / {{ galleryImages.length }}</span>
+            </div>
+
+            <button 
+              @click="openLightbox(mobileCarouselIndex)"
+              class="px-3 py-1 bg-white/90 hover:bg-white backdrop-blur-md text-slate-900 text-xs font-bold rounded-full pointer-events-auto flex items-center gap-1 shadow-md active:scale-95 transition-transform cursor-pointer"
+            >
+              <span>🔍</span>
+              <span>{{ $t('tourDetails.gallery.viewAll') || 'Enlarge' }}</span>
+            </button>
+          </div>
+
+          <!-- Dot Indicators -->
+          <div class="absolute bottom-1.5 left-0 right-0 flex justify-center gap-1.5 pointer-events-none">
+            <span 
+              v-for="(_, dIdx) in galleryImages" 
+              :key="dIdx" 
+              :class="mobileCarouselIndex === dIdx ? 'w-5 bg-[#c9a84c]' : 'w-1.5 bg-white/50'" 
+              class="h-1.5 rounded-full transition-all duration-300"
+            ></span>
+          </div>
+        </div>
+
+        <!-- 2. DESKTOP 5-PHOTO ASYMMETRIC MOSAIC (Visible on md+) -->
+        <div class="hidden md:grid md:grid-cols-4 md:grid-rows-2 gap-2 h-[420px] lg:h-[500px]">
+          
+          <!-- Main Hero Photo (Spans 2 columns & 2 rows) -->
+          <div 
+            @click="openLightbox(0)" 
+            class="md:col-span-2 md:row-span-2 w-full h-full relative group cursor-pointer overflow-hidden bg-slate-800"
+          >
+            <img 
+              :src="galleryImages[0]?.url" 
+              :alt="galleryImages[0]?.title"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6 text-white">
+              <span class="text-base font-bold">{{ galleryImages[0]?.title }}</span>
+            </div>
+          </div>
+
+          <!-- 4 Grid Thumbnails -->
           <div 
             v-for="(img, i) in galleryImages.slice(1, 5)" 
             :key="i"
             @click="openLightbox(Number(i) + 1)"
-            class="hidden md:block relative group cursor-pointer overflow-hidden bg-[#e2e8f0]"
+            class="relative group cursor-pointer overflow-hidden bg-slate-800"
           >
             <img 
               :src="img.url" 
               :alt="img.title"
-              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
             />
-            <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors"></div>
+            <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-300"></div>
 
-            <!-- "Show All Photos" Trigger on the last thumbnail -->
+            <!-- "Show All Photos" Trigger on the 4th thumbnail -->
             <button 
-              v-if="i === 3" 
+              v-if="i === 3 || i === (galleryImages.slice(1, 5).length - 1)" 
               @click.stop="openLightbox(0)"
-              class="absolute bottom-4 right-4 bg-white/95 backdrop-blur-md hover:bg-white text-[#0f172a] px-4 py-2.5 rounded-xl text-xs font-bold shadow-lg flex items-center gap-2 transition-all hover:scale-105 cursor-pointer"
+              class="absolute bottom-4 right-4 bg-white/95 backdrop-blur-md hover:bg-white text-slate-900 px-4 py-2.5 rounded-xl text-xs font-black shadow-xl flex items-center gap-2 transition-all hover:scale-105 active:scale-95 cursor-pointer border border-slate-200"
             >
               <span>📸</span>
-              <span>{{ i18nContent.viewAllPhotos }}</span>
+              <span>{{ viewAllPhotosLabel }}</span>
             </button>
           </div>
 
@@ -2109,50 +2198,6 @@ watch(routeSlug, () => {
       </button>
     </div>
 
-    <!-- PHOTO GALLERY LIGHTBOX MODAL -->
-    <div 
-      v-if="galleryModalOpen" 
-      class="fixed inset-0 z-50 bg-black/95 flex flex-col justify-between p-4 sm:p-8 animate-in fade-in"
-    >
-      <div class="flex items-center justify-between text-white">
-        <span class="text-xs font-bold tracking-wider">{{ activeLightboxIndex + 1 }} / {{ galleryImages.length }}</span>
-        <button 
-          @click="galleryModalOpen = false" 
-          class="text-white text-sm font-bold bg-white/10 hover:bg-white/20 px-3 py-1.5 rounded-lg cursor-pointer"
-        >
-          ✕ Close
-        </button>
-      </div>
-
-      <div class="flex-1 flex items-center justify-center p-4">
-        <img 
-          :src="galleryImages[activeLightboxIndex].url" 
-          :alt="galleryImages[activeLightboxIndex].title" 
-          class="max-h-[80vh] max-w-full rounded-xl object-contain shadow-2xl"
-        />
-      </div>
-
-      <div class="text-center text-white text-xs font-medium">
-        <p class="font-bold text-sm">{{ galleryImages[activeLightboxIndex].title }}</p>
-        <p class="text-white/70 text-[11px]">{{ galleryImages[activeLightboxIndex].caption }}</p>
-      </div>
-
-      <div class="flex justify-center gap-4 mt-2">
-        <button 
-          @click="activeLightboxIndex = (activeLightboxIndex - 1 + galleryImages.length) % galleryImages.length"
-          class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-bold cursor-pointer"
-        >
-          ← Prev
-        </button>
-        <button 
-          @click="activeLightboxIndex = (activeLightboxIndex + 1) % galleryImages.length"
-          class="px-4 py-2 bg-white/10 hover:bg-white/20 text-white rounded-lg text-xs font-bold cursor-pointer"
-        >
-          Next →
-        </button>
-      </div>
-    </div>
-
     <!-- SHARE MODAL -->
     <div 
       v-if="showShareModal" 
@@ -2443,6 +2488,92 @@ watch(routeSlug, () => {
         <span>{{ toastMessage }}</span>
       </div>
     </Transition>
+
+    <!-- FULLSCREEN LUXURY PHOTO LIGHTBOX MODAL -->
+    <Teleport to="body">
+      <Transition
+        enter-active-class="transition duration-300 ease-out"
+        enter-from-class="opacity-0 scale-95"
+        enter-to-class="opacity-100 scale-100"
+        leave-active-class="transition duration-200 ease-in"
+        leave-from-class="opacity-100 scale-100"
+        leave-to-class="opacity-0 scale-95"
+      >
+        <div 
+          v-if="galleryModalOpen" 
+          class="fixed inset-0 z-[9999] bg-black/95 backdrop-blur-2xl flex flex-col justify-between select-none"
+          @click.self="closeLightbox"
+          @keydown="handleLightboxKeydown"
+          tabindex="0"
+        >
+          <!-- Top Control Bar -->
+          <div class="px-6 py-4 flex items-center justify-between text-white border-b border-white/10">
+            <div class="flex items-center gap-3">
+              <span class="px-3 py-1 bg-white/10 rounded-full text-xs font-mono font-bold tracking-wider text-amber-400">
+                {{ activeLightboxIndex + 1 }} / {{ galleryImages.length }}
+              </span>
+              <span class="text-sm font-bold text-white/90 truncate max-w-xs sm:max-w-md">
+                {{ galleryImages[activeLightboxIndex]?.title }}
+              </span>
+            </div>
+
+            <div class="flex items-center gap-3">
+              <button 
+                @click="closeLightbox" 
+                class="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center text-lg font-bold transition-all cursor-pointer"
+                title="Close (Esc)"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+
+          <!-- Central Large Image Stage -->
+          <div class="relative flex-1 flex items-center justify-center p-4 sm:p-8 overflow-hidden">
+            <!-- Previous Button -->
+            <button 
+              @click.stop="prevLightboxPhoto" 
+              class="absolute left-4 sm:left-8 z-10 w-12 h-12 rounded-full bg-black/60 hover:bg-[#c9a84c] text-white hover:text-slate-900 border border-white/20 flex items-center justify-center text-2xl font-bold transition-all active:scale-90 cursor-pointer shadow-2xl"
+              title="Previous Photo (←)"
+            >
+              ‹
+            </button>
+
+            <!-- Main High-Res Image -->
+            <div class="max-w-5xl max-h-[70vh] relative rounded-2xl overflow-hidden shadow-2xl">
+              <img 
+                :src="galleryImages[activeLightboxIndex]?.url" 
+                :alt="galleryImages[activeLightboxIndex]?.title" 
+                class="max-w-full max-h-[70vh] object-contain mx-auto transition-all duration-300"
+              />
+            </div>
+
+            <!-- Next Button -->
+            <button 
+              @click.stop="nextLightboxPhoto" 
+              class="absolute right-4 sm:right-8 z-10 w-12 h-12 rounded-full bg-black/60 hover:bg-[#c9a84c] text-white hover:text-slate-900 border border-white/20 flex items-center justify-center text-2xl font-bold transition-all active:scale-90 cursor-pointer shadow-2xl"
+              title="Next Photo (→)"
+            >
+              ›
+            </button>
+          </div>
+
+          <!-- Bottom Thumbnail Strip -->
+          <div class="px-6 py-4 bg-black/50 border-t border-white/10 overflow-x-auto flex justify-center items-center gap-3 no-scrollbar">
+            <div 
+              v-for="(img, tIdx) in galleryImages" 
+              :key="tIdx"
+              @click="activeLightboxIndex = tIdx"
+              :class="activeLightboxIndex === tIdx ? 'ring-2 ring-[#c9a84c] scale-110 opacity-100' : 'opacity-50 hover:opacity-80'"
+              class="w-16 h-12 sm:w-20 sm:h-14 rounded-xl overflow-hidden shrink-0 cursor-pointer transition-all duration-200 bg-slate-800"
+            >
+              <img :src="img.url" class="w-full h-full object-cover" />
+            </div>
+          </div>
+
+        </div>
+      </Transition>
+    </Teleport>
 
     <!-- FOOTER -->
     <Footer class="mt-16" />
