@@ -160,8 +160,12 @@ const gdprConsent = ref(false);
 const closeModal = () => emit('close');
 
 const redirectAfterAuth = () => {
-  const redirect = route.query.redirect as string || '/portal/dashboard';
-  router.push(redirect);
+  const redirect = (route.query.redirect as string) || '/portal';
+  if (redirect === '/dashboard' || redirect === '/portal/dashboard') {
+    router.push('/portal');
+  } else {
+    router.push(redirect);
+  }
 };
 
 const handleLogin = async () => {

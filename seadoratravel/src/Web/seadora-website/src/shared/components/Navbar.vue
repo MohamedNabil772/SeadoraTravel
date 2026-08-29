@@ -8,6 +8,10 @@ import CustomerProfileDropdown from '@/shared/components/CustomerProfileDropdown
 const { locale, t } = useI18n()
 const currencyStore = useCurrencyStore()
 const authStore = useAuthStore()
+import { useRouter, useRoute } from 'vue-router'
+
+const router = useRouter()
+const route = useRoute()
 
 const showProfileDropdown = ref(false)
 const showLangDropdown = ref(false)
@@ -16,6 +20,9 @@ const showCurrencyDropdown = ref(false)
 const handleLogout = () => {
   authStore.logout()
   showProfileDropdown.value = false
+  if (route.path.startsWith('/portal') || route.path.startsWith('/dashboard')) {
+    router.push('/')
+  }
 }
 
 

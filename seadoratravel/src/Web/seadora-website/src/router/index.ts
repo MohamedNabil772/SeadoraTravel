@@ -14,13 +14,21 @@ const router = createRouter({
       component: () => import('../features/portal/layouts/CustomerPortalLayout.vue'),
       meta: { requiresAuth: true },
       children: [
-        { path: '', name: 'portal-dashboard', component: () => import('../features/portal/views/PortalDashboardView.vue') },
+        { path: '', alias: ['dashboard', '/portal/dashboard'], name: 'portal-dashboard', component: () => import('../features/portal/views/PortalDashboardView.vue') },
         { path: 'bookings', name: 'portal-bookings', component: () => import('../features/portal/views/PortalBookingsView.vue') },
         { path: 'bookings/:id', name: 'portal-booking-detail', component: () => import('../features/portal/views/PortalBookingDetailView.vue') },
         { path: 'documents', name: 'portal-documents', component: () => import('../features/portal/views/PortalDocumentsView.vue') },
         { path: 'profile', name: 'portal-profile', component: () => import('../features/portal/views/PortalProfileView.vue') },
         { path: 'support', name: 'portal-support', component: () => import('../features/portal/views/PortalSupportView.vue') }
       ]
+    },
+    {
+      path: '/dashboard',
+      redirect: '/portal'
+    },
+    {
+      path: '/portal/dashboard',
+      redirect: '/portal'
     },
     {
       path: '/',
@@ -47,6 +55,10 @@ const router = createRouter({
       name: 'tour-details',
       component: TourDetailsView,
       props: true
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      redirect: '/'
     }
   ]
 })
@@ -57,7 +69,7 @@ router.beforeEach((to, _from, next) => {
   const authStore = useAuthStore();
   if (to.meta.requiresAuth && !authStore.isAuthenticated) {
     authStore.openAuthModal();
-    next('/'); // Or preserve path for redirect after login
+    next({ path: '/', query: { redirect: to.fullPath } });
   } else {
     next();
   }
