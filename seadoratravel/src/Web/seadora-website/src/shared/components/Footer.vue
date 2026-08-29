@@ -37,7 +37,7 @@ const { t } = useI18n()
           <a href="https://www.instagram.com/seadora.travel.egypt?igsh=MWMzaGpsbDV6NGQzNw==" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
             <LuxuryIcons name="instagram" size="14" color="currentColor" />
           </a>
-          <a href="https://www.tiktok.com/@seadoratravel" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
+          <a href="https://www.tiktok.com/@seadora.travel.eg?_r=1&_t=ZS-99IAMFd3PRl" target="_blank" rel="noopener noreferrer" aria-label="TikTok">
             <LuxuryIcons name="tiktok" size="14" color="currentColor" />
           </a>
         </div>
