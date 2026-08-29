@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import api from '@/services/api'
 import { toast } from 'vue-sonner'
 
@@ -25,20 +25,50 @@ interface Tour {
   price?: number
 }
 
+interface CurrencyItem {
+  id: string
+  code: string
+  name: string
+  symbol: string
+  exchangeRate: number
+  liveExchangeRate?: number
+  isBase: boolean
+  isActive: boolean
+}
+
 interface Payment {
   id: string
   bookingId: string
   amount: number
-  currency?: string
+  currency: string
+  exchangeRate?: number
+  settledAmount?: number
   method: string
   reference?: string
   receivedUtc: string
-  recordedBy?: string
+  createdBy?: string
 }
+
+// Configurable Payment Methods
+const availablePaymentMethods = ref<string[]>([
+  'Credit / Debit Card',
+  'Bank Wire Transfer',
+  'Cash (EUR)',
+  'Cash (USD)',
+  'Cash (EGP)',
+  'InstaPay (Egypt)',
+  'Vodafone Cash / Smart Wallet',
+  'Stripe Online Checkout',
+  'POS Machine Terminal',
+  'PayPal',
+  'Crypto / USDT',
+  'Other / Custom'
+])
 
 // State
 const bookings = ref<Booking[]>([])
 const tours = ref<Tour[]>([])
+const currencies = ref<CurrencyItem[]>([])
 const paymentsMap = ref<Record<string, Payment[]>>({})
 const loading = ref(true)
 const loadingPayments = ref(false)
@@ -55,19 +85,27 @@ const customDateEnd = ref<string>('')
 
 // Payment Recording Form
 const form = ref({
-  amount: '',
-  method: 'Card',
+  amount: '', // Amount paid in Customer Currency
+  currency: 'EUR', // Selected Payment Currency
+  exchangeRate: 1.0, // Conversion Rate against Booking Currency (e.g. 53.50 EGP/EUR)
+  settledAmount: 0, // Calculated amount deducted from Booking (in Booking Currency)
+  method: 'Credit / Debit Card',
+  customMethod: '',
   reference: '',
   receivedUtc: new Date().toISOString().slice(0, 16)
 })
 
 // Currency Formatter
-const formatMoney = (val: number, currency: string = 'EUR') => {
-  return new Intl.NumberFormat('en-IE', {
-    style: 'currency',
-    currency: currency || 'EUR',
-    minimumFractionDigits: 2
-  }).format(val || 0)
+const formatMoney = (val: number, currencyCode: string = 'EUR') => {
+  try {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currencyCode || 'EUR',
+      minimumFractionDigits: 2
+    }).format(val || 0)
+  } catch {
+    return `${(val || 0).toFixed(2)} ${currencyCode}`
+  }
 }
 
 const formatDate = (dateStr: string) => {
@@ -96,16 +134,29 @@ const formatDateTime = (dateStr: string) => {
 async function loadInitialData() {
   loading.value = true
   try {
-    const [bookingsRes, toursRes] = await Promise.all([
+    const [bookingsRes, toursRes, currenciesRes] = await Promise.all([
       api.get('/api/booking/api/bookings'),
-      api.get('/api/content/api/tours')
+      api.get('/api/content/api/tours'),
+      api.get('/api/content/api/currencies').catch(() => ({ data: [] }))
     ])
     
     const rawBookings = bookingsRes.data
     bookings.value = Array.isArray(rawBookings) ? rawBookings : (rawBookings?.items || [])
     tours.value = Array.isArray(toursRes.data) ? toursRes.data : []
+    
+    if (Array.isArray(currenciesRes.data) && currenciesRes.data.length > 0) {
+      currencies.value = currenciesRes.data
+    } else {
+      currencies.value = [
+        { id: '1', code: 'EUR', name: 'Euro', symbol: '€', exchangeRate: 1.0, isBase: true, isActive: true },
+        { id: '2', code: 'USD', name: 'US Dollar', symbol: '$', exchangeRate: 1.08, isBase: false, isActive: true },
+        { id: '3', code: 'GBP', name: 'British Pound', symbol: '£', exchangeRate: 0.85, isBase: false, isActive: true },
+        { id: '4', code: 'EGP', name: 'Egyptian Pound', symbol: 'E£', exchangeRate: 53.50, isBase: false, isActive: true },
+        { id: '5', code: 'AED', name: 'UAE Dirham', symbol: 'د.إ', exchangeRate: 3.97, isBase: false, isActive: true },
+        { id: '6', code: 'SAR', name: 'Saudi Riyal', symbol: '﷼', exchangeRate: 4.05, isBase: false, isActive: true }
+      ]
+    }
 
-    // Select first booking if available
     if (bookings.value.length > 0 && !selectedBookingId.value) {
       selectBooking(bookings.value[0].id)
     }
@@ -140,16 +191,75 @@ function selectBooking(id: string) {
   if (id && !paymentsMap.value[id]) {
     loadBookingPayments(id)
   }
-  // Reset form with remaining balance
+  
   const b = selectedBooking.value
   if (b) {
-    const total = getBookingTotal(b)
-    const paid = getBookingPaid(b.id)
-    const remaining = Math.max(0, total - paid)
-    form.value.amount = remaining > 0 ? remaining.toFixed(2) : ''
+    const bookingCurr = b.currency || 'EUR'
+    form.value.currency = bookingCurr
+    updateRateForCurrency(bookingCurr)
+    
+    const remaining = getBookingRemaining(b)
+    recalculateFromBaseDue(remaining)
     form.value.reference = ''
     form.value.receivedUtc = new Date().toISOString().slice(0, 16)
   }
+}
+
+// Calculate rate between payment currency and booking base currency
+function updateRateForCurrency(targetCurrency: string) {
+  const b = selectedBooking.value
+  const bookingCurr = (b?.currency || 'EUR').toUpperCase()
+  const payCurr = targetCurrency.toUpperCase()
+
+  if (payCurr === bookingCurr) {
+    form.value.exchangeRate = 1.0
+    return
+  }
+
+  // Find currencies in rate store
+  const targetObj = currencies.value.find(c => c.code.toUpperCase() === payCurr)
+  const baseObj = currencies.value.find(c => c.code.toUpperCase() === bookingCurr)
+
+  const targetRate = targetObj?.exchangeRate || (payCurr === 'EGP' ? 53.50 : payCurr === 'USD' ? 1.08 : 1.0)
+  const baseRate = baseObj?.exchangeRate || 1.0
+
+  // Relative rate: how many target units per 1 base unit
+  const calculatedRate = targetRate / baseRate
+  form.value.exchangeRate = parseFloat(calculatedRate.toFixed(4))
+}
+
+// Watch payment currency changes
+watch(() => form.value.currency, (newCurr) => {
+  updateRateForCurrency(newCurr)
+  const b = selectedBooking.value
+  if (b) {
+    const remaining = getBookingRemaining(b)
+    recalculateFromBaseDue(remaining)
+  }
+})
+
+// Watch rate adjustments
+watch(() => form.value.exchangeRate, () => {
+  recalculateSettledAmount()
+})
+
+// Recalculate customer paid amount when given a target base settled amount
+function recalculateFromBaseDue(baseAmount: number) {
+  const rate = form.value.exchangeRate || 1.0
+  const custAmount = baseAmount * rate
+  form.value.amount = custAmount > 0 ? custAmount.toFixed(2) : ''
+  form.value.settledAmount = parseFloat(baseAmount.toFixed(2))
+}
+
+// Recalculate settled amount from user input
+function onCustomerAmountInput() {
+  recalculateSettledAmount()
+}
+
+function recalculateSettledAmount() {
+  const raw = parseFloat(form.value.amount) || 0
+  const rate = form.value.exchangeRate || 1.0
+  form.value.settledAmount = parseFloat((raw / rate).toFixed(2))
 }
 
 // Helpers
@@ -164,7 +274,7 @@ function getBookingTotal(b: Booking): number {
 
 function getBookingPaid(bId: string): number {
   const pList = paymentsMap.value[bId] || []
-  return pList.reduce((sum, p) => sum + (p.amount || 0), 0)
+  return pList.reduce((sum, p) => sum + (p.settledAmount ?? p.amount ?? 0), 0)
 }
 
 function getBookingRemaining(b: Booking): number {
@@ -254,7 +364,7 @@ const filteredBookings = computed(() => {
 const totalBookingsCount = computed(() => bookings.value.length)
 const totalVolumeAmount = computed(() => bookings.value.reduce((sum, b) => sum + getBookingTotal(b), 0))
 const totalCollectedAmount = computed(() => {
-  return Object.values(paymentsMap.value).flat().reduce((sum, p) => sum + (p.amount || 0), 0)
+  return Object.values(paymentsMap.value).flat().reduce((sum, p) => sum + (p.settledAmount ?? p.amount ?? 0), 0)
 })
 const totalUnpaidAmount = computed(() => Math.max(0, totalVolumeAmount.value - totalCollectedAmount.value))
 
@@ -263,8 +373,8 @@ function setQuickAmount(ratio: number) {
   if (!selectedBooking.value) return
   const remaining = getBookingRemaining(selectedBooking.value)
   const total = getBookingTotal(selectedBooking.value)
-  const target = ratio === 1 ? remaining : total * ratio
-  form.value.amount = Math.min(target, remaining > 0 ? remaining : total).toFixed(2)
+  const targetBase = ratio === 1 ? remaining : total * ratio
+  recalculateFromBaseDue(Math.min(targetBase, remaining > 0 ? remaining : total))
 }
 
 // Record Payment Handler
@@ -279,24 +389,32 @@ async function handleRecordPayment() {
     return
   }
 
+  const finalMethod = form.value.method === 'Other / Custom' && form.value.customMethod.trim() 
+    ? form.value.customMethod.trim() 
+    : form.value.method
+
   recordingPayment.value = true
   try {
     await api.post(`/api/finance/api/payments/booking/${selectedBooking.value.id}`, {
       amount,
-      method: form.value.method,
-      reference: form.value.reference?.trim() || `MANUAL-${Date.now().toString().slice(-6)}`,
+      currency: form.value.currency,
+      exchangeRate: form.value.exchangeRate,
+      settledAmount: form.value.settledAmount,
+      method: finalMethod,
+      reference: form.value.reference?.trim() || `${finalMethod.toUpperCase()}-${Date.now().toString().slice(-6)}`,
       receivedUtc: form.value.receivedUtc ? new Date(form.value.receivedUtc).toISOString() : new Date().toISOString()
     })
 
-    toast.success(`Payment of ${formatMoney(amount)} recorded successfully!`)
+    toast.success(`Payment of ${formatMoney(amount, form.value.currency)} (Settling ${formatMoney(form.value.settledAmount, selectedBooking.value.currency || 'EUR')}) recorded successfully!`)
     
     // Refresh payments for this booking
     await loadBookingPayments(selectedBooking.value.id)
     
     // Reset amount
     const remaining = getBookingRemaining(selectedBooking.value)
-    form.value.amount = remaining > 0 ? remaining.toFixed(2) : ''
+    recalculateFromBaseDue(remaining)
     form.value.reference = ''
+    form.value.customMethod = ''
   } catch (err: any) {
     console.error('Failed to record payment', err)
     const msg = err?.response?.data?.message || err?.response?.data?.detail || 'Failed to record payment.'
@@ -321,10 +439,10 @@ onMounted(loadInitialData)
     <div class="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-xs flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6">
       <div>
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 text-xs font-bold uppercase tracking-wider mb-2">
-          <span>💳</span> Financial Ledger & Payment Reconciliation
+          <span>💳</span> Multi-Currency Financial Ledger & Settlement
         </div>
         <h1 class="text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">Payments & Settlement</h1>
-        <p class="text-xs md:text-sm text-slate-500 mt-1">Search bookings, review transaction histories, and link manual or electronic payments.</p>
+        <p class="text-xs md:text-sm text-slate-500 mt-1">Accept payments in any customer currency with live exchange conversion and flexible settlement methods.</p>
       </div>
 
       <!-- Financial Metrics Ribbon -->
@@ -521,9 +639,9 @@ onMounted(loadInitialData)
                 <span class="truncate font-medium">{{ getTourName(b.tourId) }}</span>
               </div>
               <div class="text-right">
-                <span class="font-bold text-slate-900">{{ formatMoney(getBookingTotal(b)) }}</span>
+                <span class="font-bold text-slate-900">{{ formatMoney(getBookingTotal(b), b.currency || 'EUR') }}</span>
                 <div v-if="getBookingRemaining(b) > 0" class="text-[10px] text-amber-600 font-semibold">
-                  Due: {{ formatMoney(getBookingRemaining(b)) }}
+                  Due: {{ formatMoney(getBookingRemaining(b), b.currency || 'EUR') }}
                 </div>
               </div>
             </div>
@@ -540,7 +658,7 @@ onMounted(loadInitialData)
             📋
           </div>
           <h3 class="text-base font-bold text-slate-900">No Booking Selected</h3>
-          <p class="text-xs text-slate-500 max-w-sm mx-auto mt-1">Select a booking from the left list to review its financial snapshot, record transactions, and print receipts.</p>
+          <p class="text-xs text-slate-500 max-w-sm mx-auto mt-1">Select a booking from the left list to review its financial snapshot, record multi-currency transactions, and print receipts.</p>
         </div>
 
         <!-- Linked Booking Details Card -->
@@ -583,13 +701,13 @@ onMounted(loadInitialData)
             <div class="pt-4 border-t border-slate-100 space-y-2">
               <div class="flex justify-between items-baseline text-xs">
                 <div class="space-x-2">
-                  <span class="text-slate-500">Total Price: <strong class="text-slate-900 font-bold">{{ formatMoney(getBookingTotal(selectedBooking)) }}</strong></span>
+                  <span class="text-slate-500">Booking Total: <strong class="text-slate-900 font-bold">{{ formatMoney(getBookingTotal(selectedBooking), selectedBooking.currency || 'EUR') }}</strong></span>
                   <span class="text-slate-300">|</span>
-                  <span class="text-emerald-700 font-medium">Paid: <strong>{{ formatMoney(getBookingPaid(selectedBooking.id)) }}</strong></span>
+                  <span class="text-emerald-700 font-medium">Paid: <strong>{{ formatMoney(getBookingPaid(selectedBooking.id), selectedBooking.currency || 'EUR') }}</strong></span>
                 </div>
                 <div>
                   <span class="text-xs font-bold text-amber-700">
-                    Remaining Due: {{ formatMoney(getBookingRemaining(selectedBooking)) }}
+                    Remaining Due: {{ formatMoney(getBookingRemaining(selectedBooking), selectedBooking.currency || 'EUR') }}
                   </span>
                 </div>
               </div>
@@ -604,7 +722,7 @@ onMounted(loadInitialData)
             </div>
           </div>
 
-          <!-- Two-Card Action Grid: Inline Payment Recording & Transaction Ledger -->
+          <!-- Two-Card Action Grid: Inline Multi-Currency Payment Recording & Transaction Ledger -->
           <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
             
             <!-- RECORD PAYMENT FORM (5 cols) -->
@@ -612,9 +730,9 @@ onMounted(loadInitialData)
               <div>
                 <div class="flex items-center justify-between mb-3">
                   <h3 class="font-bold text-sm text-slate-900 flex items-center gap-1.5">
-                    <span>💵</span> Record Payment
+                    <span>💵</span> Record Multi-Currency Payment
                   </h3>
-                  <span class="text-[10px] text-slate-400 uppercase font-bold">Manual Link</span>
+                  <span class="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-bold uppercase">Dynamic FX</span>
                 </div>
 
                 <!-- Quick-Fill Chips -->
@@ -640,57 +758,118 @@ onMounted(loadInitialData)
                 </div>
 
                 <div class="space-y-3">
-                  <!-- Amount Input -->
-                  <div>
-                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">
-                      Payment Amount (EUR)
-                    </label>
-                    <div class="relative">
-                      <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-sm font-bold">€</span>
+                  
+                  <!-- Currency Selector & Exchange Rate -->
+                  <div class="grid grid-cols-2 gap-2">
+                    <div>
+                      <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-600 mb-1">
+                        Payment Currency
+                      </label>
+                      <select 
+                        v-model="form.currency" 
+                        class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#062d4d]"
+                      >
+                        <option v-for="c in currencies" :key="c.code" :value="c.code">
+                          {{ c.code }} ({{ c.symbol }}) - {{ c.name }}
+                        </option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-600 mb-1">
+                        Exchange Rate (vs {{ selectedBooking.currency || 'EUR' }})
+                      </label>
                       <input 
-                        v-model="form.amount" 
+                        v-model.number="form.exchangeRate" 
                         type="number" 
-                        min="0.01" 
-                        step="0.01" 
-                        placeholder="0.00" 
-                        class="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#062d4d] focus:bg-white"
+                        step="0.0001" 
+                        min="0.0001"
+                        class="w-full px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-mono font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#062d4d]"
                       />
                     </div>
                   </div>
 
-                  <!-- Payment Method -->
+                  <!-- Amount Input in Customer Currency -->
                   <div>
-                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">
-                      Payment Method
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-600 mb-1">
+                      Customer Pays Amount ({{ form.currency }})
+                    </label>
+                    <div class="relative">
+                      <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-xs font-bold">
+                        {{ form.currency }}
+                      </span>
+                      <input 
+                        v-model="form.amount" 
+                        @input="onCustomerAmountInput"
+                        type="number" 
+                        min="0.01" 
+                        step="0.01" 
+                        placeholder="0.00" 
+                        class="w-full pl-12 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#062d4d] focus:bg-white"
+                      />
+                    </div>
+                  </div>
+
+                  <!-- Multi-Currency Settlement Live Calculation Box -->
+                  <div class="p-2.5 bg-sky-50/80 border border-sky-200/60 rounded-xl text-xs space-y-1">
+                    <div class="flex items-center justify-between text-slate-600">
+                      <span>Rate conversion:</span>
+                      <span class="font-mono font-bold text-slate-900">
+                        1 {{ selectedBooking.currency || 'EUR' }} = {{ form.exchangeRate }} {{ form.currency }}
+                      </span>
+                    </div>
+                    <div class="flex items-center justify-between text-[#062d4d] font-bold pt-1 border-t border-sky-200/40">
+                      <span>Settles in Booking:</span>
+                      <span class="text-sm font-black text-emerald-700">
+                        {{ formatMoney(form.settledAmount, selectedBooking.currency || 'EUR') }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Configurable Payment Method -->
+                  <div>
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-600 mb-1">
+                      Payment Method / Channel
                     </label>
                     <select 
                       v-model="form.method" 
                       class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#062d4d]"
                     >
-                      <option value="Card">Credit / Debit Card</option>
-                      <option value="Bank">Bank Wire Transfer</option>
-                      <option value="Cash">Cash (Onsite / Representative)</option>
-                      <option value="Stripe">Online Stripe Checkout</option>
-                      <option value="Other">Other Gateway / Voucher</option>
+                      <option v-for="m in availablePaymentMethods" :key="m" :value="m">
+                        {{ m }}
+                      </option>
                     </select>
+                  </div>
+
+                  <!-- Custom Payment Method Name Input (Conditional) -->
+                  <div v-if="form.method === 'Other / Custom'">
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-600 mb-1">
+                      Custom Method Name
+                    </label>
+                    <input 
+                      v-model="form.customMethod" 
+                      type="text" 
+                      placeholder="e.g. Corporate Cheque, VIP Voucher #12..." 
+                      class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#062d4d] focus:bg-white"
+                    />
                   </div>
 
                   <!-- Reference / Wire ID -->
                   <div>
-                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">
-                      Reference / Wire ID
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-600 mb-1">
+                      Reference / Wire ID / TXN
                     </label>
                     <input 
                       v-model="form.reference" 
                       type="text" 
-                      placeholder="e.g. TXN-998822, Wire ref..." 
+                      placeholder="e.g. TXN-998822, Wire ref, Instapay ref..." 
                       class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#062d4d] focus:bg-white"
                     />
                   </div>
 
                   <!-- Received Date -->
                   <div>
-                    <label class="block text-[11px] font-bold uppercase tracking-wider text-slate-600 mb-1">
+                    <label class="block text-[10px] font-bold uppercase tracking-wider text-slate-600 mb-1">
                       Received Date & Time
                     </label>
                     <input 
@@ -706,7 +885,7 @@ onMounted(loadInitialData)
               <button 
                 @click="handleRecordPayment" 
                 :disabled="recordingPayment || !form.amount"
-                class="w-full py-2.5 bg-[#062d4d] hover:bg-[#0a3d66] active:scale-[0.98] text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                class="w-full py-2.5 bg-[#062d4d] hover:bg-[#0a3d66] active:scale-[0.98] text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer mt-2"
               >
                 <span v-if="recordingPayment" class="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin"></span>
                 <span>{{ recordingPayment ? 'Recording...' : 'Record Payment →' }}</span>
@@ -721,7 +900,7 @@ onMounted(loadInitialData)
                     <span>📜</span> Transaction Ledger
                   </h3>
                   <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-lg border border-emerald-100">
-                    Total: {{ formatMoney(getBookingPaid(selectedBooking.id)) }}
+                    Total Settled: {{ formatMoney(getBookingPaid(selectedBooking.id), selectedBooking.currency || 'EUR') }}
                   </span>
                 </div>
 
@@ -735,11 +914,11 @@ onMounted(loadInitialData)
                 <div v-else-if="selectedPayments.length === 0" class="bg-slate-50 rounded-xl p-8 text-center border border-slate-100 my-4">
                   <span class="text-2xl block mb-1">💸</span>
                   <h4 class="text-xs font-bold text-slate-700">No Payments Recorded Yet</h4>
-                  <p class="text-[11px] text-slate-400 mt-0.5">Use the form on the left to record the initial deposit or settlement.</p>
+                  <p class="text-[11px] text-slate-400 mt-0.5">Use the form on the left to record multi-currency deposits or settlements.</p>
                 </div>
 
                 <!-- Payments Table / List -->
-                <div v-else class="space-y-2.5 max-h-[340px] overflow-y-auto pr-1">
+                <div v-else class="space-y-2.5 max-h-[360px] overflow-y-auto pr-1">
                   <div 
                     v-for="p in selectedPayments" 
                     :key="p.id" 
@@ -752,12 +931,15 @@ onMounted(loadInitialData)
                       <div>
                         <div class="font-bold text-slate-900">{{ p.method }}</div>
                         <div class="text-[10px] text-slate-400 font-mono">{{ p.reference || 'No Reference' }}</div>
+                        <div v-if="p.currency && p.currency !== (selectedBooking.currency || 'EUR')" class="text-[10px] text-sky-700 font-medium mt-0.5">
+                          Paid: {{ formatMoney(p.amount, p.currency) }} (Rate: {{ p.exchangeRate || '1.0' }})
+                        </div>
                       </div>
                     </div>
 
                     <div class="text-right">
                       <div class="font-black text-emerald-700 text-sm">
-                        +{{ formatMoney(p.amount, p.currency) }}
+                        +{{ formatMoney(p.settledAmount ?? p.amount, selectedBooking.currency || 'EUR') }}
                       </div>
                       <div class="text-[10px] text-slate-400">
                         {{ formatDateTime(p.receivedUtc) }}

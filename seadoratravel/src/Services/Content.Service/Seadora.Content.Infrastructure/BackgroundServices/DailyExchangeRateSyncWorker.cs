@@ -10,7 +10,7 @@ public class DailyExchangeRateSyncWorker : BackgroundService
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<DailyExchangeRateSyncWorker> _logger;
-    private static readonly TimeSpan SyncInterval = TimeSpan.FromHours(24);
+    private static readonly TimeSpan SyncInterval = TimeSpan.FromMinutes(30);
 
     public DailyExchangeRateSyncWorker(
         IServiceProvider serviceProvider,
@@ -22,7 +22,7 @@ public class DailyExchangeRateSyncWorker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        _logger.LogInformation("DailyExchangeRateSyncWorker initialized. Scheduled every {Hours} hours.", SyncInterval.TotalHours);
+        _logger.LogInformation("ExchangeRateSyncWorker initialized. Scheduled every {Minutes} minutes.", SyncInterval.TotalMinutes);
 
         // Initial sync on startup after 10s delay to let DB seed and settle
         try

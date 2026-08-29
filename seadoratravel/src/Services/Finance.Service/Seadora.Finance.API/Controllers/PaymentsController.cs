@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Seadora.Finance.Application.Common.Interfaces;
 using Seadora.Finance.Application.Payments.Commands.RecordPayment;
-using Seadora.Finance.Domain.Enums;
 
 namespace Seadora.Finance.API.Controllers;
 
@@ -23,7 +22,15 @@ public class PaymentsController : ControllerBase
         _db = db;
     }
 
-    public record RecordPaymentRequest(decimal Amount, PaymentMethod Method, string? Reference, DateTime? ReceivedUtc);
+    public record RecordPaymentRequest(
+        decimal Amount, 
+        string? Method, 
+        string? Currency, 
+        decimal? ExchangeRate, 
+        decimal? SettledAmount, 
+        string? Reference, 
+        DateTime? ReceivedUtc
+    );
 
     [HttpPost("booking/{bookingId:guid}")]
     public async Task<IActionResult> Record(Guid bookingId, [FromBody] RecordPaymentRequest request)
@@ -32,7 +39,16 @@ public class PaymentsController : ControllerBase
         {
             var createdBy = User.FindFirstValue(ClaimTypes.Email) ?? User.FindFirstValue(ClaimTypes.NameIdentifier);
             var id = await _mediator.Send(new RecordPaymentCommand(
-                bookingId, request.Amount, request.Method, request.Reference, request.ReceivedUtc, createdBy));
+                bookingId, 
+                request.Amount, 
+                request.Method ?? "Card", 
+                request.Currency, 
+                request.ExchangeRate, 
+                request.SettledAmount, 
+                request.Reference, 
+                request.ReceivedUtc, 
+                createdBy
+            ));
             return Ok(new { paymentId = id });
         }
         catch (KeyNotFoundException ex)
@@ -53,7 +69,9 @@ public class PaymentsController : ControllerBase
                 p.BookingId,
                 p.Amount,
                 p.Currency,
-                Method = p.Method.ToString(),
+                p.ExchangeRate,
+                p.SettledAmount,
+                Method = p.Method,
                 p.Reference,
                 p.ReceivedUtc,
                 p.CreatedBy

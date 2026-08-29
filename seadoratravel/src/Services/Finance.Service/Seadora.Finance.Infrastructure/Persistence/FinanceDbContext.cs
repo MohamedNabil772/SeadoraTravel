@@ -81,7 +81,9 @@ public class FinanceDbContext : DbContext, IFinanceDbContext, IProcessedMessageD
             entity.HasKey(p => p.Id);
             entity.Property(p => p.Amount).HasPrecision(18, 2);
             entity.Property(p => p.Currency).IsRequired().HasMaxLength(3);
-            entity.Property(p => p.Method).HasConversion<string>().HasMaxLength(20);
+            entity.Property(p => p.ExchangeRate).HasPrecision(18, 6);
+            entity.Property(p => p.SettledAmount).HasPrecision(18, 2);
+            entity.Property(p => p.Method).IsRequired().HasMaxLength(50);
             entity.Property(p => p.Reference).HasMaxLength(200);
             entity.Property(p => p.CreatedBy).HasMaxLength(200);
             entity.HasIndex(p => p.BookingId);

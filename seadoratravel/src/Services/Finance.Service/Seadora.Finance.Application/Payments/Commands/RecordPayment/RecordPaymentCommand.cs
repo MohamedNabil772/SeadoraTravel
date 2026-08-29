@@ -6,7 +6,6 @@ using Seadora.Contracts.Events;
 using Seadora.Finance.Application.Common;
 using Seadora.Finance.Application.Common.Interfaces;
 using Seadora.Finance.Domain.Entities;
-using Seadora.Finance.Domain.Enums;
 using Seadora.Finance.Domain.Posting;
 
 namespace Seadora.Finance.Application.Payments.Commands.RecordPayment;
@@ -20,7 +19,10 @@ namespace Seadora.Finance.Application.Payments.Commands.RecordPayment;
 public record RecordPaymentCommand(
     Guid BookingId,
     decimal Amount,
-    PaymentMethod Method,
+    string Method,
+    string? Currency,
+    decimal? ExchangeRate,
+    decimal? SettledAmount,
     string? Reference,
     DateTime? ReceivedUtc,
     string? CreatedBy) : IRequest<Guid>;
@@ -47,12 +49,13 @@ public class RecordPaymentCommandHandler : IRequestHandler<RecordPaymentCommand,
 
     public async Task<Guid> Handle(RecordPaymentCommand cmd, CancellationToken ct)
     {
-        var amount = Math.Round(cmd.Amount, 2, MidpointRounding.AwayFromZero);
+        var paymentAmount = Math.Round(cmd.Amount, 2, MidpointRounding.AwayFromZero);
         var received = cmd.ReceivedUtc ?? DateTime.UtcNow;
 
         var snap = await _db.BookingFinancialSnapshots.FirstOrDefaultAsync(s => s.BookingId == cmd.BookingId, ct);
         if (snap is null)
         {
+            var initialCurrency = string.IsNullOrWhiteSpace(cmd.Currency) ? "EUR" : cmd.Currency.ToUpperInvariant();
             snap = new BookingFinancialSnapshot
             {
                 Id = Guid.NewGuid(),
@@ -61,20 +64,38 @@ public class RecordPaymentCommandHandler : IRequestHandler<RecordPaymentCommand,
                 CustomerId = Guid.Empty,
                 TourId = Guid.Empty,
                 TourTypeCode = "EXPEDITION",
-                Gross = amount,
+                Gross = paymentAmount,
                 Discount = 0m,
                 Tax = 0m,
-                Net = amount,
+                Net = paymentAmount,
                 SupplierCost = 0m,
-                Margin = amount,
+                Margin = paymentAmount,
                 Paid = 0m,
-                Due = amount,
-                Currency = "EUR",
+                Due = paymentAmount,
+                Currency = initialCurrency,
                 Status = "Confirmed",
                 BookingDateUtc = received,
                 UpdatedUtc = DateTime.UtcNow
             };
             _db.BookingFinancialSnapshots.Add(snap);
+        }
+
+        var paymentCurrency = string.IsNullOrWhiteSpace(cmd.Currency) ? snap.Currency : cmd.Currency.ToUpperInvariant();
+        var exchangeRate = cmd.ExchangeRate ?? 1.0m;
+        if (exchangeRate <= 0) exchangeRate = 1.0m;
+
+        decimal settledAmount;
+        if (cmd.SettledAmount.HasValue && cmd.SettledAmount.Value > 0)
+        {
+            settledAmount = Math.Round(cmd.SettledAmount.Value, 2, MidpointRounding.AwayFromZero);
+        }
+        else if (string.Equals(paymentCurrency, snap.Currency, StringComparison.OrdinalIgnoreCase))
+        {
+            settledAmount = paymentAmount;
+        }
+        else
+        {
+            settledAmount = Math.Round(paymentAmount / exchangeRate, 2, MidpointRounding.AwayFromZero);
         }
 
         var payment = new Payment
@@ -83,9 +104,11 @@ public class RecordPaymentCommandHandler : IRequestHandler<RecordPaymentCommand,
             BookingId = snap.BookingId,
             BranchId = snap.BranchId,
             CustomerId = snap.CustomerId,
-            Amount = amount,
-            Currency = snap.Currency,
-            Method = cmd.Method,
+            Amount = paymentAmount,
+            Currency = paymentCurrency,
+            ExchangeRate = exchangeRate,
+            SettledAmount = settledAmount,
+            Method = string.IsNullOrWhiteSpace(cmd.Method) ? "Card" : cmd.Method,
             Reference = cmd.Reference,
             ReceivedUtc = received,
             CreatedBy = cmd.CreatedBy
@@ -94,14 +117,14 @@ public class RecordPaymentCommandHandler : IRequestHandler<RecordPaymentCommand,
 
         var fx = await FxResolver.ResolveRateAsync(_db, snap.Currency, received, ct);
         _db.JournalEntries.Add(LedgerPosting.PaymentReceipt(
-            snap.BookingId, snap.BranchId, amount, snap.Currency, fx, received, payment.Id.ToString()));
+            snap.BookingId, snap.BranchId, settledAmount, snap.Currency, fx, received, payment.Id.ToString()));
 
         var total = snap.Net + snap.Tax;
-        snap.Paid += amount;
+        snap.Paid += settledAmount;
         snap.Due = Math.Max(0m, total - snap.Paid);
         snap.UpdatedUtc = DateTime.UtcNow;
 
-        await AddCollectedAsync(snap.BranchId, received.Date, snap.Currency, amount, ct);
+        await AddCollectedAsync(snap.BranchId, received.Date, snap.Currency, settledAmount, ct);
 
         _outbox.Enqueue(new PaymentRecorded
         {
@@ -109,11 +132,11 @@ public class RecordPaymentCommandHandler : IRequestHandler<RecordPaymentCommand,
             PaymentId = payment.Id,
             BookingId = snap.BookingId,
             BranchId = snap.BranchId,
-            Amount = amount,
+            Amount = settledAmount,
             Currency = snap.Currency,
             CumulativePaid = snap.Paid,
             BookingTotal = total,
-            Method = cmd.Method.ToString(),
+            Method = payment.Method,
             ReceivedUtc = received
         });
 

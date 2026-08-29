@@ -1,9 +1,5 @@
-using Seadora.Finance.Domain.Enums;
-
 namespace Seadora.Finance.Domain.Entities;
 
-// ponytail: plain record of money received - bank-feed auto-match and reconciliation land in a
-// later task, ReconciledUtc is the hook they will set.
 public class Payment
 {
     public Guid Id { get; set; }
@@ -12,7 +8,9 @@ public class Payment
     public Guid? CustomerId { get; set; }
     public decimal Amount { get; set; }
     public string Currency { get; set; } = FinanceConstants.ReportingCurrency;
-    public PaymentMethod Method { get; set; }
+    public decimal ExchangeRate { get; set; } = 1.0m;
+    public decimal SettledAmount { get; set; }
+    public string Method { get; set; } = "Card";
     public string? Reference { get; set; }
     public DateTime ReceivedUtc { get; set; }
     public DateTime? ReconciledUtc { get; set; }
