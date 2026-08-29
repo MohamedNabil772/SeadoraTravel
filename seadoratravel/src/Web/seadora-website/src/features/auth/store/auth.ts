@@ -46,7 +46,7 @@ export const useAuthStore = defineStore('auth', () => {
   const user = ref<any>(null);
   const token = ref<string | null>(localStorage.getItem('token') || null);
   const isAuthenticated = ref<boolean>(!!token.value);
-  const isLoggedIn = isAuthenticated; // alias for compatibility
+  const isLoggedIn = isAuthenticated;
   const isAuthModalOpen = ref(false);
   const favorites = ref<string[]>(loadInitialFavorites());
 
@@ -64,7 +64,6 @@ export const useAuthStore = defineStore('auth', () => {
     }
     persistFavorites(favorites.value);
 
-    // Asynchronously notify backend for global favorites statistics
     try {
       fetch(`/api/content/api/tours/${strId}/favorite?isFavorite=${!exists}`, {
         method: 'POST'
@@ -72,12 +71,28 @@ export const useAuthStore = defineStore('auth', () => {
     } catch (_) {}
   };
 
+  // Helper to load and merge persistent profile
+  const getPersistedProfile = (email?: string) => {
+    try {
+      const emailKey = email ? `seadora_customer_profile_${email.toLowerCase().trim()}` : '';
+      const raw = (emailKey ? localStorage.getItem(emailKey) : null) || localStorage.getItem('seadora_customer_profile');
+      if (raw) return JSON.parse(raw);
+    } catch (_) {}
+    return null;
+  };
+
   // Initialize session from localStorage if token exists
   if (token.value) {
     try {
       const storedUser = localStorage.getItem('user');
       if (storedUser) {
-        user.value = JSON.parse(storedUser);
+        const parsed = JSON.parse(storedUser);
+        const saved = getPersistedProfile(parsed.email);
+        user.value = {
+          ...parsed,
+          ...(saved || {}),
+          avatarUrl: saved?.avatarUrl || parsed?.avatarUrl || ''
+        };
         if (user.value.preferredLanguage) loadLanguageAsync(user.value.preferredLanguage);
       } else {
         fetchProfile();
@@ -97,11 +112,25 @@ export const useAuthStore = defineStore('auth', () => {
 
   const setSession = (sessionToken: string, sessionUser: any) => {
     token.value = sessionToken;
-    user.value = sessionUser;
+    const saved = getPersistedProfile(sessionUser?.email);
+    const mergedUser = {
+      ...sessionUser,
+      ...(saved || {}),
+      avatarUrl: saved?.avatarUrl || sessionUser?.avatarUrl || '',
+      name: saved?.fullName || saved?.name || sessionUser?.name || 'VIP Guest',
+      phone: saved?.phoneNumber || saved?.phone || sessionUser?.phone || '',
+      preferredLanguage: saved?.preferredLanguage || sessionUser?.preferredLanguage || 'en'
+    };
+
+    user.value = mergedUser;
     isAuthenticated.value = true;
     localStorage.setItem('token', sessionToken);
-    localStorage.setItem('user', JSON.stringify(sessionUser));
-    if (sessionUser?.preferredLanguage) loadLanguageAsync(sessionUser.preferredLanguage);
+    localStorage.setItem('user', JSON.stringify(mergedUser));
+    if (mergedUser.email) {
+      localStorage.setItem(`seadora_customer_profile_${mergedUser.email.toLowerCase().trim()}`, JSON.stringify(mergedUser));
+    }
+    localStorage.setItem('seadora_customer_profile', JSON.stringify(mergedUser));
+    if (mergedUser?.preferredLanguage) loadLanguageAsync(mergedUser.preferredLanguage);
   };
 
   const login = async (data: any) => {
@@ -129,14 +158,18 @@ export const useAuthStore = defineStore('auth', () => {
   async function fetchProfile() {
     try {
       const response = await authApi.fetchProfile();
-      user.value = response.data;
+      const saved = getPersistedProfile(response.data?.email);
+      user.value = {
+        ...response.data,
+        ...(saved || {}),
+        avatarUrl: saved?.avatarUrl || response.data?.avatarUrl || ''
+      };
       localStorage.setItem('user', JSON.stringify(user.value));
       if (user.value?.preferredLanguage) loadLanguageAsync(user.value.preferredLanguage);
-      return response.data;
+      return user.value;
     } catch (error) {
-      console.error('Fetch profile error', error);
-      logout();
-      throw error;
+      console.warn('Fetch profile offline fallback', error);
+      return user.value;
     }
   };
 
@@ -152,6 +185,10 @@ export const useAuthStore = defineStore('auth', () => {
     if (user.value) {
       user.value = { ...user.value, ...updates };
       localStorage.setItem('user', JSON.stringify(user.value));
+      if (user.value.email) {
+        localStorage.setItem(`seadora_customer_profile_${user.value.email.toLowerCase().trim()}`, JSON.stringify(user.value));
+      }
+      localStorage.setItem('seadora_customer_profile', JSON.stringify(user.value));
     }
   };
 

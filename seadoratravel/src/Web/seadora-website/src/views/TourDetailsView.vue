@@ -1597,7 +1597,7 @@ watch(routeSlug, () => {
               class="px-3 py-1 bg-white/90 hover:bg-white backdrop-blur-md text-slate-900 text-xs font-bold rounded-full pointer-events-auto flex items-center gap-1 shadow-md active:scale-95 transition-transform cursor-pointer"
             >
               <span>🔍</span>
-              <span>{{ $t('tourDetails.gallery.viewAll') || 'Enlarge' }}</span>
+              <span>{{ viewAllPhotosLabel }}</span>
             </button>
           </div>
 

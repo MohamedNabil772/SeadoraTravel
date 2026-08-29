@@ -202,7 +202,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/features/auth/store/auth';
 import { authApi } from '@/features/auth/api/authApi';
@@ -220,6 +220,17 @@ const profile = ref({
   preferredLanguage: authStore.user?.preferredLanguage || 'en',
   dietary: authStore.user?.dietaryRequirements || 'Standard Luxury'
 });
+
+watch(() => authStore.user, (u: any) => {
+  if (u) {
+    if (u.name || u.fullName) profile.value.fullName = u.name || u.fullName;
+    if (u.email) profile.value.email = u.email;
+    if (u.phone || u.phoneNumber) profile.value.phoneNumber = u.phone || u.phoneNumber;
+    if (u.avatarUrl !== undefined) profile.value.avatarUrl = u.avatarUrl;
+    if (u.preferredLanguage) profile.value.preferredLanguage = u.preferredLanguage;
+    if (u.dietaryRequirements) profile.value.dietary = u.dietaryRequirements;
+  }
+}, { immediate: true });
 
 const userInitials = computed(() => {
   if (!profile.value.fullName) return 'VIP';
