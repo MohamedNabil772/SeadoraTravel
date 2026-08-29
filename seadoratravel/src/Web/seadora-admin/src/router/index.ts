@@ -8,7 +8,8 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/',
+      path: '/login',
+      alias: '/',
       name: 'login',
       component: LoginView,
       meta: { requiresAuth: false }
@@ -169,6 +170,10 @@ const router = createRouter({
           meta: { title: 'Ticket Details' }
         }
       ]
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      redirect: '/'
     }
   ]
 })
@@ -180,8 +185,8 @@ router.beforeEach((to, _from, next) => {
   const requiresAuth = to.matched.some(record => record.meta.requiresAuth !== false)
 
   if (requiresAuth && !authStore.isAuthenticated) {
-    next('/')
-  } else if (to.path === '/' && authStore.isAuthenticated) {
+    next('/login')
+  } else if ((to.path === '/' || to.path === '/login') && authStore.isAuthenticated) {
     next('/dashboard')
   } else {
     next()
