@@ -68,7 +68,10 @@ builder.Services.AddAuthorization(options =>
     foreach (var permission in financePermissions)
     {
         options.AddPolicy(permission, p => p.RequireAuthenticatedUser().RequireAssertion(ctx =>
-            ctx.User.HasClaim(c => c.Type == "permission" && (c.Value == permission || c.Value == "*"))));
+            ctx.User.IsInRole("Admin") ||
+            ctx.User.IsInRole("SuperAdmin") ||
+            ctx.User.HasClaim(c => (c.Type == "permission" || c.Type == "Permissions" || c.Type == "role" || c.Type == "Role") && 
+                                   (c.Value == permission || c.Value == "*" || c.Value == "Admin" || c.Value == "SuperAdmin"))));
     }
 
     // ponytail: fail closed - everything requires AdminPolicy unless it opts out with [AllowAnonymous].

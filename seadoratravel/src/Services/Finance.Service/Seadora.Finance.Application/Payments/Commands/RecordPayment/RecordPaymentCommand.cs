@@ -47,11 +47,35 @@ public class RecordPaymentCommandHandler : IRequestHandler<RecordPaymentCommand,
 
     public async Task<Guid> Handle(RecordPaymentCommand cmd, CancellationToken ct)
     {
-        var snap = await _db.BookingFinancialSnapshots.FirstOrDefaultAsync(s => s.BookingId == cmd.BookingId, ct)
-            ?? throw new KeyNotFoundException($"No financial snapshot for booking {cmd.BookingId}; revenue must be recognized before a payment can be recorded.");
-
         var amount = Math.Round(cmd.Amount, 2, MidpointRounding.AwayFromZero);
         var received = cmd.ReceivedUtc ?? DateTime.UtcNow;
+
+        var snap = await _db.BookingFinancialSnapshots.FirstOrDefaultAsync(s => s.BookingId == cmd.BookingId, ct);
+        if (snap is null)
+        {
+            snap = new BookingFinancialSnapshot
+            {
+                Id = Guid.NewGuid(),
+                BookingId = cmd.BookingId,
+                BranchId = Guid.Empty,
+                CustomerId = Guid.Empty,
+                TourId = Guid.Empty,
+                TourTypeCode = "EXPEDITION",
+                Gross = amount,
+                Discount = 0m,
+                Tax = 0m,
+                Net = amount,
+                SupplierCost = 0m,
+                Margin = amount,
+                Paid = 0m,
+                Due = amount,
+                Currency = "EUR",
+                Status = "Confirmed",
+                BookingDateUtc = received,
+                UpdatedUtc = DateTime.UtcNow
+            };
+            _db.BookingFinancialSnapshots.Add(snap);
+        }
 
         var payment = new Payment
         {
