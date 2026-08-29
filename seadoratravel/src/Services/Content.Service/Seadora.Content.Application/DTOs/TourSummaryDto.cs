@@ -18,7 +18,9 @@ public class TourSummaryDto
     public string FormattedPrice => $"{Price:N2} {Currency}";
     public decimal Rating { get; set; }
     public string DestinationName { get; set; } = string.Empty;
+    public Dictionary<string, string> DestinationNames { get; set; } = new();
     public string CategoryName { get; set; } = string.Empty;
+    public Dictionary<string, string> CategoryNames { get; set; } = new();
     public List<string> Images { get; set; } = new();
     public string MainImage { get; set; } = string.Empty;
     public string Duration { get; set; } = string.Empty;

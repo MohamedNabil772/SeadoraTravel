@@ -264,8 +264,14 @@
     "message": "Parlez-nous de vos besoins..."
   },
   "tours": {
-    "travelDate": "Date de Voyage",
-    "sortBy": "Trier par"
+    "travelDate": "Date du voyage",
+    "sortBy": "Trier par",
+    "from": "À partir de",
+    "fullDay": "Journée complète",
+    "halfDay": "Demi-journée",
+    "hours": "Heures",
+    "bookNow": "Réserver",
+    "viewDetails": "Voir les détails"
   },
   "concierge": {
     "welcome": "Bienvenue chez Seadora Travel ! Comment puis-je vous aider avec votre expérience de luxe en mer Rouge aujourd'hui ?",
@@ -733,6 +739,17 @@
       "saveChanges": "Enregistrer les Préférences VIP",
       "saving": "Enregistrement en cours...",
       "savedSuccess": "Vos préférences VIP ont été mises à jour avec succès."
+    },
+    "favorites": {
+      "badge": "Expériences sauvegardées & Wishlist",
+      "title": "Vos expériences sauvegardées",
+      "subtitle": "Des voyages de luxe exclusifs enregistrés pour vos prochaines aventures.",
+      "emptyTitle": "Aucune expérience sauvegardée",
+      "emptySubtitle": "Découvrez nos expéditions d'élite sur la Mer Rouge et nos dahabiyas privées sur le Nil.",
+      "discover": "Découvrir les expériences",
+      "remove": "Retirer des favoris",
+      "startingFrom": "À partir de",
+      "bookNow": "Réserver"
     }
   }
 }

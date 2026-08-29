@@ -265,7 +265,13 @@
   },
   "tours": {
     "travelDate": "Travel Date",
-    "sortBy": "Sort By"
+    "sortBy": "Sort By",
+    "from": "Starting From",
+    "fullDay": "Full Day",
+    "halfDay": "Half Day",
+    "hours": "Hours",
+    "bookNow": "Book Now",
+    "viewDetails": "View Details"
   },
   "concierge": {
     "welcome": "Welcome to Seadora Travel! How may I assist you with your luxury Red Sea experience today?",
@@ -733,6 +739,17 @@
       "saveChanges": "Save VIP Preferences",
       "saving": "Saving Preferences...",
       "savedSuccess": "Your VIP preferences have been securely updated."
+    },
+    "favorites": {
+      "badge": "Saved Experiences & Wishlist",
+      "title": "Your Saved Experiences",
+      "subtitle": "Curated luxury journeys saved for your upcoming voyages.",
+      "emptyTitle": "No Saved Experiences Yet",
+      "emptySubtitle": "Explore our luxury Red Sea expeditions, private charters, and historical voyages.",
+      "discover": "Discover Experiences",
+      "remove": "Remove from favorites",
+      "startingFrom": "Starting From",
+      "bookNow": "Book Now"
     }
   }
 }

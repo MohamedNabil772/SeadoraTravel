@@ -261,7 +261,13 @@
   },
   "tours": {
     "travelDate": "Reisedatum",
-    "sortBy": "Sortieren nach"
+    "sortBy": "Sortieren nach",
+    "from": "Ab",
+    "fullDay": "Ganztägig",
+    "halfDay": "Halbtags",
+    "hours": "Stunden",
+    "bookNow": "Jetzt buchen",
+    "viewDetails": "Details ansehen"
   },
   "concierge": {
     "welcome": "Willkommen bei Seadora Travel! Wie kann ich Ihnen heute bei Ihrem Luxus-Erlebnis am Roten Meer helfen?",
@@ -729,6 +735,17 @@
       "saveChanges": "VIP-Präferenzen Speichern",
       "saving": "Wird gespeichert...",
       "savedSuccess": "Ihre VIP-Präferenzen wurden erfolgreich aktualisiert."
+    },
+    "favorites": {
+      "badge": "Gespeicherte Erlebnisse & Wunschliste",
+      "title": "Ihre gespeicherten Erlebnisse",
+      "subtitle": "Exklusive Luxusreisen, gespeichert für Ihre zukünftigen Abenteuer.",
+      "emptyTitle": "Noch keine Erlebnisse gespeichert",
+      "emptySubtitle": "Entdecken Sie unsere Luxus-Expeditionen auf dem Roten Meer und private Nil-Dahabiyas.",
+      "discover": "Erlebnisse entdecken",
+      "remove": "Aus Favoriten entfernen",
+      "startingFrom": "Ab",
+      "bookNow": "Jetzt buchen"
     }
   }
 }

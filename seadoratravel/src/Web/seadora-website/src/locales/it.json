@@ -264,8 +264,14 @@
     "message": "Raccontaci le tue esigenze..."
   },
   "tours": {
-    "travelDate": "Data di Viaggio",
-    "sortBy": "Ordina per"
+    "travelDate": "Data del viaggio",
+    "sortBy": "Ordina per",
+    "from": "A partire da",
+    "fullDay": "Intera giornata",
+    "halfDay": "Mezza giornata",
+    "hours": "Ore",
+    "bookNow": "Prenota ora",
+    "viewDetails": "Vedi dettagli"
   },
   "concierge": {
     "welcome": "Benvenuti a Seadora Travel! Come posso aiutarvi oggi con la vostra esperienza di lusso sul Mar Rosso?",
@@ -733,6 +739,17 @@
       "saveChanges": "Salva Preferenze VIP",
       "saving": "Salvataggio in corso...",
       "savedSuccess": "Le tue preferenze VIP sono state aggiornate con successo."
+    },
+    "favorites": {
+      "badge": "Esperienze salvate & Wishlist",
+      "title": "Le tue esperienze salvate",
+      "subtitle": "Viaggi di lusso selezionati e salvati per le tue future avventure.",
+      "emptyTitle": "Nessuna esperienza salvata",
+      "emptySubtitle": "Esplora le nostre spedizioni sul Mar Rosso e le dahabiya private sul Nilo.",
+      "discover": "Scopri esperienze",
+      "remove": "Rimuovi dai preferiti",
+      "startingFrom": "A partire da",
+      "bookNow": "Prenota ora"
     }
   }
 }
