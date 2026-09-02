@@ -143,7 +143,8 @@ function handleLogout() {
             active-class="bg-white/10 text-white shadow-sm ring-1 ring-white/10"
           >
             <span class="opacity-70 group-hover:opacity-100 transition-opacity">📅</span>
-            <span>Bookings</span>
+            <span class="flex-1">Bookings</span>
+            <span v-if="notificationStore.unreadBookingsCount > 0" class="bg-amber-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{{ notificationStore.unreadBookingsCount }}</span>
           </RouterLink>
           <RouterLink 
             to="/customers" 

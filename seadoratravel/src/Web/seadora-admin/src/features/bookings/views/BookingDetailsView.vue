@@ -10,6 +10,7 @@ interface Booking {
   customerName: string
   customerEmail: string
   bookingDate: string
+  tourDate?: string
   status: string
   whatsApp?: string
   hotelName?: string
@@ -51,11 +52,11 @@ async function loadData() {
 
     // Fetch all bookings for this tour to build the customer trip grid
     const allBookingsRes = await api.get(`/api/booking/api/bookings?tourId=${bData.tourId}`)
-    const targetDate = new Date(bData.bookingDate).toDateString()
+    const targetDate = new Date(bData.tourDate || bData.bookingDate).toDateString()
 
     const allBookings = Array.isArray(allBookingsRes.data) ? allBookingsRes.data : (allBookingsRes.data?.items || [])
     tripGuests.value = allBookings.filter((b: any) => {
-      return new Date(b.bookingDate).toDateString() === targetDate
+      return new Date(b.tourDate || b.bookingDate).toDateString() === targetDate
     })
   } catch (e) {
     console.error('Failed to load booking details', e)
@@ -162,8 +163,9 @@ onMounted(loadData)
                 <span class="font-bold text-dark text-base">{{ tour?.names?.en || 'Untitled Tour' }}</span>
               </div>
               <div>
-                <span class="text-xs text-body block uppercase font-semibold">Date & Time</span>
-                <span class="font-medium text-dark">{{ formatDate(booking.bookingDate) }}</span>
+                <span class="text-xs text-body block uppercase font-semibold">Excursion Trip Date</span>
+                <span class="font-bold text-dark text-base">{{ formatDate(booking.tourDate || booking.bookingDate) }}</span>
+                <span class="text-[11px] text-body block mt-0.5">Booked on: {{ formatDate(booking.bookingDate) }}</span>
               </div>
               <div class="grid grid-cols-2 gap-2">
                 <div>

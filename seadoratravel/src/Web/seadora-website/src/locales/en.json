@@ -751,5 +751,23 @@
       "startingFrom": "Starting From",
       "bookNow": "Book Now"
     }
+  },
+  "seo": {
+    "home": {
+      "title": "Seadora Travel – Luxury Egypt Experiences & Red Sea Tours",
+      "description": "Luxury Egypt tours with Seadora Travel: Red Sea cruises, diving, Nile voyages and private Cairo & Luxor experiences. VIP concierge, hotel pickup and expert local guides."
+    },
+    "tours": {
+      "title": "Egypt Tours & Excursions | Seadora Travel",
+      "description": "Browse curated Egypt tours: snorkeling & diving in Hurghada, Pyramids day trips, Nile cruises, desert safaris and private luxury experiences."
+    },
+    "comingSoon": {
+      "title": "Something Extraordinary Is Coming | Seadora Travel",
+      "description": "A new luxury travel experience from Seadora Travel is on the way. Stay tuned."
+    },
+    "feedback": {
+      "title": "Share Your Experience | Seadora Travel",
+      "description": "Tell us about your Seadora Travel tour. Your feedback helps us craft extraordinary journeys."
+    }
   }
 }

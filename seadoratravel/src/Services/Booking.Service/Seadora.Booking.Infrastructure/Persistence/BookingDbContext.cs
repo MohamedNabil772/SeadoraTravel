@@ -61,5 +61,26 @@ public class BookingDbContext : DbContext, IBookingDbContext, IProcessedMessageD
             // one departure per tour/start/slot - concurrent creators collide, one wins
             e.HasIndex(d => new { d.TourId, d.StartUtc, d.TimeSlot }).IsUnique();
         });
+
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            foreach (var property in entityType.GetProperties())
+            {
+                if (property.ClrType == typeof(DateTime))
+                {
+                    property.SetValueConverter(new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateTime, DateTime>(
+                        v => v.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(v, DateTimeKind.Utc) : v.ToUniversalTime(),
+                        v => DateTime.SpecifyKind(v, DateTimeKind.Utc)
+                    ));
+                }
+                else if (property.ClrType == typeof(DateTime?))
+                {
+                    property.SetValueConverter(new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateTime?, DateTime?>(
+                        v => v.HasValue ? (v.Value.Kind == DateTimeKind.Unspecified ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : v.Value.ToUniversalTime()) : v,
+                        v => v.HasValue ? DateTime.SpecifyKind(v.Value, DateTimeKind.Utc) : v
+                    ));
+                }
+            }
+        }
     }
 }

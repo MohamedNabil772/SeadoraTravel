@@ -1,14 +1,17 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
+import { ref, onMounted, onUnmounted, watch, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import api from '@/services/api'
 import { useToast } from '@/composables/useToast'
+import { useNotificationStore } from '@/features/notifications/store/notificationStore'
 import LuxuryPagination from '@/shared/components/LuxuryPagination.vue'
 import CreateBookingModal from '../components/CreateBookingModal.vue'
-import { Plus } from 'lucide-vue-next'
+import { Plus, RotateCw } from 'lucide-vue-next'
 
 const router = useRouter()
+const notificationStore = useNotificationStore()
 const isCreateModalOpen = ref(false)
+let autoRefreshTimer: any = null
 
 interface Booking {
   id: string
@@ -16,6 +19,7 @@ interface Booking {
   customerName: string
   customerEmail: string
   bookingDate: string
+  tourDate?: string
   status: string
   whatsApp?: string
   hotelName?: string
@@ -64,10 +68,10 @@ async function loadData() {
   }
 }
 
-function getBookedCount(tourId: string, dateStr: string) {
-  if (!bookings.value || bookings.value.length === 0) return 0
+function getBookedCount(tourId: string, dateStr?: string) {
+  if (!bookings.value || bookings.value.length === 0 || !dateStr) return 0
   const targetDate = new Date(dateStr).toDateString()
-  return bookings.value.filter(b => b.tourId === tourId && new Date(b.bookingDate).toDateString() === targetDate).length
+  return bookings.value.filter(b => b.tourId === tourId && new Date(b.tourDate || b.bookingDate).toDateString() === targetDate).length
 }
 
 function getMaxAllocations(tourId: string) {
@@ -82,11 +86,23 @@ function getTourName(tourId: string) {
   return tour ? (tour.names?.en || 'Untitled Tour') : 'Unknown Tour'
 }
 
-function formatDate(dateStr: string) {
+function formatTripDate(dateStr?: string) {
   if (!dateStr) return '—'
   const date = new Date(dateStr)
+  if (isNaN(date.getTime())) return dateStr
   return date.toLocaleDateString('en-US', {
+    weekday: 'short',
     year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  })
+}
+
+function formatCreationDate(dateStr?: string) {
+  if (!dateStr) return '—'
+  const date = new Date(dateStr)
+  if (isNaN(date.getTime())) return dateStr
+  return date.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
@@ -118,11 +134,43 @@ async function updateStatus(bookingId: string, status: string) {
 
 
 
+async function refreshBookingsSilently() {
+  try {
+    const bookingsRes = await api.get('/api/booking/api/bookings')
+    const rawBookings = bookingsRes.data
+    bookings.value = Array.isArray(rawBookings) ? rawBookings : (rawBookings?.items || [])
+  } catch (e) {
+    console.debug('Silent bookings sync', e)
+  }
+}
+
+// Watch for notification changes from the store (triggered when bookings are made)
+watch(() => notificationStore.lastUpdated, () => {
+  refreshBookingsSilently()
+})
+
+watch(() => notificationStore.unreadBookingsCount, () => {
+  refreshBookingsSilently()
+})
+
 function goToCreateBooking() {
   router.push('/bookings/create')
 }
 
-onMounted(loadData)
+onMounted(() => {
+  loadData()
+  // Active page auto-poll every 10 seconds to catch all real-time creations
+  autoRefreshTimer = setInterval(() => {
+    refreshBookingsSilently()
+  }, 10000)
+})
+
+onUnmounted(() => {
+  if (autoRefreshTimer) {
+    clearInterval(autoRefreshTimer)
+    autoRefreshTimer = null
+  }
+})
 </script>
 
 <template>
@@ -132,7 +180,15 @@ onMounted(loadData)
         <h2>Bookings Management</h2>
         <p>Review customer reservations, capacity allocations, and create manual VIP bookings.</p>
       </div>
-      <div class="header-actions">
+      <div class="header-actions flex items-center gap-3">
+        <button
+          @click="loadData"
+          class="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-text-muted hover:text-text-main bg-white border border-border/80 rounded-lg shadow-xs hover:bg-surface-sunken transition-all cursor-pointer"
+          title="Refresh bookings grid"
+        >
+          <RotateCw class="w-3.5 h-3.5" :class="{ 'animate-spin': loading }" />
+          <span>Refresh</span>
+        </button>
         <button
           @click="goToCreateBooking"
           class="btn-create"
@@ -164,7 +220,10 @@ onMounted(loadData)
         </thead>
         <tbody>
           <tr v-for="b in paginatedBookings" :key="b.id">
-            <td class="font-mono text-xs text-body">{{ formatDate(b.bookingDate) }}</td>
+            <td class="font-mono text-xs text-body">
+              <div class="font-bold text-[#062d4d] text-sm">{{ formatTripDate(b.tourDate || b.bookingDate) }}</div>
+              <div class="text-[10px] text-slate-400 mt-0.5">Booked: {{ formatCreationDate(b.bookingDate) }}</div>
+            </td>
             <td class="font-bold text-xs tracking-wider uppercase text-primary">
               {{ b.tripType || 'Group' }}
             </td>
@@ -183,7 +242,7 @@ onMounted(loadData)
             <td class="tour-name font-semibold text-black">
               <div>{{ getTourName(b.tourId) }}</div>
               <div class="text-xs text-body font-mono mt-1">
-                Allocations: {{ getBookedCount(b.tourId, b.bookingDate) }} / {{ getMaxAllocations(b.tourId) }}
+                Allocations: {{ getBookedCount(b.tourId, b.tourDate || b.bookingDate) }} / {{ getMaxAllocations(b.tourId) }}
               </div>
             </td>
             <td>
@@ -206,7 +265,7 @@ onMounted(loadData)
                   🛡️ ID Verified
                 </span>
                 <span 
-                  v-if="getBookedCount(b.tourId, b.bookingDate) >= getMaxAllocations(b.tourId)" 
+                  v-if="getBookedCount(b.tourId, b.tourDate || b.bookingDate) >= getMaxAllocations(b.tourId)" 
                   class="status-badge completed !bg-emerald-600 !text-white"
                   title="All capacity places booked for this trip"
                 >

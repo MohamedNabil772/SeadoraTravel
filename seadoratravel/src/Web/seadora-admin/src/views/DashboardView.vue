@@ -1,6 +1,10 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import api from '@/services/api'
+import { useNotificationStore } from '@/features/notifications/store/notificationStore'
+
+const notificationStore = useNotificationStore()
+let autoRefreshTimer: any = null
 
 const toursCount = ref(0)
 const destinationsCount = ref(0)
@@ -13,8 +17,8 @@ const recentBookings = ref<any[]>([])
 const favoriteTours = ref<any[]>([])
 const loading = ref(true)
 
-async function fetchStats() {
-  loading.value = true
+async function fetchStats(isSilent = false) {
+  if (!isSilent) loading.value = true
   try {
     const [toursRes, destsRes, catsRes, reportsRes, favRes] = await Promise.all([
       api.get('/api/content/api/tours'),
@@ -47,9 +51,13 @@ async function fetchStats() {
   } catch (e) {
     console.error('Failed to fetch dashboard stats', e)
   } finally {
-    loading.value = false
+    if (!isSilent) loading.value = false
   }
 }
+
+watch(() => notificationStore.lastUpdated, () => {
+  fetchStats(true)
+})
 
 function formatDate(dateStr: string) {
   if (!dateStr) return '—'
@@ -61,7 +69,19 @@ function formatPrice(val: number) {
   return new Intl.NumberFormat('en-IE', { style: 'currency', currency: 'EUR' }).format(val)
 }
 
-onMounted(fetchStats)
+onMounted(() => {
+  fetchStats()
+  autoRefreshTimer = setInterval(() => {
+    fetchStats(true)
+  }, 10000)
+})
+
+onUnmounted(() => {
+  if (autoRefreshTimer) {
+    clearInterval(autoRefreshTimer)
+    autoRefreshTimer = null
+  }
+})
 </script>
 
 <template>

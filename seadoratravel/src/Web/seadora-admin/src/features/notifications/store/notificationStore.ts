@@ -17,16 +17,18 @@ export const useNotificationStore = defineStore('notifications', () => {
   const notifications = ref<NotificationItem[]>([])
   const isLoading = ref(false)
   const pollingTimer = ref<number | null>(null)
+  const lastUpdated = ref<number>(Date.now())
 
   const unreadCount = computed(() => notifications.value.filter(n => !n.isRead).length)
-  const unreadInquiriesCount = computed(() => notifications.value.filter(n => !n.isRead && (n.type.toLowerCase().includes('inquiry') || n.type.toLowerCase().includes('contact'))).length)
-  const unreadBookingsCount = computed(() => notifications.value.filter(n => !n.isRead && n.type.toLowerCase().includes('booking')).length)
+  const unreadInquiriesCount = computed(() => notifications.value.filter(n => !n.isRead && ((n.type || '').toLowerCase().includes('inquiry') || (n.type || '').toLowerCase().includes('contact'))).length)
+  const unreadBookingsCount = computed(() => notifications.value.filter(n => !n.isRead && (n.type || '').toLowerCase().includes('booking')).length)
 
   const fetchNotifications = async () => {
     try {
       isLoading.value = true
       const { data } = await api.get('/api/booking/api/notifications')
       notifications.value = Array.isArray(data) ? data : (data.notifications || [])
+      lastUpdated.value = Date.now()
     } catch (error) {
       console.error('Failed to fetch notifications', error)
     } finally {
@@ -36,6 +38,7 @@ export const useNotificationStore = defineStore('notifications', () => {
 
   const startPolling = (intervalMs = 10000) => {
     const authStore = useAuthStore()
+    authStore.initAuth()
     
     // Stop any existing timer first
     stopPolling()
@@ -43,6 +46,7 @@ export const useNotificationStore = defineStore('notifications', () => {
     if (authStore.isAuthenticated) {
       fetchNotifications()
       pollingTimer.value = window.setInterval(() => {
+        authStore.initAuth()
         if (authStore.isAuthenticated) {
           fetchNotifications()
         } else {
@@ -106,6 +110,7 @@ export const useNotificationStore = defineStore('notifications', () => {
   return {
     notifications,
     isLoading,
+    lastUpdated,
     unreadCount,
     unreadInquiriesCount,
     unreadBookingsCount,

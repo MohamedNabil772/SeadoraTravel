@@ -98,6 +98,8 @@ const activeFiltersCount = computed(() => {
 // Toast state
 const toastMessage = ref('')
 const showToast = ref(false)
+const toastType = ref<'success' | 'error' | 'warning' | 'info'>('success')
+let toastTimer: any = null
 
 // Pagination states
 const currentPage = ref(1)
@@ -115,7 +117,7 @@ const bookingForm = ref({
   email: '',
   phone: '',
   destination: '',
-  date: '',
+  date: new Date(Date.now() + 86400000).toISOString().split('T')[0],
   guests: '2',
   notes: '',
   packageOption: 'premium',
@@ -664,12 +666,14 @@ const openDetailsPage = (tour: Tour) => {
   router.push(`/tour/${slug}`)
 }
 
-const triggerToast = (msg: string) => {
+const triggerToast = (msg: string, type: 'success' | 'error' | 'warning' | 'info' = 'success', duration = 4000) => {
+  if (toastTimer) clearTimeout(toastTimer)
   toastMessage.value = msg
+  toastType.value = type
   showToast.value = true
-  setTimeout(() => {
+  toastTimer = setTimeout(() => {
     showToast.value = false
-  }, 3000)
+  }, duration)
 }
 
 const isTourFavorite = (tourId: string) => {
@@ -864,6 +868,7 @@ const submitBooking = async () => {
   bookingSubmitError.value = ''
   try {
     const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+    const finalPrice = calculateFinalPrice()
     const response = await fetch(`${API_URL}/api/booking/api/bookings`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -871,11 +876,16 @@ const submitBooking = async () => {
         tourId: selectedTourForBooking.value.id,
         customerName: bookingForm.value.name.trim(),
         customerEmail: bookingForm.value.email.trim(),
-        whatsApp: bookingForm.value.whatsapp.trim(),
+        whatsApp: bookingForm.value.whatsapp.trim() || bookingForm.value.phone.trim(),
         hotelName: bookingForm.value.hotelName.trim(),
         roomNumber: bookingForm.value.roomNumber.trim(),
         passportFileName: bookingForm.value.passportFileName,
-        tripType: bookingForm.value.tripType
+        tripType: bookingForm.value.tripType,
+        tourDate: bookingForm.value.date ? new Date(bookingForm.value.date).toISOString() : null,
+        guests: parseInt(bookingForm.value.guests) || 1,
+        hotelPickup: bookingForm.value.pickupRequired === 'yes',
+        totalPrice: finalPrice,
+        language: bookingForm.value.guideLanguage || 'en'
       })
     })
     
@@ -2136,6 +2146,10 @@ onUnmounted(() => {
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
+                    <label class="block text-[10px] font-bold text-muted mb-2 uppercase tracking-widest font-sans">{{ $t('booking.labels.tourDate') || 'Travel Date' }}</label>
+                    <input v-model="bookingForm.date" type="date" required class="w-full px-5 py-4 bg-cream/20 border border-gold/25 rounded-lg outline-none text-sm font-jost text-dark placeholder-muted/65 transition-all duration-300 hover:border-gold/50 focus:border-gold focus:bg-white focus:ring-1 focus:ring-gold focus:shadow-[0_0_12px_rgba(201,168,76,0.15)]">
+                  </div>
+                  <div>
                     <label class="block text-[10px] font-bold text-muted mb-2 uppercase tracking-widest font-sans">{{ $t('booking.labels.tripType') }}</label>
                     <div class="relative">
                       <select v-model="bookingForm.tripType" class="w-full px-5 py-4 bg-cream/20 border border-gold/25 rounded-lg outline-none text-sm font-jost text-dark transition-all duration-300 hover:border-gold/50 focus:border-gold focus:bg-white focus:ring-1 focus:ring-gold focus:shadow-[0_0_12px_rgba(201,168,76,0.15)] appearance-none cursor-pointer pr-12">
@@ -2149,15 +2163,16 @@ onUnmounted(() => {
                       </div>
                     </div>
                   </div>
-                  <div class="grid grid-cols-3 gap-3">
-                    <div class="col-span-2">
-                      <label class="block text-[10px] font-bold text-muted mb-2 uppercase tracking-widest font-sans">{{ $t('booking.labels.hotelName') }}</label>
-                      <input v-model="bookingForm.hotelName" type="text" required class="w-full px-5 py-4 bg-cream/20 border border-gold/25 rounded-lg outline-none text-sm font-jost text-dark placeholder-muted/65 transition-all duration-300 hover:border-gold/50 focus:border-gold focus:bg-white focus:ring-1 focus:ring-gold focus:shadow-[0_0_12px_rgba(201,168,76,0.15)]" :placeholder="$t('booking.placeholders.hotelName')">
-                    </div>
-                    <div class="col-span-1">
-                      <label class="block text-[10px] font-bold text-muted mb-2 uppercase tracking-widest font-sans">{{ $t('booking.labels.roomNo') }}</label>
-                      <input v-model="bookingForm.roomNumber" type="text" required class="w-full px-5 py-4 bg-cream/20 border border-gold/25 rounded-lg outline-none text-sm font-jost text-dark placeholder-muted/65 transition-all duration-300 hover:border-gold/50 focus:border-gold focus:bg-white focus:ring-1 focus:ring-gold focus:shadow-[0_0_12px_rgba(201,168,76,0.15)]" :placeholder="$t('booking.placeholders.roomNo')">
-                    </div>
+                </div>
+
+                <div class="grid grid-cols-3 gap-3">
+                  <div class="col-span-2">
+                    <label class="block text-[10px] font-bold text-muted mb-2 uppercase tracking-widest font-sans">{{ $t('booking.labels.hotelName') }}</label>
+                    <input v-model="bookingForm.hotelName" type="text" required class="w-full px-5 py-4 bg-cream/20 border border-gold/25 rounded-lg outline-none text-sm font-jost text-dark placeholder-muted/65 transition-all duration-300 hover:border-gold/50 focus:border-gold focus:bg-white focus:ring-1 focus:ring-gold focus:shadow-[0_0_12px_rgba(201,168,76,0.15)]" :placeholder="$t('booking.placeholders.hotelName')">
+                  </div>
+                  <div class="col-span-1">
+                    <label class="block text-[10px] font-bold text-muted mb-2 uppercase tracking-widest font-sans">{{ $t('booking.labels.roomNo') }}</label>
+                    <input v-model="bookingForm.roomNumber" type="text" required class="w-full px-5 py-4 bg-cream/20 border border-gold/25 rounded-lg outline-none text-sm font-jost text-dark placeholder-muted/65 transition-all duration-300 hover:border-gold/50 focus:border-gold focus:bg-white focus:ring-1 focus:ring-gold focus:shadow-[0_0_12px_rgba(201,168,76,0.15)]" :placeholder="$t('booking.placeholders.roomNo')">
                   </div>
                 </div>
 
@@ -2208,15 +2223,57 @@ onUnmounted(() => {
     <!-- Footer -->
     <Footer />
     
-    <!-- Luxury Toast Notification -->
-    <Transition name="toast">
-      <div v-if="showToast" class="fixed bottom-8 right-8 z-[9999] bg-[#0d1f2d] border border-[#c9a84c]/30 rounded-md px-5 py-3.5 shadow-2xl text-white font-sans text-xs flex items-center gap-3">
-        <svg class="w-4 h-4 text-gold flex-shrink-0 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-        <span>{{ toastMessage }}</span>
-      </div>
-    </Transition>
+    <!-- Luxury Toast Notification (Emil Design, Teleported above all modals at z-[99999]) -->
+    <Teleport to="body">
+      <Transition
+        enter-active-class="transition-all duration-300 ease-out"
+        enter-from-class="opacity-0 translate-y-3 scale-95"
+        enter-to-class="opacity-100 translate-y-0 scale-100"
+        leave-active-class="transition-all duration-200 ease-in"
+        leave-from-class="opacity-100 translate-y-0 scale-100"
+        leave-to-class="opacity-0 translate-y-2 scale-95"
+      >
+        <div 
+          v-if="showToast" 
+          class="fixed bottom-8 right-6 md:right-8 z-[99999] max-w-md px-5 py-3.5 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-2xl flex items-center gap-3.5 select-none border text-xs sm:text-sm font-bold text-white transition-all pointer-events-auto"
+          :class="[
+            toastType === 'error' ? 'bg-[#1a0f18]/98 border-rose-500/60 shadow-rose-950/40 text-rose-50' :
+            toastType === 'warning' ? 'bg-[#1f160e]/98 border-amber-500/60 shadow-amber-950/40 text-amber-50' :
+            toastType === 'info' ? 'bg-[#091e33]/98 border-cyan-500/60 shadow-cyan-950/40 text-cyan-50' :
+            'bg-[#062d4d]/98 border-[#c9a84c]/60 shadow-[#062d4d]/50 text-white'
+          ]"
+        >
+          <!-- Status Icon -->
+          <div 
+            class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-xs font-extrabold"
+            :class="[
+              toastType === 'error' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/40' :
+              toastType === 'warning' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40' :
+              toastType === 'info' ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40' :
+              'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+            ]"
+          >
+            <span v-if="toastType === 'error'">✕</span>
+            <span v-else-if="toastType === 'warning'">⚠️</span>
+            <span v-else-if="toastType === 'info'">ℹ️</span>
+            <span v-else>✓</span>
+          </div>
+
+          <!-- Message Text -->
+          <span class="flex-1 leading-snug tracking-wide font-medium">{{ toastMessage }}</span>
+
+          <!-- Dismiss Button -->
+          <button 
+            type="button"
+            @click="showToast = false" 
+            class="text-white/60 hover:text-white ml-1 text-sm font-bold p-1 rounded-md transition-colors cursor-pointer"
+            aria-label="Dismiss notification"
+          >
+            ✕
+          </button>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 

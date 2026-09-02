@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
@@ -8,11 +8,11 @@ const router = useRouter()
 const searchQuery = ref('')
 
 const quickFilters = [
-  { key: 'diving', icon: '🤿', query: 'diving' },
-  { key: 'luxor', icon: '🏛️', query: 'luxor' },
-  { key: 'cairo', icon: '🏺', query: 'cairo' },
-  { key: 'cruise', icon: '⛵', query: 'cruise' },
-  { key: 'safari', icon: '🏜️', query: 'safari' }
+  { key: 'diving', icon: 'ðŸ¤¿', query: 'diving' },
+  { key: 'luxor', icon: 'ðŸ›ï¸', query: 'luxor' },
+  { key: 'cairo', icon: 'ðŸº', query: 'cairo' },
+  { key: 'cruise', icon: 'â›µ', query: 'cruise' },
+  { key: 'safari', icon: 'ðŸœï¸', query: 'safari' }
 ]
 
 const handleSearch = () => {
@@ -37,6 +37,9 @@ const applyQuickFilter = (query: string) => {
         src="/hero-egypt-majestic.jpg" 
         alt="Majestic Egypt - Pyramids, Sun & Turquoise Red Sea" 
         class="hero-bg-media"
+        fetchpriority="high"
+        loading="eager"
+        decoding="async"
       />
       
       <!-- Bright, Luminous Sunlit Atmosphere Scrim -->
@@ -56,9 +59,9 @@ const applyQuickFilter = (query: string) => {
           
           <!-- Sunlit Royal Badge -->
           <div class="hero-royal-badge animate-fade-in-up">
-            <span class="badge-sparkle">✦</span>
+            <span class="badge-sparkle">âœ¦</span>
             <span class="badge-text">{{ t('hero.badge') }}</span>
-            <span class="badge-sparkle">✦</span>
+            <span class="badge-sparkle">âœ¦</span>
           </div>
 
           <!-- Bright & Radiant Headline -->
@@ -75,7 +78,7 @@ const applyQuickFilter = (query: string) => {
           <div class="hero-interactive-search animate-fade-in-up delay-3">
             <form @submit.prevent="handleSearch" class="search-box-form">
               <div class="search-input-group">
-                <span class="search-icon-emblem">✨</span>
+                <span class="search-icon-emblem">âœ¨</span>
                 <input 
                   v-model="searchQuery" 
                   type="text" 

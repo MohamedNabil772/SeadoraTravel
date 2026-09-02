@@ -1,0 +1,9 @@
+# Seadora Travel — robots.txt
+# https://seadoratravel.com
+
+User-agent: *
+Allow: /
+Disallow: /portal
+Disallow: /portal/
+Disallow: /api/
+Sitemap: https://seadoratravel.com/sitemap.xml

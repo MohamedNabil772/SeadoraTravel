@@ -751,5 +751,23 @@
       "startingFrom": "À partir de",
       "bookNow": "Réserver"
     }
+  },
+  "seo": {
+    "home": {
+      "title": "Seadora Travel – Expériences de luxe en Égypte & croisières en mer Rouge",
+      "description": "Voyages de luxe en Égypte avec Seadora Travel : croisières en mer Rouge, plongée, croisières sur le Nil et expériences privées au Caire & à Louxor. Concierge VIP, transfert hôtel et guides locaux experts."
+    },
+    "tours": {
+      "title": "Circuits & Excursions en Égypte | Seadora Travel",
+      "description": "Découvrez nos circuits Égypte : snorkeling & plongée à Hurghada, excursions aux Pyramides, croisières sur le Nil, safaris dans le désert et expériences de luxe privées."
+    },
+    "comingSoon": {
+      "title": "Quelque chose d'extraordinaire arrive | Seadora Travel",
+      "description": "Une nouvelle expérience de voyage de luxe signée Seadora Travel arrive bientôt. Restez à l’écoute."
+    },
+    "feedback": {
+      "title": "Partagez votre expérience | Seadora Travel",
+      "description": "Racontez votre circuit Seadora Travel. Vos retours nous aident à créer des voyages extraordinaires."
+    }
   }
 }

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useCurrencyStore } from '@/store/currency'
 import { useAuthStore } from '@/features/auth/store/auth'
@@ -10,8 +10,10 @@ import GuestInfoForm from '@/features/tours/components/GuestInfoForm.vue'
 import TourAvailabilityCalendar from '@/features/tours/components/TourAvailabilityCalendar.vue'
 
 import { loadLanguageAsync } from '@/i18n'
+import { SITE_NAME, SITE_URL, setPageMeta, breadcrumbSchema, localizedPath, stripLocalePrefix } from '@/shared/utils/seo'
 
 const route = useRoute()
+const router = useRouter()
 const { locale, t } = useI18n()
 const currencyStore = useCurrencyStore()
 const authStore = useAuthStore()
@@ -41,6 +43,9 @@ const currentCurrencyObj = computed(() => currencies.find(c => c.code === curren
 
 const setLanguage = async (code: string) => {
   await loadLanguageAsync(code)
+  // Keep the locale visible in the URL for SEO (/fr/tour/..., /de/tour/..., ...)
+  const basePath = stripLocalePrefix(route.path)
+  router.push({ path: localizedPath(basePath, code), query: route.query, hash: route.hash })
   showLangDropdown.value = false
 }
 
@@ -53,11 +58,23 @@ const selectCurrency = (code: string) => {
 const activeTab = ref('overview')
 const readMoreExpanded = ref(false)
 const showShareModal = ref(false)
-const showToast = ref(false)
-const toastMessage = ref('')
 const activeFaq = ref<number | null>(0)
 const timelineProgress = ref(0)
 const timelineRef = ref<HTMLElement | null>(null)
+const showToast = ref(false)
+const toastMessage = ref('')
+const toastType = ref<'success' | 'error' | 'warning' | 'info'>('success')
+let toastTimer: any = null
+
+const triggerToast = (message: string, type: 'success' | 'error' | 'warning' | 'info' = 'success', duration = 4000) => {
+  if (toastTimer) clearTimeout(toastTimer)
+  toastMessage.value = message
+  toastType.value = type
+  showToast.value = true
+  toastTimer = setTimeout(() => {
+    showToast.value = false
+  }, duration)
+}
 
 // ==========================================
 // LUXURY IMAGE GALLERY & LIGHTBOX SYSTEM
@@ -903,6 +920,81 @@ const tourDescription = computed(() => {
   return descs[locale.value] || descs['en']
 })
 
+/* ------------------------------------------------------------------ */
+/* Dynamic SEO: per-tour title, description, OG image and JSON-LD      */
+/* ------------------------------------------------------------------ */
+
+const applyTourSeo = () => {
+  if (!tour.value || typeof document === 'undefined') return
+
+  const name = tourTitle.value || 'Egypt Tour'
+  const rawDesc = String(tourDescription.value || '')
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+  const description = rawDesc.length > 158
+    ? `${rawDesc.slice(0, 155).trimEnd()}...`
+    : (rawDesc || `Book the ${name} experience with Seadora Travel — VIP service, hotel pickup and expert local guides.`)
+
+  const images = galleryImages.value
+    .map(g => g.url)
+    .filter((u): u is string => !!u)
+    .map(u => (u.startsWith('http') ? u : `${SITE_URL}${u}`))
+    .slice(0, 5)
+
+  const basePath = `/tour/${routeSlug.value}`
+  const currentLocale = locale.value || 'en'
+  const pageUrl = currentLocale === 'en'
+    ? `${SITE_URL}${basePath}`
+    : `${SITE_URL}/${currentLocale}${basePath}`
+
+  const schemas: object[] = [
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name,
+      description,
+      ...(images.length > 0 ? { image: images } : {}),
+      brand: { '@type': 'Brand', name: SITE_NAME },
+      ...(Number(tour.value.rating) > 0 && Number(tour.value.reviewCount) > 0
+        ? {
+            aggregateRating: {
+              '@type': 'AggregateRating',
+              ratingValue: tour.value.rating,
+              reviewCount: tour.value.reviewCount,
+              bestRating: '5',
+              worstRating: '1'
+            }
+          }
+        : {}),
+      offers: {
+        '@type': 'Offer',
+        price: String(tour.value.price ?? ''),
+        priceCurrency: tour.value.currency || 'EUR',
+        availability: 'https://schema.org/InStock',
+        url: pageUrl
+      }
+    },
+    breadcrumbSchema([
+      { name: 'Home', path: '/' },
+      { name: 'Tours', path: '/tours' },
+      { name, path: basePath }
+    ])
+  ]
+
+  setPageMeta({
+    title: `${name} | ${SITE_NAME}`,
+    description,
+    path: basePath,
+    image: images[0],
+    type: 'product',
+    jsonLd: schemas
+  })
+}
+
+watch(tour, () => applyTourSeo())
+watch(locale, () => { if (tour.value) applyTourSeo() })
+
 
 
 const defaultAddons = computed(() => {
@@ -1238,9 +1330,7 @@ const handleBookNow = () => {
 
 const confirmBooking = async () => {
   if (!validateForm()) {
-    toastMessage.value = t("toast.formErrors")
-    showToast.value = true
-    setTimeout(() => { showToast.value = false }, 3500)
+    triggerToast(t("toast.formErrors") || "Please check the required fields in the form", 'warning', 4500)
     return
   }
   
@@ -1273,8 +1363,8 @@ const confirmBooking = async () => {
       language: locale.value || 'en',
       hotelPickup: true,
       selectedAddons: addonsPayload,
-      guestsList: guestInfoFormRef.value?.guests?.map((g: any) => ({
-        fullName: g.fullName,
+      guestsList: guestInfoFormRef.value?.guests?.filter((g: any) => g.fullName && g.fullName.trim().length > 0).map((g: any) => ({
+        fullName: g.fullName.trim(),
         passportFileName: g.documentUrl || g.passportFileName || '',
         ageCategory: g.ageCategory || (g.isChild ? 'Child' : 'Adult'),
         nationality: g.nationality || '',
@@ -1283,19 +1373,23 @@ const confirmBooking = async () => {
     }
     
     try {
-      await fetch(`${API_URL}/api/booking/api/bookings`, {
+      const response = await fetch(`${API_URL}/api/booking/api/bookings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       })
+      if (response.ok) {
+        triggerToast(t("toast.bookingConfirmed") || "Booking confirmed successfully!", 'success', 5000)
+        isBookingModalOpen.value = false
+      } else {
+        const errText = await response.text()
+        console.error('Backend booking submission error:', errText)
+        triggerToast('Booking submission failed. Please verify details.', 'error', 4500)
+      }
     } catch (e) {
-      console.warn('Backend booking submission fallback', e)
+      console.error('Backend booking submission error:', e)
+      triggerToast('Connection error. Please try again.', 'error', 4500)
     }
-    
-    toastMessage.value = t("toast.bookingConfirmed")
-    showToast.value = true
-    isBookingModalOpen.value = false
-    setTimeout(() => { showToast.value = false }, 5000)
   } finally {
     bookingSubmitting.value = false
   }
@@ -1310,19 +1404,15 @@ const toggleSave = () => {
   if (!tour.value?.id) return
   authStore.toggleFavorite(tour.value.id)
   const saved = authStore.isFavorite(tour.value.id)
-  toastMessage.value = saved ? t("toast.tourSaved") : 'Removed from favorites'
-  showToast.value = true
-  setTimeout(() => { showToast.value = false }, 3000)
+  triggerToast(saved ? t("toast.tourSaved") : 'Removed from favorites', 'info', 3000)
 }
 
 const copyShareLink = () => {
   if (typeof navigator !== 'undefined' && navigator.clipboard) {
     navigator.clipboard.writeText(shareUrl.value)
   }
-  toastMessage.value = t("toast.linkCopied")
-  showToast.value = true
+  triggerToast(t("toast.linkCopied") || "Link copied to clipboard", 'info', 3000)
   showShareModal.value = false
-  setTimeout(() => { showToast.value = false }, 3000)
 }
 
 const showPickupDropdown = ref(false)
@@ -1584,7 +1674,7 @@ watch(routeSlug, () => {
             >
               <img 
                 :src="img.url" 
-                :alt="img.title" 
+                :alt="img.title || tourTitle" 
                 class="w-full h-full object-cover" 
               />
               <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
@@ -1628,7 +1718,7 @@ watch(routeSlug, () => {
           >
             <img 
               :src="galleryImages[0]?.url" 
-              :alt="galleryImages[0]?.title"
+              :alt="galleryImages[0]?.title || tourTitle"
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
             />
             <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6 text-white">
@@ -1645,7 +1735,7 @@ watch(routeSlug, () => {
           >
             <img 
               :src="img.url" 
-              :alt="img.title"
+              :alt="img.title || tourTitle"
               class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
             />
             <div class="absolute inset-0 bg-black/20 group-hover:bg-transparent transition-colors duration-300"></div>
@@ -1748,7 +1838,7 @@ watch(routeSlug, () => {
 
           <!-- 1. Overview -->
           <div v-show="activeTab === 'overview'" class="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e8f0] shadow-xs space-y-4">
-            <h3 class="text-lg sm:text-xl font-bold text-[#0f172a]">{{ i18nContent.descHeading }}</h3>
+            <h2 class="text-lg sm:text-xl font-bold text-[#0f172a]">{{ i18nContent.descHeading }}</h2>
             <div class="text-sm sm:text-base text-[#475569] leading-relaxed space-y-3.5">
               <p>
                 {{ tourDescription }}
@@ -1773,7 +1863,7 @@ watch(routeSlug, () => {
 
           <!-- 2. Highlights -->
           <div v-show="activeTab === 'highlights' || activeTab === 'overview'" class="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e8f0] shadow-xs">
-            <h3 class="text-lg sm:text-xl font-bold text-[#0f172a] mb-5">{{ i18nContent.highlightsHeading }}</h3>
+            <h2 class="text-lg sm:text-xl font-bold text-[#0f172a] mb-5">{{ i18nContent.highlightsHeading }}</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div v-for="(h, idx) in tourHighlights" :key="idx" class="flex items-start gap-3 bg-[#f8fafc] p-4 rounded-xl border border-[#f1f5f9]">
                 <span class="text-emerald-600 text-lg font-bold">★</span>
@@ -1784,7 +1874,7 @@ watch(routeSlug, () => {
 
           <!-- 3. Itinerary Timeline -->
           <div v-show="activeTab === 'itinerary' || activeTab === 'overview'" class="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e8f0] shadow-xs">
-            <h3 class="text-lg sm:text-xl font-bold text-[#0f172a] mb-6">{{ i18nContent.itineraryHeading }}</h3>
+            <h2 class="text-lg sm:text-xl font-bold text-[#0f172a] mb-6">{{ i18nContent.itineraryHeading }}</h2>
             <div class="relative pl-8 space-y-7" ref="timelineRef">
               <!-- Animated Timeline Progress Line -->
               <div class="absolute left-3 top-2 bottom-2 w-0.5 bg-[#e2e8f0] rounded-full overflow-hidden">
@@ -1808,7 +1898,7 @@ watch(routeSlug, () => {
 
           <!-- 4. Inclusions & Exclusions -->
           <div v-show="activeTab === 'includes' || activeTab === 'overview'" class="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e8f0] shadow-xs">
-            <h3 class="text-lg sm:text-xl font-bold text-[#0f172a] mb-6">{{ i18nContent.includesHeading }}</h3>
+            <h2 class="text-lg sm:text-xl font-bold text-[#0f172a] mb-6">{{ i18nContent.includesHeading }}</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
               
               <!-- Included -->
@@ -1842,7 +1932,7 @@ watch(routeSlug, () => {
 
           <!-- 5. Important Info / What to bring -->
           <div v-show="activeTab === 'info' || activeTab === 'overview'" class="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e8f0] shadow-xs space-y-5">
-            <h3 class="text-lg sm:text-xl font-bold text-[#0f172a]">{{ i18nContent.infoHeading }}</h3>
+            <h2 class="text-lg sm:text-xl font-bold text-[#0f172a]">{{ i18nContent.infoHeading }}</h2>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div class="bg-[#f8fafc] p-5 rounded-2xl border border-[#e2e8f0]">
@@ -1880,7 +1970,7 @@ watch(routeSlug, () => {
           <div v-show="activeTab === 'reviews' || activeTab === 'overview'" class="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e8f0] shadow-xs space-y-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#f1f5f9]">
               <div>
-                <h3 class="text-lg sm:text-xl font-bold text-[#0f172a]">{{ i18nContent.reviewsHeading }}</h3>
+                <h2 class="text-lg sm:text-xl font-bold text-[#0f172a]">{{ i18nContent.reviewsHeading }}</h2>
                 <p class="text-xs sm:text-sm text-[#64748b] mt-0.5">{{ i18nContent.reviewsSub }}</p>
               </div>
 
@@ -1971,7 +2061,7 @@ watch(routeSlug, () => {
 
           <!-- 7. FAQ Accordion -->
           <div v-show="activeTab === 'faq' || activeTab === 'overview'" class="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e8f0] shadow-xs space-y-4">
-            <h3 class="text-lg sm:text-xl font-bold text-[#0f172a]">{{ i18nContent.faqHeading }}</h3>
+            <h2 class="text-lg sm:text-xl font-bold text-[#0f172a]">{{ i18nContent.faqHeading }}</h2>
             <div class="space-y-3">
               <div 
                 v-for="(f, idx) in tourFaqs" 
@@ -2484,16 +2574,57 @@ watch(routeSlug, () => {
       </div>
     </Transition>
 
-    <!-- TOAST NOTIFICATION -->
-    <Transition name="fade">
-      <div 
-        v-if="showToast" 
-        class="fixed bottom-6 right-6 z-50 bg-[#062d4d] text-white border border-[#c9a84c]/40 px-5 py-3 rounded-xl shadow-2xl text-xs font-bold flex items-center gap-3 animate-in slide-in-from-bottom-3"
+    <!-- LUXURY TOAST NOTIFICATION (Emil Design, Teleported above all modals at z-[99999]) -->
+    <Teleport to="body">
+      <Transition
+        enter-active-class="transition-all duration-300 ease-out"
+        enter-from-class="opacity-0 translate-y-3 scale-95"
+        enter-to-class="opacity-100 translate-y-0 scale-100"
+        leave-active-class="transition-all duration-200 ease-in"
+        leave-from-class="opacity-100 translate-y-0 scale-100"
+        leave-to-class="opacity-0 translate-y-2 scale-95"
       >
-        <span class="text-emerald-400">✓</span>
-        <span>{{ toastMessage }}</span>
-      </div>
-    </Transition>
+        <div 
+          v-if="showToast" 
+          class="fixed bottom-8 right-6 md:right-8 z-[99999] max-w-md px-5 py-3.5 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.45)] backdrop-blur-2xl flex items-center gap-3.5 select-none border text-xs sm:text-sm font-bold text-white transition-all pointer-events-auto"
+          :class="[
+            toastType === 'error' ? 'bg-[#1a0f18]/98 border-rose-500/60 shadow-rose-950/40 text-rose-50' :
+            toastType === 'warning' ? 'bg-[#1f160e]/98 border-amber-500/60 shadow-amber-950/40 text-amber-50' :
+            toastType === 'info' ? 'bg-[#091e33]/98 border-cyan-500/60 shadow-cyan-950/40 text-cyan-50' :
+            'bg-[#062d4d]/98 border-[#c9a84c]/60 shadow-[#062d4d]/50 text-white'
+          ]"
+        >
+          <!-- Status Icon -->
+          <div 
+            class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-xs font-extrabold"
+            :class="[
+              toastType === 'error' ? 'bg-rose-500/20 text-rose-400 border border-rose-500/40' :
+              toastType === 'warning' ? 'bg-amber-500/20 text-amber-400 border border-amber-500/40' :
+              toastType === 'info' ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/40' :
+              'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+            ]"
+          >
+            <span v-if="toastType === 'error'">✕</span>
+            <span v-else-if="toastType === 'warning'">⚠️</span>
+            <span v-else-if="toastType === 'info'">ℹ️</span>
+            <span v-else>✓</span>
+          </div>
+
+          <!-- Message Text -->
+          <span class="flex-1 leading-snug tracking-wide font-medium">{{ toastMessage }}</span>
+
+          <!-- Dismiss Button -->
+          <button 
+            type="button"
+            @click="showToast = false" 
+            class="text-white/60 hover:text-white ml-1 text-sm font-bold p-1 rounded-md transition-colors cursor-pointer"
+            aria-label="Dismiss notification"
+          >
+            ✕
+          </button>
+        </div>
+      </Transition>
+    </Teleport>
 
     <!-- FULLSCREEN LUXURY PHOTO LIGHTBOX MODAL -->
     <Teleport to="body">
@@ -2549,7 +2680,7 @@ watch(routeSlug, () => {
             <div class="max-w-5xl max-h-[70vh] relative rounded-2xl overflow-hidden shadow-2xl">
               <img 
                 :src="galleryImages[activeLightboxIndex]?.url" 
-                :alt="galleryImages[activeLightboxIndex]?.title" 
+                :alt="galleryImages[activeLightboxIndex]?.title || tourTitle" 
                 class="max-w-full max-h-[70vh] object-contain mx-auto transition-all duration-300"
               />
             </div>

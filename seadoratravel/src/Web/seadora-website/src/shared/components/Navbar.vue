@@ -28,9 +28,13 @@ const handleLogout = () => {
 
 
 import { loadLanguageAsync } from '@/i18n'
+import { localizedPath, stripLocalePrefix } from '@/shared/utils/seo'
 
 const setLang = async (lang: string) => {
   await loadLanguageAsync(lang)
+  // Keep the locale visible in the URL for SEO (/fr/tours, /de/tours, ...)
+  const basePath = stripLocalePrefix(route.path)
+  router.push({ path: localizedPath(basePath, lang), query: route.query, hash: route.hash })
   isMenuOpen.value = false // close menu on switch
   showLangDropdown.value = false
 }

@@ -751,5 +751,23 @@
       "startingFrom": "A partire da",
       "bookNow": "Prenota ora"
     }
+  },
+  "seo": {
+    "home": {
+      "title": "Seadora Travel – Esperienze di lusso in Egitto e tour sul Mar Rosso",
+      "description": "Viaggi di lusso in Egitto con Seadora Travel: crociere sul Mar Rosso, immersioni, crociere sul Nilo ed esperienze private al Cairo e a Luxor. Concierge VIP, transfer in hotel e guide locali esperte."
+    },
+    "tours": {
+      "title": "Tour ed escursioni in Egitto | Seadora Travel",
+      "description": "Scopri i tour in Egitto selezionati: snorkeling e immersioni a Hurghada, gite alle Piramidi, crociere sul Nilo, safari nel deserto ed esperienze di lusso private."
+    },
+    "comingSoon": {
+      "title": "Sta arrivando qualcosa di straordinario | Seadora Travel",
+      "description": "Una nuova esperienza di viaggio di lusso firmata Seadora Travel è in arrivo. Restate sintonizzati."
+    },
+    "feedback": {
+      "title": "Condividi la tua esperienza | Seadora Travel",
+      "description": "Raccontaci il tuo tour Seadora Travel. Il tuo feedback ci aiuta a creare viaggi straordinari."
+    }
   }
 }

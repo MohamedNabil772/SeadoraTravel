@@ -139,7 +139,11 @@ public class CreateBookingCommandHandler : IRequestHandler<CreateBookingCommand,
             PickupTime = request.PickupTime,
             PassportFileName = request.PassportFileName,
             TripType = request.TripType,
-            TourDate = request.TourDate,
+            TourDate = request.TourDate.HasValue
+                ? (request.TourDate.Value.Kind == DateTimeKind.Unspecified
+                    ? DateTime.SpecifyKind(request.TourDate.Value, DateTimeKind.Utc)
+                    : request.TourDate.Value.ToUniversalTime())
+                : null,
             // Detailed guest records are authoritative: the stored count must match them.
             Guests = guestsListDomain.Count > 0 ? guestsListDomain.Count : (request.Guests > 0 ? request.Guests : 1),
             HotelPickup = request.HotelPickup,

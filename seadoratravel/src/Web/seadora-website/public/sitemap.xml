@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://seadoratravel.com/</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://seadoratravel.com/"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://seadoratravel.com/fr"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://seadoratravel.com/de"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://seadoratravel.com/it"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://seadoratravel.com/ru"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://seadoratravel.com/"/>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://seadoratravel.com/tours</loc>
+    <xhtml:link rel="alternate" hreflang="en" href="https://seadoratravel.com/tours"/>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://seadoratravel.com/fr/tours"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://seadoratravel.com/de/tours"/>
+    <xhtml:link rel="alternate" hreflang="it" href="https://seadoratravel.com/it/tours"/>
+    <xhtml:link rel="alternate" hreflang="ru" href="https://seadoratravel.com/ru/tours"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://seadoratravel.com/tours"/>
+    <priority>0.9</priority>
+  </url>
+</urlset>

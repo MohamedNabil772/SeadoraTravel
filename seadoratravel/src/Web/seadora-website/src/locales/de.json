@@ -191,9 +191,13 @@
     "description": "Seit 2010 außergewöhnliche ägyptische Reisen für europäische Reisende. Ihr zuverlässiger Partner für Rotes Meer, Nil und Wüstenabenteuer.",
     "sections": {
       "destinations": "Reiseziele",
-      "tours": "Touren"
+      "tours": "Touren",
+      "contact": "Kontakt"
     },
-    "madeWith": "Mit ❤️ in Ägypten gemacht"
+    "madeWith": "Mit ❤️ in Ägypten gemacht",
+    "rights": "Alle Rechte vorbehalten.",
+    "privacy": "Datenschutzerklärung",
+    "terms": "AGB"
   },
   "bookingPopup": {
     "header": "Reservieren Sie Ihr Erlebnis",
@@ -746,6 +750,24 @@
       "remove": "Aus Favoriten entfernen",
       "startingFrom": "Ab",
       "bookNow": "Jetzt buchen"
+    }
+  },
+  "seo": {
+    "home": {
+      "title": "Seadora Travel – Luxusreisen Ägypten & Rotes Meer Touren",
+      "description": "Luxusreisen in Ägypten mit Seadora Travel: Rote-Meer-Kreuzfahrten, Tauchen, Nilkreuzfahrten und private Kairo- & Luxor-Erlebnisse. VIP-Concierge, Hotelabholung und erfahrene lokale Guides."
+    },
+    "tours": {
+      "title": "Ägypten Touren & Ausflüge | Seadora Travel",
+      "description": "Entdecken Sie kuratierte Ägypten-Touren: Schnorcheln & Tauchen in Hurghada, Pyramiden-Tagestrips, Nilkreuzfahrten, Wüstensafaris und private Luxus-Erlebnisse."
+    },
+    "comingSoon": {
+      "title": "Etwas Außergewöhnliches kommt | Seadora Travel",
+      "description": "Ein neues Luxusreiseerlebnis von Seadora Travel ist auf dem Weg. Bleiben Sie gespannt."
+    },
+    "feedback": {
+      "title": "Teilen Sie Ihre Erfahrung | Seadora Travel",
+      "description": "Erzählen Sie uns von Ihrer Seadora-Travel-Reise. Ihr Feedback hilft uns, außergewöhnliche Reisen zu gestalten."
     }
   }
 }

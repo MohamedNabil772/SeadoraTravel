@@ -56,6 +56,11 @@ export async function loadLanguageAsync(lang: string) {
   }
   localStorage.setItem('seadora_lang', lang);
 
+  // Keep the document language attribute in sync for SEO & accessibility
+  if (typeof document !== 'undefined') {
+    document.documentElement.setAttribute('lang', lang);
+  }
+
   try {
     const response = await fetch(`/api/content/api/v1/languages/${lang}/translations`)
     if (response.ok) {
