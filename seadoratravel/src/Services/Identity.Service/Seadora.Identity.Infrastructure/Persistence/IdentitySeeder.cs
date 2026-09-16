@@ -99,32 +99,6 @@ public static class IdentitySeeder
             await userManager.CreateAsync(altAdmin, "Admin@123456");
             await userManager.AddToRoleAsync(altAdmin, "SuperAdmin");
         }
-
-        // Seed Customer
-        var customerEmail = "customer@gmail.com";
-        if (await userManager.FindByEmailAsync(customerEmail) == null)
-        {
-            var customer = new User { UserName = customerEmail, Email = customerEmail, FirstName = "John", LastName = "Doe" };
-            await userManager.CreateAsync(customer, "Customer123!");
-            await userManager.AddToRoleAsync(customer, "Customer");
-        }
-
-        // Seed a demo Accountant and Business Owner so the Finance area is reachable out of the box.
-        var accountantEmail = "accountant@seadoratravel.com";
-        if (await userManager.FindByEmailAsync(accountantEmail) == null)
-        {
-            var accountant = new User { UserName = accountantEmail, Email = accountantEmail, FirstName = "Amina", LastName = "Accountant" };
-            await userManager.CreateAsync(accountant, "Accountant123!");
-            await userManager.AddToRoleAsync(accountant, "Accountant");
-        }
-
-        var ownerEmail = "owner@seadoratravel.com";
-        if (await userManager.FindByEmailAsync(ownerEmail) == null)
-        {
-            var owner = new User { UserName = ownerEmail, Email = ownerEmail, FirstName = "Omar", LastName = "Owner" };
-            await userManager.CreateAsync(owner, "Owner123!");
-            await userManager.AddToRoleAsync(owner, "BusinessOwner");
-        }
     }
 
     // ponytail: idempotent role->permission assignment; skips silently if the role or a permission id is missing.
