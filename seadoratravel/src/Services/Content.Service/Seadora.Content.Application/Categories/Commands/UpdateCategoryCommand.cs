@@ -11,6 +11,7 @@ public record UpdateCategoryCommand(
     Dictionary<string, string>? Names = null,
     Dictionary<string, string>? Descriptions = null,
     string? IconName = null,
+    string? Icon = null,
     string? CustomIconUrl = null,
     int Order = 0,
     string? CoverImageUrl = null) : IRequest<Unit>;
@@ -24,7 +25,8 @@ public class UpdateCategoryCommandHandler(IContentDbContext context) : IRequestH
         
         if (request.Names != null) category.Names = request.Names;
         if (request.Descriptions != null) category.Descriptions = request.Descriptions;
-        if (request.IconName != null) category.IconName = request.IconName;
+        var iconVal = request.IconName ?? request.Icon;
+        if (iconVal != null) category.IconName = iconVal;
         if (request.CustomIconUrl != null) category.CustomIconUrl = request.CustomIconUrl;
         if (request.Order != 0) category.Order = request.Order;
         if (request.CoverImageUrl != null) category.CoverImageUrl = request.CoverImageUrl;

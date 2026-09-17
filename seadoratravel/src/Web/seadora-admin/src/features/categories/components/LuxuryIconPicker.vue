@@ -4,7 +4,9 @@ const sharedMyIcons = ref<string[]>([])
 </script>
 
 <script setup lang="ts">
-import api from '@/services/api'
+import { computed, watch } from 'vue'
+import api, { API_URL } from '@/services/api'
+import { getCategoryDisplayIcon, isImageUrl, resolveImageUrl } from '@/shared/utils/helpers'
 
 const props = defineProps<{
   modelValue: string | null
@@ -14,8 +16,23 @@ const emit = defineEmits(['update:modelValue'])
 
 const LuxuryIcons = [
   '⛵', '🏖️', '🏨', '🏝️', '🛳️', '🌴', '🏰', '🍷', '💎', '✈️', 
-  '🌅', '🍹', '🏄', '🗺️', '🛎️', '🥂', '🏛️', '🌟', '🐬', '🦞'
+  '🌅', '🍹', '🏄', '🤿', '🐬', '🐪', '🏜️', '🧖', '🏛️', '🌟', 
+  '🗺️', '🛎️', '🥂', '✨', '🐠', '🌊', '🚤', '🎡', '🦞', '🧭'
 ]
+
+const normalizedValue = computed(() => {
+  if (!props.modelValue) return null
+  return getCategoryDisplayIcon(props.modelValue)
+})
+
+watch(() => props.modelValue, (val) => {
+  if (val && isImageUrl(val)) {
+    const resolved = resolveImageUrl(val)
+    if (!sharedMyIcons.value.includes(resolved)) {
+      sharedMyIcons.value.push(resolved)
+    }
+  }
+}, { immediate: true })
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const isUploading = ref(false)
@@ -47,7 +64,6 @@ async function processFile(file: File) {
       formData.append('file', file)
       const res = await api.post('/api/files', formData)
       const fileId = res.data.fileId || res.data.FileId
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
       const url = `${API_URL}/api/files/${fileId}`
       
       if (!sharedMyIcons.value.includes(url)) {
@@ -81,7 +97,7 @@ async function processFile(file: File) {
         :key="icon"
         type="button"
         class="icon-btn"
-        :class="{ active: modelValue === icon }"
+        :class="{ active: normalizedValue === icon }"
         @click="emit('update:modelValue', icon)"
       >
         {{ icon }}
@@ -125,10 +141,10 @@ async function processFile(file: File) {
         :key="idx"
         type="button"
         class="icon-btn custom-icon-btn"
-        :class="{ active: modelValue === icon }"
+        :class="{ active: modelValue === icon || (modelValue && resolveImageUrl(modelValue) === icon) }"
         @click="emit('update:modelValue', icon)"
       >
-        <img :src="icon" alt="custom icon" />
+        <img :src="resolveImageUrl(icon)" alt="custom icon" />
       </button>
     </div>
   </div>

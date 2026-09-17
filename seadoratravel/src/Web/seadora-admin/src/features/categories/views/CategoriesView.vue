@@ -7,6 +7,7 @@ import { useToast } from '@/composables/useToast'
 import LuxuryPagination from '@/shared/components/LuxuryPagination.vue'
 import ExcelImportExportModal from '@/shared/components/ExcelImportExportModal.vue'
 import { Plus } from 'lucide-vue-next'
+import { resolveImageUrl, isImageUrl, getCategoryDisplayIcon } from '@/shared/utils/helpers'
 
 const isExcelModalOpen = ref(false)
 
@@ -15,6 +16,7 @@ interface Category {
   names: Record<string, string>
   descriptions?: Record<string, string>
   icon: string | null
+  iconName?: string | null
   customIconUrl?: string | null
   coverImageUrl?: string | null
   order?: number
@@ -58,7 +60,11 @@ async function fetchCategories() {
   try {
     const res = await api.get('/api/content/api/categories')
     let items = Array.isArray(res.data) ? res.data : (res.data?.items || [])
-    categories.value = items.sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
+    categories.value = items.map((c: any) => ({
+      ...c,
+      icon: c.icon || c.iconName || null,
+      iconName: c.iconName || c.icon || null
+    })).sort((a: any, b: any) => (a.order || 0) - (b.order || 0))
   } catch (e) {
     console.error('Failed to fetch categories', e)
   } finally {
@@ -81,10 +87,12 @@ function openEditDrawer(cat: Category) {
 async function saveCategory(formData: any) {
   actionLoading.value = true
   try {
+    const iconVal = formData.icon || formData.iconName || null
     const payload = {
       names: formData.names,
       descriptions: formData.descriptions,
-      icon: formData.icon,
+      icon: iconVal,
+      iconName: iconVal,
       customIconUrl: formData.customIconUrl,
       coverImageUrl: formData.coverImageUrl,
       order: formData.order !== undefined ? formData.order : categories.value.length
@@ -248,11 +256,18 @@ onMounted(fetchCategories)
               <td class="icon-cell">
                 <div class="icon-wrapper">
                   <template v-if="cat.customIconUrl">
-                    <img :src="cat.customIconUrl" alt="Icon" style="max-width:24px; max-height:24px; object-fit:contain;" />
+                    <img :src="resolveImageUrl(cat.customIconUrl)" alt="Icon" style="max-width:24px; max-height:24px; object-fit:contain;" />
                   </template>
-                  <template v-else-if="cat.icon">
-                    <img v-if="cat.icon.startsWith('data:') || cat.icon.startsWith('http')" :src="cat.icon" alt="icon" style="max-width:24px; max-height:24px; object-fit:contain;" />
-                    <span v-else>{{ cat.icon }}</span>
+                  <template v-else-if="cat.icon || cat.iconName">
+                    <img 
+                      v-if="isImageUrl(cat.icon || cat.iconName)" 
+                      :src="resolveImageUrl(cat.icon || cat.iconName)" 
+                      alt="icon" 
+                      style="max-width:24px; max-height:24px; object-fit:contain;" 
+                    />
+                    <span v-else class="text-xl leading-none select-none">
+                      {{ getCategoryDisplayIcon(cat.icon || cat.iconName) }}
+                    </span>
                   </template>
                   <span v-else class="text-slate-400" style="font-size: 14px;">—</span>
                 </div>

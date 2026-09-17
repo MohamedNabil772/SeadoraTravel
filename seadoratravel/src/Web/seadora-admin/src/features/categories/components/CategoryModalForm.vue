@@ -4,7 +4,8 @@ import LocaleTabs from '@/shared/components/locale/LocaleTabs.vue'
 import LocalizedInput from '@/shared/components/locale/LocalizedInput.vue'
 import LocalizedTextarea from '@/shared/components/locale/LocalizedTextarea.vue'
 import LuxuryIconPicker from './LuxuryIconPicker.vue'
-import api from '@/services/api'
+import api, { API_URL } from '@/services/api'
+import { resolveImageUrl } from '@/shared/utils/helpers'
 
 const props = defineProps<{
   modelValue: boolean
@@ -116,7 +117,6 @@ async function uploadFile(event: Event, targetField: 'coverImageUrl' | 'customIc
   try {
     const res = await api.post('/api/files', formData)
     const fileId = res.data.fileId || res.data.FileId
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
     form.value[targetField] = `${API_URL}/api/files/${fileId}`
   } catch (err) {
     console.error('Failed to upload', err)
@@ -171,7 +171,7 @@ async function uploadFile(event: Event, targetField: 'coverImageUrl' | 'customIc
             </div>
             <input type="file" ref="coverInput" accept="image/*" class="hidden" style="display:none" @change="e => uploadFile(e, 'coverImageUrl')" />
             <div v-if="form.coverImageUrl" class="image-preview relative group">
-              <img :src="form.coverImageUrl" alt="Cover preview" />
+              <img :src="resolveImageUrl(form.coverImageUrl)" alt="Cover preview" />
               <div class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                 <button type="button" class="btn-remove-img" @click="form.coverImageUrl = null">Remove</button>
               </div>

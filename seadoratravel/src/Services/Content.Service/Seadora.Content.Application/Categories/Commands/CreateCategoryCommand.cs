@@ -10,6 +10,7 @@ public record CreateCategoryCommand(
     Dictionary<string, string> Names,
     Dictionary<string, string>? Descriptions = null,
     string? IconName = null,
+    string? Icon = null,
     string? CustomIconUrl = null,
     int Order = 0,
     string? CoverImageUrl = null) : IRequest<Guid>;
@@ -20,6 +21,8 @@ public class CreateCategoryCommandHandler(IContentDbContext context) : IRequestH
     {
         var category = request.Adapt<Category>();
         category.Id = Guid.NewGuid();
+        var iconVal = request.IconName ?? request.Icon;
+        if (iconVal != null) category.IconName = iconVal;
         if (category.Descriptions == null) category.Descriptions = new();
         if (category.CoverImageUrl == null) category.CoverImageUrl = string.Empty;
         context.Categories.Add(category);
