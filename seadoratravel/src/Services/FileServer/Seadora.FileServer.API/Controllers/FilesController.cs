@@ -16,6 +16,7 @@ public class FilesController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Policy = "AdminPolicy")]
     public async Task<IActionResult> Upload(IFormFile file)
     {
         if (file == null || file.Length == 0)
@@ -52,6 +53,7 @@ public class FilesController : ControllerBase
     }
 
     [HttpDelete("{fileId}")]
+    [Authorize(Policy = "AdminPolicy")]
     public async Task<IActionResult> Delete(string fileId)
     {
         await _storageService.DeleteFileAsync(fileId);

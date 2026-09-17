@@ -29,6 +29,16 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 var adminPolicy = new AuthorizationPolicyBuilder(JwtBearerDefaults.AuthenticationScheme)
     .RequireAuthenticatedUser()
     .RequireRole("Admin", "SuperAdmin")
@@ -37,8 +47,6 @@ var adminPolicy = new AuthorizationPolicyBuilder(JwtBearerDefaults.Authenticatio
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AdminPolicy", adminPolicy);
-    // ponytail: fail closed - everything requires AdminPolicy unless it opts out with [AllowAnonymous].
-    options.FallbackPolicy = adminPolicy;
 });
 
 // Configure Storage
@@ -55,7 +63,8 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 }
 
-app.UseHttpsRedirection();
+app.UseRouting();
+app.UseCors("AllowAll");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
