@@ -109,17 +109,23 @@ const galleryImages = computed(() => {
     })
   }
 
-  const fallbacks = [
-    { url: 'https://images.unsplash.com/photo-1544551763-46a013bb70d5?auto=format&fit=crop&w=1400&q=80', title: 'Quad Desert Safari', caption: 'High-speed quad bike adventure across Sinai desert sands' },
-    { url: 'https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?auto=format&fit=crop&w=1000&q=80', title: 'Bedouin Camel Caravan', caption: 'Sunset camel trek across dramatic desert sand dunes' },
-    { url: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1000&q=80', title: 'Bedouin Camp Feast', caption: 'Authentic Bedouin camp with open-flame BBQ dinner' },
-    { url: 'https://images.unsplash.com/photo-1473580044384-7ba9967e16a0?auto=format&fit=crop&w=1000&q=80', title: 'Echo Mountains Canyon', caption: 'Spectacular sandstone formations and mountain echo shouts' },
-    { url: 'https://images.unsplash.com/photo-1570481662006-a3a1374699e8?auto=format&fit=crop&w=1000&q=80', title: 'Oriental Fire & Tanoura Show', caption: 'Live performance under the starlit Egyptian desert sky' }
-  ]
+  if (list.length === 0) {
+    list.push({
+      url: '/hero-egypt-majestic.jpg',
+      title: tourTitle.value || 'Tour',
+      caption: ''
+    })
+  }
 
+  // Ensure mosaic has at least 5 frames using the tour's own photos
+  const baseCount = list.length
   while (list.length < 5) {
-    const nextFallback = fallbacks[list.length % fallbacks.length]
-    list.push(nextFallback)
+    const orig = list[list.length % baseCount]
+    list.push({
+      url: orig.url,
+      title: orig.title,
+      caption: orig.caption
+    })
   }
 
   return list
@@ -612,7 +618,7 @@ const i18nContent = computed(() => {
     infoHeading: t('tourDetails.infoHeading'),
     whatToBringTitle: t('tourDetails.whatToBringTitle'),
     notSuitableTitle: t('tourDetails.notSuitableTitle'),
-    notSuitableText: t('tourDetails.notSuitableText'),
+    notSuitableText: '',
     reviewsHeading: t('tourDetails.reviewsHeading'),
     reviewsSub: t('tourDetails.reviewsSub'),
     verifiedBooking: t('tourDetails.verifiedBooking'),
@@ -651,27 +657,13 @@ const i18nContent = computed(() => {
 const tourTitle = computed(() => {
   if (tour.value?.names?.[locale.value]) return tour.value.names[locale.value]
   if (tour.value?.names?.['en']) return tour.value.names['en']
-  const titles: Record<string, string> = {
-    en: 'Quad Bike Sharm El Sheikh: ATV, Camel, Echo Mountains & BBQ Dinner Show',
-    de: 'Quad Safari Sharm El Sheikh: ATV, Kamelreiten, Echo-Berge & Beduinen-BBQ Show',
-    it: 'Quad Safari Sharm El Sheikh: ATV, Cammelli, Montagne dell’Eco e Cena BBQ con Spettacolo',
-    fr: 'Safari Quad Charm el-Cheikh : Quad, Chameau, Montagnes de l’Écho & Dîner Spectacle Bédouin',
-    ru: 'Сафари на квадроциклах в Шарм-эль-Шейхе: катание, верблюды, скалы Эхо и ужин с шоу'
-  }
-  return titles[locale.value] || titles['en']
+  return tour.value?.names ? (Object.values(tour.value.names)[0] || 'Tour') : 'Tour'
 })
 
 const tourDescription = computed(() => {
   if (tour.value?.descriptions?.[locale.value]) return tour.value.descriptions[locale.value]
   if (tour.value?.descriptions?.['en']) return tour.value.descriptions['en']
-  const descs: Record<string, string> = {
-    en: 'Five desert experiences in one golden evening — quad bike, camel ride, the Echo Mountains, a Bedouin BBQ feast and a live fire show under the Sinai stars. Free hotel pickup, and one of Sharm El Sheikh’s highest-rated safaris.',
-    de: 'Fünf Wüstenerlebnisse an einem goldenen Abend – Quad-Bike, Kamelreiten, Echo-Berge, Beduinen-BBQ-Festmahl und Live-Feuershow unter den Sternen des Sinai. Kostenlose Hotelabholung und eine der beliebtesten Safaris in Sharm El Sheikh.',
-    it: 'Cinque esperienze nel deserto in una magica serata: quad, giro in cammello, Montagne dell’Eco, banchetto barbecue beduino e spettacolo di fuoco sotto le stelle del Sinai. Pick-up gratuito e safari tra i più votati.',
-    fr: 'Cinq expériences dans le désert en une soirée dorée : quad, balade à dos de chameau, montagnes de l’écho, festin barbecue bédouin et spectacle de feu sous les étoiles du Sinaï. Prise en charge gratuite à l’hôtel.',
-    ru: 'Пять ярких приключений за один золотой вечер: сафари на квадроциклах, катание на верблюдах, каньон Эхо, бедуинский ужин-барбекю и огненное шоу под звездами Синая. Бесплатный трансфер из отеля.'
-  }
-  return descs[locale.value] || descs['en']
+  return tour.value?.descriptions ? (Object.values(tour.value.descriptions)[0] || '') : ''
 })
 
 /* ------------------------------------------------------------------ */
