@@ -1084,7 +1084,9 @@ const fetchTourData = async () => {
           const targetSlug = getSlug(currentSlug)
           found = tours.find((t: any) => {
             const names = t.names || {}
-            return Object.values(names).some((n: any) => getSlug(String(n)) === targetSlug) ||
+            return (t.slug && (t.slug === currentSlug || getSlug(t.slug) === targetSlug)) ||
+                   (t.title && getSlug(t.title) === targetSlug) ||
+                   Object.values(names).some((n: any) => getSlug(String(n)) === targetSlug) ||
                    getSlug(t.name || '') === targetSlug
           })
         }
@@ -1093,13 +1095,27 @@ const fetchTourData = async () => {
         if (!found && currentSlug) {
           const targetSlug = getSlug(currentSlug)
           found = tours.find((t: any) => {
-            const enSlug = getSlug(t.names?.['en'] || '')
+            const enSlug = getSlug(t.names?.['en'] || t.title || '')
             return enSlug.includes(targetSlug) || targetSlug.includes(enSlug)
           })
         }
 
+        const selectedTour = found || tours[0]
+        if (selectedTour?.id) {
+          try {
+            const detailRes = await fetch(`${API_URL}/api/content/api/tours/${selectedTour.id}`)
+            if (detailRes.ok) {
+              const fullTour = await detailRes.json()
+              tour.value = { ...selectedTour, ...fullTour }
+              return
+            }
+          } catch (detailErr) {
+            console.warn('Could not fetch single tour details, using list data', detailErr)
+          }
+        }
+
         // Assign found tour, or fallback to first tour
-        tour.value = found || tours[0]
+        tour.value = selectedTour
       }
     }
   } catch (e) {
