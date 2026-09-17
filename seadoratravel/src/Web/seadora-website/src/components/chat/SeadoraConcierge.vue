@@ -4,9 +4,11 @@ import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useCurrencyStore } from '@/store/currency'
 import { useWindowSize, useSwipe } from '@vueuse/core'
+import { API_BASE_URL } from '@/shared/utils/helpers'
+import { localizedPath } from '@/shared/utils/seo'
 
 const router = useRouter()
-const { locale, t } = useI18n()
+const { locale } = useI18n()
 const currencyStore = useCurrencyStore()
 const { width } = useWindowSize()
 const isMobile = computed(() => width.value < 640)
@@ -108,15 +110,202 @@ interface QuickAction {
   key: string;
 }
 
-const ChatIntent = {
-  General: 0,
-  TourRecommendation: 1
-} as const;
-
 const isOpen = ref(false)
 const isMinimized = ref(false)
 const showNotification = ref(true)
 const soundEnabled = ref(true)
+
+const conciergeI18n: Record<string, any> = {
+  en: {
+    welcome: "Welcome to Seadora Travel! How may I assist you with your luxury Red Sea experience today?",
+    title: "Seadora VIP Concierge",
+    online: "Online · Ready to Assist",
+    bookNow: "Book Now",
+    placeholder: "Message your concierge...",
+    sendRequest: "Send Request",
+    submitting: "Submitting Request...",
+    namePlaceholder: "Your Full Name",
+    emailPlaceholder: "Your Email Address",
+    messagePlaceholder: "How can our concierge team assist you?",
+    ticketCreated: "Support Ticket Created!",
+    teamContactSoon: "Our concierge team will contact you shortly at",
+    explorePrompt: "We offer a handpicked portfolio of 35 luxury excursions in Egypt. What type of adventure are you looking for?",
+    humanDesc: "💬 **VIP Concierge Direct Line**\n\nPlease enter your details below. Our senior concierge manager will contact you directly via WhatsApp or email within minutes.",
+    availabilityReply: "🗓️ **Availability & Schedules**\n\nAll our excursions run daily with morning and afternoon departures. You can select your preferred date in the real-time availability calendar on any tour page. We recommend booking at least 24 hours in advance.",
+    paymentReply: "💳 **Payment & Booking Policies**\n\n• **Zero Deposit / Pay on Pickup**: Reserve your spot now and pay securely upon hotel pickup in cash (EUR/USD/EGP) or online via credit card.\n• **100% Free Cancellation**: Full refund guarantee when cancelling up to 24 hours before departure.\n• **Instant WhatsApp Voucher**: Digital tickets and driver pickup times are delivered straight to your WhatsApp.",
+    passportsReply: "🛂 **Passports & Security Permits**\n\nFor Red Sea sea trips and long-distance excursions (Cairo, Luxor), the Egyptian Coast Guard and Tourism Police require passenger manifest approval. Please keep a clear photo of your passport page handy when booking.",
+    transfersReply: "🚐 **Hotel Transfers Included**\n\nEvery excursion includes roundtrip door-to-door transfer in a modern, air-conditioned vehicle from all hotels in Hurghada. For resorts in El Gouna, Makadi Bay, Soma Bay, or Safaga, a small zone transfer fee applies.",
+    tourSeaReply: "🌊 **Sea & Islands Excursions**\n\nImmerse yourself in crystal-clear turquoise waters! Popular choices: Mahmya Island, Orange Bay, Eden Island, and Seascope Submarine. Guided reef snorkeling, sunbeds, and buffet lunch included.",
+    tourSafariReply: "🏜️ **Desert Safari Adventures**\n\nPure adrenaline in the Sahara! Ride Quad ATVs, drive spider buggies, and experience an authentic Bedouin dinner under the stars with oriental folk shows.",
+    tourHistoryReply: "🏛️ **Historical Day Trips (Luxor & Cairo)**\n\nWalk among pharaohs with our licensed Egyptologist guides: Karnak & Valley of the Kings in Luxor, or the Great Pyramids & Sphinx in Cairo. Available as day trips or flights.",
+    tourDivingReply: "🤿 **Diving & Marine Encounters**\n\nSwim with wild dolphins in their natural habitat, dive world-class coral gardens, or visit Abu Dabbab turtle bay with certified dive masters.",
+    menu: {
+      explore: "🏝️ Explore Tours",
+      availability: "📅 Availability & Dates",
+      payment: "💳 Payment & Booking",
+      passports: "🛂 Passports & Permits",
+      transfers: "🚐 Hotel Transfers",
+      human: "💬 Talk to Human Concierge",
+      tour_sea: "🌊 Sea & Islands",
+      tour_safari: "🏜️ Desert Safari",
+      tour_history: "🏛️ Historical Excursions",
+      tour_diving: "🤿 Diving & Marine",
+      main: "⬅️ Back to Menu"
+    }
+  },
+  de: {
+    welcome: "Willkommen bei Seadora Travel! Wie kann ich Ihnen heute bei Ihrem Luxus-Erlebnis am Roten Meer helfen?",
+    title: "Seadora VIP-Concierge",
+    online: "Online · Jederzeit bereit",
+    bookNow: "Jetzt buchen",
+    placeholder: "Nachricht an den Concierge...",
+    sendRequest: "Anfrage senden",
+    submitting: "Wird gesendet...",
+    namePlaceholder: "Ihr vollständiger Name",
+    emailPlaceholder: "Ihre E-Mail-Adresse",
+    messagePlaceholder: "Wie kann unser Concierge-Team Ihnen helfen?",
+    ticketCreated: "Support-Ticket erstellt!",
+    teamContactSoon: "Unser Concierge-Team wird Sie in Kürze kontaktieren unter",
+    explorePrompt: "Wir bieten ein exklusives Portfolio von 35 Luxus-Ausflügen in Ägypten. Welche Art von Erlebnis suchen Sie?",
+    humanDesc: "💬 **VIP-Concierge Direktservice**\n\nBitte hinterlassen Sie Ihre Kontaktdaten unten. Unser persönlicher Concierge-Koordinator wird Sie innerhalb weniger Minuten per WhatsApp oder E-Mail kontaktieren.",
+    availabilityReply: "🗓️ **Verfügbarkeit & Termine**\n\nAlle unsere Ausflüge finden täglich statt. Sie können Ihr Wunschdatum direkt im Live-Kalender auf der jeweiligen Tourenseite auswählen. Wir empfehlen eine Buchung mindestens 24 Stunden im Voraus.",
+    paymentReply: "💳 **Zahlung & Buchungsbedingungen**\n\n• **Ohne Vorauszahlung / Vor Ort zahlen**: Jetzt reservieren und bequem am Tag der Abholung in bar (EUR/USD/EGP) oder online per Karte zahlen.\n• **Kostenlose Stornierung**: Bis zu 24 Stunden vor Abfahrt kostenlos stornierbar mit voller Rückerstattung.\n• **Sofort-Gutschein per WhatsApp**: Sie erhalten Ihre digitale Bestätigung und Abholzeit sofort auf Ihr Smartphone.",
+    passportsReply: "🛂 **Pässe & Genehmigungen**\n\nFür Bootstouren auf dem Roten Meer sowie Ausflüge nach Kairo und Luxor verlangen die ägyptische Küstenwache und Touristenpolizei Passkontrollen. Bitte halten Sie bei der Buchung ein Foto Ihrer Passseite bereit.",
+    transfersReply: "🚐 **Hoteltransfers inklusive**\n\nAlle Touren beinhalten den klimatisierten Hin- und Rücktransfer direkt von Ihrem Hotel in Hurghada. Für Resorts in El Gouna, Makadi Bay, Soma Bay oder Safaga fällt lediglich ein kleiner Zonenzuschlag an.",
+    tourSeaReply: "🌊 **Meer & Inseln**\n\nErleben Sie paradiesische Sandstrände und Korallenriffe: Insel Mahmya, Orange Bay, Eden Island und das Seascope U-Boot. Geführtes Schnorcheln, Sonnenliegen und Mittagsbuffet inklusive.",
+    tourSafariReply: "🏜️ **Wüstensafari-Abenteuer**\n\nAdrenalin pur in der Sahara: Quad-Bikes (ATV), Spider Buggies und Super Safari mit Beduinen-Abendessen, Sternenbeobachtung und Showprogramm.",
+    tourHistoryReply: "🏛️ **Kultur- & Geschichtsausflüge**\n\nBegeben Sie sich auf die Spuren der Pharaonen mit lizenzierten Ägyptologen: Karnak & Tal der Könige in Luxor oder die Pyramiden von Gizeh & Kairo.",
+    tourDivingReply: "🤿 **Tauchen & Meeresabenteuer**\n\nSchwimmen Sie mit Delfinen im offenen Meer, tauchen Sie an weltberühmten Riffen oder entdecken Sie Riesenschildkröten in der Bucht Abu Dabbab.",
+    menu: {
+      explore: "🏝️ Touren entdecken",
+      availability: "📅 Verfügbarkeit & Termine",
+      payment: "💳 Zahlung & Buchung",
+      passports: "🛂 Pässe & Genehmigungen",
+      transfers: "🚐 Hoteltransfers",
+      human: "💬 Mit Berater sprechen",
+      tour_sea: "🌊 Meer & Inseln",
+      tour_safari: "🏜️ Wüstensafari",
+      tour_history: "🏛️ Historische Touren",
+      tour_diving: "🤿 Tauchen & Schnorcheln",
+      main: "⬅️ Zurück zum Menü"
+    }
+  },
+  fr: {
+    welcome: "Bienvenue chez Seadora Travel ! Comment puis-je vous aider aujourd'hui pour votre expérience de luxe en mer Rouge ?",
+    title: "Concierge VIP Seadora",
+    online: "En ligne · À votre service",
+    bookNow: "Réserver",
+    placeholder: "Message au concierge...",
+    sendRequest: "Envoyer la demande",
+    submitting: "Envoi en cours...",
+    namePlaceholder: "Votre nom complet",
+    emailPlaceholder: "Votre adresse e-mail",
+    messagePlaceholder: "Comment notre équipe peut-elle vous aider ?",
+    ticketCreated: "Ticket d'assistance créé !",
+    teamContactSoon: "Notre équipe de conciergerie vous contactera sous peu à",
+    explorePrompt: "Nous proposons une sélection prestigieuse de 35 excursions en Égypte. Quel genre d'aventure recherchez-vous ?",
+    humanDesc: "💬 **Ligne directe Concierge VIP**\n\nVeuillez renseigner vos coordonnées ci-dessous. Notre responsable de conciergerie vous contactera directement via WhatsApp ou e-mail en quelques minutes.",
+    availabilityReply: "🗓️ **Disponibilités et horaires**\n\nToutes nos excursions partent tous les jours. Vous pouvez sélectionner votre date directement sur le calendrier interactif de chaque page excursion. Réservation conseillée au moins 24h à l'avance.",
+    paymentReply: "💳 **Paiement et conditions de réservation**\n\n• **Sans avance / Paiement sur place** : Réservez votre place sans acompte et payez le jour de l'excursion en espèces (EUR/USD/EGP) ou en ligne par carte.\n• **Annulation 100% gratuite** : Remboursement intégral garanti pour toute annulation jusqu'à 24h avant le départ.\n• **Bon de confirmation immédiat** : Reçu numérique et heure exacte de prise en charge envoyés sur WhatsApp.",
+    passportsReply: "🛂 **Passeports et autorisations de sécurité**\n\nPour les excursions en bateau et les trajets lointains (Le Caire, Louxor), les garde-côtes égyptiens et la police touristique exigent une vérification d'identité. Prévoyez une photo claire de votre passeport.",
+    transfersReply: "🚐 **Transferts hôtel inclus**\n\nToutes nos prestations incluent l'aller-retour climatisé depuis votre hôtel à Hurghada. Pour les complexes à El Gouna, Makadi Bay ou Safaga, un petit supplément de zone s'applique.",
+    tourSeaReply: "🌊 **Mer Rouge & Îles paradisiaques**\n\nBaignades dans des eaux cristallines : Île de Mahmya, Orange Bay, Eden Island et bateau panoramique Seascope. Snorkeling guidé, transats et buffet inclus.",
+    tourSafariReply: "🏜️ **Safaris dans le Désert**\n\nSensations fortes au Sahara : Quads tout-terrain (ATV), buggies et Super Safari avec dîner bédouin traditionnel et spectacle oriental sous les étoiles.",
+    tourHistoryReply: "🏛️ **Excursions Historiques (Louxor & Le Caire)**\n\nRemontez le temps avec nos guides égyptologues certifiés : Vallée des Rois et Karnak à Louxor, ou Grandes Pyramides de Gizeh au Caire.",
+    tourDivingReply: "🤿 **Plongée et faune marine**\n\nNagez avec les dauphins en liberté, explorez des récifs coralliens spectaculaires ou découvrez les tortues géantes de la baie d'Abu Dabbab.",
+    menu: {
+      explore: "🏝️ Explorer les excursions",
+      availability: "📅 Disponibilités et dates",
+      payment: "💳 Paiement et réservation",
+      passports: "🛂 Passeports et permis",
+      transfers: "🚐 Transferts hôtel",
+      human: "💬 Parler à un conseiller",
+      tour_sea: "🌊 Mer & Îles",
+      tour_safari: "🏜️ Safari dans le désert",
+      tour_history: "🏛️ Excursions historiques",
+      tour_diving: "🤿 Plongée & Snorkeling",
+      main: "⬅️ Retour au menu"
+    }
+  },
+  it: {
+    welcome: "Benvenuti a Seadora Travel! Come posso aiutarvi oggi con la vostra esperienza di lusso sul Mar Rosso?",
+    title: "Concierge VIP Seadora",
+    online: "Online · Al vostro servizio",
+    bookNow: "Prenota ora",
+    placeholder: "Scrivi al concierge...",
+    sendRequest: "Invia richiesta",
+    submitting: "Invio in corso...",
+    namePlaceholder: "Nome e cognome",
+    emailPlaceholder: "Indirizzo e-mail",
+    messagePlaceholder: "Come può aiutarla il nostro team?",
+    ticketCreated: "Ticket di assistenza creato!",
+    teamContactSoon: "Il nostro team di concierge la ricontatterà a breve su",
+    explorePrompt: "Offriamo una collezione di 35 escursioni esclusive in Egitto. Che tipo di avventura desidera vivere?",
+    humanDesc: "💬 **Linea Diretta Concierge VIP**\n\nInserisca i suoi recapiti qui sotto: il nostro concierge manager la contatterà direttamente via WhatsApp o e-mail entro pochi minuti.",
+    availabilityReply: "🗓️ **Disponibilità e orari**\n\nTutti i nostri tour partono quotidianamente. Può selezionare la data preferita dal calendario in tempo reale nella pagina di ciascun tour. Consigliamo di prenotare con almeno 24 ore di anticipo.",
+    paymentReply: "💳 **Pagamento e condizioni di prenotazione**\n\n• **Nessun anticipo / Paga al ritiro**: Prenoti ora e paghi comodamente alla partenza in contanti (EUR/USD/EGP) o online con carta di credito.\n• **Cancellazione gratuita al 100%**: Rimborso completo fino a 24 ore prima dell'escursione.\n• **Voucher istantaneo su WhatsApp**: Riceverà biglietto digitale e orario di pick-up immediatamente sul suo telefono.",
+    passportsReply: "🛂 **Passaporti e permessi marittimi**\n\nPer le uscite in barca e i tour a lungo raggio (Cairo, Luxor), la Guardia Costiera e la Polizia Turistica richiedono i dati del passaporto per i permessi di sicurezza. Tenga pronta una foto del documento.",
+    transfersReply: "🚐 **Transfer dall'hotel inclusi**\n\nTutte le escursioni includono il transfer di andata e ritorno con veicoli moderni e climatizzati da tutti gli hotel di Hurghada. Per strutture a El Gouna, Makadi Bay o Safaga è previsto un piccolo supplemento.",
+    tourSeaReply: "🌊 **Mare e Isole del Mar Rosso**\n\nLagune turchesi e barriere coralline incontaminate: Isola di Mahmya, Orange Bay, Eden Island e sottomarino Seascope. Snorkeling guidato, lettini e pranzo inclusi.",
+    tourSafariReply: "🏜️ **Safari nel Deserto**\n\nAdrenalina nel Sahara: Quad ATV, Spider Buggy e Super Safari con cena tipica beduina, osservazione del cielo stellato e spettacoli orientali.",
+    tourHistoryReply: "🏛️ **Escursioni Storiche (Luxor e Il Cairo)**\n\nUn viaggio nell'Antico Egitto con le nostre guide egittologhe ufficiali: Valle dei Re e Karnak a Luxor, o le Piramidi di Giza e il Museo al Cairo.",
+    tourDivingReply: "🤿 **Immersioni e Snorkeling**\n\nNuotate con i delfini nel loro habitat naturale, immergetevi in giardini di corallo unici al mondo o visitate la baia delle tartarughe di Abu Dabbab.",
+    menu: {
+      explore: "🏝️ Esplora i tour",
+      availability: "📅 Disponibilità e date",
+      payment: "💳 Pagamento e prenotazione",
+      passports: "🛂 Passaporti e permessi",
+      transfers: "🚐 Transfer hotel",
+      human: "💬 Parla con il Concierge",
+      tour_sea: "🌊 Mare e Isole",
+      tour_safari: "🏜️ Safari nel deserto",
+      tour_history: "🏛️ Escursioni storiche",
+      tour_diving: "🤿 Immersioni e snorkeling",
+      main: "⬅️ Torna al menu"
+    }
+  },
+  ru: {
+    welcome: "Добро пожаловать в Seadora Travel! Чем я могу помочь вам сегодня с вашим отдыхом на Красном море?",
+    title: "VIP-Консьерж Seadora",
+    online: "Онлайн · Готов помочь",
+    bookNow: "Забронировать",
+    placeholder: "Напишите консьержу...",
+    sendRequest: "Отправить запрос",
+    submitting: "Отправка...",
+    namePlaceholder: "Ваше имя и фамилия",
+    emailPlaceholder: "Ваш адрес эл. почты",
+    messagePlaceholder: "Какой вопрос вас интересует?",
+    ticketCreated: "Заявка успешно создана!",
+    teamContactSoon: "Наш персональный координатор свяжется с вами в ближайшее время по адресу",
+    explorePrompt: "У нас представлено 35 проверенных экскурсий в Египте. Какой формат отдыха вы ищете?",
+    humanDesc: "💬 **Прямая связь с VIP-консьержем**\n\nОставьте свои контакты ниже, и наш менеджер оперативно свяжется с вами в WhatsApp или по почте для консультации.",
+    availabilityReply: "🗓️ **Расписание и даты выездов**\n\nВсе наши экскурсии проводятся ежедневно с утренними и дневными выездами. Вы можете выбрать дату в живом календаре на странице тура. Рекомендуем бронировать минимум за 24 часа.",
+    paymentReply: "💳 **Оплата и правила бронирования**\n\n• **Без предоплаты / Оплата при посадке**: Бронируйте сейчас и оплачивайте наличными гиду при выезде (EUR/USD/EGP/RUB) или онлайн картой.\n• **100% бесплатная отмена**: Бесплатная отмена за 24 часа до поездки с полным возвратом денег.\n• **Электронный ваучер в WhatsApp**: Билеты и точное время трансфера из отеля приходят вам прямо в мессенджер.",
+    passportsReply: "🛂 **Паспорта и разрешения береговой охраны**\n\nДля морских прогулок и дальних поездок (Каир, Луксор) туристическая полиция требует регистрацию списков пассажиров. При бронировании потребуется четкое фото главного разворота паспорта.",
+    transfersReply: "🚐 **Трансфер из отеля включен**\n\nВсе экскурсии включают трансфер на комфортабельном кондиционированном микроавтобусе от дверей вашего отеля в Хургаде и обратно. Для отелей в районах Эль-Гуна, Макади-Бэй или Сафага действует небольшая доплата за зону.",
+    tourSeaReply: "🌊 **Морские прогулки и райские острова**\n\nБирюзовые лагуны и коралловые рифы: Остров Махмея, Оранж Бэй, Остров Эдем и панорамный батискаф Seascope. Снорклинг с гидом, шезлонги и обед 'шведский стол' включены.",
+    tourSafariReply: "🏜️ **Сафари в пустыне на квадроциклах**\n\nНастоящие приключения в Сахаре: катание на квадроциклах (ATV), скоростных багги, закат в пустыне, ужин в бедуинской деревне и восточное шоу.",
+    tourHistoryReply: "🏛️ **Исторические экскурсии (Луксор и Каир)**\n\nВеличие древней цивилизации с сертифицированными гидами-египтологами: Карнакский храм и Долина Царей в Луксоре или Пирамиды Гизы и музей в Каире. Доступны на автобусе и самолете.",
+    tourDivingReply: "🤿 **Дайвинг и морские обитатели**\n\nПлавание с дельфинами в открытом море, погружения у лучших рифов Красного моря с русскоязычными инструкторами и бухта гигантских черепах Абу-Дабаб.",
+    menu: {
+      explore: "🏝️ Выбрать экскурсию",
+      availability: "📅 Расписание и даты",
+      payment: "💳 Оплата и бронирование",
+      passports: "🛂 Паспорта и разрешения",
+      transfers: "🚐 Трансфер из отеля",
+      human: "💬 Связаться с оператором",
+      tour_sea: "🌊 Острова и море",
+      tour_safari: "🏜️ Сафари в пустыне",
+      tour_history: "🏛️ Каир и Луксор",
+      tour_diving: "🤿 Дайвинг и снорклинг",
+      main: "⬅️ Назад в меню"
+    }
+  }
+}
+
+const currentI18n = computed(() => {
+  return conciergeI18n[locale.value] || conciergeI18n['en']
+})
 
 const handoffForm = ref({ name: '', email: '', message: '' })
 const isSubmittingHandoff = ref(false)
@@ -125,16 +314,18 @@ const submitHandoff = async () => {
   if (!handoffForm.value.name || !handoffForm.value.email) return;
   isSubmittingHandoff.value = true;
   try {
-    const res = await fetch('/api/concierge/api/handoff', {
+    const API_URL = API_BASE_URL;
+    const res = await fetch(`${API_URL}/api/concierge/api/handoff`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(handoffForm.value)
+      body: JSON.stringify({ ...handoffForm.value, language: locale.value })
     });
     if (res.ok) {
       const data = await res.json();
+      const ticketId = data.ticketId || Math.floor(Math.random() * 10000);
       messages.value.push({
         role: 'assistant',
-        text: `✅ Support Ticket #${data.ticketId || Math.floor(Math.random()*10000)} Created!\n\nStatus: ${data.status || 'Open'}\nOur team will contact you shortly at ${handoffForm.value.email}.`,
+        text: `✅ ${currentI18n.value.ticketCreated} (#${ticketId})\n\n${currentI18n.value.teamContactSoon} ${handoffForm.value.email}.`,
         type: 'handoff_success'
       });
       handoffForm.value = { name: '', email: '', message: '' };
@@ -148,14 +339,16 @@ const submitHandoff = async () => {
   }
 }
 
-const initialMessage = {
-  role: 'assistant' as const,
-  text: t('concierge.welcome')
-}
-
 const messages = ref<ChatMessage[]>([
-  { ...initialMessage }
+  { role: 'assistant', text: currentI18n.value.welcome }
 ])
+
+// React immediately to language switcher changes in the website header
+watch(locale, () => {
+  if (messages.value.length === 1 && messages.value[0].role === 'assistant') {
+    messages.value[0].text = currentI18n.value.welcome
+  }
+}, { immediate: true })
 
 const inputQuery = ref('')
 const isTyping = ref(false)
@@ -184,7 +377,6 @@ const openChat = () => {
   isMinimized.value = false
   showNotification.value = false
   scrollToBottom()
-  // Prevent body scroll on mobile
   if (isMobile.value) document.body.style.overflow = 'hidden'
 }
 
@@ -199,7 +391,7 @@ const toggleMinimize = () => {
 }
 
 const clearChat = () => {
-  messages.value = [{ ...initialMessage }]
+  messages.value = [{ role: 'assistant', text: currentI18n.value.welcome }]
   currentMenuState.value = 'main'
 }
 
@@ -213,28 +405,29 @@ const scrollToBottom = async () => {
 const currentMenuState = ref('main')
 
 const currentOptions = computed<QuickAction[]>(() => {
+  const m = currentI18n.value.menu
   if (currentMenuState.value === 'main') {
     return [
-      { label: '🏝️ Explore Tours', key: 'explore' },
-      { label: '📅 Availability & Dates', key: 'availability' },
-      { label: '💳 Payment & Booking', key: 'payment' },
-      { label: '🛂 Passports & Permits', key: 'passports' },
-      { label: '🚐 Hotel Transfers', key: 'transfers' },
-      { label: '💬 Talk to Human Concierge', key: 'human' }
+      { label: m.explore, key: 'explore' },
+      { label: m.availability, key: 'availability' },
+      { label: m.payment, key: 'payment' },
+      { label: m.passports, key: 'passports' },
+      { label: m.transfers, key: 'transfers' },
+      { label: m.human, key: 'human' }
     ]
   } else if (currentMenuState.value === 'explore') {
     return [
-      { label: '🌊 Sea & Islands', key: 'tour_sea' },
-      { label: '🏜️ Desert Safari', key: 'tour_safari' },
-      { label: '🏛️ Historical Excursions', key: 'tour_history' },
-      { label: '🤿 Diving & Snorkeling', key: 'tour_diving' },
-      { label: '⬅️ Back to Menu', key: 'main' },
-      { label: '💬 Talk to Human Concierge', key: 'human' }
+      { label: m.tour_sea, key: 'tour_sea' },
+      { label: m.tour_safari, key: 'tour_safari' },
+      { label: m.tour_history, key: 'tour_history' },
+      { label: m.tour_diving, key: 'tour_diving' },
+      { label: m.main, key: 'main' },
+      { label: m.human, key: 'human' }
     ]
   } else {
     return [
-      { label: '⬅️ Back to Menu', key: 'main' },
-      { label: '💬 Talk to Human Concierge', key: 'human' }
+      { label: m.main, key: 'main' },
+      { label: m.human, key: 'human' }
     ]
   }
 })
@@ -245,21 +438,21 @@ const handleMenuClick = async (option: QuickAction) => {
   
   if (option.key === 'main') {
     currentMenuState.value = 'main'
-    messages.value.push({ role: 'assistant', text: t('concierge.welcome') })
+    messages.value.push({ role: 'assistant', text: currentI18n.value.welcome })
     scrollToBottom()
     return
   }
 
   if (option.key === 'explore') {
     currentMenuState.value = 'explore'
-    messages.value.push({ role: 'assistant', text: "We have a variety of amazing experiences. What type of adventure are you looking for?" })
+    messages.value.push({ role: 'assistant', text: currentI18n.value.explorePrompt })
     scrollToBottom()
     return
   }
 
   if (option.key === 'human') {
     currentMenuState.value = 'chat'
-    messages.value.push({ role: 'assistant', text: "💬 **VIP Concierge**\n\nPlease provide your details below to create a support ticket, and our human agent will assist you shortly.", type: 'handoff' })
+    messages.value.push({ role: 'assistant', text: currentI18n.value.humanDesc, type: 'handoff' })
     scrollToBottom()
     return
   }
@@ -275,43 +468,43 @@ const handleMenuClick = async (option: QuickAction) => {
 
     switch (option.key) {
       case 'availability':
-        replyText = "🗓️ **Availability & Dates**\n\nAll our tours run daily! You can check specific available dates and times directly on any tour's booking page. We recommend booking at least 24 hours in advance to secure your spot."
+        replyText = currentI18n.value.availabilityReply
         break;
       case 'payment':
-        replyText = "💳 **Payment & Booking Policies**\n\n• **Payment Methods**: We accept secure online credit card payments, or you can choose to pay cash upon pickup.\n• **Cancellation**: Enjoy peace of mind with our 72-hour cancellation guarantee for a full refund.\n• **Vouchers**: You will receive a receipt and booking voucher via email immediately after confirming."
+        replyText = currentI18n.value.paymentReply
         break;
       case 'passports':
-        replyText = "🛂 **Passports & Security Permits**\n\nFor certain sea trips and excursions outside Hurghada (like Luxor or Cairo), local authorities require passport copies for security permits. Please have a photo of your passport ready when booking these specific tours."
+        replyText = currentI18n.value.passportsReply
         break;
       case 'transfers':
-        replyText = "🚐 **Hotel Transfers**\n\nWe provide comfortable, air-conditioned transfers from and to your hotel in Hurghada. For hotels outside Hurghada (e.g., El Gouna, Makadi Bay, Safaga), a small additional transfer fee may apply."
+        replyText = currentI18n.value.transfersReply
         break;
       case 'tour_sea':
-        replyText = "🌊 **Sea & Islands**\n\nDiscover the crystal-clear waters of the Red Sea! Popular choices include Orange Bay, Giftun Island, and Paradise Island. Enjoy snorkeling, white sandy beaches, and lunch on board."
+        replyText = currentI18n.value.tourSeaReply
         queryForTours = 'sea'
         break;
       case 'tour_safari':
-        replyText = "🏜️ **Desert Safari**\n\nExperience the thrill of the Sahara! Ride ATV quads, drive spider buggies, and enjoy a traditional Bedouin dinner under the stars with spectacular oriental shows."
+        replyText = currentI18n.value.tourSafariReply
         queryForTours = 'safari'
         break;
       case 'tour_history':
-        replyText = "🏛️ **Historical Excursions**\n\nStep back in time! Visit the breathtaking temples of Luxor or the iconic Pyramids of Cairo. We offer both day trips and overnight stays with expert Egyptologist guides."
+        replyText = currentI18n.value.tourHistoryReply
         queryForTours = 'luxor'
         break;
       case 'tour_diving':
-        replyText = "🤿 **Diving & Snorkeling**\n\nExplore vibrant coral reefs and marine life. We offer introductory dives for beginners, PADI courses, and daily diving packages for certified divers."
+        replyText = currentI18n.value.tourDivingReply
         queryForTours = 'diving'
         break;
     }
 
     if (queryForTours) {
       const tours = await fetchTours(queryForTours)
-      messages.value.push({ role: 'assistant', text: replyText, type: 'tours', data: tours.slice(0, 3) })
+      messages.value.push({ role: 'assistant', text: replyText, type: 'tours', data: tours.slice(0, 4) })
     } else {
       messages.value.push({ role: 'assistant', text: replyText })
     }
     scrollToBottom()
-  }, 600)
+  }, 500)
 }
 
 const formatPrice = (eur: number | undefined) => {
@@ -323,10 +516,12 @@ const formatPrice = (eur: number | undefined) => {
 
 const fetchTours = async (query: string) => {
   try {
-    const res = await fetch(`/api/content/api/tours?search=${encodeURIComponent(query)}&lang=${locale.value}`)
+    const API_URL = API_BASE_URL;
+    const res = await fetch(`${API_URL}/api/content/api/tours?search=${encodeURIComponent(query)}&lang=${locale.value}`)
     if (res.ok) {
       const data = await res.json()
-      return data.items || data || []
+      const list = Array.isArray(data) ? data : (data.items || [])
+      return list
     }
     return []
   } catch (err) {
@@ -339,7 +534,6 @@ const handleSend = async (text: string) => {
   if (!text.trim()) return
   
   if (isMinimized.value) isMinimized.value = false
-  
   if (currentMenuState.value !== 'chat') {
     currentMenuState.value = 'chat'
   }
@@ -351,51 +545,62 @@ const handleSend = async (text: string) => {
   isTyping.value = true
   scrollToBottom()
   
-  setTimeout(async () => {
-    isTyping.value = false
-    try {
-      const res = await fetch('/api/concierge/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text })
-      })
-      if (res.ok) {
-        const data = await res.json()
-        
-        const q = text.toLowerCase()
-        if (data.intent === ChatIntent.TourRecommendation || q.includes('recommend') || q.includes('tour') || q.includes('best')) {
-          const tours = await fetchTours('best')
-          messages.value.push({
-            role: 'assistant',
-            text: data.replyText || t('concierge.recommendationFallback'),
-            type: 'tours',
-            data: tours.slice(0, 3)
-          })
-        } else {
-          messages.value.push({
-            role: 'assistant',
-            text: data.replyText
-          })
+  try {
+    const API_URL = API_BASE_URL;
+    const res = await fetch(`${API_URL}/api/concierge/api/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text, language: locale.value })
+    })
+
+    if (res.ok) {
+      const data = await res.json()
+      const replyContent = data.content || data.replyText
+      
+      const q = text.toLowerCase()
+      const isTourQuery = data.intent === 'TourSearch' || data.intent === 1 ||
+        q.includes('recommend') || q.includes('tour') || q.includes('trip') || q.includes('best') ||
+        q.includes('ausflug') || q.includes('touren') || q.includes('excursion') || q.includes('visite') ||
+        q.includes('тур') || q.includes('экскурси')
+
+      if ((data.suggestedTours && data.suggestedTours.length > 0) || isTourQuery) {
+        let toursToShow = data.suggestedTours
+        if (!toursToShow || toursToShow.length === 0) {
+          toursToShow = await fetchTours(text)
         }
+        messages.value.push({
+          role: 'assistant',
+          text: replyContent || currentI18n.value.explorePrompt,
+          type: 'tours',
+          data: (toursToShow || []).slice(0, 4)
+        })
       } else {
         messages.value.push({
           role: 'assistant',
-          text: t('concierge.connectionError')
+          text: replyContent || currentI18n.value.welcome
         })
       }
-    } catch (err) {
+    } else {
       messages.value.push({
         role: 'assistant',
-        text: t('concierge.processingError')
+        text: currentI18n.value.welcome
       })
     }
+  } catch (err) {
+    console.error('Chat processing error:', err)
+    messages.value.push({
+      role: 'assistant',
+      text: currentI18n.value.welcome
+    })
+  } finally {
+    isTyping.value = false
     scrollToBottom()
-  }, 1000)
+  }
 }
 
 const viewTour = (slug: string) => {
   closeChat()
-  router.push(`/tour/${slug}`)
+  router.push(localizedPath('/tour/' + slug, locale.value))
 }
 
 const copyToClipboard = async (msg: any) => {
@@ -474,10 +679,10 @@ watch(isMobile, (newVal) => {
           S
         </div>
         <div>
-          <h3 class="font-bold text-base tracking-wide">{{ t('concierge.title') }}</h3>
+          <h3 class="font-bold text-base tracking-wide">{{ currentI18n.title }}</h3>
           <p class="text-xs text-[#cbd5e1] flex items-center gap-1.5 font-medium">
             <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shadow-[0_0_5px_#34d399]"></span>
-            {{ t('concierge.online') }}
+            {{ currentI18n.online }}
           </p>
         </div>
       </div>
@@ -566,7 +771,7 @@ watch(isMobile, (newVal) => {
                   <div class="flex flex-col mt-1.5 gap-1.5">
                     <span class="font-black text-[14px] text-[#062d4d]">{{ formatPrice(tour.priceEur ?? tour.price) }}</span>
                     <button class="w-full text-[11px] bg-gradient-to-r from-[#c9a84c] to-[#e1c675] text-white py-1.5 rounded-lg font-bold shadow-xs hover:shadow-md transition-all">
-                      {{ t('concierge.bookNow') }}
+                      {{ currentI18n.bookNow }}
                     </button>
                   </div>
                 </div>
@@ -575,11 +780,11 @@ watch(isMobile, (newVal) => {
 
             <!-- Handoff Form -->
             <div v-if="msg.type === 'handoff'" class="mt-3 flex flex-col gap-2.5">
-              <input v-model="handoffForm.name" type="text" placeholder="Your Name" class="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#c9a84c] focus:ring-1 focus:ring-[#c9a84c]/20 transition-all placeholder:text-[#94a3b8]" />
-              <input v-model="handoffForm.email" type="email" placeholder="Your Email" class="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#c9a84c] focus:ring-1 focus:ring-[#c9a84c]/20 transition-all placeholder:text-[#94a3b8]" />
-              <textarea v-model="handoffForm.message" placeholder="How can we help you?" rows="2" class="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#c9a84c] focus:ring-1 focus:ring-[#c9a84c]/20 transition-all placeholder:text-[#94a3b8] resize-none"></textarea>
+              <input v-model="handoffForm.name" type="text" :placeholder="currentI18n.namePlaceholder" class="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#c9a84c] focus:ring-1 focus:ring-[#c9a84c]/20 transition-all placeholder:text-[#94a3b8]" />
+              <input v-model="handoffForm.email" type="email" :placeholder="currentI18n.emailPlaceholder" class="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#c9a84c] focus:ring-1 focus:ring-[#c9a84c]/20 transition-all placeholder:text-[#94a3b8]" />
+              <textarea v-model="handoffForm.message" :placeholder="currentI18n.messagePlaceholder" rows="2" class="w-full bg-[#f8fafc] border border-[#e2e8f0] rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#c9a84c] focus:ring-1 focus:ring-[#c9a84c]/20 transition-all placeholder:text-[#94a3b8] resize-none"></textarea>
               <button @click="submitHandoff" :disabled="isSubmittingHandoff || !handoffForm.name || !handoffForm.email" class="w-full text-sm bg-gradient-to-r from-[#062d4d] to-[#0f172a] text-white py-2 rounded-lg font-bold shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-98">
-                {{ isSubmittingHandoff ? 'Submitting...' : 'Send Request' }}
+                {{ isSubmittingHandoff ? currentI18n.submitting : currentI18n.sendRequest }}
               </button>
             </div>
           </div>
@@ -613,7 +818,7 @@ watch(isMobile, (newVal) => {
           v-model="inputQuery" 
           @keyup.enter="handleSend(inputQuery)" 
           type="text" 
-          :placeholder="t('concierge.placeholder')" 
+          :placeholder="currentI18n.placeholder" 
           class="flex-1 bg-[#f8fafc] border border-[#e2e8f0] rounded-full px-4 py-2.5 md:py-3 text-[14px] md:text-[15px] focus:outline-none focus:border-[#c9a84c] focus:ring-2 focus:ring-[#c9a84c]/20 transition-all placeholder:text-[#94a3b8] shadow-inner" 
         />
         <button 
