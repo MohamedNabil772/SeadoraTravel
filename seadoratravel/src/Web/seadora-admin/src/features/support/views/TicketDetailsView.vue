@@ -1,27 +1,128 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { 
-  ArrowLeft, Clock, MoreVertical, Send, Paperclip, CheckCircle, User, 
-  Mail, Phone, Calendar, ShieldAlert 
+  ArrowLeft, Clock, Send, CheckCircle, Mail, ShieldAlert 
 } from 'lucide-vue-next'
+import api from '@/services/api'
+import { useToast } from '@/composables/useToast'
 
 const router = useRouter()
 const route = useRoute()
+const toast = useToast()
 const ticketId = route.params.id as string
 
+const ticket = ref<any>(null)
+const loading = ref(true)
 const replyText = ref('')
+const isSendingReply = ref(false)
 
-const messages = ref([
-  { id: 1, sender: 'Eleanor Vance', type: 'customer', text: 'Hello, I need to request a refund for my yacht tour that was cancelled last week due to the storm.', time: 'Oct 24, 10:30 AM', channel: 'Email' },
-  { id: 2, sender: 'System', type: 'system', text: 'Ticket priority upgraded to High by SLA engine.', time: 'Oct 24, 10:35 AM' },
-  { id: 3, sender: 'Alex (Support)', type: 'agent', text: 'Hi Eleanor, I apologize for the inconvenience. I will process your refund immediately. Could you please confirm the last 4 digits of the card you used?', time: 'Oct 24, 11:15 AM' },
-  { id: 4, sender: 'Eleanor Vance', type: 'customer', text: 'Sure, it is 4092.', time: 'Oct 24, 11:45 AM', channel: 'Email' },
-])
+interface DisplayMessage {
+  id: string | number
+  sender: string
+  type: 'agent' | 'customer' | 'system'
+  text: string
+  time: string
+  channel?: string
+}
+
+const messages = ref<DisplayMessage[]>([])
+
+const fetchTicketDetails = async () => {
+  loading.value = true
+  try {
+    const res = await api.get(`/api/support/api/tickets/${ticketId}`)
+    ticket.value = res.data
+    if (res.data?.messages) {
+      messages.value = res.data.messages.map((m: any) => ({
+        id: m.id,
+        sender: m.sender,
+        type: m.isFromAgent ? 'agent' : 'customer',
+        text: m.body,
+        time: m.sentAt ? new Date(m.sentAt).toLocaleString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        }) : ''
+      }))
+    } else {
+      messages.value = []
+    }
+  } catch (err: any) {
+    console.error('Failed to load ticket:', err)
+    toast.error('Ticket not found', err.message)
+    ticket.value = null
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchTicketDetails()
+})
+
+const sendReply = async () => {
+  if (!replyText.value.trim() || isSendingReply.value) return
+
+  isSendingReply.value = true
+  try {
+    await api.post(`/api/support/api/tickets/${ticketId}/messages`, {
+      sender: 'Admin Support',
+      isFromAgent: true,
+      body: replyText.value.trim(),
+      messageId: null
+    })
+    toast.success('Reply sent successfully')
+    replyText.value = ''
+    await fetchTicketDetails()
+  } catch (err: any) {
+    toast.error('Failed to send reply', err.message)
+  } finally {
+    isSendingReply.value = false
+  }
+}
+
+const updateStatus = async (newStatus: string) => {
+  try {
+    await api.put(`/api/support/api/tickets/${ticketId}/status`, {
+      status: newStatus
+    })
+    if (ticket.value) {
+      ticket.value.status = newStatus
+    }
+    toast.success(`Ticket marked as ${newStatus}`)
+  } catch (err: any) {
+    toast.error('Failed to update status', err.message)
+  }
+}
+
+const customerInitials = computed(() => {
+  const name = ticket.value?.customerName || 'Guest'
+  return name.split(' ').map((n: string) => n[0]).join('').slice(0, 2).toUpperCase()
+})
 </script>
 
 <template>
-  <div class="h-full flex flex-col xl:flex-row gap-6 animate-fade-in relative max-w-[1400px] mx-auto">
+  <div v-if="loading" class="h-full flex items-center justify-center py-20">
+    <div class="flex flex-col items-center gap-3">
+      <div class="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+      <p class="text-sm text-text-muted">Loading ticket details...</p>
+    </div>
+  </div>
+
+  <div v-else-if="!ticket" class="h-full flex flex-col items-center justify-center py-20 text-center">
+    <div class="w-14 h-14 rounded-full bg-surface-sunken flex items-center justify-center text-text-muted/50 mb-3">
+      <ShieldAlert class="w-6 h-6" />
+    </div>
+    <h2 class="text-lg font-medium text-text-main">Ticket not found</h2>
+    <p class="text-sm text-text-muted mt-1 mb-4">This ticket may have been removed or does not exist.</p>
+    <button @click="router.push('/support')" class="px-4 py-2 bg-primary text-white rounded-md text-sm font-medium hover:bg-primary-light transition-colors">
+      Back to Service Desk
+    </button>
+  </div>
+
+  <div v-else class="h-full flex flex-col xl:flex-row gap-6 animate-fade-in relative max-w-[1400px] mx-auto">
     <!-- Main Thread Area -->
     <div class="flex-1 flex flex-col bg-white rounded-xl border border-border/60 shadow-sm overflow-hidden h-[calc(100vh-8rem)] xl:h-auto">
       
@@ -33,33 +134,41 @@ const messages = ref([
           </button>
           <div>
             <div class="flex items-center gap-3">
-              <h1 class="text-xl font-medium text-text-main">Refund request for cancelled Yacht tour</h1>
-              <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200">Open</span>
-              <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-orange-50 text-orange-600 ring-1 ring-inset ring-orange-500/20">High</span>
+              <h1 class="text-xl font-medium text-text-main">{{ ticket.subject || 'Support Ticket' }}</h1>
+              <span class="px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800 border border-amber-200">
+                {{ ticket.status }}
+              </span>
+              <span class="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-orange-50 text-orange-600 ring-1 ring-inset ring-orange-500/20">
+                {{ ticket.priority }}
+              </span>
             </div>
             <p class="text-sm text-text-muted mt-1 flex items-center gap-2">
               <span class="font-mono text-xs">{{ ticketId }}</span>
               <span>•</span>
               <Clock class="w-3.5 h-3.5" />
-              <span>Created Oct 24</span>
-              <span class="text-red-500 font-medium ml-2">2h left on SLA</span>
+              <span>Created {{ ticket.createdAt ? new Date(ticket.createdAt).toLocaleDateString() : 'Recently' }}</span>
             </p>
           </div>
         </div>
         
         <div class="flex items-center gap-2">
-          <button class="px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/10 rounded-md transition-colors flex items-center gap-1.5">
+          <button 
+            v-if="ticket.status !== 'Resolved'"
+            @click="updateStatus('Resolved')" 
+            class="px-3 py-1.5 text-sm font-medium text-primary hover:bg-primary/10 rounded-md transition-colors flex items-center gap-1.5"
+          >
             <CheckCircle class="w-4 h-4" />
             Resolve
-          </button>
-          <button class="p-2 text-text-muted hover:text-text-main hover:bg-black/5 rounded-md transition-colors">
-            <MoreVertical class="w-5 h-5" />
           </button>
         </div>
       </div>
 
       <!-- Messages Timeline -->
       <div class="flex-1 overflow-y-auto p-6 space-y-6 bg-[#f8f9fa] relative">
+        <div v-if="messages.length === 0" class="text-center py-12 text-text-muted text-sm">
+          No messages in this ticket thread yet.
+        </div>
+
         <div 
           v-for="msg in messages" 
           :key="msg.id"
@@ -95,7 +204,7 @@ const messages = ref([
         </div>
       </div>
 
-      <!-- Luxury Reply Composer -->
+      <!-- Reply Composer -->
       <div class="p-4 bg-white border-t border-border/60">
         <div class="border border-border/80 focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/30 rounded-xl overflow-hidden transition-all bg-surface-sunken">
           <textarea 
@@ -105,22 +214,15 @@ const messages = ref([
             class="w-full p-4 bg-transparent resize-none outline-none text-sm"
           ></textarea>
           
-          <div class="px-4 py-2 border-t border-border/40 bg-white flex items-center justify-between">
-            <div class="flex gap-1">
-              <button class="p-2 text-text-muted hover:text-primary hover:bg-primary/5 rounded-md transition-colors" title="Attach file">
-                <Paperclip class="w-4 h-4" />
-              </button>
-            </div>
-            <div class="flex items-center gap-2">
-              <select class="text-xs bg-transparent border-none text-text-muted cursor-pointer outline-none">
-                <option>Reply as Email</option>
-                <option>Internal Note</option>
-              </select>
-              <button class="inline-flex items-center gap-2 bg-primary hover:bg-primary-light text-text-inverse px-4 py-1.5 rounded-md transition-all shadow-sm active:scale-95 text-sm font-medium">
-                <Send class="w-4 h-4" />
-                Send
-              </button>
-            </div>
+          <div class="px-4 py-2 border-t border-border/40 bg-white flex items-center justify-end">
+            <button 
+              @click="sendReply"
+              :disabled="!replyText.trim() || isSendingReply"
+              class="inline-flex items-center gap-2 bg-primary hover:bg-primary-light disabled:opacity-50 text-text-inverse px-4 py-1.5 rounded-md transition-all shadow-sm active:scale-95 text-sm font-medium"
+            >
+              <Send class="w-4 h-4" />
+              <span>{{ isSendingReply ? 'Sending...' : 'Send' }}</span>
+            </button>
           </div>
         </div>
       </div>
@@ -133,42 +235,18 @@ const messages = ref([
         
         <div class="flex items-center gap-4 mb-6">
           <div class="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center text-secondary font-medium text-lg">
-            EV
+            {{ customerInitials }}
           </div>
           <div>
-            <div class="font-medium text-text-main">Eleanor Vance</div>
-            <div class="text-xs text-secondary font-medium">VIP Tier: Gold</div>
+            <div class="font-medium text-text-main">{{ ticket.customerName || 'Customer' }}</div>
           </div>
         </div>
 
         <div class="space-y-3 text-sm">
           <div class="flex items-center gap-3 text-text-muted">
             <Mail class="w-4 h-4" />
-            <a href="#" class="hover:text-primary transition-colors">eleanor.v@example.com</a>
-          </div>
-          <div class="flex items-center gap-3 text-text-muted">
-            <Phone class="w-4 h-4" />
-            <span>+1 (555) 123-4567</span>
-          </div>
-          <div class="flex items-center gap-3 text-text-muted">
-            <User class="w-4 h-4" />
-            <span>Member since 2024</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white rounded-xl border border-border/60 shadow-sm p-5">
-        <h3 class="text-sm font-semibold uppercase tracking-wider text-text-muted mb-4 border-b border-border/40 pb-2">Related Booking</h3>
-        
-        <div class="group cursor-pointer">
-          <div class="flex items-center justify-between mb-1">
-            <span class="font-medium text-primary group-hover:underline">BKG-8892</span>
-            <span class="px-2 py-0.5 rounded text-[10px] font-medium bg-red-100 text-red-800">Cancelled</span>
-          </div>
-          <div class="text-sm font-medium text-text-main mb-1">Luxury Red Sea Yacht Tour</div>
-          <div class="flex items-center gap-2 text-xs text-text-muted">
-            <Calendar class="w-3.5 h-3.5" />
-            <span>Oct 20 - Oct 22, 2024</span>
+            <a v-if="ticket.customerEmail" :href="'mailto:' + ticket.customerEmail" class="hover:text-primary transition-colors">{{ ticket.customerEmail }}</a>
+            <span v-else class="text-xs text-text-muted">No email provided</span>
           </div>
         </div>
       </div>
@@ -178,20 +256,16 @@ const messages = ref([
         
         <div class="space-y-4">
           <div>
-            <label class="text-xs text-text-muted mb-1 block">Assignee</label>
-            <select class="w-full bg-surface-sunken border border-border/80 rounded px-2 py-1.5 text-sm outline-none">
-              <option>Alex (Support)</option>
-              <option>Sarah (Manager)</option>
-              <option>Unassigned</option>
-            </select>
-          </div>
-          <div>
             <label class="text-xs text-text-muted mb-1 block">Status</label>
-            <select class="w-full bg-surface-sunken border border-border/80 rounded px-2 py-1.5 text-sm outline-none">
-              <option>Open</option>
-              <option>In Progress</option>
-              <option>Waiting on Customer</option>
-              <option>Resolved</option>
+            <select 
+              :value="ticket.status"
+              @change="(e: any) => updateStatus(e.target.value)"
+              class="w-full bg-surface-sunken border border-border/80 rounded px-2 py-1.5 text-sm outline-none"
+            >
+              <option value="Open">Open</option>
+              <option value="InProgress">In Progress</option>
+              <option value="Waiting">Waiting</option>
+              <option value="Resolved">Resolved</option>
             </select>
           </div>
         </div>

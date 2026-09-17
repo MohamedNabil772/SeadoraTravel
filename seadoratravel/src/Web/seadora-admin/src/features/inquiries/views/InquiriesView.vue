@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { 
   Search, 
   Filter, 
@@ -19,81 +19,29 @@ import {
 import { useConfirm } from '@/composables/useConfirm'
 import { useToast } from '@/composables/useToast'
 import LuxuryPagination from '@/shared/components/LuxuryPagination.vue'
+import api from '@/services/api'
 
-// Mock Data for Inquiries
-const inquiries = ref([
-  {
-    id: 'INQ-1049',
-    guestName: 'Eleanor Vance',
-    email: 'eleanor.v@example.com',
-    phone: '+447911123456',
-    destination: 'Maldives Overwater Villa',
-    date: '2026-11-15',
-    guests: 2,
-    message: 'We are looking for a secluded overwater villa for our 10th anniversary. Interested in private dining options.',
-    status: 'Pending',
-    createdAt: '2026-08-19T10:30:00Z',
-    notes: ''
-  },
-  {
-    id: 'INQ-1048',
-    guestName: 'Mohammed Al-Fayed',
-    email: 'm.alfayed@example.ae',
-    phone: '+971501234567',
-    destination: 'Swiss Alps Ski Chalet',
-    date: '2026-12-20',
-    guests: 6,
-    message: 'Need a premium chalet with a private chef and ski-in/ski-out access for the family.',
-    status: 'Replied',
-    createdAt: '2026-08-18T14:15:00Z',
-    notes: 'Sent brochure for Zermatt properties.'
-  },
-  {
-    id: 'INQ-1047',
-    guestName: 'Sofia Rossi',
-    email: 's.rossi@example.it',
-    phone: '+393123456789',
-    destination: 'Amalfi Coast Yacht Charter',
-    date: '2026-09-05',
-    guests: 4,
-    message: 'Looking to charter a yacht for 3 days along the Amalfi coast. Must include crew.',
-    status: 'Resolved',
-    createdAt: '2026-08-15T09:45:00Z',
-    notes: 'Booked. Deposit received.'
-  },
-  {
-    id: 'INQ-1046',
-    guestName: 'James Chen',
-    email: 'j.chen@example.sg',
-    phone: '+6591234567',
-    destination: 'Kyoto, Japan',
-    travelDates: 'Nov 05 - Nov 18, 2026',
-    guests: 4,
-    budget: '$8,500',
-    status: 'In Progress',
-    createdAt: '1 day ago',
-    message: 'Family trip focusing on cultural experiences and traditional ryokan stays. Needs kid-friendly activities.',
-    notes: 'Sent initial itinerary proposal. Waiting for feedback.'
-  },
-  {
-    id: 'INQ-1047',
-    guestName: 'Sarah Jenkins',
-    email: 'sjenkins@company.com',
-    phone: '+1 212-555-0144',
-    destination: 'Amalfi Coast, Italy',
-    travelDates: 'Sep 01 - Sep 10, 2026',
-    guests: 2,
-    budget: '$6,000',
-    status: 'Closed',
-    createdAt: '3 days ago',
-    message: 'Honeymoon trip! Interested in boat tours, cooking classes, and luxury dining reservations.',
-    notes: 'Successfully booked. Sent confirmation details.'
-  }
-])
+interface Inquiry {
+  id: string
+  guestName: string
+  email: string
+  phone: string
+  destination: string
+  date?: string
+  guests?: string | number
+  message: string
+  status: string
+  createdAt: string
+  notes: string
+}
+
+// Live inquiries from backend
+const inquiries = ref<Inquiry[]>([])
+const loading = ref(false)
 
 const searchQuery = ref('')
 const statusFilter = ref('All')
-const statuses = ['All', 'New', 'In Progress', 'Closed']
+const statuses = ['All', 'Pending', 'Replied', 'Resolved', 'Archived']
 
 const isDrawerOpen = ref(false)
 const selectedInquiry = ref<any>(null)
@@ -105,20 +53,49 @@ const replyMessage = ref('')
 const { confirm } = useConfirm()
 const toast = useToast()
 
+const fetchInquiries = async () => {
+  loading.value = true
+  try {
+    const res = await api.get('/api/booking/api/inquiries', {
+      params: {
+        pageNumber: 1,
+        pageSize: 100
+      }
+    })
+    const items = res.data?.items || res.data || []
+    inquiries.value = items.map((item: any) => ({
+      id: item.id,
+      guestName: item.fullName || 'Anonymous',
+      email: item.email || '',
+      phone: item.phone || '',
+      destination: item.destinationInterest || 'VIP Inquiry',
+      date: item.dateOrGuests || '',
+      guests: item.dateOrGuests || '2',
+      message: item.message || '',
+      status: item.status || 'Pending',
+      createdAt: item.createdAt,
+      notes: item.adminNotes || ''
+    }))
+  } catch (e: any) {
+    console.error('Failed to load inquiries:', e)
+    toast.error('Failed to load inquiries', e.message || 'Network error')
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchInquiries()
+})
+
 const sendReply = async () => {
   if (!selectedInquiry.value || !replyMessage.value.trim()) return
 
   isSendingReply.value = true
   try {
-    const res = await fetch(`/api/booking/api/inquiries/${selectedInquiry.value.id}/reply`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ message: replyMessage.value })
+    await api.post(`/api/booking/api/inquiries/${selectedInquiry.value.id}/reply`, {
+      replyMessage: replyMessage.value
     })
-
-    if (!res.ok) throw new Error('Failed to send reply')
 
     toast.success('Reply sent successfully')
     
@@ -137,7 +114,7 @@ const sendReply = async () => {
 
 const openDrawer = (inquiry: any) => {
   selectedInquiry.value = { ...inquiry }
-  adminNotes.value = inquiry.notes
+  adminNotes.value = inquiry.notes || ''
   newStatus.value = inquiry.status
   isDrawerOpen.value = true
 }
@@ -149,14 +126,23 @@ const closeDrawer = () => {
   }, 300)
 }
 
-const saveInquiryDetails = () => {
+const saveInquiryDetails = async () => {
   if (selectedInquiry.value) {
-    const index = inquiries.value.findIndex(i => i.id === selectedInquiry.value.id)
-    if (index !== -1) {
-      inquiries.value[index].notes = adminNotes.value
-      inquiries.value[index].status = newStatus.value
-      toast.success('Inquiry updated successfully', `Status changed to ${newStatus.value}`)
-      closeDrawer()
+    try {
+      await api.put(`/api/booking/api/inquiries/${selectedInquiry.value.id}/status`, {
+        id: selectedInquiry.value.id,
+        status: newStatus.value,
+        adminNotes: adminNotes.value
+      })
+      const index = inquiries.value.findIndex(i => i.id === selectedInquiry.value.id)
+      if (index !== -1) {
+        inquiries.value[index].notes = adminNotes.value
+        inquiries.value[index].status = newStatus.value
+        toast.success('Inquiry updated successfully', `Status changed to ${newStatus.value}`)
+        closeDrawer()
+      }
+    } catch (e: any) {
+      toast.error('Failed to update inquiry', e.message)
     }
   }
 }
@@ -169,17 +155,30 @@ const deleteInquiry = async () => {
     type: 'danger'
   })
   if (ok) {
-    inquiries.value = inquiries.value.filter(i => i.id !== selectedInquiry.value.id)
-    toast.success('Inquiry deleted')
-    closeDrawer()
+    try {
+      await api.delete(`/api/booking/api/inquiries/${selectedInquiry.value.id}`)
+      inquiries.value = inquiries.value.filter(i => i.id !== selectedInquiry.value.id)
+      toast.success('Inquiry deleted')
+      closeDrawer()
+    } catch (e: any) {
+      toast.error('Failed to delete inquiry', e.message)
+    }
   }
 }
 
-const quickStatusUpdate = (id: string, status: string) => {
-  const index = inquiries.value.findIndex(i => i.id === id)
-  if (index !== -1) {
-    inquiries.value[index].status = status
-    toast.success(`Status updated to ${status}`)
+const quickStatusUpdate = async (id: string, status: string) => {
+  try {
+    await api.put(`/api/booking/api/inquiries/${id}/status`, {
+      id: id,
+      status: status
+    })
+    const index = inquiries.value.findIndex(i => i.id === id)
+    if (index !== -1) {
+      inquiries.value[index].status = status
+      toast.success(`Status updated to ${status}`)
+    }
+  } catch (e: any) {
+    toast.error('Failed to update status', e.message)
   }
 }
 
@@ -210,14 +209,20 @@ const pendingRequests = computed(() => inquiries.value.filter(i => i.status === 
 const repliedRequests = computed(() => inquiries.value.filter(i => i.status === 'Replied').length)
 const resolvedRequests = computed(() => inquiries.value.filter(i => i.status === 'Resolved').length)
 
-const formatDate = (dateStr: string) => {
-  return new Date(dateStr).toLocaleDateString('en-US', {
+const formatDate = (dateStr?: string) => {
+  if (!dateStr) return '-'
+  const d = new Date(dateStr)
+  if (isNaN(d.getTime())) return dateStr
+  return d.toLocaleDateString('en-US', {
     month: 'short', day: 'numeric', year: 'numeric'
   })
 }
 
-const formatDateTime = (dateStr: string) => {
-  return new Date(dateStr).toLocaleString('en-US', {
+const formatDateTime = (dateStr?: string) => {
+  if (!dateStr) return '-'
+  const d = new Date(dateStr)
+  if (isNaN(d.getTime())) return dateStr
+  return d.toLocaleString('en-US', {
     month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
   })
 }
@@ -372,9 +377,23 @@ const getStatusColor = (status: string) => {
                 </div>
               </td>
             </tr>
-            <tr v-if="filteredInquiries.length === 0">
-              <td colspan="6" class="px-6 py-12 text-center text-text-muted">
-                No inquiries found matching your filters.
+            <tr v-if="loading">
+              <td colspan="6" class="px-6 py-16 text-center text-text-muted">
+                <div class="flex flex-col items-center justify-center gap-2">
+                  <div class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                  <span class="text-sm">Loading VIP inquiries...</span>
+                </div>
+              </td>
+            </tr>
+            <tr v-else-if="filteredInquiries.length === 0">
+              <td colspan="6" class="px-6 py-16 text-center text-text-muted">
+                <div class="flex flex-col items-center justify-center gap-3">
+                  <div class="w-14 h-14 rounded-full bg-surface-sunken flex items-center justify-center text-text-muted/50">
+                    <MessageSquare class="w-6 h-6" />
+                  </div>
+                  <p class="font-medium text-text-main text-base">No inquiries found</p>
+                  <p class="text-xs text-text-muted max-w-sm">When prospective guests submit inquiry forms on the website, they will appear here in real time.</p>
+                </div>
               </td>
             </tr>
           </tbody>
@@ -415,7 +434,7 @@ const getStatusColor = (status: string) => {
               <div class="space-y-3">
                 <div class="flex items-center gap-3">
                   <div class="w-10 h-10 rounded-full bg-secondary/10 text-secondary-text flex items-center justify-center font-bold font-serif border border-secondary/20">
-                    {{ selectedInquiry?.guestName.charAt(0) }}
+                    {{ (selectedInquiry?.guestName || '?').charAt(0).toUpperCase() }}
                   </div>
                   <div>
                     <div class="font-medium text-text-main">{{ selectedInquiry?.guestName }}</div>
@@ -425,7 +444,7 @@ const getStatusColor = (status: string) => {
                   <a :href="'mailto:' + selectedInquiry?.email" class="flex items-center gap-2 text-primary hover:underline">
                     <Mail class="w-4 h-4 text-text-muted" /> {{ selectedInquiry?.email }}
                   </a>
-                  <a :href="'https://wa.me/' + selectedInquiry?.phone.replace('+', '')" target="_blank" class="flex items-center gap-2 text-[#25D366] hover:underline font-medium">
+                  <a :href="'https://wa.me/' + (selectedInquiry?.phone ? selectedInquiry.phone.replace('+', '') : '')" target="_blank" class="flex items-center gap-2 text-[#25D366] hover:underline font-medium">
                     <Phone class="w-4 h-4 text-[#25D366]" /> {{ selectedInquiry?.phone }} (WhatsApp)
                   </a>
                 </div>

@@ -13,6 +13,7 @@ const emit = defineEmits<{
 
 const subject = ref('')
 const customer = ref('')
+const email = ref('')
 const priority = ref('Med')
 const description = ref('')
 
@@ -20,6 +21,7 @@ watch(() => props.isOpen, (val) => {
   if (val) {
     subject.value = ''
     customer.value = ''
+    email.value = ''
     priority.value = 'Med'
     description.value = ''
   }
@@ -29,6 +31,7 @@ function submit() {
   emit('submit', {
     subject: subject.value,
     customer: customer.value,
+    email: email.value,
     priority: priority.value,
     description: description.value
   })
@@ -55,8 +58,13 @@ function submit() {
           
           <div class="p-6 overflow-y-auto max-h-[70vh] flex flex-col gap-5">
             <div class="flex flex-col gap-1.5">
-              <label class="text-sm font-medium text-text-main">Customer</label>
-              <input v-model="customer" type="text" placeholder="Search customer..." class="w-full bg-surface-sunken border border-border/80 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 rounded-md px-3 py-2 text-sm outline-none transition-all">
+              <label class="text-sm font-medium text-text-main">Customer Name</label>
+              <input v-model="customer" type="text" placeholder="Customer name..." class="w-full bg-surface-sunken border border-border/80 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 rounded-md px-3 py-2 text-sm outline-none transition-all">
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+              <label class="text-sm font-medium text-text-main">Customer Email</label>
+              <input v-model="email" type="email" placeholder="customer@example.com" class="w-full bg-surface-sunken border border-border/80 focus:border-primary/50 focus:ring-2 focus:ring-primary/20 rounded-md px-3 py-2 text-sm outline-none transition-all">
             </div>
             
             <div class="flex flex-col gap-1.5">

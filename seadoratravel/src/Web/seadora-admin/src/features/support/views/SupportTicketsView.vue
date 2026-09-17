@@ -1,13 +1,17 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Plus, Search, Filter, MessageSquare, Mail, MessageCircle, MoreVertical, Clock } from 'lucide-vue-next'
 import CreateTicketModal from '../components/CreateTicketModal.vue'
+import api from '@/services/api'
+import { useToast } from '@/composables/useToast'
 
 const router = useRouter()
+const toast = useToast()
 const isCreateModalOpen = ref(false)
 const searchQuery = ref('')
 const currentFilter = ref('All')
+const loading = ref(false)
 
 interface Ticket {
   id: string
@@ -20,12 +24,61 @@ interface Ticket {
   slaHours: number
 }
 
-const tickets = ref<Ticket[]>([
-  { id: 'TKT-1042', subject: 'Refund request for cancelled Yacht tour', customer: 'Eleanor Vance', status: 'Open', priority: 'High', channel: 'Email', createdAt: '2h ago', slaHours: 2 },
-  { id: 'TKT-1043', subject: 'Change booking dates - VIP Safari', customer: 'Arthur Pendelton', status: 'InProgress', priority: 'Urgent', channel: 'WhatsApp', createdAt: '1h ago', slaHours: 1 },
-  { id: 'TKT-1041', subject: 'Dietary requirements for dinner', customer: 'Sophia Rossi', status: 'Waiting', priority: 'Med', channel: 'Web', createdAt: '1d ago', slaHours: 12 },
-  { id: 'TKT-1039', subject: 'Lost item during transfer', customer: 'James Cooper', status: 'Resolved', priority: 'Low', channel: 'Chat', createdAt: '2d ago', slaHours: 0 },
-])
+const tickets = ref<Ticket[]>([])
+
+const fetchTickets = async () => {
+  loading.value = true
+  try {
+    const res = await api.get('/api/support/api/tickets')
+    const list = Array.isArray(res.data) ? res.data : []
+    tickets.value = list.map((t: any) => ({
+      id: t.id,
+      subject: t.subject || 'Untitled Support Request',
+      customer: t.customerName || 'Guest',
+      status: (t.status || 'Open') as any,
+      priority: t.priority === 'Medium' ? 'Med' : ((t.priority || 'Med') as any),
+      channel: (t.channel || 'Web') as any,
+      createdAt: t.createdAt ? new Date(t.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently',
+      slaHours: t.slaHours ?? 24
+    }))
+  } catch (err: any) {
+    console.error('Failed to load tickets:', err)
+    toast.error('Failed to load tickets', err.message || 'Network error')
+  } finally {
+    loading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchTickets()
+})
+
+const handleCreateTicket = async (data: any) => {
+  try {
+    const priorityMap: Record<string, number> = {
+      'Low': 1,
+      'Med': 2,
+      'Medium': 2,
+      'High': 3,
+      'Urgent': 4
+    }
+
+    const payload = {
+      subject: data.subject,
+      customerName: data.customer || 'Guest',
+      customerEmail: data.email || 'guest@seadoratravel.com',
+      channel: 2, // Web
+      priority: priorityMap[data.priority] || 2,
+      messageBody: data.description || data.subject
+    }
+
+    await api.post('/api/support/api/tickets', payload)
+    toast.success('Ticket created successfully')
+    await fetchTickets()
+  } catch (err: any) {
+    toast.error('Failed to create ticket', err.message || 'Error occurred')
+  }
+}
 
 const filteredTickets = computed(() => {
   let result = tickets.value
@@ -158,7 +211,7 @@ function getChannelIcon(channel: string) {
               <td class="px-6 py-4">
                 <div class="flex items-center gap-3">
                   <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-xs">
-                    {{ ticket.customer.split(' ').map(n => n[0]).join('') }}
+                    {{ (ticket.customer || 'Guest').split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase() }}
                   </div>
                   <span class="font-medium text-text-main">{{ ticket.customer }}</span>
                 </div>
@@ -185,13 +238,22 @@ function getChannelIcon(channel: string) {
                 </button>
               </td>
             </tr>
-            <tr v-if="filteredTickets.length === 0">
-              <td colspan="6" class="px-6 py-12 text-center text-text-muted">
+            <tr v-if="loading">
+              <td colspan="6" class="px-6 py-16 text-center text-text-muted">
+                <div class="flex flex-col items-center justify-center gap-2">
+                  <div class="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+                  <span class="text-sm">Loading support tickets...</span>
+                </div>
+              </td>
+            </tr>
+            <tr v-else-if="filteredTickets.length === 0">
+              <td colspan="6" class="px-6 py-16 text-center text-text-muted">
                 <div class="flex flex-col items-center justify-center gap-3">
-                  <div class="w-12 h-12 rounded-full bg-surface-sunken flex items-center justify-center">
-                    <Search class="w-5 h-5 text-text-muted/50" />
+                  <div class="w-14 h-14 rounded-full bg-surface-sunken flex items-center justify-center text-text-muted/50">
+                    <MessageSquare class="w-6 h-6" />
                   </div>
-                  <p>No tickets found matching your criteria.</p>
+                  <p class="font-medium text-text-main text-base">No support tickets found</p>
+                  <p class="text-xs text-text-muted max-w-sm">All customer inquiries and support requests are currently resolved or none have been submitted yet.</p>
                 </div>
               </td>
             </tr>
@@ -209,6 +271,6 @@ function getChannelIcon(channel: string) {
       </div>
     </div>
     
-    <CreateTicketModal :is-open="isCreateModalOpen" @close="isCreateModalOpen = false" />
+    <CreateTicketModal :is-open="isCreateModalOpen" @close="isCreateModalOpen = false" @submit="handleCreateTicket" />
   </div>
 </template>
