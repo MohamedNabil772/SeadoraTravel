@@ -12,4 +12,5 @@ public class DestinationDto
     public string ImageUrl { get; set; } = string.Empty;
     public string FlagEmoji { get; set; } = string.Empty;
     public int TourCount { get; set; }
+    public int ToursCount => TourCount;
 }

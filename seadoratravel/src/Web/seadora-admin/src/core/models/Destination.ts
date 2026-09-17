@@ -8,4 +8,5 @@ export interface Destination {
   flagEmoji?: string
   isFeatured?: boolean
   toursCount?: number
+  tourCount?: number
 }

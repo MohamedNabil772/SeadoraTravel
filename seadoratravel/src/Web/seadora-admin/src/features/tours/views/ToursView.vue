@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { ref, onMounted, computed, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import api from '@/services/api'
 import ExcelImportExportModal from '@/shared/components/ExcelImportExportModal.vue'
 import LuxuryPagination from '@/shared/components/LuxuryPagination.vue'
@@ -22,6 +22,7 @@ interface Tour {
   groupMaxCapacity?: number
   includes?: string[]
   imageUrl?: string
+  mainImage?: string
   emoji?: string
   bgGradient?: string
   badge?: string
@@ -66,6 +67,8 @@ interface Destination {
   names: Record<string, string>
   flagEmoji?: string
   flag?: string
+  tourCount?: number
+  toursCount?: number
 }
 
 interface Category {
@@ -83,6 +86,7 @@ interface TourType {
 }
 
 const router = useRouter()
+const route = useRoute()
 
 const tours = ref<Tour[]>([])
 const destinations = ref<Destination[]>([])
@@ -94,16 +98,20 @@ const actionLoading = ref(false)
 
 const searchQuery = ref('')
 const selectedCategoryFilter = ref('all')
-const selectedDestinationFilter = ref('all')
+const selectedDestinationFilter = ref((route.query.destination as string) || 'all')
 const selectedSupplierFilter = ref('all')
 const selectedTourTypeFilter = ref('all')
 const isExcelModalOpen = ref(false)
 
+watch(() => route.query.destination, (newVal) => {
+  selectedDestinationFilter.value = (newVal as string) || 'all'
+})
+
 const isAnyFilterActive = computed(() => {
   return searchQuery.value !== '' || 
          selectedCategoryFilter.value !== 'all' || 
-         selectedDestinationFilter.value !== 'all' ||
-         selectedSupplierFilter.value !== 'all' ||
+         selectedDestinationFilter.value !== 'all' || 
+         selectedSupplierFilter.value !== 'all' || 
          selectedTourTypeFilter.value !== 'all'
 })
 
@@ -113,6 +121,9 @@ function resetFilters() {
   selectedDestinationFilter.value = 'all'
   selectedSupplierFilter.value = 'all'
   selectedTourTypeFilter.value = 'all'
+  if (route.query.destination) {
+    router.replace({ query: {} })
+  }
 }
 
 const durations = [
@@ -158,7 +169,7 @@ function getTourDestination(tour: Tour): { name: string, flag: string } {
     }
   }
   if (tour.destinationId) {
-    const d = destinations.value.find(x => x.id === tour.destinationId)
+    const d = destinations.value.find(x => x.id?.toLowerCase() === tour.destinationId?.toLowerCase())
     if (d) {
       return {
         name: d.names?.en || 'Destination',
@@ -175,7 +186,7 @@ function getTourDestination(tour: Tour): { name: string, flag: string } {
 function getTourCategory(tour: Tour): string {
   if (tour.category?.names?.en) return tour.category.names.en
   if (tour.categoryId) {
-    const c = categories.value.find(x => x.id === tour.categoryId)
+    const c = categories.value.find(x => x.id?.toLowerCase() === tour.categoryId?.toLowerCase())
     if (c?.names?.en) return c.names.en
   }
   return tour.categoryName || 'General Tour'
@@ -183,7 +194,7 @@ function getTourCategory(tour: Tour): string {
 
 function getTourTypeName(tour: Tour): string {
   if (tour.tourTypeId) {
-    const tt = tourTypes.value.find(x => x.id === tour.tourTypeId)
+    const tt = tourTypes.value.find(x => x.id?.toLowerCase() === tour.tourTypeId?.toLowerCase())
     if (tt?.names?.en) return tt.names.en
   }
   return 'VIP Experience'
@@ -197,7 +208,7 @@ function getTourSupplier(tour: Tour): { name: string, percent?: number } {
     }
   }
   if (tour.supplierId) {
-    const s = suppliers.value.find(x => x.id === tour.supplierId)
+    const s = suppliers.value.find(x => x.id?.toLowerCase() === tour.supplierId?.toLowerCase())
     if (s) {
       return {
         name: s.nameEn || s.nameAr || 'Partner',
@@ -216,10 +227,14 @@ const filteredTours = computed(() => {
     const nameMatch = t.names?.en?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
                       t.names?.ru?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
                       t.names?.de?.toLowerCase().includes(searchQuery.value.toLowerCase())
-    const catMatch = selectedCategoryFilter.value === 'all' || t.categoryId === selectedCategoryFilter.value
-    const destMatch = selectedDestinationFilter.value === 'all' || t.destinationId === selectedDestinationFilter.value
-    const supMatch = selectedSupplierFilter.value === 'all' || t.supplierId === selectedSupplierFilter.value
-    const typeMatch = selectedTourTypeFilter.value === 'all' || t.tourTypeId === selectedTourTypeFilter.value
+    const catMatch = selectedCategoryFilter.value === 'all' || 
+                     t.categoryId?.toLowerCase() === selectedCategoryFilter.value.toLowerCase()
+    const destMatch = selectedDestinationFilter.value === 'all' || 
+                      t.destinationId?.toLowerCase() === selectedDestinationFilter.value.toLowerCase()
+    const supMatch = selectedSupplierFilter.value === 'all' || 
+                     t.supplierId?.toLowerCase() === selectedSupplierFilter.value.toLowerCase()
+    const typeMatch = selectedTourTypeFilter.value === 'all' || 
+                      t.tourTypeId?.toLowerCase() === selectedTourTypeFilter.value.toLowerCase()
     return nameMatch && catMatch && destMatch && supMatch && typeMatch
   })
 })
@@ -318,7 +333,7 @@ onMounted(loadData)
       <select v-model="selectedDestinationFilter" aria-label="Filter by destination" class="filter-select">
         <option value="all">All Destinations</option>
         <option v-for="dest in destinations" :key="dest.id" :value="dest.id">
-          {{ dest.names?.en || 'Unknown' }}
+          {{ dest.names?.en || 'Unknown' }} ({{ dest.tourCount ?? dest.toursCount ?? 0 }})
         </option>
       </select>
 
@@ -376,11 +391,11 @@ onMounted(loadData)
             <td>
               <div class="tour-cell">
                 <img
-                  v-if="tour.imageUrl"
-                  :src="tour.imageUrl"
+                  v-if="tour.mainImage || tour.imageUrl"
+                  :src="tour.mainImage || tour.imageUrl"
                   class="tour-thumb"
                   alt=""
-                  @error="tour.imageUrl = ''"
+                  @error="tour.mainImage = ''; tour.imageUrl = ''"
                 />
                 <span v-else class="tour-emoji">{{ tour.emoji || '✨' }}</span>
                 <div>

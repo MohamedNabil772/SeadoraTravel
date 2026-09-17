@@ -20,6 +20,7 @@ interface Destination {
   flagEmoji?: string
   isFeatured?: boolean
   toursCount?: number
+  tourCount?: number
 }
 
 const destinations = ref<Destination[]>([])
@@ -234,9 +235,15 @@ onMounted(fetchDestinations)
               <span v-else class="text-slate-400 text-xs">—</span>
             </td>
             <td>
-              <span class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-slate-100 text-slate-800 border border-slate-200">
-                <span>✦</span> {{ dest.toursCount || 0 }} {{ (dest.toursCount === 1) ? 'Tour' : 'Tours' }}
-              </span>
+              <router-link
+                :to="{ path: '/tours', query: { destination: dest.id } }"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full bg-slate-100 hover:bg-[#c9a84c]/20 text-slate-800 hover:text-[#062d4d] border border-slate-200 hover:border-[#c9a84c]/40 transition-all cursor-pointer group"
+                :title="`View tours in ${dest.names?.en || 'destination'}`"
+              >
+                <span class="text-[#c9a84c] group-hover:scale-110 transition-transform">✦</span>
+                <span>{{ dest.tourCount ?? dest.toursCount ?? 0 }} {{ ((dest.tourCount ?? dest.toursCount ?? 0) === 1) ? 'Tour' : 'Tours' }}</span>
+                <span class="text-[10px] text-slate-400 group-hover:text-slate-700 transition-colors">→</span>
+              </router-link>
             </td>
             <td>
               <span v-if="dest.isFeatured" class="badge-success">Yes</span>
