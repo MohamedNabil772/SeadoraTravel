@@ -2,6 +2,7 @@
 import Navbar from '../shared/components/Navbar.vue'
 import Hero from '../shared/components/Hero.vue'
 import Destinations from '../features/destinations/components/Destinations.vue'
+import Trips from '../features/tours/components/Trips.vue'
 import WhyChoose from '../shared/components/WhyChoose.vue'
 import Testimonials from '../shared/components/Testimonials.vue'
 import Contact from '../features/contact/components/Contact.vue'
@@ -15,6 +16,7 @@ import Footer from '../shared/components/Footer.vue'
     <main class="main-content">
       <Hero />
       <Destinations />
+      <Trips />
       <WhyChoose />
       <Testimonials />
       <Contact />

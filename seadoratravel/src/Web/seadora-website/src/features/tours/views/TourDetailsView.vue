@@ -4,7 +4,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
 import { useCurrencyStore } from '@/store/currency'
 import { useAuthStore } from '@/features/auth/store/auth'
-import { getSlug, getFullImageUrl } from '@/shared/utils/helpers'
+import { getSlug, getFullImageUrl, API_BASE_URL } from '@/shared/utils/helpers'
 import Footer from '@/shared/components/Footer.vue'
 import GuestInfoForm from '@/features/tours/components/GuestInfoForm.vue'
 import TourAvailabilityCalendar from '@/features/tours/components/TourAvailabilityCalendar.vue'
@@ -1054,7 +1054,7 @@ const shareUrl = computed(() => typeof window !== 'undefined' ? window.location.
 const fetchTourData = async () => {
   loading.value = true
   try {
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+    const API_URL = API_BASE_URL
     const currentSlug = String(routeSlug.value || '').trim()
 
     // 1. Direct ID fetch if GUID
@@ -1184,7 +1184,7 @@ const confirmBooking = async () => {
   
   bookingSubmitting.value = true
   try {
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+    const API_URL = API_BASE_URL
     const addonsPayload = selectedAddons.value.map(id => {
       const a = availableAddons.value.find((x: any) => x.id === id)
       if (!a) return null

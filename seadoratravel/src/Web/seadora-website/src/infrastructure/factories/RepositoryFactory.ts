@@ -5,16 +5,15 @@ import { ApiDestinationRepository } from '../api/ApiDestinationRepository'
 import { ApiBookingRepository } from '../api/ApiBookingRepository'
 import { ApiFeedbackRepository } from '../api/ApiFeedbackRepository'
 
+import { API_BASE_URL } from '@/shared/utils/helpers'
 import type { ITourRepository } from '../../core/repositories/ITourRepository'
 import type { ICategoryRepository } from '../../core/repositories/ICategoryRepository'
 import type { IDestinationRepository } from '../../core/repositories/IDestinationRepository'
 import type { IBookingRepository } from '../../core/repositories/IBookingRepository'
 import type { IFeedbackRepository } from '../../core/repositories/IFeedbackRepository'
 
-const API_URL = import.meta.env?.VITE_API_URL || 'http://localhost:8000'
-
 const apiClient = axios.create({
-  baseURL: API_URL
+  baseURL: API_BASE_URL
 })
 
 apiClient.interceptors.request.use((config) => {

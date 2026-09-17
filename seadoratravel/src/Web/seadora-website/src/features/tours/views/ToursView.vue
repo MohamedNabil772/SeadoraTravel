@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { getSlug, getFullImageUrl } from '@/shared/utils/helpers'
+import { getSlug, getFullImageUrl, API_BASE_URL } from '@/shared/utils/helpers'
 import { ref, onMounted, computed, watch, onUnmounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useI18n } from 'vue-i18n'
@@ -144,7 +144,7 @@ const bookingSubmitError = ref('')
 
 const fetchToursFromBackend = async (searchTxt?: string) => {
   try {
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+    const API_URL = API_BASE_URL
     const url = new URL(`${API_URL}/api/content/api/tours`)
     if (searchTxt && searchTxt.trim()) {
       url.searchParams.set('search', searchTxt.trim())
@@ -612,7 +612,7 @@ onMounted(async () => {
   document.addEventListener('pointerdown', handleBodyClick, { passive: true })
   document.addEventListener('click', handleBodyClick, { passive: true })
   try {
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+    const API_URL = API_BASE_URL
     
     // Fetch Categories
     const catRes = await fetch(`${API_URL}/api/content/api/categories`)
@@ -867,7 +867,7 @@ const submitBooking = async () => {
   bookingLoading.value = true
   bookingSubmitError.value = ''
   try {
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+    const API_URL = API_BASE_URL
     const finalPrice = calculateFinalPrice()
     const response = await fetch(`${API_URL}/api/booking/api/bookings`, {
       method: 'POST',

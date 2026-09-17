@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRoute } from 'vue-router'
+import { API_BASE_URL } from '@/shared/utils/helpers'
 
 const route = useRoute()
 
@@ -23,7 +24,7 @@ onMounted(async () => {
   if (tourId.value) {
     loadingTour.value = true
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+      const API_URL = API_BASE_URL
       const res = await fetch(`${API_URL}/api/content/api/tours`)
       if (res.ok) {
         const tours = await res.json()
@@ -66,7 +67,7 @@ const handleSubmit = async () => {
 
   isSubmitting.value = true
   try {
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+    const API_URL = API_BASE_URL
     // Ensure the tourId is a valid Guid. If empty or not set, use empty Guid.
     const isGuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(tourId.value)
     const validTourId = isGuid ? tourId.value : '00000000-0000-0000-0000-000000000000'

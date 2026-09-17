@@ -2,6 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from 'vue-i18n'
+import { API_BASE_URL } from '@/shared/utils/helpers'
 import type { Destination } from '../../../core/models/Destination'
 
 const { t, locale } = useI18n()
@@ -50,7 +51,7 @@ const getLocalizedArray = (field: any) => {
 
 onMounted(async () => {
   try {
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const API_URL = API_BASE_URL;
     
     // Fetch Destinations
     const destRes = await fetch(`${API_URL}/api/content/api/destinations`).catch(() => null);
@@ -123,7 +124,7 @@ const getTourCount = (dest: LocalDestination) => {
 }
 
 const getBgStyle = (dest: LocalDestination) => {
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+  const API_URL = API_BASE_URL;
   let url = dest.imageUrl || dest.imagePath
   
   if (!url) {

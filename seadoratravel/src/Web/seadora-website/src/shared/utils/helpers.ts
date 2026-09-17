@@ -20,6 +20,8 @@ export function getLocalized(obj: any, locale: string = 'en', fallback: string =
   return String(obj)
 }
 
+export const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? 'https://api.seadoratravel.com' : 'http://localhost:8000');
+
 export function getFullImageUrl(url?: string): string {
   if (!url) return '';
   if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('blob:') || url.startsWith('data:')) {
@@ -28,6 +30,5 @@ export function getFullImageUrl(url?: string): string {
   if (url.startsWith('/images/') || url.startsWith('images/')) {
     return url.startsWith('/') ? url : `/${url}`;
   }
-  const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:8000';
-  return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+  return `${API_BASE_URL}${url.startsWith('/') ? '' : '/'}${url}`;
 }

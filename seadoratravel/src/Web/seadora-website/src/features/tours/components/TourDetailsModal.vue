@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { getFullImageUrl } from '@/shared/utils/helpers'
+import { getFullImageUrl, API_BASE_URL } from '@/shared/utils/helpers'
 
 interface Tour {
   id: string;
@@ -86,7 +86,7 @@ const fetchReviews = async () => {
   if (!props.tour) return
   loadingReviews.value = true
   try {
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+    const API_URL = API_BASE_URL
     const res = await fetch(`${API_URL}/api/booking/api/feedbacks?tourId=${props.tour.id}`)
     if (res.ok) {
       const data = await res.json()

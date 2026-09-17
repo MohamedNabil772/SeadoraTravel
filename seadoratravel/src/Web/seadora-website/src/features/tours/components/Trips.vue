@@ -2,7 +2,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useRouter } from 'vue-router'
-import { getFullImageUrl } from '@/shared/utils/helpers'
+import { getFullImageUrl, API_BASE_URL } from '@/shared/utils/helpers'
 
 const { t, locale, te } = useI18n()
 
@@ -62,7 +62,7 @@ const bookingLoading = ref(false)
 
 onMounted(async () => {
   try {
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const API_URL = API_BASE_URL;
     
     // Fetch Categories
     const catRes = await fetch(`${API_URL}/api/content/api/categories`)
@@ -142,7 +142,7 @@ const submitBooking = async () => {
   
   bookingLoading.value = true;
   try {
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+    const API_URL = API_BASE_URL;
     const response = await fetch(`${API_URL}/api/booking/api/bookings`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
