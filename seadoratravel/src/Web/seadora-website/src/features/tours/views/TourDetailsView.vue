@@ -56,7 +56,6 @@ const selectCurrency = (code: string) => {
 
 // UI States
 const activeTab = ref('overview')
-const readMoreExpanded = ref(false)
 const showShareModal = ref(false)
 const activeFaq = ref<number | null>(0)
 const timelineProgress = ref(0)
@@ -276,15 +275,7 @@ const i18nContent = computed(() => {
         'Enjoy live Tanoura spinning dancers and a thrilling fire show under starry skies.',
         'Stress-free round-trip hotel pickup and drop-off in air-conditioned comfort.'
       ],
-      itinerary: [
-        { time: '15:00 - 15:30', title: 'Hotel Pickup & Transfer', desc: 'Comfortable air-conditioned coach pickup directly from your hotel in Sharm El-Sheikh.' },
-        { time: '15:45 - 16:00', title: 'ATV Safety Briefing & Test Run', desc: 'Meet your desert safari instructors, wear safety gear, and complete a quick practice test.' },
-        { time: '16:00 - 17:15', title: 'Adrenaline Quad Safari & Echo Mountains', desc: 'Ride into rugged Sinai canyons and stop at the Echo Mountains to shout and hear the canyon reply.' },
-        { time: '17:15 - 18:00', title: 'Bedouin Tent & Sunset Camel Ride', desc: 'Sway gently atop desert camels over golden dunes as the desert sunset turns amber.' },
-        { time: '18:00 - 19:30', title: 'Bedouin BBQ Buffet & Herbal Tea', desc: 'Savor grilled chicken, kofta, fresh salads, fresh-baked flatbread, and authentic Habak tea.' },
-        { time: '19:30 - 20:30', title: 'Oriental Fire Show & Tanoura Dance', desc: 'Mesmerizing folkloric whirling Tanoura performance and an exhilarating fire-breathing show.' },
-        { time: '20:30 - 21:00', title: 'Return Hotel Transfer', desc: 'Relax on the return ride back to your hotel with unforgettable memories.' }
-      ],
+      itinerary: [],
       inclusions: [
         'Hotel pickup and drop-off in comfortable air-conditioned vehicle',
         'Automatic quad bike rental with safety helmet',
@@ -401,15 +392,7 @@ const i18nContent = computed(() => {
         'Erleben Sie eine traditionelle Tanoura-Tanzshow und eine spektakuläre Feuershow unter Sternen.',
         'Bequemer und stressfreier Hin- und Rücktransfer ab/bis Hotel im klimatisierten Fahrzeug.'
       ],
-      itinerary: [
-        { time: '15:00 - 15:30', title: 'Hotelabholung & Transfer', desc: 'Bequeme Abholung mit klimatisiertem Bus direkt von Ihrem Hotel in Sharm El-Sheikh.' },
-        { time: '15:45 - 16:00', title: 'Sicherheitseinweisung & Probefahrt', desc: 'Begrüßung durch die Wüsten-Instruktoren, Helm anlegen und kurze Probefahrt.' },
-        { time: '16:00 - 17:15', title: 'Quad-Safari & Echo-Berge', desc: 'Fahrt in die Sinai-Schluchten und Fotostopp an den Echo-Bergen mit Echo-Ruf.' },
-        { time: '17:15 - 18:00', title: 'Beduinencamp & Kamelritt zum Sonnenuntergang', desc: 'Sanfter Ritt auf Kamelen über goldene Dünen bei Sonnenuntergang.' },
-        { time: '18:00 - 19:30', title: 'Beduinen-BBQ-Buffet & Kräutertee', desc: 'Köstliches BBQ mit gegrilltem Hähnchen, Kofta, frischen Salaten und Habak-Tee.' },
-        { time: '19:30 - 20:30', title: 'Orientalische Feuershow & Tanoura-Tanz', desc: 'Faszinierender Tanoura-Drehtanz und aufregende Feuershow unter dem Sternenhimmel.' },
-        { time: '20:30 - 21:00', title: 'Rücktransfer zum Hotel', desc: 'Entspannte Rückfahrt zu Ihrem Ferienresort.' }
-      ],
+      itinerary: [],
       inclusions: [
         'Hotelabholung und Rücktransfer im klimatisierten Fahrzeug',
         'Automatisches Quad-Bike mit Sicherheitshelm',
@@ -526,15 +509,7 @@ const i18nContent = computed(() => {
         'Spettacolo folcloristico dal vivo con danzatore Tanoura e mangiafuoco sotto le stelle.',
         'Comodo transfer di andata e ritorno con aria condizionata dal tuo hotel.'
       ],
-      itinerary: [
-        { time: '15:00 - 15:30', title: 'Pick-up in Hotel e Trasferimento', desc: 'Prelievo comodo con pullman climatizzato direttamente dal tuo resort a Sharm El-Sheikh.' },
-        { time: '15:45 - 16:00', title: 'Briefing di Sicurezza e Guida di Prova', desc: 'Incontro con gli istruttori, consegna caschi e breve prova di guida sul quad.' },
-        { time: '16:00 - 17:15', title: 'Safari in Quad e Montagne dell’Eco', desc: 'Guida nel canyon del Sinai con sosta fotografica e prova dell’eco.' },
-        { time: '17:15 - 18:00', title: 'Accampamento Beduino e Giro in Cammello', desc: 'Passeggiata in cammello sulle dune durante la luce dorata del tramonto.' },
-        { time: '18:00 - 19:30', title: 'Buffet BBQ Beduino e Tè Habak', desc: 'Cena con pollo grigliato, kofta, insalate orientali e tè tipico alle erbe.' },
-        { time: '19:30 - 20:30', title: 'Spettacolo di Fuoco e Danza Tanoura', desc: 'Emozionante spettacolo con danzatrice rotante Tanoura e mangiafuoco.' },
-        { time: '20:30 - 21:00', title: 'Rientro in Hotel', desc: 'Rientro rilassante al tuo resort.' }
-      ],
+      itinerary: [],
       inclusions: [
         'Trasferimento di andata e ritorno in veicolo climatizzato',
         'Noleggio quad automatico con casco di sicurezza',
@@ -651,15 +626,7 @@ const i18nContent = computed(() => {
         'Spectacle oriental avec danseur Tanoura et cracheur de feu sous le ciel étoilé.',
         'Transfert aller-retour pratique et climatisé depuis votre hôtel.'
       ],
-      itinerary: [
-        { time: '15:00 - 15:30', title: 'Prise en charge à l’hôtel', desc: 'Transfert en bus climatisé confortable directement depuis votre hôtel à Charm el-Cheikh.' },
-        { time: '15:45 - 16:00', title: 'Consignes de sécurité & Essai quad', desc: 'Accueil par les moniteurs, équipement des casques et court essai sur piste.' },
-        { time: '16:00 - 17:15', title: 'Safari en Quad & Montagnes de l’Écho', desc: 'Balade dans les canyons du Sinaï et arrêt photo aux Montagnes de l’Écho.' },
-        { time: '17:15 - 18:00', title: 'Camp Bédouin & Balade à Chameau', desc: 'Promenade à dos de chameau sur les dunes au coucher du soleil.' },
-        { time: '18:00 - 19:30', title: 'Buffet Barbecue Bédouin & Thé Habak', desc: 'Dîner barbecue avec poulet grillé, kofta, salades fraîches et thé bédouin.' },
-        { time: '19:30 - 20:30', title: 'Spectacle de Feu & Danse Tanoura', desc: 'Spectacle traditionnel avec danseur tournoyant Tanoura et cracheurs de feu.' },
-        { time: '20:30 - 21:00', title: 'Retour à l’hôtel', desc: 'Trajet retour reposant jusqu’à votre hôtel.' }
-      ],
+      itinerary: [],
       inclusions: [
         'Transfert aller-retour en véhicule climatisé',
         'Location du quad automatique avec casque',
@@ -776,15 +743,7 @@ const i18nContent = computed(() => {
         'Яркое восточное шоу с национальным танцем Танура и фаер-шоу под звездами.',
         'Комфортабельный трансфер из отеля и обратно на авто с кондиционером.'
       ],
-      itinerary: [
-        { time: '15:00 - 15:30', title: 'Трансфер из отеля', desc: 'Сбор туристов на комфортабельном кондиционированном микроавтобусе из отелей Шарм-эль-Шейха.' },
-        { time: '15:45 - 16:00', title: 'Инструктаж и пробный заезд', desc: 'Знакомство с инструкторами, выдача шлемов и тест-драйв на квадроцикле.' },
-        { time: '16:00 - 17:15', title: 'Сафари на квадроциклах и Скалы Эхо', desc: 'Драйвовый заезд по ущельям Синая и остановка у скал Эхо для фото.' },
-        { time: '17:15 - 18:00', title: 'Деревня бедуинов и верблюды на закате', desc: 'Катание на верблюдах по дюнам в лучах заходящего солнца.' },
-        { time: '18:00 - 19:30', title: 'Ужин-барбекю и бедуинский чай', desc: 'Шведский стол: курица на углях, люля-кебаб, салаты, свежие лепёшки и чай хабак.' },
-        { time: '19:30 - 20:30', title: 'Шоу огня и танец Танура', desc: 'Зрелищный танец юбок Танура и захватывающее шоу факиров с огнем.' },
-        { time: '20:30 - 21:00', title: 'Возвращение в отель', desc: 'Трансфер обратно в отель с морем впечатлений.' }
-      ],
+      itinerary: [],
       inclusions: [
         'Трансфер из отеля и обратно на кондиционированном транспорте',
         'Аренда квадроцикла с защитным шлемом',
@@ -1053,11 +1012,48 @@ const tourHighlights = computed(() => {
   return i18nContent.value.highlights
 })
 const tourItinerary = computed(() => {
-  if (tour.value?.itinerary?.[locale.value]) return tour.value.itinerary[locale.value]
-  if (tour.value?.itinerary?.['en']) return tour.value.itinerary['en']
-  if (tour.value?.itinerary) return tour.value.itinerary
-  return i18nContent.value.itinerary
+  const raw = tour.value?.itinerary
+  if (!raw) return []
+  if (Array.isArray(raw)) {
+    if (raw.length === 0) return []
+    return raw.map((item: any) => {
+      const time = item.timeString || item.time || (item.dayNumber ? `Day ${item.dayNumber}` : '')
+      const title = item.titles?.[locale.value] || item.titles?.['en'] || item.title || ''
+      const desc = item.descriptions?.[locale.value] || item.descriptions?.['en'] || item.desc || item.description || ''
+      return { time, title, desc }
+    }).filter((step: any) => step.title || step.desc)
+  }
+  if (typeof raw === 'object') {
+    const list = raw[locale.value] || raw['en']
+    if (Array.isArray(list) && list.length > 0) return list
+  }
+  return []
 })
+
+const hasItinerary = computed(() => tourItinerary.value && tourItinerary.value.length > 0)
+
+const availableTabs = computed(() => {
+  const tabs = [
+    { id: 'overview', label: i18nContent.value.tabs.overview },
+    { id: 'highlights', label: i18nContent.value.tabs.highlights }
+  ]
+  if (hasItinerary.value) {
+    tabs.push({ id: 'itinerary', label: i18nContent.value.tabs.itinerary })
+  }
+  tabs.push(
+    { id: 'includes', label: i18nContent.value.tabs.includes },
+    { id: 'info', label: i18nContent.value.tabs.info },
+    { id: 'reviews', label: i18nContent.value.tabs.reviews },
+    { id: 'faq', label: i18nContent.value.tabs.faq }
+  )
+  return tabs
+})
+
+watch(hasItinerary, (has) => {
+  if (!has && activeTab.value === 'itinerary') {
+    activeTab.value = 'overview'
+  }
+}, { immediate: true })
 const tourInclusions = computed(() => {
   if (tour.value?.inclusions?.[locale.value]) return tour.value.inclusions[locale.value]
   if (tour.value?.inclusions?.['en']) return tour.value.inclusions['en']
@@ -1816,15 +1812,7 @@ watch(routeSlug, () => {
           <!-- INTERACTIVE TABS BAR -->
           <div class="sticky top-16 z-40 bg-white/95 backdrop-blur-md border-b border-[#e2e8f0] -mx-4 px-4 sm:mx-0 sm:px-0 flex items-center gap-1.5 overflow-x-auto scrollbar-none py-1.5">
             <button 
-              v-for="tab in [
-                { id: 'overview', label: i18nContent.tabs.overview },
-                { id: 'highlights', label: i18nContent.tabs.highlights },
-                { id: 'itinerary', label: i18nContent.tabs.itinerary },
-                { id: 'includes', label: i18nContent.tabs.includes },
-                { id: 'info', label: i18nContent.tabs.info },
-                { id: 'reviews', label: i18nContent.tabs.reviews },
-                { id: 'faq', label: i18nContent.tabs.faq }
-              ]"
+              v-for="tab in availableTabs"
               :key="tab.id"
               @click="activeTab = tab.id"
               class="px-4 py-2.5 text-xs sm:text-sm font-bold rounded-xl whitespace-nowrap transition-all cursor-pointer"
@@ -1840,25 +1828,10 @@ watch(routeSlug, () => {
           <div v-show="activeTab === 'overview'" class="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e8f0] shadow-xs space-y-4">
             <h2 class="text-lg sm:text-xl font-bold text-[#0f172a]">{{ i18nContent.descHeading }}</h2>
             <div class="text-sm sm:text-base text-[#475569] leading-relaxed space-y-3.5">
-              <p>
+              <p class="whitespace-pre-line">
                 {{ tourDescription }}
               </p>
-              <div v-show="readMoreExpanded" class="space-y-3.5 animate-in fade-in">
-                <p>
-                  As the sun sinks behind the Sinai mountains, your quad bike is fueled and waiting. Twist the throttle and let your automatic ATV carry you across rolling sand dunes. At the Echo Mountains, shout into the canyon and hear the rock reply.
-                </p>
-                <p>
-                  Arrive at the Bedouin camp to be welcomed with fragrant Habak herbal tea. Relish a rich open BBQ buffet under starry skies, followed by a breathtaking whirling Tanoura dance and an adrenaline-fueled fire show.
-                </p>
-              </div>
             </div>
-            <button 
-              @click="readMoreExpanded = !readMoreExpanded"
-              class="text-xs sm:text-sm font-bold text-[#062d4d] hover:underline flex items-center gap-1.5 pt-2 cursor-pointer"
-            >
-              <span>{{ readMoreExpanded ? i18nContent.showLess : i18nContent.readMore }}</span>
-              <span>{{ readMoreExpanded ? '↑' : '↓' }}</span>
-            </button>
           </div>
 
           <!-- 2. Highlights -->
@@ -1873,7 +1846,7 @@ watch(routeSlug, () => {
           </div>
 
           <!-- 3. Itinerary Timeline -->
-          <div v-show="activeTab === 'itinerary' || activeTab === 'overview'" class="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e8f0] shadow-xs">
+          <div v-if="hasItinerary" v-show="activeTab === 'itinerary' || activeTab === 'overview'" class="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e8f0] shadow-xs">
             <h2 class="text-lg sm:text-xl font-bold text-[#0f172a] mb-6">{{ i18nContent.itineraryHeading }}</h2>
             <div class="relative pl-8 space-y-7" ref="timelineRef">
               <!-- Animated Timeline Progress Line -->
