@@ -129,31 +129,17 @@ const calendarDays = computed(() => {
     const isPast = d < today
     const isToday = d.getTime() === today.getTime()
     const isSelected = props.modelValue === dateStr
-    const dayOfWeek = d.getDay() // 0 = Sun, 5 = Fri, 6 = Sat
 
     let status: 'Available' | 'LowStock' | 'SoldOut' = 'Available'
-    let spotsLeft = 18
+    let spotsLeft = 20
     let priceEur = props.basePriceEur
 
-    // Check backend overrides first
+    // Check backend overrides first if provided
     if (overrideMap.has(dateStr)) {
       const ov = overrideMap.get(dateStr)!
       status = ov.status
       if (ov.priceEur) priceEur = ov.priceEur
       if (ov.spotsLeft !== undefined) spotsLeft = ov.spotsLeft
-    } else {
-      // Deterministic dynamic pattern based on date day number for authentic realistic variance
-      const dayNum = d.getDate()
-      if (dayNum % 13 === 0) {
-        status = 'SoldOut'
-        spotsLeft = 0
-      } else if (dayNum % 6 === 0 || dayOfWeek === 5 || dayOfWeek === 6) {
-        status = 'LowStock'
-        spotsLeft = (dayNum % 4) + 2 // 2 to 5 spots
-        priceEur = Math.round(props.basePriceEur * 1.1) // Weekend slight surge
-      } else if (dayNum % 4 === 0) {
-        priceEur = Math.max(20, Math.round(props.basePriceEur * 0.95)) // Mid-week special
-      }
     }
 
     const priceFormatted = currencyStore.formatPrice(priceEur)

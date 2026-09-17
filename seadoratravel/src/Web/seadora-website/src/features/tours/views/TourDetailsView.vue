@@ -235,7 +235,7 @@ const i18nContent = computed(() => {
       infoHeading: 'Important Information & Advice',
       whatToBringTitle: 'What to Bring',
       notSuitableTitle: 'Not Suitable For',
-      notSuitableText: 'Pregnant women, travelers with severe back/neck problems, or children under 6 for quad driving.',
+      notSuitableText: '',
       reviewsHeading: 'Customer Reviews & Ratings',
       reviewsSub: 'Verified traveler reviews from recent safari departures',
       verifiedBooking: 'Verified Booking',
@@ -260,55 +260,14 @@ const i18nContent = computed(() => {
         trust2: '24/7 Dedicated WhatsApp Concierge',
         trust3: 'Best Price Guarantee — Direct Operator'
       },
-      whatToBring: [
-        'Sunglasses and head scarf (Keffiyeh)',
-        'Comfortable closed-toe sports shoes',
-        'Camera or smartphone for sunset photos',
-        'Warm jacket in winter months (Nov - Mar)',
-        'Cash for optional souvenirs, drinks or tips'
-      ],
-      highlights: [
-        'Ride automatic quad bikes across sweeping desert dunes with no prior experience needed.',
-        'Hear your voice echo off towering sandstone cliffs at the famous Echo Mountains.',
-        'Take a scenic sunset camel trek over golden dunes for breathtaking photographs.',
-        'Feast on an open Bedouin BBQ buffet with grilled meats and freshly baked flatbread.',
-        'Enjoy live Tanoura spinning dancers and a thrilling fire show under starry skies.',
-        'Stress-free round-trip hotel pickup and drop-off in air-conditioned comfort.'
-      ],
+      whatToBring: [],
+      highlights: [],
       itinerary: [],
-      inclusions: [
-        'Hotel pickup and drop-off in comfortable air-conditioned vehicle',
-        'Automatic quad bike rental with safety helmet',
-        'Professional desert safari guide (Multilingual)',
-        'Camel ride over golden dunes (approx. 15-20 minutes)',
-        'Stop at the Echo Mountains for photography and echo shout',
-        'Open BBQ dinner buffet (grilled meats, rice, salads, fresh bread)',
-        'Traditional Bedouin herbal tea (Habak)',
-        'Live oriental entertainment (Tanoura dancer & fire show)',
-        'All taxes, fuel surcharges, and service fees'
-      ],
-      exclusions: [
-        'Desert scarf (Keffiyeh) and safety goggles (available for rent/purchase €3-€4)',
-        'Souvenir photos and videos captured by the professional desert photographer',
-        'Soft drinks and bottled beverages inside the Bedouin camp (nominal fee)',
-        'Gratuities / tips for safari guides and drivers (optional)'
-      ],
-      faqs: [
-        { q: 'Do I need a driver license or prior quad biking experience?', a: 'No driver license or prior experience is required! All our quad bikes are fully automatic and easy to ride. Our instructors provide a full safety briefing and practice session before starting.' },
-        { q: 'What is the policy for children participating?', a: 'Children aged 16+ can drive their own single quad. Children aged 6-15 can ride as passengers on double quads with an adult. Children under 6 can participate in the Bedouin dinner and camel ride.' },
-        { q: 'Can I cancel or change my booking date for free?', a: 'Yes! We offer 100% free cancellation and date changes up to 24 hours before your scheduled tour departure.' },
-        { q: 'Is hotel pickup included from all resorts in the area?', a: 'Yes, round-trip pickup and drop-off is included from all hotels and resorts in the destination area.' }
-      ],
-      options: [
-        { title: 'Single Quad ATV Safari + Camel & BBQ Show', subtitle: '1 Person on 1 Quad Bike (16+ yrs)', badge: 'BESTSELLER' },
-        { title: 'Double Quad ATV Safari (2 Persons on 1 Quad)', subtitle: 'Driver + Passenger on 1 Quad Bike', badge: 'POPULAR FOR COUPLES' },
-        { title: 'VIP Private Desert Safari + Stargazing Telescope', subtitle: 'Exclusive Private Guide & VIP Bedouin Seating', badge: 'LUXURY VIP' }
-      ],
-      addons: [
-        { name: 'Bedouin Desert Scarf & Dust Goggles', priceEur: 4 },
-        { name: 'VIP Front Row Dinner Seating & Fruit Basket', priceEur: 8 },
-        { name: 'Professional Photographer HD Photo & Video Pack', priceEur: 15 }
-      ]
+      inclusions: [],
+      exclusions: [],
+      faqs: [],
+      options: [],
+      addons: []
     },
     de: {
       home: 'Startseite',
@@ -352,7 +311,7 @@ const i18nContent = computed(() => {
       infoHeading: 'Wichtige Informationen & Ratschläge',
       whatToBringTitle: 'Was Sie mitbringen sollten',
       notSuitableTitle: 'Nicht geeignet für',
-      notSuitableText: 'Schwangere Frauen, Personen mit schweren Rückenproblemen oder Kinder unter 6 Jahren zum Quadfahren.',
+      notSuitableText: '',
       reviewsHeading: 'Kundenbewertungen & Erfahrungsberichte',
       reviewsSub: 'Verifizierte Reisebewertungen kürzlicher Wüstentouren',
       verifiedBooking: 'Verifizierte Buchung',
@@ -377,55 +336,14 @@ const i18nContent = computed(() => {
         trust2: '24/7 WhatsApp-Kundenservice',
         trust3: 'Bestpreisgarantie — Direkter Veranstalter'
       },
-      whatToBring: [
-        'Sonnenbrille und Wüstentuch (Keffiyeh)',
-        'Bequeme geschlossene Sportschuhe',
-        'Kamera oder Smartphone für Sonnenuntergangsfotos',
-        'Warme Jacke in den Wintermonaten (Nov - März)',
-        'Bargeld für optionale Getränke, Souvenirs oder Trinkgelder'
-      ],
-      highlights: [
-        'Fahren Sie automatische Quads durch atemberaubende Wüstendünen – keine Vorkenntnisse nötig.',
-        'Hören Sie Ihre Stimme an den Felswänden der berühmten Echo-Berge widerhallen.',
-        'Erleben Sie einen Kamelritt im warmen Abendlicht für perfekte Erinnerungsfotos.',
-        'Genießen Sie ein reichhaltiges Beduinen-BBQ-Buffet mit gegrilltem Fleisch und frischem Fladenbrot.',
-        'Erleben Sie eine traditionelle Tanoura-Tanzshow und eine spektakuläre Feuershow unter Sternen.',
-        'Bequemer und stressfreier Hin- und Rücktransfer ab/bis Hotel im klimatisierten Fahrzeug.'
-      ],
+      whatToBring: [],
+      highlights: [],
       itinerary: [],
-      inclusions: [
-        'Hotelabholung und Rücktransfer im klimatisierten Fahrzeug',
-        'Automatisches Quad-Bike mit Sicherheitshelm',
-        'Professioneller mehrsprachiger Safari-Reiseleiter',
-        'Kamelritt über Wüstendünen (ca. 15-20 Minuten)',
-        'Stopp an den Echo-Bergen für Fotos und Echo-Rufe',
-        'Offenes BBQ-Abendbuffet (Grillfleisch, Reis, Salate, frisches Brot)',
-        'Traditioneller Beduinen-Kräutertee (Habak)',
-        'Orientalische Live-Show (Tanoura-Tanz und Feuershow)',
-        'Alle Steuern und Servicegebühren'
-      ],
-      exclusions: [
-        'Wüstentuch (Keffiyeh) und Staubbrille (vor Ort leihbar/kaufbar ca. 3-4 €)',
-        'Fotos & Videos vom professionellen Wüstenfotografen',
-        'Softdrinks und Dosengetränke im Beduinencamp',
-        'Trinkgelder für Reiseleiter und Fahrer (optional)'
-      ],
-      faqs: [
-        { q: 'Brauche ich einen Führerschein oder Quad-Erfahrung?', a: 'Nein, kein Führerschein und keine Vorerfahrung erforderlich! Alle Quads sind vollautomatisch und sehr einfach zu steuern.' },
-        { q: 'Wie ist die Regelung für Kinder?', a: 'Jugendliche ab 16 Jahren können ein eigenes Einzelquad fahren. Kinder von 6 bis 15 Jahren fahren als Beifahrer auf dem Doppelquad mit einem Erwachsenen mit.' },
-        { q: 'Kann ich die Buchung kostenlos stornieren?', a: 'Ja! Sie können Ihre Buchung bis zu 24 Stunden vor Beginn 100% kostenlos stornieren oder umbuchen.' },
-        { q: 'Ist die Hotelabholung von allen Hotels inklusive?', a: 'Ja, der Hin- und Rücktransfer von allen Hotels im Zielgebiet ist bereits im Preis enthalten.' }
-      ],
-      options: [
-        { title: 'Einzel-Quad Safari + Kamel & BBQ Show', subtitle: '1 Person auf 1 Quad (ab 16 J.)', badge: 'BESTSELLER' },
-        { title: 'Doppel-Quad Safari (2 Personen auf 1 Quad)', subtitle: 'Fahrer + Beifahrer auf 1 Quad', badge: 'BELIEBT BEI PAAREN' },
-        { title: 'VIP Private Wüstensafari + Sternen-Teleskop', subtitle: 'Exklusiver Privatguide & VIP-Sitzplätze', badge: 'LUXUS VIP' }
-      ],
-      addons: [
-        { name: 'Beduinentuch & Schutzbrille', priceEur: 4 },
-        { name: 'VIP-Sitzplatz 1. Reihe & Obstkorb', priceEur: 8 },
-        { name: 'HD Foto- & Videopaket vom Fotografen', priceEur: 15 }
-      ]
+      inclusions: [],
+      exclusions: [],
+      faqs: [],
+      options: [],
+      addons: []
     },
     it: {
       home: 'Home',
@@ -469,7 +387,7 @@ const i18nContent = computed(() => {
       infoHeading: 'Informazioni Importanti & Consigli',
       whatToBringTitle: 'Cosa Portare',
       notSuitableTitle: 'Non Adatto a',
-      notSuitableText: 'Donne in gravidanza, persone con gravi problemi alla schiena o bambini sotto i 6 anni per la guida del quad.',
+      notSuitableText: '',
       reviewsHeading: 'Recensioni dei Clienti',
       reviewsSub: 'Recensioni verificate da viaggiatori recenti',
       verifiedBooking: 'Prenotazione Verificata',
@@ -494,55 +412,14 @@ const i18nContent = computed(() => {
         trust2: 'Assistenza WhatsApp Dedicata 24/7',
         trust3: 'Miglior Prezzo Garantito — Operatore Diretto'
       },
-      whatToBring: [
-        'Occhiali da sole e kefiah per il deserto',
-        'Scarpe sportive chiuse comode',
-        'Fotocamera o smartphone per le foto al tramonto',
-        'Giacca calda nei mesi invernali (Nov - Mar)',
-        'Contanti per bevande extra, souvenir o mance'
-      ],
-      highlights: [
-        'Guida quad automatici tra le spettacolari dune del deserto, nessuna esperienza richiesta.',
-        'Ascolta la tua voce echeggiare contro le maestose pareti delle Montagne dell’Eco.',
-        'Fai una suggestiva passeggiata a dorso di cammello al tramonto.',
-        'Gusta una ricca cena barbecue beduina con carne alla griglia e pane fresco.',
-        'Spettacolo folcloristico dal vivo con danzatore Tanoura e mangiafuoco sotto le stelle.',
-        'Comodo transfer di andata e ritorno con aria condizionata dal tuo hotel.'
-      ],
+      whatToBring: [],
+      highlights: [],
       itinerary: [],
-      inclusions: [
-        'Trasferimento di andata e ritorno in veicolo climatizzato',
-        'Noleggio quad automatico con casco di sicurezza',
-        'Guida safari professionista multilingue',
-        'Giro in cammello sulle dune (15-20 min)',
-        'Sosta alle Montagne dell’Eco per foto',
-        'Cena a buffet BBQ aperta (carne, riso, insalate, pane fresco)',
-        'Tè tradizionale beduino alle erbe (Habak)',
-        'Spettacolo dal vivo (Danza Tanoura e mangiafuoco)',
-        'Tutte le tasse e i costi di servizio'
-      ],
-      exclusions: [
-        'Kefiah e occhiali antipolvere (noleggiabili/acquistabili a 3-4 €)',
-        'Foto e video del fotografo professionista',
-        'Bevande analcoliche in lattina al campo beduino',
-        'Mance per guide e autisti (opzionali)'
-      ],
-      faqs: [
-        { q: 'Serve la patente o esperienza precedente sui quad?', a: 'Nessuna patente o esperienza necessaria! Tutti i nostri quad sono completamente automatici e facili da guidare.' },
-        { q: 'Qual è la regola per i bambini?', a: 'I ragazzi dai 16 anni in su possono guidare il proprio quad singolo. I bambini da 6 a 15 anni possono salire come passeggeri sul quad doppio con un adulto.' },
-        { q: 'Posso cancellare gratuitamente?', a: 'Sì! Offriamo la cancellazione gratuita al 100% fino a 24 ore prima dell’orario di partenza.' },
-        { q: 'Il prelievo in hotel è incluso ovunque?', a: 'Sì, il trasferimento di andata e ritorno da tutti gli hotel e resort della zona è già incluso nel prezzo.' }
-      ],
-      options: [
-        { title: 'Safari Quad Singolo + Cammello & Show BBQ', subtitle: '1 Persona su 1 Quad (Età 16+)', badge: 'PIÙ VENDUTO' },
-        { title: 'Safari Quad Doppio (2 Persone su 1 Quad)', subtitle: 'Pilota + Passeggero su 1 Quad', badge: 'IDEALE PER COPPIE' },
-        { title: 'Safari VIP Privato + Telescopio Astronomico', subtitle: 'Guida Privata Esclusiva & Posti VIP', badge: 'LUSSO VIP' }
-      ],
-      addons: [
-        { name: 'Kefiah da Deserto & Occhialini Antipolvere', priceEur: 4 },
-        { name: 'Posto VIP in Prima Fila & Cesto di Frutta', priceEur: 8 },
-        { name: 'Pacchetto Foto & Video HD con Fotografo', priceEur: 15 }
-      ]
+      inclusions: [],
+      exclusions: [],
+      faqs: [],
+      options: [],
+      addons: []
     },
     fr: {
       home: 'Accueil',
@@ -586,7 +463,7 @@ const i18nContent = computed(() => {
       infoHeading: 'Informations Importantes & Conseils',
       whatToBringTitle: 'À apporter',
       notSuitableTitle: 'Non adapté pour',
-      notSuitableText: 'Femmes enceintes, personnes souffrant du dos ou enfants de moins de 6 ans pour la conduite du quad.',
+      notSuitableText: '',
       reviewsHeading: 'Avis Clients et Évaluations',
       reviewsSub: 'Avis vérifiés de voyageurs récents',
       verifiedBooking: 'Réservation Vérifiée',
@@ -611,55 +488,14 @@ const i18nContent = computed(() => {
         trust2: 'Service Client WhatsApp 24/7',
         trust3: 'Meilleur Prix Garanti — Opérateur Direct'
       },
-      whatToBring: [
-        'Lunettes de soleil et foulard bédouin (Keffieh)',
-        'Chaussures de sport fermées et confortables',
-        'Appareil photo ou smartphone pour les photos au coucher du soleil',
-        'Veste chaude en hiver (novembre à mars)',
-        'Espèces pour boissons supplémentaires ou pourboires'
-      ],
-      highlights: [
-        'Conduisez des quads automatiques sur les dunes dorées, aucune expérience requise.',
-        'Écoutez votre voix résonner contre les falaises des célèbres Montagnes de l’Écho.',
-        'Balade à dos de chameau dans la lumière dorée du coucher de soleil.',
-        'Savourez un buffet barbecue bédouin avec grillades et pain traditionnel cuit sur place.',
-        'Spectacle oriental avec danseur Tanoura et cracheur de feu sous le ciel étoilé.',
-        'Transfert aller-retour pratique et climatisé depuis votre hôtel.'
-      ],
+      whatToBring: [],
+      highlights: [],
       itinerary: [],
-      inclusions: [
-        'Transfert aller-retour en véhicule climatisé',
-        'Location du quad automatique avec casque',
-        'Guide professionnel multilingue',
-        'Balade à dos de chameau (15-20 min)',
-        'Arrêt photo aux Montagnes de l’Écho',
-        'Dîner buffet barbecue (grillades, riz, salades, pain frais)',
-        'Thé bédouin traditionnel (Habak)',
-        'Spectacle oriental en direct (Tanoura et feu)',
-        'Toutes les taxes et frais de service'
-      ],
-      exclusions: [
-        'Foulard bédouin et lunettes anti-poussière (disponibles à l’achat/location 3-4 €)',
-        'Photos et vidéos du photographe professionnel',
-        'Boissons gazeuses en canette au camp bédouin',
-        'Pourboires pour le guide et chauffeur (facultatifs)'
-      ],
-      faqs: [
-        { q: 'Faut-il un permis de conduire ou de l’expérience en quad ?', a: 'Aucun permis ni expérience préalable requis ! Tous nos quads sont entièrement automatiques et très faciles à conduire.' },
-        { q: 'Quelle est la politique pour les enfants ?', a: 'Les jeunes dès 16 ans peuvent piloter leur propre quad solo. Les enfants de 6 à 15 ans voyagent en passagers sur un quad double avec un adulte.' },
-        { q: 'Puis-je annuler gratuitement ?', a: 'Oui ! Vous pouvez annuler ou modifier votre réservation sans frais jusqu’à 24h avant le départ.' },
-        { q: 'La prise en charge à l’hôtel est-elle incluse partout ?', a: 'Oui, le transfert aller-retour depuis tous les hôtels de la région est inclus dans le tarif.' }
-      ],
-      options: [
-        { title: 'Safari Quad Solo + Chameau & Show BBQ', subtitle: '1 Personne sur 1 Quad (16 ans +)', badge: 'MEILLEURE VENTE' },
-        { title: 'Safari Quad Double (2 Personnes sur 1 Quad)', subtitle: 'Conducteur + Passager sur 1 Quad', badge: 'IDÉAL COUPLES' },
-        { title: 'Safari Privé VIP + Télescope Astronomique', subtitle: 'Guide Privé Exclusif & Places VIP', badge: 'LUXE VIP' }
-      ],
-      addons: [
-        { name: 'Foulard Keffieh & Lunettes Anti-poussière', priceEur: 4 },
-        { name: 'Place VIP 1er Rang & Corbeille de Fruits', priceEur: 8 },
-        { name: 'Pack Photos & Vidéos HD Professionnel', priceEur: 15 }
-      ]
+      inclusions: [],
+      exclusions: [],
+      faqs: [],
+      options: [],
+      addons: []
     },
     ru: {
       home: 'Главная',
@@ -703,7 +539,7 @@ const i18nContent = computed(() => {
       infoHeading: 'Полезная информация и советы',
       whatToBringTitle: 'Что взять с собой',
       notSuitableTitle: 'Не рекомендуется',
-      notSuitableText: 'Беременным женщинам, людям с травмами спины и детям до 6 лет для управления квадроциклом.',
+      notSuitableText: '',
       reviewsHeading: 'Отзывы путешественников',
       reviewsSub: 'Проверенные отзывы туристов о сафари',
       verifiedBooking: 'Подтвержденная поездка',
@@ -728,55 +564,14 @@ const i18nContent = computed(() => {
         trust2: 'Поддержка в WhatsApp 24/7',
         trust3: 'Гарантия лучшей цены от прямого организатора'
       },
-      whatToBring: [
-        'Солнцезащитные очки и арафатку (платок на голову)',
-        'Удобную закрытую спортивную обувь',
-        'Фотоаппарат или смартфон для красивых снимков на закате',
-        'Теплую кофту или куртку в зимний сезон (ноябрь-март)',
-        'Наличные деньги на сувениры, напитки или чаевые'
-      ],
-      highlights: [
-        'Катание на автоматических квадроциклах по песчаным дюнам — права и опыт не нужны.',
-        'Услышьте свой голос среди отвесных скал в знаменитом каньоне Эхо.',
-        'Прогулка на верблюдах на закате с потрясающими фото на память.',
-        'Аутентичный бедуинский ужин-барбекю со свежими лепешками и блюдами на гриле.',
-        'Яркое восточное шоу с национальным танцем Танура и фаер-шоу под звездами.',
-        'Комфортабельный трансфер из отеля и обратно на авто с кондиционером.'
-      ],
+      whatToBring: [],
+      highlights: [],
       itinerary: [],
-      inclusions: [
-        'Трансфер из отеля и обратно на кондиционированном транспорте',
-        'Аренда квадроцикла с защитным шлемом',
-        'Профессиональный русскоязычный гид-инструктор',
-        'Катание на верблюдах (15-20 минут)',
-        'Остановка в ущелье Эхо для фотосессии',
-        'Ужин-барбекю (мясо на гриле, рис, салаты, свежий хлеб)',
-        'Традиционный бедуинский чай (хабак)',
-        'Восточная шоу-программа (Танура и огненное шоу)',
-        'Все налоги и сервисные сборы'
-      ],
-      exclusions: [
-        'Арафатка и защитные очки от пыли (можно арендовать/купить на месте за 3-4 $)',
-        'Фото и видео от профессионального фотографа',
-        'Газированные напитки в банках в бедуинском лагере',
-        'Чаевые гидам и водителям (по желанию)'
-      ],
-      faqs: [
-        { q: 'Нужны ли водительские права или опыт вождения?', a: 'Нет, водительские права и опыт не требуются! Все квадроциклы автоматические и очень простые в управлении.' },
-        { q: 'С какого возраста можно детям?', a: 'Подростки с 16 лет могут управлять отдельным квадроциклом. Дети 6-15 лет едут пассажирами на двухместном квадроцикле со взрослым.' },
-        { q: 'Можно ли отменить бронирование бесплатно?', a: 'Да! Вы можете бесплатно отменить или перенести тур за 24 часа до выезда.' },
-        { q: 'Трансфер входит в стоимость из всех отелей?', a: 'Да, трансфер в обе стороны включен в стоимость из любого отеля курорта.' }
-      ],
-      options: [
-        { title: 'Одиночный квадроцикл + Верблюды и Шоу с ужином', subtitle: '1 человек на 1 квадроцикле (16+ лет)', badge: 'ХИТ ПРОДАЖ' },
-        { title: 'Двухместный квадроцикл (2 человека на 1 квадроцикле)', subtitle: 'Водитель + Пассажир', badge: 'ПОПУЛЯРНО ДЛЯ ПАР' },
-        { title: 'VIP Приватное сафари + Телескоп для звезд', subtitle: 'Индивидуальный гид и VIP места', badge: 'VIP ЛЮКС' }
-      ],
-      addons: [
-        { name: 'Арафатка и пылезащитные очки', priceEur: 4 },
-        { name: 'VIP места в 1-м ряду и фруктовая тарелка', priceEur: 8 },
-        { name: 'Профессиональная фото и видеосъемка HD', priceEur: 15 }
-      ]
+      inclusions: [],
+      exclusions: [],
+      faqs: [],
+      options: [],
+      addons: []
     }
   }
 
@@ -995,7 +790,7 @@ const bookingForm = ref({
   whatsapp: '',
   hotelName: '',
   roomNumber: '',
-  pickupTime: '15:00 - 15:30 (Sunset Safari - Recommended)',
+  pickupTime: '08:00 - 08:30 (Morning)',
   specialRequests: ''
 })
 
@@ -1007,10 +802,17 @@ const formErrors = ref({
 })
 
 const tourHighlights = computed(() => {
-  if (tour.value?.highlights?.[locale.value]) return tour.value.highlights[locale.value]
-  if (tour.value?.highlights?.['en']) return tour.value.highlights['en']
-  return i18nContent.value.highlights
+  if (!tour.value?.highlights) return []
+  if (Array.isArray(tour.value.highlights)) {
+    return tour.value.highlights.filter(Boolean)
+  }
+  const val = tour.value.highlights[locale.value] || tour.value.highlights['en']
+  if (Array.isArray(val)) return val.filter(Boolean)
+  if (typeof val === 'string' && val.trim()) return [val.trim()]
+  return []
 })
+const hasHighlights = computed(() => tourHighlights.value.length > 0)
+
 const tourItinerary = computed(() => {
   const raw = tour.value?.itinerary
   if (!raw) return []
@@ -1029,63 +831,105 @@ const tourItinerary = computed(() => {
   }
   return []
 })
-
 const hasItinerary = computed(() => tourItinerary.value && tourItinerary.value.length > 0)
 
-const availableTabs = computed(() => {
-  const tabs = [
-    { id: 'overview', label: i18nContent.value.tabs.overview },
-    { id: 'highlights', label: i18nContent.value.tabs.highlights }
-  ]
-  if (hasItinerary.value) {
-    tabs.push({ id: 'itinerary', label: i18nContent.value.tabs.itinerary })
+const tourInclusions = computed(() => {
+  if (!tour.value?.inclusions) return []
+  if (Array.isArray(tour.value.inclusions)) {
+    return tour.value.inclusions.filter(Boolean)
   }
-  tabs.push(
-    { id: 'includes', label: i18nContent.value.tabs.includes },
-    { id: 'info', label: i18nContent.value.tabs.info },
-    { id: 'reviews', label: i18nContent.value.tabs.reviews },
-    { id: 'faq', label: i18nContent.value.tabs.faq }
-  )
-  return tabs
+  const val = tour.value.inclusions[locale.value] || tour.value.inclusions['en']
+  if (Array.isArray(val)) return val.filter(Boolean)
+  if (typeof val === 'string' && val.trim()) return [val.trim()]
+  return []
 })
 
-watch(hasItinerary, (has) => {
-  if (!has && activeTab.value === 'itinerary') {
-    activeTab.value = 'overview'
-  }
-}, { immediate: true })
-const tourInclusions = computed(() => {
-  if (tour.value?.inclusions?.[locale.value]) return tour.value.inclusions[locale.value]
-  if (tour.value?.inclusions?.['en']) return tour.value.inclusions['en']
-  return i18nContent.value.inclusions
-})
 const tourExclusions = computed(() => {
-  if (tour.value?.exclusions?.[locale.value]) return tour.value.exclusions[locale.value]
-  if (tour.value?.exclusions?.['en']) return tour.value.exclusions['en']
-  return i18nContent.value.exclusions
+  if (!tour.value?.exclusions) return []
+  if (Array.isArray(tour.value.exclusions)) {
+    return tour.value.exclusions.filter(Boolean)
+  }
+  const val = tour.value.exclusions[locale.value] || tour.value.exclusions['en']
+  if (Array.isArray(val)) return val.filter(Boolean)
+  if (typeof val === 'string' && val.trim()) return [val.trim()]
+  return []
 })
+const hasIncludes = computed(() => tourInclusions.value.length > 0 || tourExclusions.value.length > 0)
+
 const tourFaqs = computed(() => {
-  if (tour.value?.faqs?.[locale.value]) return tour.value.faqs[locale.value]
-  if (tour.value?.faqs?.['en']) return tour.value.faqs['en']
-  if (tour.value?.faqs) return tour.value.faqs
-  return i18nContent.value.faqs
+  const raw = tour.value?.faqs
+  if (!raw || !Array.isArray(raw) || raw.length === 0) return []
+  return raw.map((f: any) => {
+    const q = f.questions?.[locale.value] || f.questions?.['en'] || f.q || f.question || ''
+    const a = f.answers?.[locale.value] || f.answers?.['en'] || f.a || f.answer || ''
+    return { q, a }
+  }).filter((f: any) => f.q && f.a)
 })
+const hasFaqs = computed(() => tourFaqs.value.length > 0)
+
 const tourWhatToBring = computed(() => {
-  if (tour.value?.whatToBring?.[locale.value]) return tour.value.whatToBring[locale.value]
-  if (tour.value?.whatToBring?.['en']) return tour.value.whatToBring['en']
-  return i18nContent.value.whatToBring
+  const raw = tour.value?.whatToBring || tour.value?.importantInformation?.whatToBring
+  if (!raw) return []
+  if (Array.isArray(raw)) return raw.filter(Boolean)
+  const val = raw[locale.value] || raw['en']
+  if (Array.isArray(val)) return val.filter(Boolean)
+  if (typeof val === 'string' && val.trim()) return [val.trim()]
+  return []
 })
+
 const tourNotSuitable = computed(() => {
-  if (tour.value?.notSuitableText?.[locale.value]) return tour.value.notSuitableText[locale.value]
-  if (tour.value?.notSuitableText?.['en']) return tour.value.notSuitableText['en']
-  return i18nContent.value.notSuitableText
+  const raw = tour.value?.notSuitableText || tour.value?.importantInformation?.notSuitableFor
+  if (!raw) return ''
+  if (typeof raw === 'string') return raw
+  return raw[locale.value] || raw['en'] || ''
 })
 
 const tourNotes = computed(() => {
-  if (tour.value?.notes?.[locale.value]) return tour.value.notes[locale.value]
-  if (tour.value?.notes?.['en']) return tour.value.notes['en']
-  return tour.value?.notes || ''
+  const raw = tour.value?.notes || tour.value?.importantInformation?.notes
+  if (!raw) return ''
+  if (typeof raw === 'string') return raw
+  return raw[locale.value] || raw['en'] || ''
 })
+const hasInfo = computed(() => tourWhatToBring.value.length > 0 || Boolean(tourNotSuitable.value) || Boolean(tourNotes.value))
+
+const tourReviews = computed(() => {
+  if (tour.value?.reviews && Array.isArray(tour.value.reviews)) {
+    return tour.value.reviews
+  }
+  return []
+})
+const hasReviews = computed(() => tourReviews.value.length > 0)
+
+const availableTabs = computed(() => {
+  const tabs = [
+    { id: 'overview', label: i18nContent.value.tabs.overview }
+  ]
+  if (hasHighlights.value) {
+    tabs.push({ id: 'highlights', label: i18nContent.value.tabs.highlights })
+  }
+  if (hasItinerary.value) {
+    tabs.push({ id: 'itinerary', label: i18nContent.value.tabs.itinerary })
+  }
+  if (hasIncludes.value) {
+    tabs.push({ id: 'includes', label: i18nContent.value.tabs.includes })
+  }
+  if (hasInfo.value) {
+    tabs.push({ id: 'info', label: i18nContent.value.tabs.info })
+  }
+  if (hasReviews.value) {
+    tabs.push({ id: 'reviews', label: i18nContent.value.tabs.reviews })
+  }
+  if (hasFaqs.value) {
+    tabs.push({ id: 'faq', label: i18nContent.value.tabs.faq })
+  }
+  return tabs
+})
+
+watch(availableTabs, (tabs) => {
+  if (!tabs.some(t => t.id === activeTab.value)) {
+    activeTab.value = 'overview'
+  }
+}, { immediate: true })
 
 // Dynamic Pickup Timing based on Admin Settings
 const pickupTimeType = computed(() => tour.value?.pickupTimeType || 'FixedSlots')
@@ -1094,9 +938,9 @@ const availablePickupTimes = computed(() => {
     return tour.value.availablePickupTimes
   }
   return [
-    '15:00 - 15:30 (Sunset Safari - Recommended)',
-    '10:00 - 10:30 (Morning Safari)',
-    '17:00 - 17:30 (Dinner & Show Evening)'
+    '08:00 - 08:30 (Morning)',
+    '13:00 - 13:30 (Afternoon)',
+    '17:00 - 17:30 (Evening)'
   ]
 })
 
@@ -1835,7 +1679,7 @@ watch(routeSlug, () => {
           </div>
 
           <!-- 2. Highlights -->
-          <div v-show="activeTab === 'highlights' || activeTab === 'overview'" class="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e8f0] shadow-xs">
+          <div v-if="hasHighlights" v-show="activeTab === 'highlights' || activeTab === 'overview'" class="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e8f0] shadow-xs">
             <h2 class="text-lg sm:text-xl font-bold text-[#0f172a] mb-5">{{ i18nContent.highlightsHeading }}</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div v-for="(h, idx) in tourHighlights" :key="idx" class="flex items-start gap-3 bg-[#f8fafc] p-4 rounded-xl border border-[#f1f5f9]">
@@ -1870,12 +1714,12 @@ watch(routeSlug, () => {
           </div>
 
           <!-- 4. Inclusions & Exclusions -->
-          <div v-show="activeTab === 'includes' || activeTab === 'overview'" class="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e8f0] shadow-xs">
+          <div v-if="hasIncludes" v-show="activeTab === 'includes' || activeTab === 'overview'" class="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e8f0] shadow-xs">
             <h2 class="text-lg sm:text-xl font-bold text-[#0f172a] mb-6">{{ i18nContent.includesHeading }}</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
               
               <!-- Included -->
-              <div class="space-y-3.5">
+              <div v-if="tourInclusions.length > 0" class="space-y-3.5">
                 <h4 class="text-xs sm:text-sm uppercase font-extrabold tracking-wider text-[#059669] flex items-center gap-2 pb-2.5 border-b border-[#ecfdf5]">
                   <span>✓</span> {{ i18nContent.includedTitle }}
                 </h4>
@@ -1888,7 +1732,7 @@ watch(routeSlug, () => {
               </div>
 
               <!-- Excluded -->
-              <div class="space-y-3.5">
+              <div v-if="tourExclusions.length > 0" class="space-y-3.5">
                 <h4 class="text-xs sm:text-sm uppercase font-extrabold tracking-wider text-[#dc2626] flex items-center gap-2 pb-2.5 border-b border-[#fef2f2]">
                   <span>✕</span> {{ i18nContent.excludedTitle }}
                 </h4>
@@ -1904,11 +1748,11 @@ watch(routeSlug, () => {
           </div>
 
           <!-- 5. Important Info / What to bring -->
-          <div v-show="activeTab === 'info' || activeTab === 'overview'" class="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e8f0] shadow-xs space-y-5">
+          <div v-if="hasInfo" v-show="activeTab === 'info' || activeTab === 'overview'" class="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e8f0] shadow-xs space-y-5">
             <h2 class="text-lg sm:text-xl font-bold text-[#0f172a]">{{ i18nContent.infoHeading }}</h2>
             
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <div class="bg-[#f8fafc] p-5 rounded-2xl border border-[#e2e8f0]">
+              <div v-if="tourWhatToBring.length > 0" class="bg-[#f8fafc] p-5 rounded-2xl border border-[#e2e8f0]">
                 <h4 class="text-xs sm:text-sm font-bold text-[#0f172a] mb-2.5 flex items-center gap-2">
                   <span>🎒</span> {{ i18nContent.whatToBringTitle }}
                 </h4>
@@ -1918,7 +1762,7 @@ watch(routeSlug, () => {
               </div>
 
               <div class="flex flex-col gap-5">
-                <div class="bg-[#fff7ed] p-5 rounded-2xl border border-[#ffedd5] flex-1">
+                <div v-if="tourNotSuitable" class="bg-[#fff7ed] p-5 rounded-2xl border border-[#ffedd5] flex-1">
                   <h4 class="text-xs sm:text-sm font-bold text-[#c2410c] mb-2.5 flex items-center gap-2">
                     <span>⚠️</span> {{ i18nContent.notSuitableTitle }}
                   </h4>
@@ -1940,7 +1784,7 @@ watch(routeSlug, () => {
           </div>
 
           <!-- 6. Customer Reviews -->
-          <div v-show="activeTab === 'reviews' || activeTab === 'overview'" class="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e8f0] shadow-xs space-y-6">
+          <div v-if="hasReviews" v-show="activeTab === 'reviews' || activeTab === 'overview'" class="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e8f0] shadow-xs space-y-6">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-[#f1f5f9]">
               <div>
                 <h2 class="text-lg sm:text-xl font-bold text-[#0f172a]">{{ i18nContent.reviewsHeading }}</h2>
@@ -1948,92 +1792,38 @@ watch(routeSlug, () => {
               </div>
 
               <div class="flex items-center gap-3">
-                <div class="text-3xl sm:text-4xl font-extrabold text-[#062d4d]">4.9</div>
+                <div class="text-3xl sm:text-4xl font-extrabold text-[#062d4d]">{{ Number(tour?.rating || 4.9).toFixed(1) }}</div>
                 <div>
                   <div class="flex text-amber-400 text-base">★★★★★</div>
-                  <div class="text-xs text-[#64748b] font-medium">{{ i18nContent.reviewsCount }}</div>
+                  <div class="text-xs text-[#64748b] font-medium">{{ tour?.reviewCount || tourReviews.length }} {{ i18nContent.reviewsCount }}</div>
                 </div>
               </div>
             </div>
 
             <!-- Review Cards -->
             <div class="space-y-4">
-              <div class="bg-[#f8fafc] p-4 sm:p-5 rounded-xl border border-[#f1f5f9] space-y-2.5">
+              <div v-for="(rev, rIdx) in tourReviews" :key="rIdx" class="bg-[#f8fafc] p-4 sm:p-5 rounded-xl border border-[#f1f5f9] space-y-2.5">
                 <div class="flex items-center justify-between">
                   <div class="flex items-center gap-2.5">
                     <div class="w-8 h-8 rounded-full bg-[#062d4d] text-white text-xs font-bold flex items-center justify-center">
-                      MK
+                      {{ (rev.author || 'G').slice(0, 2).toUpperCase() }}
                     </div>
                     <div>
-                      <span class="text-xs sm:text-sm font-bold text-[#0f172a] block">Maximilian Klein 🇩🇪</span>
-                      <span class="text-[10px] sm:text-xs text-[#94a3b8]">August 2026 · {{ i18nContent.verifiedBooking }}</span>
+                      <span class="text-xs sm:text-sm font-bold text-[#0f172a] block">{{ rev.author }}</span>
+                      <span class="text-[10px] sm:text-xs text-[#94a3b8]">{{ rev.date }} · {{ i18nContent.verifiedBooking }}</span>
                     </div>
                   </div>
-                  <div class="text-amber-400 text-xs sm:text-sm">★★★★★</div>
+                  <div class="text-amber-400 text-xs sm:text-sm">{{ '★'.repeat(rev.rating || 5) }}</div>
                 </div>
                 <p class="text-xs sm:text-sm text-[#475569] leading-relaxed">
-                  "The sunset ATV ride was sensational! The instructors were very attentive and patient. The Bedouin camp dinner was delicious and the fire show was mesmerizing. Excellent value for money!"
+                  "{{ rev.comment }}"
                 </p>
               </div>
-
-              <div class="bg-[#f8fafc] p-4 sm:p-5 rounded-xl border border-[#f1f5f9] space-y-2.5">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-full bg-[#c9a84c] text-white text-xs font-bold flex items-center justify-center">
-                      EL
-                    </div>
-                    <div>
-                      <span class="text-xs sm:text-sm font-bold text-[#0f172a] block">Elena Rossi 🇮🇹</span>
-                      <span class="text-[10px] sm:text-xs text-[#94a3b8]">July 2026 · {{ i18nContent.verifiedBooking }}</span>
-                    </div>
-                  </div>
-                  <div class="text-amber-400 text-xs sm:text-sm">★★★★★</div>
-                </div>
-                <p class="text-xs sm:text-sm text-[#475569] leading-relaxed">
-                  "Un'esperienza fantastica! Il giro in quad è divertentissimo, i cammelli docili e il cibo ottimo. Consiglio a tutti di portare una sciarpa per la polvere."
-                </p>
-              </div>
-            </div>
-
-            <!-- Review Submission Form -->
-            <div class="mt-8 pt-6 border-t border-[#e2e8f0]">
-              <h4 class="text-base sm:text-lg font-bold text-[#0f172a] mb-4">{{ i18nContent.reviewForm.title }}</h4>
-              <form @submit.prevent="" class="space-y-4 bg-[#f8fafc] p-4 sm:p-5 rounded-xl border border-[#f1f5f9]">
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label class="block text-xs font-bold text-[#334155] mb-1.5">{{ i18nContent.reviewForm.yourName }}</label>
-                    <input type="text" class="w-full px-3.5 py-2.5 rounded-xl border border-[#cbd5e1] text-xs sm:text-sm font-medium focus:outline-none focus:border-[#062d4d] focus:ring-1 focus:ring-[#062d4d] bg-white" />
-                  </div>
-                  <div>
-                    <label class="block text-xs font-bold text-[#334155] mb-1.5">{{ i18nContent.reviewForm.yourRating }}</label>
-                    <select class="w-full px-3.5 py-2.5 rounded-xl border border-[#cbd5e1] text-xs sm:text-sm font-medium focus:outline-none focus:border-[#062d4d] focus:ring-1 focus:ring-[#062d4d] bg-white text-[#475569]">
-                      <option value="5">★★★★★ (5/5)</option>
-                      <option value="4">★★★★☆ (4/5)</option>
-                      <option value="3">★★★☆☆ (3/5)</option>
-                      <option value="2">★★☆☆☆ (2/5)</option>
-                      <option value="1">★☆☆☆☆ (1/5)</option>
-                    </select>
-                  </div>
-                </div>
-                <div>
-                  <label class="block text-xs font-bold text-[#334155] mb-1.5">{{ i18nContent.reviewForm.reviewTitle }}</label>
-                  <input type="text" class="w-full px-3.5 py-2.5 rounded-xl border border-[#cbd5e1] text-xs sm:text-sm font-medium focus:outline-none focus:border-[#062d4d] focus:ring-1 focus:ring-[#062d4d] bg-white" />
-                </div>
-                <div>
-                  <label class="block text-xs font-bold text-[#334155] mb-1.5">{{ i18nContent.reviewForm.shareExperience }}</label>
-                  <textarea rows="4" class="w-full px-3.5 py-2.5 rounded-xl border border-[#cbd5e1] text-xs sm:text-sm font-medium focus:outline-none focus:border-[#062d4d] focus:ring-1 focus:ring-[#062d4d] bg-white resize-none" :placeholder="i18nContent.reviewForm.shareExperience"></textarea>
-                </div>
-                <div class="flex justify-end pt-2">
-                  <button type="submit" class="px-6 py-3 bg-[#062d4d] hover:bg-[#0a3f6b] text-white text-xs sm:text-sm font-bold rounded-xl shadow-md transition-colors cursor-pointer">
-                    {{ i18nContent.reviewForm.submitReview }}
-                  </button>
-                </div>
-              </form>
             </div>
           </div>
 
           <!-- 7. FAQ Accordion -->
-          <div v-show="activeTab === 'faq' || activeTab === 'overview'" class="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e8f0] shadow-xs space-y-4">
+          <div v-if="hasFaqs" v-show="activeTab === 'faq' || activeTab === 'overview'" class="bg-white rounded-2xl p-6 sm:p-8 border border-[#e2e8f0] shadow-xs space-y-4">
             <h2 class="text-lg sm:text-xl font-bold text-[#0f172a]">{{ i18nContent.faqHeading }}</h2>
             <div class="space-y-3">
               <div 
