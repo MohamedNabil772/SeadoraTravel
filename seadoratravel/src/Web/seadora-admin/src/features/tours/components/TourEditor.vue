@@ -99,7 +99,7 @@
 
           <div v-if="form.imageUrl && !isUploadingCover" class="relative group bg-white rounded-xl overflow-hidden border border-gray-200 shadow-sm inline-block">
             <div class="relative w-full max-w-md aspect-video">
-              <img :src="form.imageUrl" alt="Tour Cover Image" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+              <img :src="resolveImageUrl(form.imageUrl)" alt="Tour Cover Image" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
               <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center">
                 <button @click.stop="form.imageUrl = null" type="button" class="px-4 py-2 bg-red-600/90 hover:bg-red-600 text-white font-medium rounded-lg backdrop-blur-sm transition-all transform hover:scale-105 shadow-lg flex items-center gap-2">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
@@ -277,10 +277,13 @@
 <script setup lang="ts">
 import { ref, inject, onMounted, watch } from 'vue'
 import LocaleSwitcher from './LocaleSwitcher.vue'
-import api from '@/services/api'
+import api, { API_URL } from '@/services/api'
+import { resolveImageUrl } from '@/shared/utils/helpers'
+import { useToast } from '@/composables/useToast'
 
 const currentLocale = ref('en')
 const form = inject<any>('tourForm')
+const toast = useToast()
 
 const tourTypes = ref<any[]>([])
 const destinations = ref<any[]>([])
@@ -340,7 +343,10 @@ const uploadCover = async (e: Event) => {
   const target = e.target as HTMLInputElement
   if (!target.files?.length) return
   const file = target.files[0]
-  if (!file.type.startsWith('image/')) return
+  if (!file.type.startsWith('image/')) {
+    toast.error('Please select an image file (PNG, JPG, WEBP)')
+    return
+  }
 
   const formData = new FormData()
   formData.append('file', file)
@@ -349,10 +355,16 @@ const uploadCover = async (e: Event) => {
   try {
     const res = await api.post('/api/files', formData)
     const fileId = res.data.fileId || res.data.FileId
-    const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
-    form.value.imageUrl = `${API_URL}/api/files/${fileId}`
-  } catch (err) {
-    console.error(err)
+    const url = `${API_URL}/api/files/${fileId}`
+    form.value.imageUrl = url
+    if (!form.value.mediaUrls) form.value.mediaUrls = []
+    if (!form.value.mediaUrls.includes(url)) {
+      form.value.mediaUrls.unshift(url)
+    }
+    toast.success('Cover image uploaded successfully')
+  } catch (err: any) {
+    console.error('Failed to upload cover image', err)
+    toast.error(err.response?.data?.message || 'Failed to upload cover image')
   } finally {
     isUploadingCover.value = false
     if (target) target.value = ''

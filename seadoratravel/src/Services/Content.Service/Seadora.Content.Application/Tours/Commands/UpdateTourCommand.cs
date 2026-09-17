@@ -91,7 +91,16 @@ public class UpdateTourCommandHandler : IRequestHandler<UpdateTourCommand, Unit>
         if (request.StartTime != null) tour.StartTime = request.StartTime;
         if (request.Rating > 0) tour.Rating = request.Rating;
         if (request.ReviewCount > 0) tour.ReviewCount = request.ReviewCount;
-        if (request.ImageUrl != null) tour.ImageUrl = request.ImageUrl;
+        if (request.ImageUrl != null)
+        {
+            tour.ImageUrl = request.ImageUrl;
+            if (tour.MediaUrls == null) tour.MediaUrls = new List<string>();
+            if (!string.IsNullOrEmpty(request.ImageUrl) && (tour.MediaUrls.Count == 0 || tour.MediaUrls[0] != request.ImageUrl))
+            {
+                tour.MediaUrls.Remove(request.ImageUrl);
+                tour.MediaUrls.Insert(0, request.ImageUrl);
+            }
+        }
         if (request.Emoji != null) tour.Emoji = request.Emoji;
         if (request.BgGradient != null) tour.BgGradient = request.BgGradient;
         if (request.Badge != null) tour.Badge = request.Badge;
@@ -122,10 +131,18 @@ public class UpdateTourCommandHandler : IRequestHandler<UpdateTourCommand, Unit>
                 Captions = m.Captions ?? new Dictionary<string, string>()
             }).ToList();
             tour.MediaUrls = request.Media.Select(m => m.Url).ToList();
+            if (!string.IsNullOrEmpty(tour.ImageUrl) && !tour.MediaUrls.Contains(tour.ImageUrl))
+            {
+                tour.MediaUrls.Insert(0, tour.ImageUrl);
+            }
         }
         else if (request.MediaUrls != null)
         {
             tour.MediaUrls = request.MediaUrls;
+            if (!string.IsNullOrEmpty(tour.ImageUrl) && !tour.MediaUrls.Contains(tour.ImageUrl))
+            {
+                tour.MediaUrls.Insert(0, tour.ImageUrl);
+            }
         }
 
         if (request.Includes != null)

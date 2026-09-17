@@ -23,6 +23,7 @@ public class TourSummaryDto
     public Dictionary<string, string> CategoryNames { get; set; } = new();
     public List<string> Images { get; set; } = new();
     public string MainImage { get; set; } = string.Empty;
+    public string ImageUrl { get; set; } = string.Empty;
     public string Duration { get; set; } = string.Empty;
     public List<string> Includes { get; set; } = new();
     public int MaxAllocations { get; set; }

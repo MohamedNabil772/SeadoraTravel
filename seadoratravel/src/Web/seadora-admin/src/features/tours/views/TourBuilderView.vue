@@ -323,6 +323,11 @@ const saveTour = async () => {
       captions: { en: m.caption || '' }
     }))
     const mediaUrls = mediaList.map((m: any) => m.url)
+    if (form.value.imageUrl) {
+      const idx = mediaUrls.indexOf(form.value.imageUrl)
+      if (idx > 0) mediaUrls.splice(idx, 1)
+      if (idx !== 0) mediaUrls.unshift(form.value.imageUrl)
+    }
 
     const payload: any = {
       id: form.value.id || undefined,

@@ -29,7 +29,7 @@
     <div v-if="form.mediaGallery && form.mediaGallery.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       <div v-for="(item, index) in form.mediaGallery" :key="index" class="relative group bg-white rounded-lg overflow-hidden border border-gray-200 shadow-sm flex flex-col">
         <div class="relative aspect-video">
-          <img :src="item.url" :alt="item.caption || 'Tour image'" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+          <img :src="resolveImageUrl(item.url)" :alt="item.caption || 'Tour image'" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
           <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center gap-2">
             <button @click.stop="removeMedia(Number(index))" type="button" class="px-3 py-2 bg-red-600/90 hover:bg-red-600 text-white font-medium rounded-lg backdrop-blur-sm transition-all transform hover:scale-105 shadow-lg flex items-center gap-2">
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -49,7 +49,8 @@
 
 <script setup lang="ts">
 import { ref, inject } from 'vue'
-import api from '@/services/api'
+import api, { API_URL } from '@/services/api'
+import { resolveImageUrl } from '@/shared/utils/helpers'
 
 const form = inject<any>('tourForm')
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -74,7 +75,6 @@ const handleFileUpload = async (event: Event) => {
   const files = Array.from(target.files).filter(f => f.type.startsWith('image/'))
   if (files.length === 0) return
 
-  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
   isUploading.value = true
   
   let uploadedCount = 0

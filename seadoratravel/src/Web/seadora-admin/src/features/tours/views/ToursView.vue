@@ -7,6 +7,7 @@ import LuxuryPagination from '@/shared/components/LuxuryPagination.vue'
 import { useConfirm } from '@/composables/useConfirm'
 import { useToast } from '@/composables/useToast'
 import { Plus } from 'lucide-vue-next'
+import { resolveImageUrl, DEFAULT_FALLBACK_IMAGE } from '@/shared/utils/helpers'
 
 interface Tour {
   id: string
@@ -252,6 +253,13 @@ function getDurationLabel(d: string) {
   return match ? match.label : d
 }
 
+function handleImageError(event: Event) {
+  const target = event.target as HTMLImageElement
+  if (target && target.src !== DEFAULT_FALLBACK_IMAGE) {
+    target.src = DEFAULT_FALLBACK_IMAGE
+  }
+}
+
 const { confirm } = useConfirm()
 const toast = useToast()
 
@@ -391,11 +399,11 @@ onMounted(loadData)
             <td>
               <div class="tour-cell">
                 <img
-                  v-if="tour.mainImage || tour.imageUrl"
-                  :src="tour.mainImage || tour.imageUrl"
+                  v-if="tour.imageUrl || tour.mainImage"
+                  :src="resolveImageUrl(tour.imageUrl || tour.mainImage)"
                   class="tour-thumb"
                   alt=""
-                  @error="tour.mainImage = ''; tour.imageUrl = ''"
+                  @error="handleImageError"
                 />
                 <span v-else class="tour-emoji">{{ tour.emoji || '✨' }}</span>
                 <div>
