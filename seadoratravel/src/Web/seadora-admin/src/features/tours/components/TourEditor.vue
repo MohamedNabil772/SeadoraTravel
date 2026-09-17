@@ -290,9 +290,10 @@ const highlightsInput = ref('')
 const isUploadingCover = ref(false)
 const coverInput = ref<HTMLInputElement | null>(null)
 
-watch(currentLocale, () => {
-  highlightsInput.value = form.value.highlights?.[currentLocale.value]?.join(', ') || ''
-})
+watch([currentLocale, () => form.value.highlights?.[currentLocale.value]], () => {
+  const val = form.value.highlights?.[currentLocale.value]
+  highlightsInput.value = Array.isArray(val) ? val.join(', ') : (typeof val === 'string' ? val : '')
+}, { immediate: true })
 
 onMounted(async () => {
   if (!form.value.highlights) form.value.highlights = { en: [], de: [], it: [], fr: [], ru: [] }
